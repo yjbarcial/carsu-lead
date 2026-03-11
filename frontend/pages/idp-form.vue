@@ -119,26 +119,11 @@
         </div>
       </div>
       <div class="section-body">
-        <!-- Campus -->
+
+        <!-- Campus — static display only -->
         <div class="field-group" style="margin-bottom: 20px">
-          <label>Campus <span class="req">*</span></label>
-          <div class="checkbox-group">
-            <label
-              v-for="option in campusOptions"
-              :key="option"
-              class="checkbox-item"
-              :class="{ checked: form.campus === option }"
-            >
-              <input
-                type="radio"
-                name="campus"
-                :value="option"
-                v-model="form.campus"
-                @change="updateChecked"
-              />
-              {{ option }}
-            </label>
-          </div>
+          <label>Campus</label>
+          <div class="static-value">CSU Main Campus</div>
         </div>
 
         <!-- Office Affiliation -->
@@ -162,166 +147,261 @@
           </div>
         </div>
 
+        <!-- College / Office / Unit -->
         <div class="field-grid field-grid-2" style="margin-bottom: 18px">
           <div class="field-group span-2">
             <label>College / Office / Unit <span class="req">*</span></label>
+            <select
+              v-if="collegeOfficeUnitOptions.length > 0"
+              v-model="form.collegeOfficeUnit"
+              :class="{ error: errors.collegeOfficeUnit }"
+            >
+              <option value="">Select office / unit…</option>
+              <option v-for="opt in collegeOfficeUnitOptions" :key="opt" :value="opt">{{ opt }}</option>
+            </select>
             <input
+              v-else
               type="text"
               v-model="form.collegeOfficeUnit"
               :class="{ error: errors.collegeOfficeUnit }"
-              placeholder="e.g. College of Engineering"
+              placeholder="Type your college / office / unit"
             />
+          </div>
+          <!-- Program selector — only for OVPAA colleges with programs -->
+          <div v-if="isOVPAA && selectedCollegePrograms.length > 0" class="field-group span-2" style="margin-top: 4px">
+            <label>Program / Department <span class="req">*</span></label>
+            <select v-model="form.collegeProgram" :class="{ error: errors.collegeProgram }">
+              <option value="">Select program…</option>
+              <option v-for="p in selectedCollegePrograms" :key="p" :value="p">{{ p }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Name of Personnel -->
+        <div class="field-group" style="margin-bottom: 18px">
+          <label>Name of Personnel <span class="req">*</span></label>
+          <div class="name-grid">
+            <div>
+              <input type="text" v-model="form.lastName" :class="{ error: errors.lastName }" placeholder="Last Name" />
+              <small class="field-hint">Last Name</small>
+            </div>
+            <div>
+              <input type="text" v-model="form.firstName" :class="{ error: errors.firstName }" placeholder="First Name" />
+              <small class="field-hint">First Name</small>
+            </div>
+            <div class="mi-col">
+              <input type="text" v-model="form.middleInitial" :class="{ error: errors.middleInitial }" placeholder="M.I." maxlength="3" />
+              <small class="field-hint">M.I.</small>
+            </div>
           </div>
         </div>
 
         <div class="field-grid field-grid-2" style="margin-bottom: 18px">
-          <div class="field-group">
-            <label>Name of Personnel <span class="req">*</span></label>
-            <input
-              type="text"
-              v-model="form.nameOfPersonnel"
-              :class="{ error: errors.nameOfPersonnel }"
-              placeholder="Full name"
-            />
-          </div>
+
+          <!-- Employee Email -->
           <div class="field-group">
             <label>Your CarSU Email Address <span class="req">*</span></label>
-            <input
-              type="email"
-              v-model="form.employeeEmail"
-              :class="{
-                error: emailHints.employee.type === 'error',
-                valid: emailHints.employee.type === 'success',
-              }"
-              placeholder="yourname@carsu.edu.ph"
-              @blur="validateEmail('employee')"
-            />
-            <small class="email-hint" :class="emailHints.employee.type">{{
-              emailHints.employee.msg
-            }}</small>
+            <div class="email-prefix-wrapper" :class="{ error: emailHints.employee.type === 'error', valid: emailHints.employee.type === 'success' }">
+              <input
+                type="text"
+                v-model="form.employeeEmailPrefix"
+                class="email-prefix-input"
+                placeholder="yourname"
+                @blur="validateEmail('employee')"
+              />
+              <span class="email-suffix">@carsu.edu.ph</span>
+            </div>
+            <small class="email-hint" :class="emailHints.employee.type">{{ emailHints.employee.msg }}</small>
           </div>
+
+          <!-- Date Prepared -->
           <div class="field-group">
             <label>Date Prepared <span class="req">*</span></label>
-            <input
-              type="date"
-              v-model="form.datePrepared"
-              :class="{ error: errors.datePrepared }"
-            />
+            <input type="date" v-model="form.datePrepared" :class="{ error: errors.datePrepared }" />
           </div>
-          <div class="field-group">
-            <label
-              >Current Position / Designation <span class="req">*</span></label
-            >
-            <input
-              type="text"
-              v-model="form.currentPosition"
-              :class="{ error: errors.currentPosition }"
-              placeholder="e.g. Instructor I"
-            />
+
+          <!-- Educational Attainment -->
+          <div class="field-group span-2">
+            <label>Highest Educational Attainment <span class="req">*</span></label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <select v-model="form.educAttainment" :class="{ error: errors.educAttainment }">
+                <option value="">Select…</option>
+                <option>Bachelor's Degree</option>
+                <option>Post-Baccalaureate Certificate</option>
+                <option>Master's Degree</option>
+                <option>Post-Master's Certificate</option>
+                <option>Doctorate Degree (Ph.D. / Ed.D. / etc.)</option>
+                <option>Post-Doctoral</option>
+              </select>
+              <input
+                type="text"
+                v-model="form.educAttainmentSpec"
+                :class="{ error: errors.educAttainmentSpec }"
+                placeholder="Specify degree / program (e.g. BS Computer Science)"
+              />
+            </div>
           </div>
+
+          <!-- Current Position / Designation -->
+          <div class="field-group span-2">
+            <label>Current Position / Designation <span class="req">*</span></label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div>
+                <small class="field-hint" style="margin-bottom:4px;display:block;">Personnel Type</small>
+                <select v-model="form.personnelType" :class="{ error: errors.personnelType }" @change="form.currentPosition = ''">
+                  <option value="">Select type…</option>
+                  <option value="administrative">Administrative Personnel</option>
+                  <option v-if="form.officeAffiliation === 'OVPAA'" value="faculty">Faculty</option>
+                </select>
+              </div>
+              <div>
+                <small class="field-hint" style="margin-bottom:4px;display:block;">Position / Designation</small>
+                <select v-model="form.currentPosition" :class="{ error: errors.currentPosition }" :disabled="!form.personnelType">
+                  <option value="">Select position…</option>
+                  <template v-if="form.personnelType === 'administrative'">
+                    <option>Admin Aide I – Utility</option>
+                    <option>Admin Aide I – Clerk</option>
+                    <option>Admin Aide II – Utility</option>
+                    <option>Admin Aide II – Clerk</option>
+                    <option>Admin Aide III – Clerk</option>
+                    <option>Admin Aide IV – Mechanic</option>
+                    <option>Admin Aide IV – Clerk</option>
+                    <option>Admin Aide IV – Driver</option>
+                    <option>Security Guard I</option>
+                    <option>Farm Worker I</option>
+                    <option>Admin Assistant I</option>
+                    <option>Admin Assistant II</option>
+                    <option>Admin Assistant III</option>
+                    <option>Admin Assistant IV</option>
+                    <option>Admin Officer I</option>
+                    <option>Admin Officer II</option>
+                    <option>Admin Officer III</option>
+                    <option>Admin Officer IV</option>
+                    <option>Admin Officer V</option>
+                    <option>Accountant III</option>
+                    <option>College Librarian I</option>
+                    <option>College Librarian III</option>
+                    <option>Nurse I</option>
+                    <option>Nurse II</option>
+                    <option>Chief Administrative Officer (CAO)</option>
+                    <option>Board Secretary V</option>
+                    <option>Guidance Counselor III</option>
+                    <option>Programmer II</option>
+                    <option>Database Administrator</option>
+                    <option>System Analyst</option>
+                    <option>Planning Officer</option>
+                    <option>Attorney II</option>
+                    <option>Attorney III</option>
+                    <option>Physician</option>
+                    <option>Procurement Officer</option>
+                  </template>
+                  <template v-if="form.personnelType === 'faculty'">
+                    <option>Instructor I</option>
+                    <option>Instructor II</option>
+                    <option>Instructor III</option>
+                    <option>Assistant Professor I</option>
+                    <option>Assistant Professor II</option>
+                    <option>Assistant Professor III</option>
+                    <option>Assistant Professor IV</option>
+                    <option>Associate Professor I</option>
+                    <option>Associate Professor II</option>
+                    <option>Associate Professor III</option>
+                    <option>Associate Professor IV</option>
+                    <option>Associate Professor V</option>
+                    <option>Associate Professor VI</option>
+                    <option>Professor I</option>
+                    <option>Professor II</option>
+                    <option>Professor III</option>
+                    <option>Professor IV</option>
+                    <option>Professor V</option>
+                    <option>Professor VI</option>
+                    <option>University Professor</option>
+                  </template>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Year Covered -->
           <div class="field-group">
             <label>Year Covered <span class="req">*</span></label>
-            <input
-              type="text"
-              v-model="form.yearCovered"
-              :class="{ error: errors.yearCovered }"
-              placeholder="e.g. 2025"
-            />
+            <input type="text" v-model="form.yearCovered" :class="{ error: errors.yearCovered }" placeholder="e.g. 2025" />
           </div>
+
+          <!-- Years in Position -->
           <div class="field-group">
             <label>Years in Position <span class="req">*</span></label>
-            <input
-              type="number"
-              v-model="form.yearsInPosition"
-              :class="{ error: errors.yearsInPosition }"
-              min="0"
-              placeholder="0"
-            />
+            <input type="number" v-model="form.yearsInPosition" :class="{ error: errors.yearsInPosition }" min="0" placeholder="0" />
           </div>
+
+          <!-- Years in CSU -->
           <div class="field-group">
             <label>Years in CSU <span class="req">*</span></label>
-            <input
-              type="number"
-              v-model="form.yearsInCSU"
-              :class="{ error: errors.yearsInCSU }"
-              min="0"
-              placeholder="0"
-            />
+            <input type="number" v-model="form.yearsInCSU" :class="{ error: errors.yearsInCSU }" min="0" placeholder="0" />
           </div>
-        </div>
 
-        <!-- Supervisor -->
-        <div class="field-grid field-grid-2" style="margin-bottom: 20px">
+          <!-- Supervisor Name -->
           <div class="field-group">
             <label>Immediate Supervisor Name <span class="req">*</span></label>
-            <input
-              type="text"
-              v-model="form.supervisorName"
-              :class="{ error: errors.supervisorName }"
-              placeholder="e.g. Dr. Juan Dela Cruz"
-            />
+            <input type="text" v-model="form.supervisorName" :class="{ error: errors.supervisorName }" placeholder="e.g. Dr. Juan Dela Cruz" />
           </div>
+
+          <!-- Supervisor Email -->
           <div class="field-group">
             <label>Supervisor CarSU Email <span class="req">*</span></label>
-            <input
-              type="email"
-              v-model="form.supervisorEmail"
-              :class="{
-                error: emailHints.supervisor.type === 'error',
-                valid: emailHints.supervisor.type === 'success',
-              }"
-              placeholder="supervisor@carsu.edu.ph"
-              @blur="validateEmail('supervisor')"
-            />
-            <small class="email-hint" :class="emailHints.supervisor.type">{{
-              emailHints.supervisor.msg
-            }}</small>
-          </div>
-        </div>
-
-        <!-- Purpose -->
-        <div class="field-group">
-          <label>Purpose <span class="req">*</span></label>
-          <div class="checkbox-group">
-            <label
-              v-for="option in purposeOptions"
-              :key="option"
-              class="checkbox-item"
-              :class="{ checked: form.headerPurpose === option }"
-            >
+            <div class="email-prefix-wrapper" :class="{ error: emailHints.supervisor.type === 'error', valid: emailHints.supervisor.type === 'success' }">
               <input
-                type="radio"
-                name="headerPurpose"
-                :value="option"
-                v-model="form.headerPurpose"
+                type="text"
+                v-model="form.supervisorEmailPrefix"
+                class="email-prefix-input"
+                placeholder="supervisor"
+                @blur="validateEmail('supervisor')"
               />
-              {{ option }}
-            </label>
+              <span class="email-suffix">@carsu.edu.ph</span>
+            </div>
+            <small class="email-hint" :class="emailHints.supervisor.type">{{ emailHints.supervisor.msg }}</small>
           </div>
-          <div
-            class="other-specify"
-            :class="{ visible: form.headerPurpose === 'Other' }"
-          >
-            <input
-              type="text"
-              v-model="form.headerPurposeOther"
-              placeholder="Please specify…"
-            />
+
+          <!-- Purpose -->
+          <div class="field-group span-2">
+            <label>Purpose <span class="req">*</span></label>
+            <div class="checkbox-group">
+              <label
+                v-for="option in purposeOptions"
+                :key="option"
+                class="checkbox-item"
+                :class="{ checked: form.headerPurpose === option }"
+              >
+                <input
+                  type="radio"
+                  name="headerPurpose"
+                  :value="option"
+                  v-model="form.headerPurpose"
+                />
+                {{ option }}
+              </label>
+            </div>
+            <div class="other-specify" :class="{ visible: form.headerPurpose === 'Other' }">
+              <input type="text" v-model="form.headerPurposeOther" placeholder="Please specify…" />
+            </div>
           </div>
+
         </div>
       </div>
     </div>
 
     <!-- ── SECTION I: COMPETENCY ASSESSMENT ── -->
-    <div class="section-card">
+    <div class="section-card section-card-collapsible">
       <div class="section-header">
         <div class="section-num">I</div>
         <div>
           <h3>Competency Assessment</h3>
           <p>Identify key competencies to develop</p>
         </div>
+        <div v-if="!form.headerPurpose" class="section-locked-badge">Complete Section H first</div>
       </div>
-      <div class="section-body">
+      <transition name="reveal">
+      <div v-if="form.headerPurpose" class="section-body">
         <div class="section-desc">
           Identify key competencies you need to develop based on your current or
           target role. For detailed descriptions and behavioral indicators,
@@ -365,12 +445,11 @@
           <table class="dynamic-table">
             <thead>
               <tr>
-                <th style="width: 50px">No.</th>
-                <th>Target Competency</th>
-                <th style="width: 130px">Current Level</th>
-                <th style="width: 130px">Required Level</th>
+                <th style="width: 40px">No.</th>
+                <th style="min-width:180px">Target Competency</th>
+                <th style="width: 150px">Current Level</th>
+                <th style="width: 150px">Required Level</th>
                 <th>Suggested LeaD Interventions</th>
-                <th>Resource / Support Needed</th>
                 <th style="width: 120px">Target Timeline</th>
                 <th style="width: 40px"></th>
               </tr>
@@ -386,50 +465,61 @@
                   />
                 </td>
                 <td>
-                  <textarea
-                    rows="2"
-                    v-model="row.targetCompetency"
-                    placeholder=""
-                  ></textarea>
+                  <select v-model="row.competencyGroup" @change="row.targetCompetency = ''; row.requiredLevel = ''">
+                    <option value="">Group…</option>
+                    <option>Core</option>
+                    <option>Leadership</option>
+                    <option>Organizational</option>
+                    <option>Technical</option>
+                  </select>
+                  <select v-if="row.competencyGroup" v-model="row.targetCompetency" style="margin-top:6px" @change="row.requiredLevel = getRequiredLevel(row.targetCompetency, form.currentPosition)">
+                    <option value="">Select…</option>
+                    <option v-for="c in getCompetencyOptions(row.competencyGroup)" :key="c" :value="c">{{ c }}</option>
+                  </select>
                 </td>
                 <td>
                   <select v-model="row.currentLevel">
                     <option value="">Select…</option>
-                    <option>Basic</option>
-                    <option>Intermediate</option>
-                    <option>Advanced</option>
-                    <option>Expert</option>
+                    <option value="1 - Basic">1 - Basic</option>
+                    <option value="2 - Intermediate">2 - Intermediate</option>
+                    <option value="3 - Advanced">3 - Advanced</option>
+                    <option value="4 - Expert">4 - Expert</option>
                   </select>
                 </td>
                 <td>
-                  <select v-model="row.requiredLevel">
+                  <div v-if="row.requiredLevel" class="required-level-badge">{{ row.requiredLevel }}</div>
+                  <div v-else class="required-level-empty">Auto-set</div>
+                </td>
+                <td>
+                  <select v-model="row.leadInterventions" style="min-width:200px">
                     <option value="">Select…</option>
-                    <option>Basic</option>
-                    <option>Intermediate</option>
-                    <option>Advanced</option>
-                    <option>Expert</option>
+                    <optgroup label="On-the-Job Learning">
+                      <option>Observation / Demonstration</option>
+                      <option>Delegation</option>
+                      <option>Coaching</option>
+                      <option>Mentoring</option>
+                      <option>Deployment</option>
+                      <option>Job Rotation / Assignment</option>
+                      <option>Detail and Secondment</option>
+                      <option>Reading</option>
+                      <option>Flexible Learning</option>
+                      <option>Brainstorming / Group Discussion</option>
+                      <option>Experiential Learning</option>
+                    </optgroup>
+                    <optgroup label="Off-the-Job Learning">
+                      <option>Special Short Courses and Lectures</option>
+                      <option>Conferences, Training Programs, Conventions, Seminars, and Cum Paper Presentations</option>
+                      <option>Pursue Higher Education</option>
+                    </optgroup>
                   </select>
                 </td>
                 <td>
-                  <textarea
-                    rows="2"
-                    v-model="row.leadInterventions"
-                    placeholder=""
-                  ></textarea>
-                </td>
-                <td>
-                  <textarea
-                    rows="2"
-                    v-model="row.resourceSupport"
-                    placeholder=""
-                  ></textarea>
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    v-model="row.targetTimeline"
-                    placeholder=""
-                  />
+                  <select v-model="row.targetTimeline">
+                    <option value="">Select…</option>
+                    <option>2026-2027</option>
+                    <option>2027-2028</option>
+                    <option>2028-2029</option>
+                  </select>
                 </td>
                 <td>
                   <button
@@ -450,18 +540,21 @@
           </button>
         </div>
       </div>
+      </transition>
     </div>
 
     <!-- ── SECTION II: AGAP ── -->
-    <div class="section-card">
+    <div class="section-card section-card-collapsible">
       <div class="section-header">
         <div class="section-num">II</div>
         <div>
           <h3>Academic Growth and Advancement Program (AGAP)</h3>
           <p>Plans for academic advancement</p>
         </div>
+        <div v-if="!sectionIComplete" class="section-locked-badge">Complete Section I first</div>
       </div>
-      <div class="section-body">
+      <transition name="reveal">
+      <div v-if="sectionIComplete" class="section-body">
         <div class="section-desc">
           Outline your plans for academic advancement, such as enrolling in
           graduate or certification programs. Ensure alignment with your role
@@ -471,32 +564,29 @@
           <table class="dynamic-table">
             <thead>
               <tr>
-                <th style="width: 50px">No.</th>
+                <th style="width: 40px">No.</th>
                 <th>Degree Program</th>
                 <th>Target HEI</th>
                 <th style="width: 120px">Mode of Study</th>
-                <th>Source of Funding</th>
                 <th>Target Scholarship Grant</th>
-                <th style="width: 120px">Target Timeline</th>
+                <th style="width: 130px">Target Timeline</th>
                 <th style="width: 40px"></th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(row, idx) in agapRows" :key="idx">
                 <td>
-                  <input
-                    type="text"
-                    class="priority-num"
-                    :value="idx + 1"
-                    readonly
-                  />
+                  <input type="text" class="priority-num" :value="idx + 1" readonly />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="row.degreeProgram"
-                    placeholder=""
-                  />
+                  <select v-model="row.degreeProgram">
+                    <option value="">Select…</option>
+                    <option>Post-Baccalaureate Certificate</option>
+                    <option>Master's Degree</option>
+                    <option>Post-Master's Certificate</option>
+                    <option>Doctorate Degree (Ph.D. / Ed.D. / etc.)</option>
+                    <option>Post-Doctoral</option>
+                  </select>
                 </td>
                 <td>
                   <input type="text" v-model="row.targetHEI" placeholder="" />
@@ -511,34 +601,18 @@
                   </select>
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="row.sourceOfFunding"
-                    placeholder=""
-                  />
+                  <input type="text" v-model="row.scholarshipGrant" placeholder="" />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="row.scholarshipGrant"
-                    placeholder=""
-                  />
+                  <select v-model="row.targetTimeline">
+                    <option value="">Select…</option>
+                    <option>2026-2027</option>
+                    <option>2027-2028</option>
+                    <option>2028-2029</option>
+                  </select>
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="row.targetTimeline"
-                    placeholder=""
-                  />
-                </td>
-                <td>
-                  <button
-                    class="btn-remove-row"
-                    @click="removeRow(agapRows, idx)"
-                    title="Remove row"
-                  >
-                    ×
-                  </button>
+                  <button class="btn-remove-row" @click="removeRow(agapRows, idx)" title="Remove row">×</button>
                 </td>
               </tr>
             </tbody>
@@ -548,21 +622,21 @@
           <button class="btn-add-row" @click="addAgapRow">+ Add Row</button>
         </div>
       </div>
+      </transition>
     </div>
 
     <!-- ── SECTION III: PRO-ACT ── -->
-    <div class="section-card">
+    <div class="section-card section-card-collapsible">
       <div class="section-header">
         <div class="section-num">III</div>
         <div>
-          <h3>
-            Professional Advancement through Capacity-Building and Trainings
-            (Pro-ACT)
-          </h3>
+          <h3>Professional Advancement through Capacity-Building and Trainings (Pro-ACT)</h3>
           <p>Training and workshop interventions</p>
         </div>
+        <div v-if="!sectionIIComplete" class="section-locked-badge">Complete Section II first</div>
       </div>
-      <div class="section-body">
+      <transition name="reveal">
+      <div v-if="sectionIIComplete" class="section-body">
         <div class="section-desc">
           If a training intervention is identified in Part I (Competency
           Assessment), provide more detailed information here.
@@ -571,35 +645,28 @@
           <table class="dynamic-table">
             <thead>
               <tr>
-                <th style="width: 50px">No.</th>
+                <th style="width: 40px">No.</th>
                 <th>Training / Workshop Title</th>
                 <th>Target Competency / Skill</th>
                 <th style="width: 130px">Mode of Activity</th>
-                <th>Source of Funding</th>
                 <th>Trainer / Provider</th>
-                <th style="width: 120px">Target Timeline</th>
+                <th style="width: 130px">Target Timeline</th>
                 <th style="width: 40px"></th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(row, idx) in proactRows" :key="idx">
                 <td>
-                  <input
-                    type="text"
-                    class="priority-num"
-                    :value="idx + 1"
-                    readonly
-                  />
+                  <input type="text" class="priority-num" :value="idx + 1" readonly />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="row.trainingTitle"
-                    placeholder=""
-                  />
+                  <input type="text" v-model="row.trainingTitle" placeholder="" />
                 </td>
                 <td>
-                  <input type="text" v-model="row.targetSkill" placeholder="" />
+                  <select v-model="row.targetSkill">
+                    <option value="">Select…</option>
+                    <option v-for="c in filledCompetencies" :key="c" :value="c">{{ c }}</option>
+                  </select>
                 </td>
                 <td>
                   <select v-model="row.modeOfActivity">
@@ -611,34 +678,18 @@
                   </select>
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="row.sourceOfFunding"
-                    placeholder=""
-                  />
+                  <input type="text" v-model="row.trainerProvider" placeholder="" />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="row.trainerProvider"
-                    placeholder=""
-                  />
+                  <select v-model="row.targetTimeline">
+                    <option value="">Select…</option>
+                    <option>2026-2027</option>
+                    <option>2027-2028</option>
+                    <option>2028-2029</option>
+                  </select>
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    v-model="row.targetTimeline"
-                    placeholder=""
-                  />
-                </td>
-                <td>
-                  <button
-                    class="btn-remove-row"
-                    @click="removeRow(proactRows, idx)"
-                    title="Remove row"
-                  >
-                    ×
-                  </button>
+                  <button class="btn-remove-row" @click="removeRow(proactRows, idx)" title="Remove row">×</button>
                 </td>
               </tr>
             </tbody>
@@ -648,18 +699,21 @@
           <button class="btn-add-row" @click="addProactRow">+ Add Row</button>
         </div>
       </div>
+      </transition>
     </div>
 
     <!-- ── SUBMIT STAGE 1 ── -->
-    <div class="submit-area">
-      <p>
-        By submitting, you confirm that all information provided is accurate.
-        Your supervisor will be notified automatically.
-      </p>
-      <button class="btn-submit" :disabled="isSubmitting" @click="submitStage1">
-        {{ isSubmitting ? "Submitting…" : "Submit IDP" }}
-      </button>
-    </div>
+    <transition name="reveal">
+      <div v-if="sectionIIIComplete" class="submit-area">
+        <p>
+          By submitting, you confirm that all information provided is accurate.
+          Your supervisor will be notified automatically.
+        </p>
+        <button class="btn-submit" :disabled="isSubmitting" @click="submitStage1">
+          {{ isSubmitting ? "Submitting…" : "Submit IDP" }}
+        </button>
+      </div>
+    </transition>
   </div>
 
   <!-- ═══════════════════════════════════════════════ -->
@@ -1114,7 +1168,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, computed, watch, onMounted } from "vue";
 
 // ── NOTE FOR MIGRATION ──────────────────────────────────────────────────────
 // APPS_SCRIPT_URL below is temporary for the current Google Sheets backend.
@@ -1135,17 +1189,25 @@ const loadingMsg = ref("Submitting your IDP, please wait…");
 
 // ── Stage 1 form data ──────────────────────────────────────────────────────
 const form = reactive({
-  campus: "",
+  campus: "CSU Main Campus",
   officeAffiliation: "",
   collegeOfficeUnit: "",
-  nameOfPersonnel: "",
+  collegeProgram: "",
+  personnelType: "",  // "administrative" | "faculty"
+  lastName: "",
+  firstName: "",
+  middleInitial: "",
+  employeeEmailPrefix: "",
   employeeEmail: "",
+  educAttainment: "",
+  educAttainmentSpec: "",
   datePrepared: "",
   currentPosition: "",
   yearCovered: "",
   yearsInPosition: "",
   yearsInCSU: "",
   supervisorName: "",
+  supervisorEmailPrefix: "",
   supervisorEmail: "",
   headerPurpose: "",
   headerPurposeOther: "",
@@ -1162,11 +1224,11 @@ const emailHints = reactive({
 // Dynamic table rows
 const competencyRows = ref([
   {
+    competencyGroup: "",
     targetCompetency: "",
     currentLevel: "",
     requiredLevel: "",
     leadInterventions: "",
-    resourceSupport: "",
     targetTimeline: "",
   },
 ]);
@@ -1175,7 +1237,6 @@ const agapRows = ref([
     degreeProgram: "",
     targetHEI: "",
     modeOfStudy: "",
-    sourceOfFunding: "",
     scholarshipGrant: "",
     targetTimeline: "",
   },
@@ -1185,7 +1246,6 @@ const proactRows = ref([
     trainingTitle: "",
     targetSkill: "",
     modeOfActivity: "",
-    sourceOfFunding: "",
     trainerProvider: "",
     targetTimeline: "",
   },
@@ -1214,15 +1274,153 @@ const assessment = reactive({
 });
 
 // ── Static options ─────────────────────────────────────────────────────────
-const campusOptions = ["CSU Main Campus", "CSU Cabadbaran City Campus"];
+const campusOptions = ["CSU Main Campus"];
 const officeOptions = [
   "OVPAF",
   "OVPAA",
   "OVPEO",
   "OVPSAS",
   "OVPRDIE",
-  "Office of the Campus Director",
 ];
+
+// Sub-office / college options per office affiliation
+// For OVPAA colleges, value is { name, programs: [] }
+const subOfficeMap = {
+  OVPAF: [
+    "Human Resource Management Services (HRMS)",
+    "Supply and Property Management Office (SPMO)",
+    "Records Management Office",
+    "Procurement Office",
+    "Engineering & Construction Office",
+    "Office of the Campus Safety & Security",
+    "General Services Office",
+    "DRRM Office",
+    "University Budget Office",
+    "University Accounting Office",
+    "University Cashiering Office",
+    "Business & Resource Management Office",
+    "Corporate Enterprise Development Office",
+    "University Press",
+  ],
+  OVPAA: [
+    { name: "Professional Schools", programs: [] },
+    { name: "College of Engineering and Geo-Sciences (CEGS)", programs: [
+      "BS in Agricultural and Biosystems Engineering",
+      "BS in Civil Engineering",
+      "BS in Electronics Engineering",
+      "BS in Geodetic Engineering",
+      "BS in Geology",
+      "BS in Mining Engineering",
+    ]},
+    { name: "College of Computing and Information Sciences (CCIS)", programs: [
+      "BS in Computer Science",
+      "BS in Information System",
+      "BS in Information Technology",
+    ]},
+    { name: "College of Mathematics and Natural Sciences (CMNS)", programs: [
+      "BS in Applied Mathematics",
+      "BS in Biology",
+      "BS in Chemistry",
+      "BS in Marine Biology",
+      "BS in Mathematics",
+      "BS in Physics",
+    ]},
+    { name: "College of Humanities and Social Sciences (CHaSS)", programs: [
+      "Bachelor of Arts in Sociology",
+      "Bachelor of Science in Psychology",
+      "Bachelor of Science in Social Work",
+    ]},
+    { name: "College of Agricultural and Agri-Industries (CAA)", programs: [
+      "BS in Agriculture",
+    ]},
+    { name: "College of Forestry and Environmental Sciences", programs: [
+      "BS in Environmental Science",
+      "BS in Forestry",
+      "BS in Agroforestry",
+    ]},
+    { name: "National Service Training Program", programs: [] },
+    { name: "Office of Curriculum & Instruction Development", programs: [] },
+    { name: "Office of Student Internship Programs", programs: [] },
+    { name: "Office of the University Registrar", programs: [] },
+    { name: "Office of the University Librarian", programs: [] },
+  ],
+  OVPEO: [
+    "Project Management Office",
+    "Office of the Planning & Quality Management Services",
+    "Office of Strategic Foresight and Futures Thinking",
+    "Office of Internationalization and Global Engagements",
+    "Management Information System",
+    "Public Information & Communication Office",
+    "Alumni Relations Office",
+  ],
+  OVPSAS: [
+    "Office of the Student Welfare & Engagements",
+    "Office of the Student Leadership & Development",
+    "Office of the Counselling & Career Services",
+    "Office of the Admission & Scholarship",
+    "University Center for Culture & Arts",
+    "University Center for Sports & Recreation",
+    "University Center for Health & Wellness",
+  ],
+  OVPRDIE: [
+    "Research & Development and Innovation (RDI) Services",
+    "Technology Transfer & Licensing Office",
+    "Technology Business Incubator (TBI) Office",
+    "Extension Services Office",
+    "RDIE Publication Management Office",
+  ],
+};
+
+// For OVPAA: colleges with sub-programs
+const isOVPAA = computed(() => form.officeAffiliation === "OVPAA");
+
+const collegeOfficeUnitOptions = computed(() => {
+  const list = subOfficeMap[form.officeAffiliation] || [];
+  if (isOVPAA.value) return list.map(c => typeof c === "string" ? c : c.name);
+  return list;
+});
+
+const selectedCollegePrograms = computed(() => {
+  if (!isOVPAA.value) return [];
+  const colleges = subOfficeMap["OVPAA"] || [];
+  const found = colleges.find(c => typeof c === "object" && c.name === form.collegeOfficeUnit);
+  return found ? found.programs : [];
+});
+
+// Reset downstream when affiliation changes
+watch(() => form.officeAffiliation, () => {
+  form.collegeOfficeUnit = "";
+  form.collegeProgram = "";
+  form.personnelType = "";
+  form.currentPosition = "";
+});
+
+watch(() => form.collegeOfficeUnit, () => {
+  form.collegeProgram = "";
+});
+// ── Section completion computed flags ─────────────────────────────────────
+const sectionIComplete = computed(() => {
+  // Section I (Competency) is "done" once purpose is chosen — rows are optional
+  return !!form.compPurpose;
+});
+
+const sectionIIComplete = computed(() => {
+  // Section II (AGAP) always shows once Section I purpose picked — rows optional
+  return sectionIComplete.value;
+});
+
+const sectionIIIComplete = computed(() => {
+  // Section III (Pro-ACT) always shows once Section II visible — rows optional
+  return sectionIIComplete.value;
+});
+
+// Competencies actually entered in Section I — used by Pro-ACT dropdown
+const filledCompetencies = computed(() =>
+  competencyRows.value
+    .map(r => r.targetCompetency)
+    .filter(c => c && c.trim())
+);
+
 const purposeOptions = [
   "Initial Assessment",
   "Mid-Year Review",
@@ -1259,6 +1457,66 @@ const interventionOptions = [
 ];
 const implOptions = ["Q1", "Q2", "Q3", "Q4", "Within this year", "Next year"];
 
+// ── Competency lists ────────────────────────────────────────────────────────
+const competencyData = {
+  Core: computed(() => {
+    const base = ["Integrity","Accountability","Scientific and Technological Excellence","Delivering Service Excellence","Environmental Consciousness","Building Partnership"];
+    if (form.personnelType === "faculty") base.push("Faculty Specializing in Environment");
+    return base;
+  }),
+  Leadership: ["Developing People","Facilitating Change","Conflict Management","Leading Innovation","Strategic Planning","Leading Others","Decisiveness"],
+  Organizational: ["Teamwork","Commitment to Learning","Customer Focus","Adaptability and Flexibility","Critical Thinking","Effective Communication","Valuing Diversity","Self-Awareness and Confidence","Stress Tolerance","Resource Management","Knowledge Management","Initiative","Result Orientation","Community Engagement","Organizational Commitment","Planning and Organizing","Emotional and Psychological Maturity","Safety and Risk Management","Interpersonal Effectiveness"],
+  Technical: computed(() => {
+    const base = ["Research Engagement","Diagnostic Information Gathering","Attention to Details","Written Communication","Oral Communication","Conceptual and Analytical Thinking","Computer Literacy","Planning and Project Management","Logical Reasoning"];
+    if (form.personnelType === "faculty") {
+      base.push("Language Faculty","IT Faculty","Math and Allied Fields Faculty Members");
+    }
+    return base;
+  }),
+};
+
+function getCompetencyOptions(group) {
+  if (!group) return [];
+  const v = competencyData[group];
+  if (!v) return [];
+  return typeof v.value !== "undefined" ? v.value : v;
+}
+
+// Required level lookup — based on position group
+// Levels: "1 - Basic", "2 - Intermediate", "3 - Advanced", "4 - Expert"
+function getPositionGroup(position) {
+  const p = (position || "").toLowerCase();
+  if (p.includes("university professor") || p.includes("professor v") || p.includes("professor vi")) return "senior_faculty";
+  if (p.includes("professor")) return "faculty_mid";
+  if (p.includes("instructor") || p.includes("assistant professor")) return "faculty_junior";
+  if (p.includes("admin officer iv") || p.includes("admin officer v") || p.includes("cao") || p.includes("board sec") || p.includes("attorney") || p.includes("physician") || p.includes("planning officer")) return "admin_senior";
+  if (p.includes("admin officer")) return "admin_mid";
+  return "admin_junior";
+}
+
+// Required levels per competency category per position group
+const reqLevelMatrix = {
+  // [posGroup]: { Core, Leadership, Organizational, Technical }
+  senior_faculty:  { Core: "4 - Expert", Leadership: "4 - Expert", Organizational: "3 - Advanced", Technical: "4 - Expert" },
+  faculty_mid:     { Core: "3 - Advanced", Leadership: "3 - Advanced", Organizational: "3 - Advanced", Technical: "3 - Advanced" },
+  faculty_junior:  { Core: "2 - Intermediate", Leadership: "2 - Intermediate", Organizational: "2 - Intermediate", Technical: "2 - Intermediate" },
+  admin_senior:    { Core: "3 - Advanced", Leadership: "3 - Advanced", Organizational: "3 - Advanced", Technical: "2 - Intermediate" },
+  admin_mid:       { Core: "2 - Intermediate", Leadership: "2 - Intermediate", Organizational: "2 - Intermediate", Technical: "2 - Intermediate" },
+  admin_junior:    { Core: "1 - Basic", Leadership: "1 - Basic", Organizational: "1 - Basic", Technical: "1 - Basic" },
+};
+
+function getRequiredLevel(competency, position) {
+  if (!competency || !position) return "";
+  const posGroup = getPositionGroup(position);
+  const matrix = reqLevelMatrix[posGroup] || {};
+  // Find which group this competency belongs to
+  for (const [grp, list] of Object.entries(competencyData)) {
+    const arr = typeof list.value !== "undefined" ? list.value : list;
+    if (arr.includes(competency)) return matrix[grp] || "";
+  }
+  return "";
+}
+
 // ── Lifecycle ──────────────────────────────────────────────────────────────
 onMounted(() => {
   // Set today's date as default
@@ -1276,15 +1534,21 @@ onMounted(() => {
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 function validateEmail(who) {
+  if (who === "employee") {
+    form.employeeEmail = (form.employeeEmailPrefix || "").trim() + "@carsu.edu.ph";
+  } else {
+    form.supervisorEmail = (form.supervisorEmailPrefix || "").trim() + "@carsu.edu.ph";
+  }
   const val = who === "employee" ? form.employeeEmail : form.supervisorEmail;
   const hint = emailHints[who];
-  if (!val) {
+  const prefix = who === "employee" ? form.employeeEmailPrefix : form.supervisorEmailPrefix;
+  if (!prefix || !prefix.trim()) {
     hint.msg = "";
     hint.type = "";
     return false;
   }
-  if (!val.endsWith("@carsu.edu.ph")) {
-    hint.msg = "Must be a @carsu.edu.ph email address.";
+  if (!/^[a-zA-Z0-9._%+\-]+$/.test(prefix.trim())) {
+    hint.msg = "Invalid characters in email prefix.";
     hint.type = "error";
     return false;
   }
@@ -1295,11 +1559,11 @@ function validateEmail(who) {
 
 function addCompetencyRow() {
   competencyRows.value.push({
+    competencyGroup: "",
     targetCompetency: "",
     currentLevel: "",
     requiredLevel: "",
     leadInterventions: "",
-    resourceSupport: "",
     targetTimeline: "",
   });
 }
@@ -1308,7 +1572,6 @@ function addAgapRow() {
     degreeProgram: "",
     targetHEI: "",
     modeOfStudy: "",
-    sourceOfFunding: "",
     scholarshipGrant: "",
     targetTimeline: "",
   });
@@ -1318,7 +1581,6 @@ function addProactRow() {
     trainingTitle: "",
     targetSkill: "",
     modeOfActivity: "",
-    sourceOfFunding: "",
     trainerProvider: "",
     targetTimeline: "",
   });
@@ -1332,7 +1594,8 @@ function removeRow(arr, idx) {
 function validateStage1() {
   let ok = true;
   const required = [
-    "nameOfPersonnel",
+    "lastName",
+    "firstName",
     "datePrepared",
     "currentPosition",
     "yearCovered",
@@ -1340,6 +1603,8 @@ function validateStage1() {
     "yearsInCSU",
     "collegeOfficeUnit",
     "supervisorName",
+    "educAttainment",
+    "educAttainmentSpec",
   ];
   required.forEach((field) => {
     if (!form[field]?.toString().trim()) {
@@ -1347,12 +1612,11 @@ function validateStage1() {
       ok = false;
     } else delete errors[field];
   });
+  // Build full emails from prefixes before validating
+  form.employeeEmail = (form.employeeEmailPrefix || "").trim() + "@carsu.edu.ph";
+  form.supervisorEmail = (form.supervisorEmailPrefix || "").trim() + "@carsu.edu.ph";
   if (!validateEmail("employee")) ok = false;
   if (!validateEmail("supervisor")) ok = false;
-  if (!form.campus) {
-    alert("Please select a Campus.");
-    ok = false;
-  }
   if (!form.officeAffiliation) {
     alert("Please select an Office Affiliation.");
     ok = false;
@@ -1382,10 +1646,15 @@ async function submitStage1() {
   const payload = {
     action: "submitStage1",
     employeeEmail: form.employeeEmail,
-    campus: form.campus,
+    campus: "CSU Main Campus",
     officeAffiliation: form.officeAffiliation,
     collegeOfficeUnit: form.collegeOfficeUnit,
-    nameOfPersonnel: form.nameOfPersonnel,
+    nameOfPersonnel: [form.lastName, form.firstName, form.middleInitial].filter(Boolean).join(", "),
+    lastName: form.lastName,
+    firstName: form.firstName,
+    middleInitial: form.middleInitial,
+    educAttainment: form.educAttainment,
+    educAttainmentSpec: form.educAttainmentSpec,
     datePrepared: form.datePrepared,
     currentPosition: form.currentPosition,
     yearCovered: form.yearCovered,
@@ -2308,6 +2577,118 @@ textarea {
   color: var(--text-light);
   display: block;
   margin-top: 4px;
+}
+
+/* ── Section locked badge ── */
+.section-card-collapsible .section-header {
+  flex-wrap: wrap;
+}
+.section-locked-badge {
+  margin-left: auto;
+  background: #f0ece0;
+  color: var(--text-light);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+/* ── Required level badge ── */
+.required-level-badge {
+  background: var(--navy);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 6px;
+  text-align: center;
+  white-space: nowrap;
+}
+.required-level-empty {
+  font-size: 11px;
+  color: var(--text-light);
+  font-style: italic;
+  text-align: center;
+}
+
+/* ── Static value display ── */
+.static-value {
+  background: var(--readonly-bg);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ── Reveal transition ── */
+.reveal-enter-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.reveal-enter-from {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+/* ── Name grid ── */
+.name-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 90px;
+  gap: 12px;
+  align-items: start;
+}
+.name-grid input {
+  width: 100%;
+}
+.field-hint {
+  display: block;
+  font-size: 11px;
+  color: var(--text-light);
+  margin-top: 4px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
+/* ── Email prefix widget ── */
+.email-prefix-wrapper {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--input-bg);
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.email-prefix-wrapper:focus-within {
+  border-color: var(--navy);
+  background: var(--white);
+}
+.email-prefix-wrapper.error { border-color: var(--error); }
+.email-prefix-wrapper.valid { border-color: var(--success); }
+.email-prefix-input {
+  flex: 1;
+  border: none !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  box-shadow: none !important;
+}
+.email-suffix {
+  padding: 10px 12px 10px 0;
+  font-size: 13px;
+  color: var(--text-light);
+  white-space: nowrap;
+  font-weight: 500;
+  background: transparent;
+  border-left: 1.5px solid var(--border);
+  padding-left: 10px;
 }
 
 /* ── Responsive ── */
