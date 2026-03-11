@@ -1,23 +1,5 @@
 <template>
   <div>
-    <!-- Header -->
-    <header class="site-header">
-      <div class="header-inner">
-        <img
-          src="/img/header-logo.png"
-          alt="Caraga State University - Office of Human Resource Management Services"
-          class="header-img"
-        />
-        <div class="header-right" v-if="screen === 'dash'" id="headerRight">
-          <div class="user-badge">
-            <div class="user-avatar">{{ userAvatar }}</div>
-            <span>{{ currentUser?.email }}</span>
-          </div>
-          <button class="btn-logout" @click="logout">Logout</button>
-        </div>
-      </div>
-    </header>
-
     <!-- Page Nav -->
     <div class="page-nav">
       <NuxtLink to="/" class="back-link">

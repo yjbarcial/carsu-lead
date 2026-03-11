@@ -6,17 +6,6 @@
       <p>Submitting your LNA, please wait…</p>
     </div>
 
-    <!-- Header -->
-    <header class="site-header">
-      <div class="header-inner">
-        <img
-          src="/img/header-logo.png"
-          alt="Caraga State University - Office of Human Resource Management Services"
-          class="header-img"
-        />
-      </div>
-    </header>
-
     <!-- Page Nav -->
     <div class="page-nav">
       <NuxtLink to="/" class="back-link">

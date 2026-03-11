@@ -4,18 +4,7 @@
     <div class="spinner"></div>
     <p>{{ loadingMsg }}</p>
   </div>
-
-  <!-- Site header -->
-  <header class="site-header">
-    <div class="header-inner">
-      <img
-        src="/img/header-logo.png"
-        alt="Caraga State University - Office of Human Resource Management Services"
-        class="header-img"
-      />
-    </div>
-  </header>
-
+  
   <!-- Page nav breadcrumb -->
   <div class="page-nav">
     <a href="/" class="back-link">
