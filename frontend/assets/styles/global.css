@@ -1,0 +1,25 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap");
+
+:root {
+  --navy: #1a4d2e;
+  --navy-mid: #2d6a3f;
+  --gold: #f5c300;
+  --cream: #faf8f4;
+  --white: #ffffff;
+  --text: #1a1a2e;
+  --text-light: #5a6070;
+  --border: #d8d4c8;
+  --error: #c0392b;
+  --success: #1a6b3c;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body {
+  font-family: "Source Sans 3", sans-serif;
+  background: var(--cream);
+  color: var(--text);
+}
