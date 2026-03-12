@@ -50,42 +50,37 @@
           </div>
         </div>
         <div class="section-body">
+
           <div class="field-grid field-grid-2" style="margin-bottom: 18px">
             <div class="field-group span-2">
               <label>Your CarSU Email Address <span class="req">*</span></label>
-              <input
-                type="email"
-                v-model="form.submitterEmail"
-                @blur="validateEmail"
-                placeholder="yourname@carsu.edu.ph"
-                :class="{ error: emailError }"
-              />
-              <small class="email-hint" :class="emailHintClass">{{
-                emailHint
-              }}</small>
-            </div>
-          </div>
-
-          <div class="field-group" style="margin-bottom: 20px">
-            <label>Campus <span class="req">*</span></label>
-            <div class="checkbox-group">
-              <label
-                v-for="c in campusOptions"
-                :key="c"
-                class="checkbox-item"
-                :class="{ checked: form.campus === c }"
+              <div
+                class="email-prefix-wrapper"
+                :class="{
+                  error: emailHint.type === 'error',
+                  valid: emailHint.type === 'success'
+                }"
               >
                 <input
-                  type="radio"
-                  name="campus"
-                  :value="c"
-                  v-model="form.campus"
+                  type="text"
+                  v-model="form.submitterEmailPrefix"
+                  class="email-prefix-input"
+                  placeholder="yourname"
+                  @blur="validateEmail"
                 />
-                {{ c }}
-              </label>
+                <span class="email-suffix">@carsu.edu.ph</span>
+              </div>
+              <small class="email-hint" :class="emailHint.type">{{ emailHint.msg }}</small>
             </div>
           </div>
 
+          <!-- Campus — static display -->
+          <div class="field-group" style="margin-bottom: 20px">
+            <label>Campus</label>
+            <div class="static-value">CSU Main Campus</div>
+          </div>
+
+          <!-- Office Affiliation -->
           <div class="field-group" style="margin-bottom: 20px">
             <label>Office Affiliation <span class="req">*</span></label>
             <div class="checkbox-group">
@@ -107,33 +102,41 @@
           </div>
 
           <div class="field-grid field-grid-2" style="margin-bottom: 18px">
+
+            <!-- Name of Unit/Office/College — dynamic dropdown -->
             <div class="field-group span-2">
-              <label
-                >Name of Unit/Office/College <span class="req">*</span></label
+              <label>Name of Unit / Office / College <span class="req">*</span></label>
+              <select
+                v-if="collegeOfficeUnitOptions.length > 0"
+                v-model="form.unitOfficeCollege"
               >
+                <option value="">Select office / unit…</option>
+                <option v-for="opt in collegeOfficeUnitOptions" :key="opt" :value="opt">{{ opt }}</option>
+              </select>
               <input
+                v-else
                 type="text"
                 v-model="form.unitOfficeCollege"
                 placeholder="e.g. College of Engineering"
               />
             </div>
+
+            <!-- Program selector — only for OVPAA colleges with programs -->
+            <div v-if="isOVPAA && selectedCollegePrograms.length > 0" class="field-group span-2" style="margin-top: 4px">
+              <label>Program / Department <span class="req">*</span></label>
+              <select v-model="form.collegeProgram">
+                <option value="">Select program…</option>
+                <option v-for="p in selectedCollegePrograms" :key="p" :value="p">{{ p }}</option>
+              </select>
+            </div>
+
             <div class="field-group">
-              <label
-                >Head of Unit/Office/College <span class="req">*</span></label
-              >
-              <input
-                type="text"
-                v-model="form.headOfUnit"
-                placeholder="Full name"
-              />
+              <label>Head of Unit/Office/College <span class="req">*</span></label>
+              <input type="text" v-model="form.headOfUnit" placeholder="Full name" />
             </div>
             <div class="field-group">
               <label>Position / Designation <span class="req">*</span></label>
-              <input
-                type="text"
-                v-model="form.position"
-                placeholder="e.g. Dean, Director"
-              />
+              <input type="text" v-model="form.position" placeholder="e.g. Dean, Director" />
             </div>
             <div class="field-group">
               <label>Date Prepared <span class="req">*</span></label>
@@ -141,20 +144,11 @@
             </div>
             <div class="field-group">
               <label>Year Covered <span class="req">*</span></label>
-              <input
-                type="text"
-                v-model="form.yearCovered"
-                placeholder="e.g. 2025"
-              />
+              <input type="text" v-model="form.yearCovered" placeholder="e.g. 2025" />
             </div>
             <div class="field-group">
               <label>Total Personnel <span class="req">*</span></label>
-              <input
-                type="number"
-                v-model="form.totalPersonnel"
-                min="0"
-                placeholder="0"
-              />
+              <input type="number" v-model="form.totalPersonnel" min="0" placeholder="0" />
             </div>
           </div>
 
@@ -167,27 +161,15 @@
                 class="checkbox-item"
                 :class="{ checked: form.purpose === p }"
               >
-                <input
-                  type="radio"
-                  name="purpose"
-                  :value="p"
-                  v-model="form.purpose"
-                />
+                <input type="radio" name="purpose" :value="p" v-model="form.purpose" />
                 {{ p }}
               </label>
             </div>
-            <div
-              v-if="form.purpose === 'Other'"
-              class="other-specify visible"
-              style="margin-top: 10px"
-            >
-              <input
-                type="text"
-                v-model="form.purposeOther"
-                placeholder="Please specify..."
-              />
+            <div v-if="form.purpose === 'Other'" class="other-specify visible" style="margin-top: 10px">
+              <input type="text" v-model="form.purposeOther" placeholder="Please specify..." />
             </div>
           </div>
+
         </div>
       </div>
 
@@ -196,12 +178,8 @@
         <div class="section-header">
           <div class="section-num">I</div>
           <div>
-            <h3>
-              Workforce Profile by Employment Classification and Position Level
-            </h3>
-            <p>
-              Indicate number of personnel per classification per position level
-            </p>
+            <h3>Workforce Profile by Employment Classification and Position Level</h3>
+            <p>Indicate number of personnel per classification per position level</p>
           </div>
         </div>
         <div class="section-body">
@@ -214,9 +192,7 @@
             <table class="data-table workforce-table">
               <thead>
                 <tr>
-                  <th style="min-width: 180px; text-align: left">
-                    Position Level
-                  </th>
+                  <th style="min-width: 180px; text-align: left">Position Level</th>
                   <th v-for="t in employmentTypes" :key="t">{{ t }}</th>
                 </tr>
               </thead>
@@ -254,51 +230,29 @@
             (CL: 1-4) and percentage (%) of personnel demonstrating it. Write
             <strong>N/A</strong> if the competency does not apply. For detailed
             descriptions, refer to the
-            <a
-              href="https://tinyurl.com/CompetencyManualandModel"
-              target="_blank"
-              >Competency Manual and Model</a
-            >.
+            <a href="https://tinyurl.com/CompetencyManualandModel" target="_blank">Competency Manual and Model</a>.
             <div style="margin-top: 14px">
               <p><i>Rating Scale:</i></p>
               <img
                 src="/img/rating-scale.png"
                 alt="Rating Scale"
-                style="
-                  max-width: 100%;
-                  height: auto;
-                  display: block;
-                  border-radius: 6px;
-                "
+                style="max-width: 100%; height: auto; display: block; border-radius: 6px;"
               />
             </div>
           </div>
 
-          <div
-            v-for="cluster in competencyClusters"
-            :key="cluster.key"
-            class="comp-table-wrap"
-          >
+          <div v-for="cluster in competencyClusters" :key="cluster.key" class="comp-table-wrap">
             <div class="comp-cluster-label">
               {{ cluster.name }} Competencies
               <span class="cluster-badge">{{ cluster.badge }}</span>
             </div>
-            <p class="comp-note" style="padding: 8px 0 4px">
-              {{ cluster.note }}
-            </p>
+            <p class="comp-note" style="padding: 8px 0 4px">{{ cluster.note }}</p>
             <div class="table-wrapper">
               <table class="data-table">
                 <thead>
                   <tr>
                     <th style="min-width: 180px">Competency</th>
-                    <th
-                      v-for="lv in compLevelHeaders"
-                      :key="lv"
-                      colspan="2"
-                      style="text-align: center"
-                    >
-                      {{ lv }}
-                    </th>
+                    <th v-for="lv in compLevelHeaders" :key="lv" colspan="2" style="text-align: center">{{ lv }}</th>
                     <th style="min-width: 200px">Basis / Key Observations</th>
                   </tr>
                   <tr>
@@ -315,32 +269,18 @@
                     <td class="row-label">{{ comp }}</td>
                     <template v-for="lv in compLevelKeys" :key="lv">
                       <td>
-                        <select
-                          v-model="competencyData[cluster.key][idx][lv + '_cl']"
-                        >
-                          <option v-for="o in clOptions" :key="o" :value="o">
-                            {{ o || "---" }}
-                          </option>
+                        <select v-model="competencyData[cluster.key][idx][lv + '_cl']">
+                          <option v-for="o in clOptions" :key="o" :value="o">{{ o || "---" }}</option>
                         </select>
                       </td>
                       <td>
-                        <select
-                          v-model="
-                            competencyData[cluster.key][idx][lv + '_pct']
-                          "
-                        >
-                          <option v-for="o in pctOptions" :key="o" :value="o">
-                            {{ o || "---" }}
-                          </option>
+                        <select v-model="competencyData[cluster.key][idx][lv + '_pct']">
+                          <option v-for="o in pctOptions" :key="o" :value="o">{{ o || "---" }}</option>
                         </select>
                       </td>
                     </template>
                     <td>
-                      <textarea
-                        rows="2"
-                        v-model="competencyData[cluster.key][idx].observations"
-                        placeholder="Observations..."
-                      ></textarea>
+                      <textarea rows="2" v-model="competencyData[cluster.key][idx].observations" placeholder="Observations..."></textarea>
                     </td>
                   </tr>
                 </tbody>
@@ -349,14 +289,7 @@
           </div>
 
           <hr class="subsection-divider" />
-          <h4
-            style="
-              font-family: 'Playfair Display', serif;
-              color: var(--navy);
-              margin-bottom: 12px;
-              font-size: 16px;
-            "
-          >
+          <h4 style="font-family: 'Playfair Display', serif; color: var(--navy); margin-bottom: 12px; font-size: 16px;">
             Competency Cluster Summary
           </h4>
           <div class="table-wrapper">
@@ -372,20 +305,8 @@
               <tbody>
                 <tr v-for="c in clusterSummary" :key="c.cluster">
                   <td class="row-label">{{ c.cluster }}</td>
-                  <td>
-                    <input
-                      type="text"
-                      v-model="c.strongest"
-                      placeholder="e.g. Integrity"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      v-model="c.weakest"
-                      placeholder="e.g. Building Partnership"
-                    />
-                  </td>
+                  <td><input type="text" v-model="c.strongest" placeholder="e.g. Integrity" /></td>
+                  <td><input type="text" v-model="c.weakest" placeholder="e.g. Building Partnership" /></td>
                   <td>
                     <select v-model="c.interventionNeeded">
                       <option value="">---</option>
@@ -424,30 +345,17 @@
               class="source-item"
               :class="{ checked: form.selectedSources.includes(src.value) }"
             >
-              <input
-                type="checkbox"
-                :value="src.value"
-                v-model="form.selectedSources"
-              />
+              <input type="checkbox" :value="src.value" v-model="form.selectedSources" />
               {{ src.label }}
             </label>
           </div>
-          <div
-            v-if="form.selectedSources.includes('Others')"
-            style="margin-top: 10px"
-          >
-            <input
-              type="text"
-              v-model="form.othersSourceText"
-              placeholder="Please specify other data sources..."
-            />
+          <div v-if="form.selectedSources.includes('Others')" style="margin-top: 10px">
+            <input type="text" v-model="form.othersSourceText" placeholder="Please specify other data sources..." />
           </div>
 
           <hr class="subsection-divider" />
 
-          <h4 class="subsec-label">
-            B. Summary of Key Insights or Gaps Identified
-          </h4>
+          <h4 class="subsec-label">B. Summary of Key Insights or Gaps Identified</h4>
           <div class="table-wrapper">
             <table class="data-table">
               <thead>
@@ -462,60 +370,20 @@
               </thead>
               <tbody>
                 <tr v-for="(row, idx) in insightRows" :key="idx">
-                  <td
-                    style="
-                      text-align: center;
-                      color: var(--text-light);
-                      font-weight: 600;
-                    "
-                  >
-                    {{ idx + 1 }}
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      v-model="row.dataSource"
-                      placeholder="Data source..."
-                    />
-                  </td>
-                  <td>
-                    <textarea
-                      rows="2"
-                      v-model="row.gap"
-                      placeholder="Identified gap or issue..."
-                    ></textarea>
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      v-model="row.personnel"
-                      placeholder="Relevant personnel or function..."
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      v-model="row.intervention"
-                      placeholder="Recommended intervention..."
-                    />
-                  </td>
+                  <td style="text-align: center; color: var(--text-light); font-weight: 600;">{{ idx + 1 }}</td>
+                  <td><input type="text" v-model="row.dataSource" placeholder="Data source..." /></td>
+                  <td><textarea rows="2" v-model="row.gap" placeholder="Identified gap or issue..."></textarea></td>
+                  <td><input type="text" v-model="row.personnel" placeholder="Relevant personnel or function..." /></td>
+                  <td><input type="text" v-model="row.intervention" placeholder="Recommended intervention..." /></td>
                   <td style="text-align: center">
-                    <button
-                      class="btn-remove-row"
-                      @click="removeInsightRow(idx)"
-                      :disabled="insightRows.length <= 1"
-                    >
-                      x
-                    </button>
+                    <button class="btn-remove-row" @click="removeInsightRow(idx)" :disabled="insightRows.length <= 1">x</button>
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
           <div style="margin-top: 12px">
-            <button class="btn-add-row" @click="addInsightRow">
-              + Add Row
-            </button>
+            <button class="btn-add-row" @click="addInsightRow">+ Add Row</button>
           </div>
         </div>
       </div>
@@ -556,81 +424,39 @@
               <tbody>
                 <template v-for="level in positionLevels" :key="level.key">
                   <tr>
-                    <td
-                      colspan="5"
-                      class="pos-level-header"
-                      style="padding: 10px 12px"
-                    >
-                      {{ level.label }}
-                    </td>
+                    <td colspan="5" class="pos-level-header" style="padding: 10px 12px">{{ level.label }}</td>
                   </tr>
                   <tr v-for="p in 3" :key="p">
                     <td style="text-align: center; vertical-align: middle">
                       <span class="priority-badge">{{ p }}</span>
                     </td>
                     <td>
-                      <input
-                        type="text"
-                        v-model="interventions[level.key][p - 1].need"
-                        placeholder="Describe competency/learning need..."
-                      />
+                      <input type="text" v-model="interventions[level.key][p - 1].need" placeholder="Describe competency/learning need..." />
                     </td>
                     <td>
                       <div class="intervention-checks">
                         <label class="iv-check">
-                          <input
-                            type="checkbox"
-                            v-model="interventions[level.key][p - 1].onJob"
-                          />
+                          <input type="checkbox" v-model="interventions[level.key][p - 1].onJob" />
                           On-the-Job Learning:
-                          <input
-                            type="text"
-                            v-model="interventions[level.key][p - 1].onJobText"
-                            placeholder="specify..."
-                            class="iv-text"
-                          />
+                          <input type="text" v-model="interventions[level.key][p - 1].onJobText" placeholder="specify..." class="iv-text" />
                         </label>
                         <label class="iv-check">
-                          <input
-                            type="checkbox"
-                            v-model="interventions[level.key][p - 1].offJob"
-                          />
+                          <input type="checkbox" v-model="interventions[level.key][p - 1].offJob" />
                           Off-the-Job Learning:
-                          <input
-                            type="text"
-                            v-model="interventions[level.key][p - 1].offJobText"
-                            placeholder="specify..."
-                            class="iv-text"
-                          />
+                          <input type="text" v-model="interventions[level.key][p - 1].offJobText" placeholder="specify..." class="iv-text" />
                         </label>
                         <label class="iv-check">
-                          <input
-                            type="checkbox"
-                            v-model="interventions[level.key][p - 1].others"
-                          />
+                          <input type="checkbox" v-model="interventions[level.key][p - 1].others" />
                           Others:
-                          <input
-                            type="text"
-                            v-model="interventions[level.key][p - 1].othersText"
-                            placeholder="specify..."
-                            class="iv-text"
-                          />
+                          <input type="text" v-model="interventions[level.key][p - 1].othersText" placeholder="specify..." class="iv-text" />
                         </label>
                       </div>
                     </td>
                     <td>
-                      <input
-                        type="text"
-                        v-model="interventions[level.key][p - 1].timeline"
-                        placeholder="e.g. Q2 2025"
-                      />
+                      <input type="text" v-model="interventions[level.key][p - 1].timeline" placeholder="e.g. Q2 2025" />
                     </td>
                     <td>
-                      <textarea
-                        rows="2"
-                        v-model="interventions[level.key][p - 1].resource"
-                        placeholder="Budget, facilitator, equipment..."
-                      ></textarea>
+                      <textarea rows="2" v-model="interventions[level.key][p - 1].resource" placeholder="Budget, facilitator, equipment..."></textarea>
                     </td>
                   </tr>
                 </template>
@@ -647,26 +473,12 @@
               data, and evidence gathered from the office.
             </p>
             <div class="field-group">
-              <label
-                >Full Name of Rater / Head of Office
-                <span class="req">*</span></label
-              >
-              <input
-                type="text"
-                v-model="form.raterFullName"
-                placeholder="Enter full name"
-                style="max-width: 400px"
-              />
+              <label>Full Name of Rater / Head of Office <span class="req">*</span></label>
+              <input type="text" v-model="form.raterFullName" placeholder="Enter full name" style="max-width: 400px" />
             </div>
-            <small
-              style="
-                font-size: 11px;
-                color: var(--text-light);
-                display: block;
-                margin-top: 8px;
-              "
-              >Signature over Printed Name of Rater/Head of Office</small
-            >
+            <small style="font-size: 11px; color: var(--text-light); display: block; margin-top: 8px;">
+              Signature over Printed Name of Rater/Head of Office
+            </small>
           </div>
         </div>
       </div>
@@ -675,8 +487,7 @@
       <div class="submit-area">
         <p>
           By submitting, you confirm that all information is accurate and based
-          on actual office data. HRMS will be notified immediately upon
-          submission.
+          on actual office data. HRMS will be notified immediately upon submission.
         </p>
         <button class="btn-submit" :disabled="isSubmitting" @click="submitForm">
           Submit LNA
@@ -687,209 +498,198 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from "vue";
+import { ref, reactive, computed, watch, onMounted } from "vue";
 
 const config = useRuntimeConfig();
-const API = config.public.apiBase; // resolves to http://localhost:3001
+const API = config.public.apiBase;
 
 const screen = ref("form");
 const isSubmitting = ref(false);
 const refId = ref("");
 
-const emailHint = ref("");
-const emailError = ref(false);
-const emailHintClass = computed(() =>
-  emailError.value ? "error" : emailHint.value.startsWith("✓") ? "success" : "",
-);
+// ── EMAIL HINT STATE (matches IDP pattern) ──
+const emailHint = reactive({ msg: "", type: "" });
 
 // ── CONSTANTS ──
-const campusOptions = ["CSU Main Campus", "CSU Cabadbaran City Campus"];
 const officeOptions = [
   "OVPAF",
   "OVPAA",
   "OVPEO",
   "OVPRDIE",
   "OVPSAS",
-  "Office of the Campus Director",
 ];
+
 const purposeOptions = [
   "Initial Assessment",
   "Mid-Year Review",
   "Annual Review",
   "Other",
 ];
+
 const employmentTypes = [
-  "Permanent",
-  "Temporary",
-  "Contractual",
-  "Casual",
-  "Coterminus",
-  "COS",
-  "Job Order",
-  "Others",
+  "Permanent", "Temporary", "Contractual", "Casual",
+  "Coterminus", "COS", "Job Order", "Others",
 ];
 const employmentTypeKeys = [
-  "permanent",
-  "temporary",
-  "contractual",
-  "casual",
-  "coterminus",
-  "cos",
-  "jobOrder",
-  "others",
+  "permanent", "temporary", "contractual", "casual",
+  "coterminus", "cos", "jobOrder", "others",
 ];
 
 const positionLevels = [
-  { key: "first", label: "First Level Positions" },
+  { key: "first",        label: "First Level Positions" },
   { key: "secondNonSup", label: "Second Level (Non-Supervisory)" },
-  { key: "secondSup", label: "Second Level (Supervisory)" },
-  { key: "third", label: "Third Level Positions" },
-  { key: "faculty", label: "Faculty Positions" },
+  { key: "secondSup",    label: "Second Level (Supervisory)" },
+  { key: "third",        label: "Third Level Positions" },
+  { key: "faculty",      label: "Faculty Positions" },
 ];
 
-const compLevelHeaders = [
-  "1st Level",
-  "2nd (Non-Sup)",
-  "2nd (Sup)",
-  "3rd Level",
-  "Faculty",
-];
-const compLevelKeys = [
-  "first",
-  "secondNonSup",
-  "secondSup",
-  "third",
-  "faculty",
-];
-const clOptions = ["", "N/A", "1", "2", "3", "4"];
+const compLevelHeaders = ["1st Level", "2nd (Non-Sup)", "2nd (Sup)", "3rd Level", "Faculty"];
+const compLevelKeys    = ["first", "secondNonSup", "secondSup", "third", "faculty"];
+const clOptions  = ["", "N/A", "1", "2", "3", "4"];
 const pctOptions = ["", "N/A", "A", "B", "C", "D"];
 
 const COMPETENCIES = {
   core: [
-    "Integrity",
-    "Accountability",
-    "Scientific & Technological Excellence",
-    "Delivering Service Excellence",
-    "Environmental Consciousness",
-    "Building Partnership",
+    "Integrity", "Accountability", "Scientific & Technological Excellence",
+    "Delivering Service Excellence", "Environmental Consciousness", "Building Partnership",
   ],
   leadership: [
-    "Developing People",
-    "Facilitating Change",
-    "Conflict Management",
-    "Leading Innovation",
-    "Strategic Planning",
-    "Leading Others",
-    "Decisiveness",
+    "Developing People", "Facilitating Change", "Conflict Management",
+    "Leading Innovation", "Strategic Planning", "Leading Others", "Decisiveness",
   ],
   org: [
-    "Teamwork",
-    "Commitment to Learning",
-    "Customer Focus",
-    "Adaptability and Flexibility",
-    "Critical Thinking",
-    "Effective Communication",
-    "Valuing Diversity",
-    "Self-Awareness and Confidence",
-    "Stress Tolerance",
-    "Resource Management",
-    "Knowledge Management",
-    "Initiative",
-    "Result Orientation",
-    "Community Engagement",
-    "Organizational Commitment",
-    "Planning and Organizing",
-    "Emotional and Psychological Maturity",
-    "Safety and Risk Management",
+    "Teamwork", "Commitment to Learning", "Customer Focus", "Adaptability and Flexibility",
+    "Critical Thinking", "Effective Communication", "Valuing Diversity",
+    "Self-Awareness and Confidence", "Stress Tolerance", "Resource Management",
+    "Knowledge Management", "Initiative", "Result Orientation", "Community Engagement",
+    "Organizational Commitment", "Planning and Organizing",
+    "Emotional and Psychological Maturity", "Safety and Risk Management",
     "Interpersonal Effectiveness",
   ],
   technical: [
-    "Research Engagement",
-    "Diagnostic Information Gathering",
-    "Attention to Details",
-    "Written Communication",
-    "Oral Communication",
-    "Conceptual and Analytical Thinking",
-    "Computer Literacy",
-    "Planning and Project Management",
-    "Logical Reasoning",
+    "Research Engagement", "Diagnostic Information Gathering", "Attention to Details",
+    "Written Communication", "Oral Communication", "Conceptual and Analytical Thinking",
+    "Computer Literacy", "Planning and Project Management", "Logical Reasoning",
   ],
 };
 
 const competencyClusters = [
-  {
-    key: "core",
-    name: "Core",
-    badge: "Core",
-    note: "Foundational attributes expected of all personnel regardless of position.",
-    competencies: COMPETENCIES.core,
-  },
-  {
-    key: "leadership",
-    name: "Leadership",
-    badge: "Leadership",
-    note: "Skills and behaviors required to effectively lead individuals, teams, and units.",
-    competencies: COMPETENCIES.leadership,
-  },
-  {
-    key: "org",
-    name: "Organizational",
-    badge: "Organizational",
-    note: "Collective attributes that define the institution's way of working.",
-    competencies: COMPETENCIES.org,
-  },
-  {
-    key: "technical",
-    name: "Technical",
-    badge: "Technical",
-    note: "Job-specific knowledge, skills, and abilities for effective role performance.",
-    competencies: COMPETENCIES.technical,
-  },
+  { key: "core",       name: "Core",          badge: "Core",           note: "Foundational attributes expected of all personnel regardless of position.",      competencies: COMPETENCIES.core },
+  { key: "leadership", name: "Leadership",     badge: "Leadership",     note: "Skills and behaviors required to effectively lead individuals, teams, and units.", competencies: COMPETENCIES.leadership },
+  { key: "org",        name: "Organizational", badge: "Organizational", note: "Collective attributes that define the institution's way of working.",              competencies: COMPETENCIES.org },
+  { key: "technical",  name: "Technical",      badge: "Technical",      note: "Job-specific knowledge, skills, and abilities for effective role performance.",    competencies: COMPETENCIES.technical },
 ];
 
 const dataSources = [
-  {
-    value: "Individual Development Plan (IDP)",
-    label: "Individual Development Plan (IDP)",
-  },
-  {
-    value: "Training Evaluation Results",
-    label: "Training Evaluation Results",
-  },
-  {
-    value: "HR Records (Coaching logs, leave patterns, discipline)",
-    label: "HR Records",
-  },
-  { value: "IPCR/OPCR/DPCR Reviews", label: "IPCR/OPCR/DPCR Reviews" },
-  {
-    value: "Audit or Accreditation Results (ISO, AACCUP, etc.)",
-    label: "Audit / Accreditation Results",
-  },
-  {
-    value: "Strategic Plan or SPMS Review",
-    label: "Strategic Plan / SPMS Review",
-  },
-  {
-    value: "Focus Group Discussion (FGD)",
-    label: "Focus Group Discussion (FGD)",
-  },
-  {
-    value: "Client/Stakeholder Feedback",
-    label: "Client/Stakeholder Feedback",
-  },
-  { value: "Risk Assessment", label: "Risk Assessment" },
-  { value: "Interview", label: "Interview" },
-  { value: "Questionnaire", label: "Questionnaire" },
-  { value: "Test", label: "Test" },
-  { value: "Others", label: "Others" },
+  { value: "Individual Development Plan (IDP)",                      label: "Individual Development Plan (IDP)" },
+  { value: "Training Evaluation Results",                            label: "Training Evaluation Results" },
+  { value: "HR Records (Coaching logs, leave patterns, discipline)", label: "HR Records" },
+  { value: "IPCR/OPCR/DPCR Reviews",                                label: "IPCR/OPCR/DPCR Reviews" },
+  { value: "Audit or Accreditation Results (ISO, AACCUP, etc.)",    label: "Audit / Accreditation Results" },
+  { value: "Strategic Plan or SPMS Review",                         label: "Strategic Plan / SPMS Review" },
+  { value: "Focus Group Discussion (FGD)",                          label: "Focus Group Discussion (FGD)" },
+  { value: "Client/Stakeholder Feedback",                           label: "Client/Stakeholder Feedback" },
+  { value: "Risk Assessment",                                        label: "Risk Assessment" },
+  { value: "Interview",                                              label: "Interview" },
+  { value: "Questionnaire",                                          label: "Questionnaire" },
+  { value: "Test",                                                   label: "Test" },
+  { value: "Others",                                                 label: "Others" },
 ];
 
-// ── FORM STATE ──
+// ── OFFICE/UNIT MAP ──
+const subOfficeMap = {
+  OVPAF: [
+    "Human Resource Management Services (HRMS)",
+    "Supply and Property Management Office (SPMO)",
+    "Records Management Office",
+    "Procurement Office",
+    "Engineering & Construction Office",
+    "Office of the Campus Safety & Security",
+    "General Services Office",
+    "DRRM Office",
+    "University Budget Office",
+    "University Accounting Office",
+    "University Cashiering Office",
+    "Business & Resource Management Office",
+    "Corporate Enterprise Development Office",
+    "University Press",
+  ],
+  OVPAA: [
+    { name: "Professional Schools", programs: [] },
+    { name: "College of Engineering and Geo-Sciences (CEGS)", programs: [
+      "BS in Agricultural and Biosystems Engineering",
+      "BS in Civil Engineering",
+      "BS in Electronics Engineering",
+      "BS in Geodetic Engineering",
+      "BS in Geology",
+      "BS in Mining Engineering",
+    ]},
+    { name: "College of Computing and Information Sciences (CCIS)", programs: [
+      "BS in Computer Science",
+      "BS in Information System",
+      "BS in Information Technology",
+    ]},
+    { name: "College of Mathematics and Natural Sciences (CMNS)", programs: [
+      "BS in Applied Mathematics",
+      "BS in Biology",
+      "BS in Chemistry",
+      "BS in Marine Biology",
+      "BS in Mathematics",
+      "BS in Physics",
+    ]},
+    { name: "College of Humanities and Social Sciences (CHaSS)", programs: [
+      "Bachelor of Arts in Sociology",
+      "Bachelor of Science in Psychology",
+      "Bachelor of Science in Social Work",
+    ]},
+    { name: "College of Agricultural and Agri-Industries (CAA)", programs: [
+      "BS in Agriculture",
+    ]},
+    { name: "College of Forestry and Environmental Sciences", programs: [
+      "BS in Environmental Science",
+      "BS in Forestry",
+      "BS in Agroforestry",
+    ]},
+    { name: "National Service Training Program", programs: [] },
+    { name: "Office of Curriculum & Instruction Development", programs: [] },
+    { name: "Office of Student Internship Programs", programs: [] },
+    { name: "Office of the University Registrar", programs: [] },
+    { name: "Office of the University Librarian", programs: [] },
+  ],
+  OVPEO: [
+    "Project Management Office",
+    "Office of the Planning & Quality Management Services",
+    "Office of Strategic Foresight and Futures Thinking",
+    "Office of Internationalization and Global Engagements",
+    "Management Information System",
+    "Public Information & Communication Office",
+    "Alumni Relations Office",
+  ],
+  OVPSAS: [
+    "Office of the Student Welfare & Engagements",
+    "Office of the Student Leadership & Development",
+    "Office of the Counselling & Career Services",
+    "Office of the Admission & Scholarship",
+    "University Center for Culture & Arts",
+    "University Center for Sports & Recreation",
+    "University Center for Health & Wellness",
+  ],
+  OVPRDIE: [
+    "Research & Development and Innovation (RDI) Services",
+    "Technology Transfer & Licensing Office",
+    "Technology Business Incubator (TBI) Office",
+    "Extension Services Office",
+    "RDIE Publication Management Office",
+  ],
+};
+
+// ── FORM STATE — declared before computed/watch that reference it ──
 const form = reactive({
+  submitterEmailPrefix: "",
   submitterEmail: "",
-  campus: "",
   officeAffiliation: "",
   unitOfficeCollege: "",
+  collegeProgram: "",
   headOfUnit: "",
   position: "",
   datePrepared: "",
@@ -902,6 +702,33 @@ const form = reactive({
   raterFullName: "",
 });
 
+// ── COMPUTED (depend on form) ──
+const isOVPAA = computed(() => form.officeAffiliation === "OVPAA");
+
+const collegeOfficeUnitOptions = computed(() => {
+  const list = subOfficeMap[form.officeAffiliation] || [];
+  if (isOVPAA.value) return list.map(c => typeof c === "string" ? c : c.name);
+  return list;
+});
+
+const selectedCollegePrograms = computed(() => {
+  if (!isOVPAA.value) return [];
+  const colleges = subOfficeMap["OVPAA"] || [];
+  const found = colleges.find(c => typeof c === "object" && c.name === form.unitOfficeCollege);
+  return found ? found.programs : [];
+});
+
+// ── WATCHERS (depend on form) ──
+watch(() => form.officeAffiliation, () => {
+  form.unitOfficeCollege = "";
+  form.collegeProgram = "";
+});
+
+watch(() => form.unitOfficeCollege, () => {
+  form.collegeProgram = "";
+});
+
+// ── OTHER REACTIVE STATE ──
 const workforce = reactive(
   Object.fromEntries(
     positionLevels.map((lv) => [
@@ -932,15 +759,10 @@ const competencyData = reactive(
 );
 
 const clusterSummary = reactive([
-  { cluster: "Core", strongest: "", weakest: "", interventionNeeded: "" },
-  { cluster: "Leadership", strongest: "", weakest: "", interventionNeeded: "" },
-  {
-    cluster: "Organizational",
-    strongest: "",
-    weakest: "",
-    interventionNeeded: "",
-  },
-  { cluster: "Technical", strongest: "", weakest: "", interventionNeeded: "" },
+  { cluster: "Core",           strongest: "", weakest: "", interventionNeeded: "" },
+  { cluster: "Leadership",     strongest: "", weakest: "", interventionNeeded: "" },
+  { cluster: "Organizational", strongest: "", weakest: "", interventionNeeded: "" },
+  { cluster: "Technical",      strongest: "", weakest: "", interventionNeeded: "" },
 ]);
 
 const insightRows = reactive([
@@ -949,15 +771,13 @@ const insightRows = reactive([
 
 const makeIntervention = () => ({
   need: "",
-  onJob: false,
-  onJobText: "",
-  offJob: false,
-  offJobText: "",
-  others: false,
-  othersText: "",
+  onJob: false, onJobText: "",
+  offJob: false, offJobText: "",
+  others: false, othersText: "",
   timeline: "",
   resource: "",
 });
+
 const interventions = reactive(
   Object.fromEntries(
     positionLevels.map((lv) => [
@@ -969,29 +789,26 @@ const interventions = reactive(
 
 // ── METHODS ──
 function validateEmail() {
-  const val = form.submitterEmail.trim();
-  if (!val) {
-    emailHint.value = "";
-    emailError.value = false;
+  const prefix = (form.submitterEmailPrefix || "").trim();
+  form.submitterEmail = prefix + "@carsu.edu.ph";
+
+  if (!prefix) {
+    emailHint.msg  = "";
+    emailHint.type = "";
     return false;
   }
-  if (!val.endsWith("@carsu.edu.ph")) {
-    emailError.value = true;
-    emailHint.value = "Must be a @carsu.edu.ph email address.";
+  if (!/^[a-zA-Z0-9._%+\-]+$/.test(prefix)) {
+    emailHint.msg  = "Invalid characters in email prefix.";
+    emailHint.type = "error";
     return false;
   }
-  emailError.value = false;
-  emailHint.value = "✓ Valid CarSU email";
+  emailHint.msg  = "✓ Valid CarSU email";
+  emailHint.type = "success";
   return true;
 }
 
 function addInsightRow() {
-  insightRows.push({
-    dataSource: "",
-    gap: "",
-    personnel: "",
-    intervention: "",
-  });
+  insightRows.push({ dataSource: "", gap: "", personnel: "", intervention: "" });
 }
 
 function removeInsightRow(idx) {
@@ -1000,14 +817,13 @@ function removeInsightRow(idx) {
 
 function validate() {
   const requiredFields = [
-    ["submitterEmail", "CarSU Email"],
     ["unitOfficeCollege", "Unit/Office/College"],
-    ["headOfUnit", "Head of Unit"],
-    ["position", "Position"],
-    ["datePrepared", "Date Prepared"],
-    ["yearCovered", "Year Covered"],
-    ["totalPersonnel", "Total Personnel"],
-    ["raterFullName", "Rater Full Name"],
+    ["headOfUnit",        "Head of Unit"],
+    ["position",          "Position"],
+    ["datePrepared",      "Date Prepared"],
+    ["yearCovered",       "Year Covered"],
+    ["totalPersonnel",    "Total Personnel"],
+    ["raterFullName",     "Rater Full Name"],
   ];
   for (const [field] of requiredFields) {
     if (!String(form[field] || "").trim()) {
@@ -1015,12 +831,10 @@ function validate() {
       return false;
     }
   }
+  // Build full email before validating
+  form.submitterEmail = (form.submitterEmailPrefix || "").trim() + "@carsu.edu.ph";
   if (!validateEmail()) {
-    alert("Only @carsu.edu.ph email addresses are allowed.");
-    return false;
-  }
-  if (!form.campus) {
-    alert("Please select a Campus.");
+    alert("Please enter a valid CarSU email prefix.");
     return false;
   }
   if (!form.officeAffiliation) {
@@ -1038,8 +852,7 @@ async function submitForm() {
   if (!validate()) return;
   isSubmitting.value = true;
 
-  let purpose =
-    form.purpose === "Other" ? form.purposeOther || "Other" : form.purpose;
+  let purpose = form.purpose === "Other" ? form.purposeOther || "Other" : form.purpose;
 
   let selectedSources = [...form.selectedSources];
   if (selectedSources.includes("Others")) {
@@ -1051,36 +864,33 @@ async function submitForm() {
   const leadInterventions = [];
   positionLevels.forEach((level) => {
     interventions[level.key].forEach((iv, idx) => {
-      leadInterventions.push({
-        positionLevel: level.label,
-        priority: idx + 1,
-        ...iv,
-      });
+      leadInterventions.push({ positionLevel: level.label, priority: idx + 1, ...iv });
     });
   });
 
   const payload = {
-    action: "submitLNA",
-    submitterEmail: form.submitterEmail.trim(),
-    campus: form.campus,
+    action:            "submitLNA",
+    submitterEmail:    form.submitterEmail,
+    campus:            "CSU Main Campus",
     officeAffiliation: form.officeAffiliation,
-    unitOfficCollege: form.unitOfficeCollege.trim(),
-    headOfUnit: form.headOfUnit.trim(),
-    position: form.position.trim(),
-    datePrepared: form.datePrepared,
-    yearCovered: form.yearCovered.trim(),
-    totalPersonnel: form.totalPersonnel,
+    unitOfficCollege:  form.unitOfficeCollege.trim(),
+    collegeProgram:    form.collegeProgram.trim(),
+    headOfUnit:        form.headOfUnit.trim(),
+    position:          form.position.trim(),
+    datePrepared:      form.datePrepared,
+    yearCovered:       form.yearCovered.trim(),
+    totalPersonnel:    form.totalPersonnel,
     purpose,
-    workforceProfile: workforce,
-    coreCompetencies: competencyData.core,
-    leadershipComps: competencyData.leadership,
-    orgComps: competencyData.org,
-    technicalComps: competencyData.technical,
+    workforceProfile:   workforce,
+    coreCompetencies:   competencyData.core,
+    leadershipComps:    competencyData.leadership,
+    orgComps:           competencyData.org,
+    technicalComps:     competencyData.technical,
     clusterSummary,
-    dataSources: selectedSources,
+    dataSources:        selectedSources,
     dataSourceInsights: insightRows,
     leadInterventions,
-    raterFullName: form.raterFullName.trim(),
+    raterFullName:      form.raterFullName.trim(),
   };
 
   try {
@@ -1125,718 +935,289 @@ onMounted(() => {
   --shadow: 0 4px 24px rgba(26, 77, 46, 0.1);
   --shadow-sm: 0 2px 8px rgba(26, 77, 46, 0.07);
 }
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-.site-header {
-  background: #fff;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-  border-bottom: 3px solid var(--navy);
-}
-.header-inner {
-  width: 100%;
-  padding: 0 24px;
-  display: flex;
-  align-items: center;
-}
-.header-img {
-  width: auto;
-  max-width: 700px;
-  height: auto;
-  display: block;
-  object-fit: contain;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 .page-nav {
-  background: var(--navy);
-  padding: 0 28px;
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--navy); padding: 0 28px;
+  display: flex; align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 .page-nav a.back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  padding: 10px 0;
-  color: rgba(255, 255, 255, 0.75);
-  text-decoration: none;
-  font-size: 12.5px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  transition: color 0.2s;
-  position: relative;
+  display: inline-flex; align-items: center; gap: 9px; padding: 10px 0;
+  color: rgba(255,255,255,0.75); text-decoration: none;
+  font-size: 12.5px; font-weight: 500; letter-spacing: 0.02em;
+  transition: color 0.2s; position: relative;
 }
 .page-nav a.back-link::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--gold);
-  transform: scaleX(0);
-  transform-origin: left;
+  content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  background: var(--gold); transform: scaleX(0); transform-origin: left;
   transition: transform 0.25s ease;
 }
-.page-nav a.back-link:hover {
-  color: #fff;
-}
-.page-nav a.back-link:hover::after {
-  transform: scaleX(1);
-}
+.page-nav a.back-link:hover { color: #fff; }
+.page-nav a.back-link:hover::after { transform: scaleX(1); }
 .page-nav a.back-link svg {
-  width: 13px;
-  height: 13px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 2.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  transition: transform 0.2s;
-  flex-shrink: 0;
-  opacity: 0.8;
+  width: 13px; height: 13px; stroke: currentColor; fill: none;
+  stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+  transition: transform 0.2s; flex-shrink: 0; opacity: 0.8;
 }
-.page-nav a.back-link:hover svg {
-  transform: translateX(-3px);
-  opacity: 1;
-}
-.nav-sep {
-  color: rgba(255, 255, 255, 0.25);
-  font-size: 13px;
-  margin: 0 10px;
-  user-select: none;
-}
-.nav-current {
-  font-size: 12.5px;
-  color: var(--gold);
-  font-weight: 600;
-  letter-spacing: 0.03em;
-}
+.page-nav a.back-link:hover svg { transform: translateX(-3px); opacity: 1; }
+.nav-sep { color: rgba(255,255,255,0.25); font-size: 13px; margin: 0 10px; user-select: none; }
+.nav-current { font-size: 12.5px; color: var(--gold); font-weight: 600; letter-spacing: 0.03em; }
 
-.container {
-  max-width: 1140px;
-  margin: 0 auto;
-  padding: 48px 40px 80px;
-}
+.container { max-width: 1140px; margin: 0 auto; padding: 48px 40px 80px; }
 
 .form-title-block {
-  text-align: center;
-  margin-bottom: 40px;
-  padding-bottom: 32px;
-  border-bottom: 3px solid var(--navy);
+  text-align: center; margin-bottom: 40px;
+  padding-bottom: 32px; border-bottom: 3px solid var(--navy);
 }
 .form-title-block .eyebrow {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--gold);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  display: block;
-  margin-bottom: 10px;
+  font-size: 11px; font-weight: 600; color: var(--gold);
+  letter-spacing: 0.14em; text-transform: uppercase; display: block; margin-bottom: 10px;
 }
-.form-title-block h2 {
-  font-family: "Playfair Display", serif;
-  font-size: 28px;
-  color: var(--navy);
-  margin-bottom: 4px;
-}
-.form-title-block h3 {
-  font-family: "Playfair Display", serif;
-  font-size: 16px;
-  color: var(--text-light);
-  font-weight: 600;
-  font-style: italic;
-  margin-bottom: 8px;
-}
-.form-title-block p {
-  color: var(--text-light);
-  font-size: 14px;
-}
+.form-title-block h2 { font-family: "Playfair Display", serif; font-size: 28px; color: var(--navy); margin-bottom: 4px; }
+.form-title-block h3 { font-family: "Playfair Display", serif; font-size: 16px; color: var(--text-light); font-weight: 600; font-style: italic; margin-bottom: 8px; }
+.form-title-block p  { color: var(--text-light); font-size: 14px; }
 
 .section-card {
-  background: var(--white);
-  border-radius: 12px;
-  box-shadow: var(--shadow-sm);
-  margin-bottom: 28px;
-  overflow: hidden;
-  border: 1px solid var(--border);
+  background: var(--white); border-radius: 12px; box-shadow: var(--shadow-sm);
+  margin-bottom: 28px; overflow: hidden; border: 1px solid var(--border);
   animation: fadeUp 0.4s ease both;
 }
-.section-header {
-  background: var(--navy);
-  padding: 16px 28px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
+.section-header { background: var(--navy); padding: 16px 28px; display: flex; align-items: center; gap: 12px; }
 .section-num {
-  background: var(--gold);
-  color: var(--navy);
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 13px;
-  flex-shrink: 0;
+  background: var(--gold); color: var(--navy); width: 28px; height: 28px;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px; flex-shrink: 0;
 }
-.section-header h3 {
-  color: var(--white);
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-}
-.section-header p {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 12px;
-  margin-top: 1px;
-}
-.section-body {
-  padding: 36px;
-}
+.section-header h3 { color: var(--white); font-size: 15px; font-weight: 600; letter-spacing: 0.03em; }
+.section-header p  { color: rgba(255,255,255,0.6); font-size: 12px; margin-top: 1px; }
+.section-body { padding: 36px; }
 
-.field-grid {
-  display: grid;
-  gap: 18px;
-}
-.field-grid-2 {
-  grid-template-columns: 1fr 1fr;
-}
-.field-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.field-group.span-2 {
-  grid-column: span 2;
-}
+.field-grid   { display: grid; gap: 18px; }
+.field-grid-2 { grid-template-columns: 1fr 1fr; }
+.field-group  { display: flex; flex-direction: column; gap: 6px; }
+.field-group.span-2 { grid-column: span 2; }
 
-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--navy-mid);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-.req {
-  color: var(--error);
-  margin-left: 2px;
-}
+label { font-size: 12px; font-weight: 600; color: var(--navy-mid); text-transform: uppercase; letter-spacing: 0.05em; }
+.req  { color: var(--error); margin-left: 2px; }
+
 input[type="text"],
 input[type="email"],
 input[type="date"],
 input[type="number"],
 select,
 textarea {
-  width: 100%;
-  padding: 10px 14px;
-  border: 1.5px solid var(--border);
-  border-radius: 8px;
-  background: var(--input-bg);
-  font-family: "Source Sans 3", sans-serif;
-  font-size: 14px;
-  color: var(--text);
-  transition: border-color 0.2s, box-shadow 0.2s;
-  outline: none;
+  width: 100%; padding: 10px 14px;
+  border: 1.5px solid var(--border); border-radius: 8px;
+  background: var(--input-bg); font-family: "Source Sans 3", sans-serif;
+  font-size: 14px; color: var(--text);
+  transition: border-color 0.2s, box-shadow 0.2s; outline: none;
 }
-input:focus,
-select:focus,
-textarea:focus {
+input:focus, select:focus, textarea:focus {
+  border-color: var(--navy); box-shadow: 0 0 0 3px rgba(26,77,46,0.08); background: var(--white);
+}
+input.error { border-color: var(--error); }
+textarea { resize: vertical; min-height: 72px; }
+
+/* ── Email prefix widget ── */
+.email-prefix-wrapper {
+  display: flex; align-items: center;
+  border: 1.5px solid var(--border); border-radius: 8px;
+  background: var(--input-bg); overflow: hidden; transition: border-color 0.2s;
+}
+.email-prefix-wrapper:focus-within {
   border-color: var(--navy);
-  box-shadow: 0 0 0 3px rgba(26, 77, 46, 0.08);
+  box-shadow: 0 0 0 3px rgba(26,77,46,0.08);
   background: var(--white);
 }
-input.error {
-  border-color: var(--error);
+.email-prefix-wrapper.error { border-color: var(--error); }
+.email-prefix-wrapper.valid { border-color: var(--success); }
+.email-prefix-input {
+  flex: 1; border: none !important; background: transparent !important;
+  border-radius: 0 !important; padding: 10px 12px;
+  font-size: 14px; color: var(--text); outline: none; box-shadow: none !important;
 }
-textarea {
-  resize: vertical;
-  min-height: 72px;
+.email-suffix {
+  padding: 10px 12px 10px 10px; font-size: 13px; color: var(--text-light);
+  white-space: nowrap; font-weight: 500; background: transparent;
+  border-left: 1.5px solid var(--border);
 }
 
-.checkbox-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 4px;
-}
+.email-hint         { font-size: 12px; margin-top: 2px; min-height: 16px; display: block; }
+.email-hint.error   { color: var(--error); }
+.email-hint.success { color: var(--success); }
+
+.checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
 .checkbox-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  padding: 8px 14px;
-  border: 1.5px solid var(--border);
-  border-radius: 8px;
-  background: var(--input-bg);
-  transition: all 0.2s;
-  font-size: 13px;
-  text-transform: none;
-  letter-spacing: 0;
-  font-weight: 400;
-  color: var(--text);
+  display: flex; align-items: center; gap: 8px; cursor: pointer;
+  padding: 8px 14px; border: 1.5px solid var(--border); border-radius: 8px;
+  background: var(--input-bg); transition: all 0.2s;
+  font-size: 13px; text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--text);
 }
-.checkbox-item:hover {
-  border-color: var(--navy);
-  background: var(--white);
-}
-.checkbox-item input {
-  width: auto;
-  padding: 0;
-  border: none;
-  background: none;
-  accent-color: var(--navy);
-  cursor: pointer;
-}
-.checkbox-item.checked {
-  border-color: var(--navy);
-  background: rgba(26, 77, 46, 0.05);
-}
+.checkbox-item:hover { border-color: var(--navy); background: var(--white); }
+.checkbox-item input { width: auto; padding: 0; border: none; background: none; accent-color: var(--navy); cursor: pointer; }
+.checkbox-item.checked { border-color: var(--navy); background: rgba(26,77,46,0.05); }
+
+.other-specify { margin-top: 10px; display: none; }
+.other-specify.visible { display: block; }
 
 .section-desc {
-  background: rgba(245, 195, 0, 0.1);
-  border-left: 3px solid var(--gold);
-  padding: 12px 16px;
-  border-radius: 0 8px 8px 0;
-  margin-bottom: 20px;
-  font-size: 13px;
-  color: var(--text-light);
-  line-height: 1.6;
+  background: rgba(245,195,0,0.1); border-left: 3px solid var(--gold);
+  padding: 12px 16px; border-radius: 0 8px 8px 0; margin-bottom: 20px;
+  font-size: 13px; color: var(--text-light); line-height: 1.6;
 }
-.section-desc a {
-  color: var(--navy);
-}
+.section-desc a { color: var(--navy); }
 
-.table-wrapper {
-  overflow-x: auto;
-  margin-top: 8px;
-}
-.data-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  font-size: 13px;
-}
-.data-table thead tr {
-  background: var(--navy-mid);
-}
+.table-wrapper { overflow-x: auto; margin-top: 8px; }
+.data-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+.data-table thead tr { background: var(--navy-mid); }
 .data-table thead th {
-  padding: 10px 12px;
-  color: var(--white);
-  font-weight: 600;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  text-align: left;
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
-  white-space: nowrap;
+  padding: 10px 12px; color: var(--white); font-weight: 600; font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.05em; text-align: left;
+  border-right: 1px solid rgba(255,255,255,0.1); white-space: nowrap;
 }
-.data-table thead th:last-child {
-  border-right: none;
-}
-.data-table tbody tr {
-  border-bottom: 1px solid var(--border);
-}
-.data-table tbody tr:nth-child(even) {
-  background: #faf9f6;
-}
-.data-table tbody td {
-  padding: 8px 10px;
-  vertical-align: middle;
-  border-right: 1px solid var(--border);
-}
-.data-table tbody td:last-child {
-  border-right: none;
-}
+.data-table thead th:last-child { border-right: none; }
+.data-table tbody tr { border-bottom: 1px solid var(--border); }
+.data-table tbody tr:nth-child(even) { background: #faf9f6; }
+.data-table tbody td { padding: 8px 10px; vertical-align: middle; border-right: 1px solid var(--border); }
+.data-table tbody td:last-child { border-right: none; }
 .data-table td input,
 .data-table td select,
-.data-table td textarea {
-  padding: 6px 10px;
-  font-size: 13px;
-  border-radius: 6px;
-}
-.data-table td textarea {
-  min-height: 56px;
-}
-.row-label {
-  font-weight: 600;
-  color: var(--navy-mid);
-  background: rgba(26, 77, 46, 0.03) !important;
-  white-space: nowrap;
-}
+.data-table td textarea { padding: 6px 10px; font-size: 13px; border-radius: 6px; }
+.data-table td textarea { min-height: 56px; }
+.row-label { font-weight: 600; color: var(--navy-mid); background: rgba(26,77,46,0.03) !important; white-space: nowrap; }
 
-.workforce-table th,
-.workforce-table td {
-  text-align: center;
-}
-.workforce-table td:first-child {
-  text-align: left;
-}
+.workforce-table th, .workforce-table td { text-align: center; }
+.workforce-table td:first-child { text-align: left; }
 
-.comp-table-wrap {
-  margin-bottom: 32px;
-}
+.comp-table-wrap { margin-bottom: 32px; }
 .comp-cluster-label {
-  background: var(--navy);
-  color: var(--white);
-  font-family: "Playfair Display", serif;
-  font-size: 14px;
-  font-weight: 600;
-  padding: 10px 16px;
-  border-radius: 8px 8px 0 0;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  background: var(--navy); color: var(--white);
+  font-family: "Playfair Display", serif; font-size: 14px; font-weight: 600;
+  padding: 10px 16px; border-radius: 8px 8px 0 0;
+  display: flex; align-items: center; gap: 10px;
 }
 .cluster-badge {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  background: rgba(245, 195, 0, 0.2);
-  border: 1px solid rgba(245, 195, 0, 0.4);
-  color: var(--gold-light);
-  padding: 3px 10px;
-  border-radius: 20px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  background: rgba(245,195,0,0.2); border: 1px solid rgba(245,195,0,0.4);
+  color: var(--gold-light); padding: 3px 10px; border-radius: 20px;
 }
-.comp-note {
-  font-size: 12px;
-  color: var(--text-light);
-  font-style: italic;
-  margin-bottom: 8px;
-}
+.comp-note { font-size: 12px; color: var(--text-light); font-style: italic; margin-bottom: 8px; }
+.cluster-summary-table thead th:first-child { width: 140px; }
 
-.cluster-summary-table thead th:first-child {
-  width: 140px;
-}
-
-.source-checklist {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 8px;
-  margin-top: 8px;
-}
+.source-checklist { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 8px; }
 .source-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border: 1.5px solid var(--border);
-  border-radius: 8px;
-  background: var(--input-bg);
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-transform: none;
-  letter-spacing: 0;
-  font-weight: 400;
-  color: var(--text);
+  display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+  border: 1.5px solid var(--border); border-radius: 8px; background: var(--input-bg);
+  font-size: 13px; cursor: pointer; transition: all 0.2s;
+  text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--text);
 }
-.source-item:hover {
-  border-color: var(--navy);
-  background: var(--white);
-}
-.source-item input {
-  accent-color: var(--navy);
-  cursor: pointer;
-  flex-shrink: 0;
-  width: auto;
-  padding: 0;
-  border: none;
-  background: none;
-}
-.source-item.checked {
-  border-color: var(--navy);
-  background: rgba(26, 77, 46, 0.04);
-}
+.source-item:hover { border-color: var(--navy); background: var(--white); }
+.source-item input { accent-color: var(--navy); cursor: pointer; flex-shrink: 0; width: auto; padding: 0; border: none; background: none; }
+.source-item.checked { border-color: var(--navy); background: rgba(26,77,46,0.04); }
 
-.pos-level-header {
-  background: rgba(245, 195, 0, 0.12) !important;
-  font-weight: 700;
-  color: var(--navy);
-  font-size: 13px;
-}
+.pos-level-header { background: rgba(245,195,0,0.12) !important; font-weight: 700; color: var(--navy); font-size: 13px; }
 .priority-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  background: var(--navy);
-  color: var(--white);
-  border-radius: 50%;
-  font-size: 11px;
-  font-weight: 700;
-  flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; background: var(--navy); color: var(--white);
+  border-radius: 50%; font-size: 11px; font-weight: 700; flex-shrink: 0;
 }
 
-.intervention-checks {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
+.intervention-checks { display: flex; flex-direction: column; gap: 6px; }
 .iv-check {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  text-transform: none;
-  letter-spacing: 0;
-  color: var(--text-light);
-  font-weight: 400;
-  cursor: pointer;
+  display: flex; align-items: center; gap: 6px; font-size: 12px;
+  text-transform: none; letter-spacing: 0; color: var(--text-light); font-weight: 400; cursor: pointer;
 }
-.iv-check input[type="checkbox"] {
-  width: auto;
-  padding: 0;
-  border: none;
-  background: none;
-  accent-color: var(--navy);
-}
-.iv-text {
-  flex: 1;
-  padding: 4px 8px;
-  font-size: 12px;
-}
+.iv-check input[type="checkbox"] { width: auto; padding: 0; border: none; background: none; accent-color: var(--navy); }
+.iv-text { flex: 1; padding: 4px 8px; font-size: 12px; }
 
 .certification-box {
-  background: rgba(201, 168, 76, 0.08);
-  border: 1.5px solid var(--gold);
-  border-radius: 10px;
-  padding: 24px 28px;
-  margin-top: 8px;
+  background: rgba(201,168,76,0.08); border: 1.5px solid var(--gold);
+  border-radius: 10px; padding: 24px 28px; margin-top: 8px;
 }
-.certification-box p {
-  font-size: 13px;
-  color: var(--text-light);
-  font-style: italic;
-  margin-bottom: 16px;
-}
+.certification-box p { font-size: 13px; color: var(--text-light); font-style: italic; margin-bottom: 16px; }
 
 .submit-area {
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 36px;
-  text-align: center;
-  box-shadow: var(--shadow-sm);
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 12px; padding: 36px; text-align: center; box-shadow: var(--shadow-sm);
 }
-.submit-area p {
-  font-size: 13px;
-  color: var(--text-light);
-  margin-bottom: 18px;
-}
+.submit-area p { font-size: 13px; color: var(--text-light); margin-bottom: 18px; }
 .btn-submit {
-  padding: 14px 48px;
-  background: var(--navy);
-  color: var(--white);
-  border: none;
-  border-radius: 10px;
-  font-family: "Source Sans 3", sans-serif;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  letter-spacing: 0.03em;
+  padding: 14px 48px; background: var(--navy); color: var(--white); border: none;
+  border-radius: 10px; font-family: "Source Sans 3", sans-serif; font-size: 16px;
+  font-weight: 600; cursor: pointer; letter-spacing: 0.03em;
   transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-  box-shadow: 0 4px 16px rgba(26, 77, 46, 0.2);
+  box-shadow: 0 4px 16px rgba(26,77,46,0.2);
 }
-.btn-submit:hover {
-  background: var(--navy-mid);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(26, 77, 46, 0.25);
-}
-.btn-submit:disabled {
-  background: #aaa;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
+.btn-submit:hover { background: var(--navy-mid); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(26,77,46,0.25); }
+.btn-submit:disabled { background: #aaa; cursor: not-allowed; transform: none; box-shadow: none; }
 
 .overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(13, 27, 62, 0.6);
-  z-index: 999;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 16px;
+  display: none; position: fixed; inset: 0; background: rgba(13,27,62,0.6);
+  z-index: 999; align-items: center; justify-content: center; flex-direction: column; gap: 16px;
 }
-.overlay.active {
-  display: flex;
-}
+.overlay.active { display: flex; }
 .spinner {
-  width: 48px;
-  height: 48px;
-  border: 4px solid rgba(255, 255, 255, 0.2);
-  border-top-color: var(--gold);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  width: 48px; height: 48px; border: 4px solid rgba(255,255,255,0.2);
+  border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite;
 }
-.overlay p {
-  color: var(--white);
-  font-size: 15px;
-}
+.overlay p { color: var(--white); font-size: 15px; }
 
 .success-screen {
-  display: none;
-  max-width: 560px;
-  margin: 80px auto;
-  text-align: center;
-  background: var(--white);
-  border-radius: 16px;
-  padding: 48px 40px;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border);
+  display: none; max-width: 560px; margin: 80px auto; text-align: center;
+  background: var(--white); border-radius: 16px; padding: 48px 40px;
+  box-shadow: var(--shadow); border: 1px solid var(--border);
 }
-.success-screen.active {
-  display: block;
-}
+.success-screen.active { display: block; }
 .success-icon {
-  width: 72px;
-  height: 72px;
-  background: rgba(26, 107, 60, 0.1);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 36px;
-  margin: 0 auto 24px;
+  width: 72px; height: 72px; background: rgba(26,107,60,0.1); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto 24px;
 }
-.success-screen h2 {
-  font-family: "Playfair Display", serif;
-  font-size: 24px;
-  color: var(--navy);
-  margin-bottom: 12px;
-}
-.success-screen p {
-  color: var(--text-light);
-  font-size: 14px;
-  margin-bottom: 20px;
-}
+.success-screen h2 { font-family: "Playfair Display", serif; font-size: 24px; color: var(--navy); margin-bottom: 12px; }
+.success-screen p  { color: var(--text-light); font-size: 14px; margin-bottom: 20px; }
 .ref-id-box {
-  background: var(--navy);
-  color: var(--gold-light);
-  font-family: monospace;
-  font-size: 22px;
-  font-weight: 700;
-  padding: 16px 24px;
-  border-radius: 10px;
-  letter-spacing: 0.1em;
-  margin: 16px 0 24px;
+  background: var(--navy); color: var(--gold-light); font-family: monospace;
+  font-size: 22px; font-weight: 700; padding: 16px 24px; border-radius: 10px;
+  letter-spacing: 0.1em; margin: 16px 0 24px;
 }
 
-.subsection-divider {
-  border: none;
-  border-top: 1px solid var(--border);
-  margin: 28px 0;
-}
-.subsec-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--navy-mid);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 10px;
-}
+.subsection-divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+.subsec-label { font-size: 13px; font-weight: 600; color: var(--navy-mid); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
 
 .btn-add-row {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  background: var(--navy);
-  color: var(--white);
-  border: none;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+  background: var(--navy); color: var(--white); border: none; border-radius: 8px;
+  font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s;
   font-family: "Source Sans 3", sans-serif;
 }
-.btn-add-row:hover {
-  background: var(--navy-mid);
-}
+.btn-add-row:hover { background: var(--navy-mid); }
 .btn-remove-row {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--error);
-  padding: 4px;
-  border-radius: 4px;
-  font-size: 18px;
-  line-height: 1;
-  transition: background 0.15s;
+  background: none; border: none; cursor: pointer; color: var(--error);
+  padding: 4px; border-radius: 4px; font-size: 18px; line-height: 1; transition: background 0.15s;
 }
-.btn-remove-row:hover {
-  background: rgba(192, 57, 43, 0.08);
-}
-.btn-remove-row:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
+.btn-remove-row:hover    { background: rgba(192,57,43,0.08); }
+.btn-remove-row:disabled { opacity: 0.3; cursor: not-allowed; }
 
-.email-hint {
-  font-size: 12px;
-  margin-top: 2px;
-  min-height: 16px;
-  display: block;
-}
-.email-hint.error {
-  color: var(--error);
-}
-.email-hint.success {
-  color: var(--success);
+.static-value {
+  background: #f0ede8; border: 1.5px solid var(--border); border-radius: 8px;
+  padding: 10px 14px; font-size: 14px; color: var(--text); font-weight: 600;
 }
 
 @media (max-width: 640px) {
-  .container {
-    padding: 24px 16px 60px;
-  }
-  .field-grid-2 {
-    grid-template-columns: 1fr;
-  }
-  .field-group.span-2 {
-    grid-column: span 1;
-  }
-  .section-body {
-    padding: 24px 20px;
-  }
-  .page-nav {
-    padding: 0 16px;
-  }
-  .nav-current,
-  .nav-sep {
-    display: none;
-  }
-  .source-checklist {
-    grid-template-columns: 1fr 1fr;
-  }
+  .container { padding: 24px 16px 60px; }
+  .field-grid-2 { grid-template-columns: 1fr; }
+  .field-group.span-2 { grid-column: span 1; }
+  .section-body { padding: 24px 20px; }
+  .page-nav { padding: 0 16px; }
+  .nav-current, .nav-sep { display: none; }
+  .source-checklist { grid-template-columns: 1fr 1fr; }
 }
+
 @keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 </style>
