@@ -1,0 +1,324 @@
+import { Injectable, Logger } from '@nestjs/common';
+import puppeteer from 'puppeteer';
+
+@Injectable()
+export class PdfService {
+  private readonly logger = new Logger(PdfService.name);
+
+  async generateIdpPdf(idp: Record<string, any>): Promise<Buffer> {
+    const html = this.buildHtml(idp);
+
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    });
+
+    try {
+      const page = await browser.newPage();
+      await page.setContent(html, { waitUntil: 'networkidle0' });
+      const pdf = await page.pdf({
+        format: 'A4',
+        printBackground: true,
+        margin: { top: '18mm', bottom: '18mm', left: '14mm', right: '14mm' },
+      });
+      return Buffer.from(pdf);
+    } finally {
+      await browser.close();
+    }
+  }
+
+  private safe(v: any): string {
+    if (v === null || v === undefined || v === '') return '—';
+    return String(v)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  private tableRows(rows: any[], cols: string[]): string {
+    if (!rows || !rows.length) {
+      return `<tr><td colspan="${cols.length}" style="text-align:center;color:#888;font-style:italic;padding:12px;">No entries provided.</td></tr>`;
+    }
+    return rows
+      .map(
+        (row, i) =>
+          `<tr style="background:${i % 2 === 0 ? '#fff' : '#f9f8f5'}">
+        <td style="text-align:center;font-weight:600;color:#666;">${i + 1}</td>
+        ${cols.map((c) => `<td>${this.safe(row[c])}</td>`).join('')}
+      </tr>`,
+      )
+      .join('');
+  }
+
+  private buildHtml(idp: Record<string, any>): string {
+    let competencyRows: any[] = [];
+    let agapRows: any[] = [];
+    let proactRows: any[] = [];
+    let assessment: any = {};
+
+    try {
+      competencyRows = JSON.parse(idp.competencyRowsJson || '[]');
+    } catch {}
+    try {
+      agapRows = JSON.parse(idp.agapRowsJson || '[]');
+    } catch {}
+    try {
+      proactRows = JSON.parse(idp.proactRowsJson || '[]');
+    } catch {}
+    try {
+      assessment = JSON.parse(idp.supervisorAssessment || '{}');
+    } catch {}
+
+    const employeeName =
+      idp.nameOfPersonnel ||
+      [idp.firstName, idp.lastName].filter(Boolean).join(' ') ||
+      '—';
+    const completedAt = idp.supervisorSignedAt
+      ? new Date(idp.supervisorSignedAt).toLocaleDateString('en-PH', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })
+      : '—';
+
+    const tdStyle =
+      'border:1px solid #ccc;padding:8px 10px;font-size:12px;vertical-align:top;';
+    const thStyle =
+      'border:1px solid #1a5c1a;padding:8px 10px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:#fff;background:#003300;text-align:left;';
+
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; font-size: 13px; color: #1a1a2e; line-height: 1.5; }
+  h1 { font-size: 18px; color: #003300; }
+  h2 { font-size: 14px; color: #003300; margin-bottom: 2px; }
+  .header { text-align: center; padding-bottom: 14px; border-bottom: 3px solid #003300; margin-bottom: 20px; }
+  .header p { color: #555; font-size: 12px; margin-top: 4px; }
+  .ref-badge { display: inline-block; background: #003300; color: #ffcc00; font-family: monospace; font-size: 14px; font-weight: 700; padding: 5px 16px; border-radius: 6px; letter-spacing: 0.08em; margin-top: 8px; }
+  .section { margin-bottom: 20px; break-inside: avoid; }
+  .section-header { background: #003300; color: #fff; padding: 8px 14px; border-radius: 6px 6px 0 0; display: flex; align-items: center; gap: 10px; }
+  .section-num { background: #ffcc00; color: #003300; width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 11px; flex-shrink: 0; }
+  .section-header h2 { color: #fff; margin: 0; }
+  .section-body { border: 1px solid #ccc; border-top: none; border-radius: 0 0 6px 6px; padding: 14px; }
+  .ro-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .ro-field { display: flex; flex-direction: column; gap: 2px; }
+  .ro-field.span-2 { grid-column: span 2; }
+  .ro-label { font-size: 10px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 0.05em; }
+  .ro-value { background: #f0ede8; border: 1px solid #ddd; border-radius: 4px; padding: 6px 10px; font-size: 12px; min-height: 28px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .ro-badge { display: inline-block; padding: 2px 7px; border-radius: 20px; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+  .cluster-core { background: #e8f4e8; color: #2d7a2d; }
+  .cluster-leadership { background: #e8eef8; color: #1a4080; }
+  .cluster-org { background: #f8f0e8; color: #8b5e1a; }
+  .cluster-tech { background: #f0e8f8; color: #6b1a8b; }
+  .assess-area { font-weight: 700; color: #1a5c1a; font-size: 12px; }
+  .cert-block { background: rgba(255,204,0,0.08); border: 1.5px solid #ffcc00; border-radius: 6px; padding: 14px 18px; margin-top: 14px; }
+  .cert-block p { font-size: 11px; color: #666; font-style: italic; margin-bottom: 12px; }
+  .sup-name { font-weight: 700; color: #003300; font-size: 15px; padding: 8px 0; border-bottom: 2px solid #003300; display: inline-block; min-width: 260px; }
+  .cert-block small { font-size: 10px; color: #888; display: block; margin-top: 4px; }
+  .status-complete { display: inline-block; background: #e8f4e8; color: #2d7a2d; border: 1px solid #2d7a2d; border-radius: 20px; padding: 2px 12px; font-size: 11px; font-weight: 700; margin-left: 10px; }
+  .footer { margin-top: 28px; padding-top: 12px; border-top: 1px solid #ccc; text-align: center; font-size: 10px; color: #999; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Individual Development Plan (IDP)</h1>
+  <p>Caraga State University — Office of Human Resource Management Services</p>
+  <p>Ampayon, Butuan City 8600, Philippines</p>
+  <div class="ref-badge">${this.safe(idp.refId)}</div>
+  <span class="status-complete">COMPLETE</span>
+  <p style="margin-top:8px;font-size:11px;color:#555;">Completed: ${completedAt}</p>
+</div>
+
+<!-- SECTION H: Personnel Information -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">H</span>
+    <h2>Personnel Information</h2>
+  </div>
+  <div class="section-body">
+    <div class="ro-grid">
+      <div class="ro-field"><div class="ro-label">Campus</div><div class="ro-value">${this.safe(idp.campus)}</div></div>
+      <div class="ro-field"><div class="ro-label">Office Affiliation</div><div class="ro-value">${this.safe(idp.officeAffiliation)}</div></div>
+      <div class="ro-field span-2"><div class="ro-label">College / Office / Unit</div><div class="ro-value">${this.safe(idp.collegeOfficeUnit)}${idp.collegeProgram ? ' — ' + this.safe(idp.collegeProgram) : ''}</div></div>
+      <div class="ro-field"><div class="ro-label">Name of Personnel</div><div class="ro-value">${this.safe(employeeName)}</div></div>
+      <div class="ro-field"><div class="ro-label">Date Prepared</div><div class="ro-value">${this.safe(idp.datePrepared)}</div></div>
+      <div class="ro-field span-2"><div class="ro-label">Highest Educational Attainment</div><div class="ro-value">${this.safe(idp.educAttainment)}${idp.educAttainmentSpec ? ' — ' + this.safe(idp.educAttainmentSpec) : ''}</div></div>
+      <div class="ro-field"><div class="ro-label">Current Position / Designation</div><div class="ro-value">${this.safe(idp.currentPosition)}</div></div>
+      <div class="ro-field"><div class="ro-label">Year Covered</div><div class="ro-value">${this.safe(idp.yearCovered)}</div></div>
+      <div class="ro-field"><div class="ro-label">Years in Position</div><div class="ro-value">${this.safe(idp.yearsInPosition)}</div></div>
+      <div class="ro-field"><div class="ro-label">Years in CSU</div><div class="ro-value">${this.safe(idp.yearsInCSU)}</div></div>
+      <div class="ro-field"><div class="ro-label">Immediate Supervisor</div><div class="ro-value">${this.safe(idp.supervisorName)}</div></div>
+      <div class="ro-field"><div class="ro-label">Purpose</div><div class="ro-value">${this.safe(idp.headerPurpose)}</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION I: Competency Assessment -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">I</span>
+    <h2>Competency Assessment</h2>
+  </div>
+  <div class="section-body">
+    <div style="margin-bottom:10px;">
+      <span class="ro-label">Assessment Purpose: </span>
+      <span style="font-size:12px;">${this.safe(idp.competencyPurpose)}</span>
+    </div>
+    <table>
+      <thead><tr>
+        <th style="${thStyle}width:30px">No.</th>
+        <th style="${thStyle}">Target Competency</th>
+        <th style="${thStyle}">Cluster</th>
+        <th style="${thStyle}">Current Level</th>
+        <th style="${thStyle}">Required Level</th>
+        <th style="${thStyle}">LeaD Interventions</th>
+        <th style="${thStyle}">Target Timeline</th>
+      </tr></thead>
+      <tbody>
+        ${
+          competencyRows
+            .map(
+              (row, i) => `
+          <tr style="background:${i % 2 === 0 ? '#fff' : '#f9f8f5'}">
+            <td style="${tdStyle}text-align:center;font-weight:600;color:#666;">${i + 1}</td>
+            <td style="${tdStyle}">${this.safe(row.targetCompetency)}</td>
+            <td style="${tdStyle}"><span class="ro-badge cluster-${(row.competencyGroup || '').toLowerCase().replace('organizational', 'org')}">${this.safe(row.competencyGroup)}</span></td>
+            <td style="${tdStyle}">${this.safe(row.currentLevel)}</td>
+            <td style="${tdStyle}">${this.safe(row.requiredLevel)}</td>
+            <td style="${tdStyle}">${this.safe(row.leadInterventions)}</td>
+            <td style="${tdStyle}">${this.safe(row.targetTimeline)}</td>
+          </tr>`,
+            )
+            .join('') ||
+          `<tr><td colspan="7" style="${tdStyle}text-align:center;color:#888;font-style:italic;">No entries.</td></tr>`
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SECTION II: AGAP -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">II</span>
+    <h2>Academic Growth and Advancement Program (AGAP)</h2>
+  </div>
+  <div class="section-body">
+    <table>
+      <thead><tr>
+        <th style="${thStyle}width:30px">No.</th>
+        <th style="${thStyle}">Degree Program</th>
+        <th style="${thStyle}">Target HEI</th>
+        <th style="${thStyle}">Mode of Study</th>
+        <th style="${thStyle}">Target Scholarship Grant</th>
+        <th style="${thStyle}">Target Timeline</th>
+      </tr></thead>
+      <tbody>
+        ${
+          agapRows
+            .map(
+              (row, i) => `
+          <tr style="background:${i % 2 === 0 ? '#fff' : '#f9f8f5'}">
+            <td style="${tdStyle}text-align:center;font-weight:600;color:#666;">${i + 1}</td>
+            <td style="${tdStyle}">${this.safe(row.degreeProgram)}</td>
+            <td style="${tdStyle}">${this.safe(row.targetHEI)}</td>
+            <td style="${tdStyle}">${this.safe(row.modeOfStudy)}</td>
+            <td style="${tdStyle}">${this.safe(row.scholarshipGrant)}</td>
+            <td style="${tdStyle}">${this.safe(row.targetTimeline)}</td>
+          </tr>`,
+            )
+            .join('') ||
+          `<tr><td colspan="6" style="${tdStyle}text-align:center;color:#888;font-style:italic;">No entries.</td></tr>`
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SECTION III: Pro-ACT -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">III</span>
+    <h2>Professional Advancement through Capacity-Building and Trainings (Pro-ACT)</h2>
+  </div>
+  <div class="section-body">
+    <table>
+      <thead><tr>
+        <th style="${thStyle}width:30px">No.</th>
+        <th style="${thStyle}">Training / Workshop Title</th>
+        <th style="${thStyle}">Target Competency / Skill</th>
+        <th style="${thStyle}">Mode of Activity</th>
+        <th style="${thStyle}">Trainer / Provider</th>
+        <th style="${thStyle}">Target Timeline</th>
+      </tr></thead>
+      <tbody>
+        ${
+          proactRows
+            .map(
+              (row, i) => `
+          <tr style="background:${i % 2 === 0 ? '#fff' : '#f9f8f5'}">
+            <td style="${tdStyle}text-align:center;font-weight:600;color:#666;">${i + 1}</td>
+            <td style="${tdStyle}">${this.safe(row.trainingTitle)}</td>
+            <td style="${tdStyle}">${this.safe(row.targetSkill)}</td>
+            <td style="${tdStyle}">${this.safe(row.modeOfActivity)}</td>
+            <td style="${tdStyle}">${this.safe(row.trainerProvider)}</td>
+            <td style="${tdStyle}">${this.safe(row.targetTimeline)}</td>
+          </tr>`,
+            )
+            .join('') ||
+          `<tr><td colspan="6" style="${tdStyle}text-align:center;color:#888;font-style:italic;">No entries.</td></tr>`
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SECTION IV: Supervisor Assessment -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">IV</span>
+    <h2>Supervisor's Assessment and Endorsement</h2>
+  </div>
+  <div class="section-body">
+    <table>
+      <thead><tr>
+        <th style="${thStyle}width:160px">Assessment Area</th>
+        <th style="${thStyle}">Response</th>
+      </tr></thead>
+      <tbody>
+        <tr><td style="${tdStyle}" class="assess-area">1. Observed Performance Gaps</td>
+          <td style="${tdStyle}"><strong>${this.safe(assessment.perfGapsYN)}</strong>${assessment.perfGapsSpec ? '<br><em>' + this.safe(assessment.perfGapsSpec) + '</em>' : ''}</td></tr>
+        <tr style="background:#f9f8f5"><td style="${tdStyle}" class="assess-area">2. Readiness for Advancement</td>
+          <td style="${tdStyle}"><strong>${this.safe(assessment.readinessYN)}</strong>${assessment.readinessRemarks ? '<br><em>' + this.safe(assessment.readinessRemarks) + '</em>' : ''}</td></tr>
+        <tr><td style="${tdStyle}" class="assess-area">3. Recommended L&amp;D Interventions</td>
+          <td style="${tdStyle}">${Array.isArray(assessment.interventions) ? assessment.interventions.map((v: string) => `<span style="display:inline-block;background:#e8f0e8;border:1px solid #2d7a2d;border-radius:4px;padding:2px 8px;font-size:11px;margin:2px;">${this.safe(v)}</span>`).join(' ') : this.safe(assessment.interventions)}</td></tr>
+        <tr style="background:#f9f8f5"><td style="${tdStyle}" class="assess-area">4. Preferred Implementation Period</td>
+          <td style="${tdStyle}">${this.safe(assessment.implYear)} — ${this.safe(assessment.implementationPeriod)}</td></tr>
+        <tr><td style="${tdStyle}" class="assess-area">5. Additional Comments</td>
+          <td style="${tdStyle}">${this.safe(assessment.additionalComments)}</td></tr>
+      </tbody>
+    </table>
+
+    <div class="cert-block">
+      <p>I hereby certify that I have reviewed and assessed the Individual Development Plan (IDP) of the concerned personnel and confirm that the proposed goals and interventions are aligned with their role, performance needs, and the strategic direction of the office.</p>
+      <div class="sup-name">${this.safe(idp.supervisorName)}</div>
+      <small>Signature over Printed Name of Immediate Supervisor</small>
+      <small style="margin-top:6px;">Date signed: ${completedAt}</small>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <p>This document was automatically generated by the CarSU HRMS LeaD System.</p>
+  <p>Caraga State University — Office of Human Resource Management Services | Ampayon, Butuan City 8600, Philippines</p>
+</div>
+
+</body>
+</html>`;
+  }
+}

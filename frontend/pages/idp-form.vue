@@ -456,25 +456,22 @@
             </thead>
             <tbody>
               <tr v-for="(row, idx) in competencyRows" :key="idx">
+                <td class="row-num-cell">{{ idx + 1 }}</td>
                 <td>
-                  <input
-                    type="text"
-                    class="priority-num"
-                    :value="idx + 1"
-                    readonly
-                  />
-                </td>
-                <td>
-                  <select v-model="row.competencyGroup" @change="row.targetCompetency = ''; row.requiredLevel = ''">
-                    <option value="">Group…</option>
-                    <option>Core</option>
-                    <option>Leadership</option>
-                    <option>Organizational</option>
-                    <option>Technical</option>
-                  </select>
-                  <select v-if="row.competencyGroup" v-model="row.targetCompetency" style="margin-top:6px" @change="row.requiredLevel = getRequiredLevel(row.targetCompetency, form.currentPosition)">
+                  <select v-model="row.targetCompetency" @change="row.competencyGroup = getCompetencyCluster(row.targetCompetency); row.requiredLevel = getRequiredLevel(row.targetCompetency, form.currentPosition)">
                     <option value="">Select…</option>
-                    <option v-for="c in getCompetencyOptions(row.competencyGroup)" :key="c" :value="c">{{ c }}</option>
+                    <optgroup label="Core">
+                      <option v-for="c in allCompetencies.Core" :key="c" :value="c">{{ c }}</option>
+                    </optgroup>
+                    <optgroup label="Leadership">
+                      <option v-for="c in allCompetencies.Leadership" :key="c" :value="c">{{ c }}</option>
+                    </optgroup>
+                    <optgroup label="Organizational">
+                      <option v-for="c in allCompetencies.Organizational" :key="c" :value="c">{{ c }}</option>
+                    </optgroup>
+                    <optgroup label="Technical">
+                      <option v-for="c in allCompetencies.Technical" :key="c" :value="c">{{ c }}</option>
+                    </optgroup>
                   </select>
                 </td>
                 <td>
@@ -575,9 +572,7 @@
             </thead>
             <tbody>
               <tr v-for="(row, idx) in agapRows" :key="idx">
-                <td>
-                  <input type="text" class="priority-num" :value="idx + 1" readonly />
-                </td>
+                <td class="row-num-cell">{{ idx + 1 }}</td>
                 <td>
                   <select v-model="row.degreeProgram">
                     <option value="">Select…</option>
@@ -655,21 +650,23 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(row, idx) in proactRows" :key="idx">
+              <template v-if="filledCompetencies.length === 0">
+                <tr>
+                  <td colspan="6" style="text-align:center; color: var(--text-light); font-style:italic; padding: 20px;">
+                    Add competencies in Section I to populate this table.
+                  </td>
+                </tr>
+              </template>
+              <tr v-for="(competency, idx) in filledCompetencies" :key="competency">
+                <td class="row-num-cell">{{ idx + 1 }}</td>
                 <td>
-                  <input type="text" class="priority-num" :value="idx + 1" readonly />
+                  <input type="text" v-model="proactRows[idx].trainingTitle" placeholder="" />
                 </td>
                 <td>
-                  <input type="text" v-model="row.trainingTitle" placeholder="" />
+                  <div class="proact-skill-label">{{ competency }}</div>
                 </td>
                 <td>
-                  <select v-model="row.targetSkill">
-                    <option value="">Select…</option>
-                    <option v-for="c in filledCompetencies" :key="c" :value="c">{{ c }}</option>
-                  </select>
-                </td>
-                <td>
-                  <select v-model="row.modeOfActivity">
+                  <select v-model="proactRows[idx].modeOfActivity">
                     <option value="">Select…</option>
                     <option>Face-to-face</option>
                     <option>Online</option>
@@ -678,26 +675,23 @@
                   </select>
                 </td>
                 <td>
-                  <input type="text" v-model="row.trainerProvider" placeholder="" />
+                  <input type="text" v-model="proactRows[idx].trainerProvider" placeholder="" />
                 </td>
                 <td>
-                  <select v-model="row.targetTimeline">
+                  <select v-model="proactRows[idx].targetTimeline">
                     <option value="">Select…</option>
                     <option>2026-2027</option>
                     <option>2027-2028</option>
                     <option>2028-2029</option>
                   </select>
                 </td>
-                <td>
-                  <button class="btn-remove-row" @click="removeRow(proactRows, idx)" title="Remove row">×</button>
-                </td>
               </tr>
             </tbody>
           </table>
         </div>
-        <div class="table-actions">
-          <button class="btn-add-row" @click="addProactRow">+ Add Row</button>
-        </div>
+        <p v-if="filledCompetencies.length > 0" style="font-size:13px; color:var(--text-light); margin-top:10px;">
+          Rows are auto-generated based on competencies entered in Section I.
+        </p>
       </div>
       </transition>
     </div>
@@ -1224,7 +1218,7 @@ const emailHints = reactive({
 // Dynamic table rows
 const competencyRows = ref([
   {
-    competencyGroup: "",
+    competencyGroup: "",  // auto-set by getCompetencyCluster on selection
     targetCompetency: "",
     currentLevel: "",
     requiredLevel: "",
@@ -1414,12 +1408,19 @@ const sectionIIIComplete = computed(() => {
   return sectionIIComplete.value;
 });
 
-// Competencies actually entered in Section I — used by Pro-ACT dropdown
-const filledCompetencies = computed(() =>
-  competencyRows.value
+// Competencies actually entered in Section I — drives Pro-ACT table rows
+const filledCompetencies = computed(() => {
+  const list = competencyRows.value
     .map(r => r.targetCompetency)
-    .filter(c => c && c.trim())
-);
+    .filter(c => c && c.trim());
+  // Keep proactRows in sync — grow or shrink as needed
+  while (proactRows.value.length < list.length) {
+    proactRows.value.push({ trainingTitle: "", targetSkill: "", modeOfActivity: "", trainerProvider: "", targetTimeline: "" });
+  }
+  // Sync targetSkill on each row
+  list.forEach((c, i) => { proactRows.value[i].targetSkill = c; });
+  return list;
+});
 
 const purposeOptions = [
   "Initial Assessment",
@@ -1480,6 +1481,23 @@ function getCompetencyOptions(group) {
   const v = competencyData[group];
   if (!v) return [];
   return typeof v.value !== "undefined" ? v.value : v;
+}
+
+// Flat computed lists per cluster (reactive to personnelType)
+const allCompetencies = computed(() => ({
+  Core: getCompetencyOptions("Core"),
+  Leadership: getCompetencyOptions("Leadership"),
+  Organizational: getCompetencyOptions("Organizational"),
+  Technical: getCompetencyOptions("Technical"),
+}));
+
+// Reverse lookup: competency name → cluster name
+function getCompetencyCluster(competency) {
+  if (!competency) return "";
+  for (const [grp, list] of Object.entries(allCompetencies.value)) {
+    if (list.includes(competency)) return grp;
+  }
+  return "";
 }
 
 // Required level lookup — based on position group
@@ -1682,15 +1700,21 @@ async function submitStage1() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
+    if (!res.ok) {
+      const errText = await res.text();
+      alert("Submission failed (" + res.status + "): " + errText);
+      return;
+    }
     const data = await res.json();
     if (data.refId) {
-      supervisorToken.value = data.refId; // show this token to the employee
-      screen.value = "stage1-success";
+      refId.value = data.refId;
+      stage.value = "stage1-success";
     } else {
-      alert("Submission failed: " + data.error);
+      alert("Submission failed: " + (data.error || "Unknown error"));
     }
-  } catch {
-    alert("Network error. Please try again.");
+  } catch (err) {
+    console.error("Submit error:", err);
+    alert("Network error: " + err.message + "\n\nMake sure the backend is running on " + API);
   } finally {
     isLoading.value = false;
     isSubmitting.value = false;
@@ -2594,6 +2618,27 @@ textarea {
   border-radius: 20px;
   border: 1px solid var(--border);
   white-space: nowrap;
+}
+
+/* ── Pro-ACT pre-filled skill label ── */
+.proact-skill-label {
+  background: var(--readonly-bg);
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 500;
+  min-width: 160px;
+}
+
+/* ── Row number cell ── */
+.row-num-cell {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-light);
+  vertical-align: middle;
 }
 
 /* ── Required level badge ── */

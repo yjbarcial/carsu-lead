@@ -1,0 +1,220 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { MailerService } from '@nestjs-modules/mailer';
+
+@Injectable()
+export class MailService {
+  private readonly logger = new Logger(MailService.name);
+
+  constructor(private readonly mailer: MailerService) {}
+
+  // ── Sent to the employee after Stage 1 submission ─────────────────────────
+  async sendEmployeeConfirmation(opts: {
+    to: string;
+    name: string;
+    refId: string;
+    supervisorName: string;
+  }) {
+    try {
+      await this.mailer.sendMail({
+        to: opts.to,
+        subject: `[CarSU LeaD] IDP Submitted — Reference ID: ${opts.refId}`,
+        html: `
+          <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;border:1px solid #ddd;border-radius:8px;overflow:hidden;">
+            <div style="background:#003300;padding:24px 32px;">
+              <h2 style="color:#ffcc00;margin:0;">CarSU LeaD System</h2>
+              <p style="color:#cce6cc;margin:4px 0 0;">Learning &amp; Development — IDP Submission</p>
+            </div>
+            <div style="padding:28px 32px;">
+              <p>Dear <strong>${opts.name}</strong>,</p>
+              <p>Your Individual Development Plan (IDP) has been successfully submitted and is now awaiting review by your supervisor.</p>
+
+              <div style="background:#f5f5f5;border-left:4px solid #003300;padding:16px 20px;border-radius:4px;margin:20px 0;">
+                <p style="margin:0 0 8px;font-size:13px;color:#666;">REFERENCE ID</p>
+                <p style="margin:0;font-size:22px;font-weight:bold;letter-spacing:2px;color:#003300;">${opts.refId}</p>
+              </div>
+
+              <p>Your supervisor (<strong>${opts.supervisorName}</strong>) has been notified and will receive a separate email to review your submission.</p>
+              <p>Please keep your Reference ID for your records. You may need it for follow-up.</p>
+
+              <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
+              <p style="font-size:12px;color:#999;">This is an automated message from the CarSU HRMS LeaD System. Please do not reply to this email.</p>
+              <p style="font-size:12px;color:#999;">Caraga State University — Office of Human Resource Management Services</p>
+            </div>
+          </div>
+        `,
+      });
+      this.logger.log(`Confirmation email sent to ${opts.to}`);
+    } catch (err) {
+      this.logger.error(
+        `Failed to send confirmation to ${opts.to}: ${err.message}`,
+      );
+    }
+  }
+
+  // ── Sent to the employee after supervisor completes Stage 2 ──────────────
+  async sendEmployeeCompletion(opts: {
+    to: string;
+    name: string;
+    refId: string;
+    supervisorName: string;
+  }) {
+    try {
+      await this.mailer.sendMail({
+        to: opts.to,
+        subject: `[CarSU LeaD] Your IDP has been reviewed — ${opts.refId}`,
+        html: `
+          <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;border:1px solid #ddd;border-radius:8px;overflow:hidden;">
+            <div style="background:#003300;padding:24px 32px;">
+              <h2 style="color:#ffcc00;margin:0;">CarSU LeaD System</h2>
+              <p style="color:#cce6cc;margin:4px 0 0;">IDP Review Complete</p>
+            </div>
+            <div style="padding:28px 32px;">
+              <p>Dear <strong>${opts.name}</strong>,</p>
+              <p>Your Individual Development Plan (IDP) has been reviewed and endorsed by your supervisor, <strong>${opts.supervisorName}</strong>. Your IDP is now complete and has been forwarded to the Office of Human Resource Management Services.</p>
+              <div style="background:#f5f5f5;border-left:4px solid #003300;padding:16px 20px;border-radius:4px;margin:20px 0;">
+                <p style="margin:0 0 8px;font-size:13px;color:#666;">REFERENCE ID</p>
+                <p style="margin:0;font-size:22px;font-weight:bold;letter-spacing:2px;color:#003300;">${opts.refId}</p>
+              </div>
+              <p>Please keep a copy of your Reference ID for your records.</p>
+              <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
+              <p style="font-size:12px;color:#999;">This is an automated message from the CarSU HRMS LeaD System. Please do not reply to this email.</p>
+              <p style="font-size:12px;color:#999;">Caraga State University — Office of Human Resource Management Services</p>
+            </div>
+          </div>
+        `,
+      });
+      this.logger.log(`Completion email sent to ${opts.to}`);
+    } catch (err) {
+      this.logger.error(
+        `Failed to send completion email to ${opts.to}: ${err.message}`,
+      );
+    }
+  }
+
+  // ── Sent to HR after IDP is fully complete (with PDF attachment) ─────────
+  async sendHrNotification(opts: {
+    employeeName: string;
+    refId: string;
+    position: string;
+    officeUnit: string;
+    supervisorName: string;
+    completedAt: string;
+    pdfBuffer: Buffer;
+  }) {
+    const hrEmail = process.env.HR_EMAIL ?? 'yjbarcial@gmail.com';
+    try {
+      await this.mailer.sendMail({
+        to: hrEmail,
+        subject: `[CarSU LeaD] IDP Complete — ${opts.employeeName} (${opts.refId})`,
+        html: `
+          <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;border:1px solid #ddd;border-radius:8px;overflow:hidden;">
+            <div style="background:#003300;padding:24px 32px;">
+              <h2 style="color:#ffcc00;margin:0;">CarSU LeaD System</h2>
+              <p style="color:#cce6cc;margin:4px 0 0;">IDP Fully Completed — HR Copy</p>
+            </div>
+            <div style="padding:28px 32px;">
+              <p>This is to notify you that the following Individual Development Plan has been completed by both the employee and their immediate supervisor.</p>
+              <div style="background:#f5f5f5;border-radius:6px;padding:16px 20px;margin:20px 0;">
+                <table style="width:100%;font-size:14px;border-collapse:collapse;">
+                  <tr><td style="padding:6px 0;color:#666;width:40%;">Reference ID</td><td style="padding:6px 0;font-weight:bold;letter-spacing:1px;">${opts.refId}</td></tr>
+                  <tr><td style="padding:6px 0;color:#666;">Employee</td><td style="padding:6px 0;font-weight:bold;">${opts.employeeName}</td></tr>
+                  <tr><td style="padding:6px 0;color:#666;">Position</td><td style="padding:6px 0;">${opts.position}</td></tr>
+                  <tr><td style="padding:6px 0;color:#666;">Office / Unit</td><td style="padding:6px 0;">${opts.officeUnit}</td></tr>
+                  <tr><td style="padding:6px 0;color:#666;">Immediate Supervisor</td><td style="padding:6px 0;">${opts.supervisorName}</td></tr>
+                  <tr><td style="padding:6px 0;color:#666;">Completed On</td><td style="padding:6px 0;">${opts.completedAt}</td></tr>
+                </table>
+              </div>
+              <p>The complete IDP document — including the supervisor's assessment and endorsement — is attached as a PDF to this email.</p>
+              <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
+              <p style="font-size:12px;color:#999;">This is an automated message from the CarSU HRMS LeaD System. Please do not reply to this email.</p>
+              <p style="font-size:12px;color:#999;">Caraga State University — Office of Human Resource Management Services</p>
+            </div>
+          </div>
+        `,
+        attachments: [
+          {
+            filename: `IDP_${opts.refId}_${opts.employeeName.replace(/\s+/g, '_')}.pdf`,
+            content: opts.pdfBuffer,
+            contentType: 'application/pdf',
+          },
+        ],
+      });
+      this.logger.log(`HR notification with PDF sent to ${hrEmail}`);
+    } catch (err) {
+      this.logger.error(`Failed to send HR notification: ${err.message}`);
+    }
+  }
+
+  // ── Sent to the supervisor after Stage 1 submission ───────────────────────
+  async sendSupervisorNotification(opts: {
+    to: string;
+    supervisorName: string;
+    employeeName: string;
+    refId: string;
+    position: string;
+    officeUnit: string;
+    reviewUrl: string;
+  }) {
+    try {
+      await this.mailer.sendMail({
+        to: opts.to,
+        subject: `[CarSU LeaD] Action Required — IDP Review for ${opts.employeeName}`,
+        html: `
+          <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;border:1px solid #ddd;border-radius:8px;overflow:hidden;">
+            <div style="background:#003300;padding:24px 32px;">
+              <h2 style="color:#ffcc00;margin:0;">CarSU LeaD System</h2>
+              <p style="color:#cce6cc;margin:4px 0 0;">Learning &amp; Development — Supervisor Action Required</p>
+            </div>
+            <div style="padding:28px 32px;">
+              <p>Dear <strong>${opts.supervisorName}</strong>,</p>
+              <p>An Individual Development Plan (IDP) has been submitted for your review.</p>
+
+              <div style="background:#f5f5f5;border-radius:6px;padding:16px 20px;margin:20px 0;">
+                <table style="width:100%;font-size:14px;border-collapse:collapse;">
+                  <tr>
+                    <td style="padding:6px 0;color:#666;width:40%;">Employee</td>
+                    <td style="padding:6px 0;font-weight:bold;">${opts.employeeName}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:6px 0;color:#666;">Position</td>
+                    <td style="padding:6px 0;">${opts.position}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:6px 0;color:#666;">Office / Unit</td>
+                    <td style="padding:6px 0;">${opts.officeUnit}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:6px 0;color:#666;">Reference ID</td>
+                    <td style="padding:6px 0;font-weight:bold;letter-spacing:1px;">${opts.refId}</td>
+                  </tr>
+                </table>
+              </div>
+
+              <p>Please use the reference ID or visit the link below to review and sign off on the IDP:</p>
+
+              <div style="text-align:center;margin:24px 0;">
+                <a href="${opts.reviewUrl}"
+                   style="background:#003300;color:#ffcc00;padding:12px 32px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:15px;display:inline-block;">
+                  Review IDP
+                </a>
+              </div>
+
+              <p style="font-size:13px;color:#666;">Or copy this link into your browser:<br>
+                <a href="${opts.reviewUrl}" style="color:#003300;">${opts.reviewUrl}</a>
+              </p>
+
+              <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
+              <p style="font-size:12px;color:#999;">This is an automated message from the CarSU HRMS LeaD System. Please do not reply to this email.</p>
+              <p style="font-size:12px;color:#999;">Caraga State University — Office of Human Resource Management Services</p>
+            </div>
+          </div>
+        `,
+      });
+      this.logger.log(`Supervisor notification sent to ${opts.to}`);
+    } catch (err) {
+      this.logger.error(
+        `Failed to send supervisor email to ${opts.to}: ${err.message}`,
+      );
+    }
+  }
+}

@@ -1,44 +1,55 @@
-import { Entity,  PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+} from 'typeorm';
 
-@Entity('idp_submissions')
+@Entity('idp')
 export class Idp {
-  @PrimaryGeneratedColumn() id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-  // Reference ID used as the supervisor token
-  @Column() refId: string;
+  @Column({ unique: true })
+  refId: string;
 
-  @Column({ default: 'PENDING' }) status: string;
+  @Column({ default: 'PENDING' })
+  status: string; // PENDING | COMPLETE
 
-  // Employee details
-  @Column() employeeEmail: string;
-  @Column({ nullable: true }) employeeName: string;
-  @Column({ nullable: true }) position: string;
-  @Column({ nullable: true }) office: string;
+  // ── Personnel / header ──────────────────────────────────────────────────
   @Column({ nullable: true }) campus: string;
   @Column({ nullable: true }) officeAffiliation: string;
-  @Column({ nullable: true }) yearCovered: string;
-  @Column({ nullable: true }) headerPurpose: string;
-  @Column({ nullable: true }) supervisorEmail: string;
-  @Column({ nullable: true }) supervisorName: string;
-  @Column({ nullable: true }) yearsInPosition: string;
-  @Column({ nullable: true }) yearsInCSU: string;
+  @Column({ nullable: true }) collegeOfficeUnit: string;
+  @Column({ nullable: true }) collegeProgram: string;
+  @Column({ nullable: true }) personnelType: string;
+  @Column({ nullable: true }) nameOfPersonnel: string;
+  @Column({ nullable: true }) lastName: string;
+  @Column({ nullable: true }) firstName: string;
+  @Column({ nullable: true }) middleInitial: string;
+  @Column({ nullable: true }) employeeEmail: string;
   @Column({ nullable: true }) datePrepared: string;
-  @Column({ nullable: true }) deadline: string;
+  @Column({ nullable: true }) educAttainment: string;
+  @Column({ nullable: true }) educAttainmentSpec: string;
+  @Column({ nullable: true }) currentPosition: string;
+  @Column({ nullable: true }) yearCovered: string;
+  @Column({ nullable: true, type: 'float' }) yearsInPosition: number;
+  @Column({ nullable: true, type: 'float' }) yearsInCSU: number;
+  @Column({ nullable: true }) supervisorName: string;
+  @Column({ nullable: true }) supervisorEmail: string;
+  @Column({ nullable: true }) headerPurpose: string;
+  @Column({ nullable: true }) competencyPurpose: string;
 
-  // JSON data from the dynamic form tables
-  @Column({ type: 'jsonb', nullable: true }) competencyRows: any;
-  @Column({ type: 'jsonb', nullable: true }) agapRows: any;
-  @Column({ type: 'jsonb', nullable: true }) proactRows: any;
+  // ── Section table rows (stored as JSON strings) ─────────────────────────
+  @Column({ type: 'text', nullable: true }) competencyRowsJson: string;
+  @Column({ type: 'text', nullable: true }) agapRowsJson: string;
+  @Column({ type: 'text', nullable: true }) proactRowsJson: string;
 
-  // Supervisor review (filled in Stage 2)
-  @Column({ nullable: true }) supervisorReviewDate: string;
-  @Column({ nullable: true }) perfGapsYN: string;
-  @Column({ nullable: true }) perfGapsSpec: string;
-  @Column({ nullable: true }) readinessYN: string;
-  @Column({ nullable: true }) readinessRemarks: string;
-  @Column({ type: 'jsonb', nullable: true }) supervisorInterventions: any;
-  @Column({ type: 'jsonb', nullable: true }) implementationPeriod: any;
-  @Column({ nullable: true }) additionalComments: string;
+  // ── Supervisor stage 2 fields ────────────────────────────────────────────
+  @Column({ nullable: true }) supervisorRemarks: string;
+  @Column({ nullable: true }) supervisorApproval: string;
+  @Column({ nullable: true }) supervisorSignedAt: string;
+  @Column({ type: 'text', nullable: true }) supervisorAssessment: string; // JSON
 
-  @CreateDateColumn() submittedAt: Date;
+  @CreateDateColumn()
+  submittedAt: Date;
 }
