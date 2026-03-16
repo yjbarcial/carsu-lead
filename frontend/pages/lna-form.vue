@@ -136,7 +136,10 @@
             </div>
             <div class="field-group">
               <label>Position / Designation <span class="req">*</span></label>
-              <input type="text" v-model="form.position" placeholder="e.g. Dean, Director" />
+              <select v-model="form.position" :disabled="!form.officeAffiliation">
+                <option value="">Select position…</option>
+                <option v-for="opt in positionOptions" :key="opt" :value="opt">{{ opt }}</option>
+              </select>
             </div>
             <div class="field-group">
               <label>Date Prepared <span class="req">*</span></label>
@@ -144,7 +147,12 @@
             </div>
             <div class="field-group">
               <label>Year Covered <span class="req">*</span></label>
-              <input type="text" v-model="form.yearCovered" placeholder="e.g. 2025" />
+              <select v-model="form.yearCovered">
+                <option value="">Select year…</option>
+                <option>2026-2027</option>
+                <option>2026-2028</option>
+                <option>2026-2029</option>
+              </select>
             </div>
             <div class="field-group">
               <label>Total Personnel <span class="req">*</span></label>
@@ -197,7 +205,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="level in positionLevels" :key="level.key">
+                <tr v-for="level in visiblePositionLevels" :key="level.key">
                   <td class="row-label">{{ level.label }}</td>
                   <td v-for="t in employmentTypeKeys" :key="t">
                     <input
@@ -241,50 +249,78 @@
             </div>
           </div>
 
-          <div v-for="cluster in competencyClusters" :key="cluster.key" class="comp-table-wrap">
-            <div class="comp-cluster-label">
-              {{ cluster.name }} Competencies
-              <span class="cluster-badge">{{ cluster.badge }}</span>
-            </div>
-            <p class="comp-note" style="padding: 8px 0 4px">{{ cluster.note }}</p>
-            <div class="table-wrapper">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th style="min-width: 180px">Competency</th>
-                    <th v-for="lv in compLevelHeaders" :key="lv" colspan="2" style="text-align: center">{{ lv }}</th>
-                    <th style="min-width: 200px">Basis / Key Observations</th>
-                  </tr>
-                  <tr>
-                    <th></th>
-                    <template v-for="lv in compLevelHeaders" :key="lv">
-                      <th>CL</th>
-                      <th>%</th>
-                    </template>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(comp, idx) in cluster.competencies" :key="comp">
-                    <td class="row-label">{{ comp }}</td>
-                    <template v-for="lv in compLevelKeys" :key="lv">
-                      <td>
-                        <select v-model="competencyData[cluster.key][idx][lv + '_cl']">
-                          <option v-for="o in clOptions" :key="o" :value="o">{{ o || "---" }}</option>
-                        </select>
-                      </td>
-                      <td>
-                        <select v-model="competencyData[cluster.key][idx][lv + '_pct']">
-                          <option v-for="o in pctOptions" :key="o" :value="o">{{ o || "---" }}</option>
-                        </select>
-                      </td>
-                    </template>
-                    <td>
-                      <textarea rows="2" v-model="competencyData[cluster.key][idx].observations" placeholder="Observations..."></textarea>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+          <!-- Position Level Tabs -->
+          <div class="comp-tabs">
+            <button
+              v-for="lv in visibleCompLevelHeaders"
+              :key="lv"
+              class="comp-tab"
+              :class="{ active: activeCompTab === lv }"
+              @click="activeCompTab = lv"
+            >
+              {{ lv }}
+            </button>
+          </div>
+
+          <!-- Tab Content: one position level at a time -->
+          <div v-for="(lvKey, lvIdx) in visibleCompLevelKeys" :key="lvKey">
+            <div v-show="activeCompTab === visibleCompLevelHeaders[lvIdx]">
+              <div v-for="cluster in competencyClusters" :key="cluster.key" class="comp-table-wrap">
+                <div class="comp-cluster-label">
+                  {{ cluster.name }} Competencies
+                  <span class="cluster-badge">{{ cluster.badge }}</span>
+                </div>
+                <p class="comp-note" style="padding: 8px 0 4px">{{ cluster.note }}</p>
+                <div class="table-wrapper">
+                  <table class="data-table comp-page-table">
+                    <thead>
+                      <tr>
+                        <th style="min-width: 200px">Competency</th>
+                        <th style="width: 180px; text-align: center">Competency Level (CL)</th>
+                        <th style="width: 180px; text-align: center">Percentage (%)</th>
+                        <th style="min-width: 200px">Basis / Key Observations</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(comp, idx) in cluster.competencies" :key="comp">
+                        <td class="row-label">{{ comp }}</td>
+                        <td>
+                          <select v-model="competencyData[cluster.key][idx][lvKey + '_cl']" class="comp-select">
+                            <option v-for="o in clOptions" :key="o" :value="o">{{ o || "---" }}</option>
+                          </select>
+                        </td>
+                        <td>
+                          <select v-model="competencyData[cluster.key][idx][lvKey + '_pct']" class="comp-select">
+                            <option v-for="o in pctOptions" :key="o" :value="o">{{ o || "---" }}</option>
+                          </select>
+                        </td>
+                        <td>
+                          <textarea rows="2" v-model="competencyData[cluster.key][idx].observations" placeholder="Observations..."></textarea>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Prev / Next navigation -->
+              <div class="comp-tab-nav">
+                <button
+                  class="btn-tab-nav"
+                  :disabled="lvIdx === 0"
+                  @click="activeCompTab = visibleCompLevelHeaders[lvIdx - 1]"
+                >
+                  ← Previous
+                </button>
+                <span class="comp-tab-page">{{ lvIdx + 1 }} / {{ visibleCompLevelKeys.length }}</span>
+                <button
+                  class="btn-tab-nav"
+                  :disabled="lvIdx === visibleCompLevelKeys.length - 1"
+                  @click="activeCompTab = visibleCompLevelHeaders[lvIdx + 1]"
+                >
+                  Next →
+                </button>
+              </div>
             </div>
           </div>
 
@@ -356,116 +392,44 @@
           <hr class="subsection-divider" />
 
           <h4 class="subsec-label">B. Summary of Key Insights or Gaps Identified</h4>
-          <div class="table-wrapper">
+          <div v-if="insightRows.length === 0" style="padding: 16px; color: var(--text-light); font-size: 13px; font-style: italic;">
+            Select at least one data source above to populate this table.
+          </div>
+          <div v-else class="table-wrapper">
             <table class="data-table">
               <thead>
                 <tr>
                   <th style="width: 40px">No.</th>
-                  <th>Data Source</th>
+                  <th style="min-width: 200px">Data Source</th>
                   <th>Identified Gap / Issue</th>
                   <th>Relevant Personnel / Function</th>
                   <th>Recommended Intervention (if any)</th>
-                  <th style="width: 40px"></th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(row, idx) in insightRows" :key="idx">
+                <tr v-for="(row, idx) in insightRows" :key="row.dataSource">
                   <td style="text-align: center; color: var(--text-light); font-weight: 600;">{{ idx + 1 }}</td>
-                  <td><input type="text" v-model="row.dataSource" placeholder="Data source..." /></td>
+                  <td class="row-label" style="font-size: 13px; white-space: normal;">{{ row.dataSource }}</td>
                   <td><textarea rows="2" v-model="row.gap" placeholder="Identified gap or issue..."></textarea></td>
                   <td><input type="text" v-model="row.personnel" placeholder="Relevant personnel or function..." /></td>
                   <td><input type="text" v-model="row.intervention" placeholder="Recommended intervention..." /></td>
-                  <td style="text-align: center">
-                    <button class="btn-remove-row" @click="removeInsightRow(idx)" :disabled="insightRows.length <= 1">x</button>
-                  </td>
                 </tr>
               </tbody>
             </table>
-          </div>
-          <div style="margin-top: 12px">
-            <button class="btn-add-row" @click="addInsightRow">+ Add Row</button>
           </div>
         </div>
       </div>
 
-      <!-- SECTION IV: LeaD INTERVENTIONS -->
+      <!-- CERTIFICATION + SUBMIT -->
       <div class="section-card">
         <div class="section-header">
           <div class="section-num">IV</div>
           <div>
-            <h3>LeaD Interventions for Priority LeaD Needs</h3>
-            <p>Top 3 priority learning needs per position level</p>
+            <h3>Certification</h3>
+            <p>Rater / Head of Office declaration</p>
           </div>
         </div>
         <div class="section-body">
-          <div class="section-desc">
-            Based on competency mapping and other data sources, identify the top
-            <strong>3 priority learning needs</strong> for each applicable
-            position level. For each, indicate the most appropriate LeaD
-            interventions.<br /><br />
-            <strong>On-the-Job:</strong> Observation, Delegation, Coaching,
-            Mentoring, Job Rotation, Detail &amp; Secondment, Reading, Flexible
-            Learning, Brainstorming, Experiential Learning<br />
-            <strong>Off-the-Job:</strong> Short Courses, Conferences, Training
-            Programs, Seminars, Cum Paper Presentations, Pursue Higher Education
-          </div>
-
-          <div class="table-wrapper">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th style="width: 40px">No.</th>
-                  <th>Priority Competency / LeaD Need</th>
-                  <th>Suggested LeaD Interventions</th>
-                  <th style="width: 120px">Timeline</th>
-                  <th>Resource / Support Needed</th>
-                </tr>
-              </thead>
-              <tbody>
-                <template v-for="level in positionLevels" :key="level.key">
-                  <tr>
-                    <td colspan="5" class="pos-level-header" style="padding: 10px 12px">{{ level.label }}</td>
-                  </tr>
-                  <tr v-for="p in 3" :key="p">
-                    <td style="text-align: center; vertical-align: middle">
-                      <span class="priority-badge">{{ p }}</span>
-                    </td>
-                    <td>
-                      <input type="text" v-model="interventions[level.key][p - 1].need" placeholder="Describe competency/learning need..." />
-                    </td>
-                    <td>
-                      <div class="intervention-checks">
-                        <label class="iv-check">
-                          <input type="checkbox" v-model="interventions[level.key][p - 1].onJob" />
-                          On-the-Job Learning:
-                          <input type="text" v-model="interventions[level.key][p - 1].onJobText" placeholder="specify..." class="iv-text" />
-                        </label>
-                        <label class="iv-check">
-                          <input type="checkbox" v-model="interventions[level.key][p - 1].offJob" />
-                          Off-the-Job Learning:
-                          <input type="text" v-model="interventions[level.key][p - 1].offJobText" placeholder="specify..." class="iv-text" />
-                        </label>
-                        <label class="iv-check">
-                          <input type="checkbox" v-model="interventions[level.key][p - 1].others" />
-                          Others:
-                          <input type="text" v-model="interventions[level.key][p - 1].othersText" placeholder="specify..." class="iv-text" />
-                        </label>
-                      </div>
-                    </td>
-                    <td>
-                      <input type="text" v-model="interventions[level.key][p - 1].timeline" placeholder="e.g. Q2 2025" />
-                    </td>
-                    <td>
-                      <textarea rows="2" v-model="interventions[level.key][p - 1].resource" placeholder="Budget, facilitator, equipment..."></textarea>
-                    </td>
-                  </tr>
-                </template>
-              </tbody>
-            </table>
-          </div>
-
-          <hr class="subsection-divider" />
-
           <div class="certification-box">
             <p>
               I hereby certify that the information provided in this Learning
@@ -545,8 +509,23 @@ const positionLevels = [
 
 const compLevelHeaders = ["1st Level", "2nd (Non-Sup)", "2nd (Sup)", "3rd Level", "Faculty"];
 const compLevelKeys    = ["first", "secondNonSup", "secondSup", "third", "faculty"];
-const clOptions  = ["", "N/A", "1", "2", "3", "4"];
-const pctOptions = ["", "N/A", "A", "B", "C", "D"];
+
+const visibleCompLevelHeaders = computed(() =>
+  form.officeAffiliation === "OVPAA"
+    ? compLevelHeaders
+    : compLevelHeaders.filter(h => h !== "Faculty")
+);
+
+const visibleCompLevelKeys = computed(() =>
+  form.officeAffiliation === "OVPAA"
+    ? compLevelKeys
+    : compLevelKeys.filter(k => k !== "faculty")
+);
+
+// Active tab for competency mapping pagination — defaults to first level
+const activeCompTab = ref("1st Level");
+const clOptions  = ["", "N/A", "1 - Basic", "2 - Intermediate", "3 - Advanced", "4 - Expert"];
+const pctOptions = ["", "N/A", "A - 76%-100%", "B - 51%-75%", "C - 26%-50%", "D - 25% -Below"];
 
 const COMPETENCIES = {
   core: [
@@ -705,6 +684,18 @@ const form = reactive({
 // ── COMPUTED (depend on form) ──
 const isOVPAA = computed(() => form.officeAffiliation === "OVPAA");
 
+const positionOptions = computed(() => {
+  if (form.officeAffiliation === "OVPAA") return ["Dean", "Chairperson"];
+  if (["OVPAF", "OVPEO", "OVPRDIE", "OVPSAS"].includes(form.officeAffiliation)) return ["Director"];
+  return [];
+});
+
+const visiblePositionLevels = computed(() =>
+  positionLevels.filter(lv =>
+    lv.key !== "faculty" || form.officeAffiliation === "OVPAA"
+  )
+);
+
 const collegeOfficeUnitOptions = computed(() => {
   const list = subOfficeMap[form.officeAffiliation] || [];
   if (isOVPAA.value) return list.map(c => typeof c === "string" ? c : c.name);
@@ -722,6 +713,7 @@ const selectedCollegePrograms = computed(() => {
 watch(() => form.officeAffiliation, () => {
   form.unitOfficeCollege = "";
   form.collegeProgram = "";
+  form.position = "";
 });
 
 watch(() => form.unitOfficeCollege, () => {
@@ -765,26 +757,61 @@ const clusterSummary = reactive([
   { cluster: "Technical",      strongest: "", weakest: "", interventionNeeded: "" },
 ]);
 
-const insightRows = reactive([
-  { dataSource: "", gap: "", personnel: "", intervention: "" },
-]);
+const insightRows = reactive([]);
 
-const makeIntervention = () => ({
-  need: "",
-  onJob: false, onJobText: "",
-  offJob: false, offJobText: "",
-  others: false, othersText: "",
-  timeline: "",
-  resource: "",
-});
+// Sync insightRows whenever selectedSources changes
+watch(
+  () => [...form.selectedSources],
+  (newSources) => {
+    // Resolve display labels for selected sources
+    const resolvedSources = newSources.map(val => {
+      if (val === "Others") {
+        return form.othersSourceText.trim() ? "Others: " + form.othersSourceText.trim() : "Others";
+      }
+      return val;
+    });
 
-const interventions = reactive(
-  Object.fromEntries(
-    positionLevels.map((lv) => [
-      lv.key,
-      [makeIntervention(), makeIntervention(), makeIntervention()],
-    ]),
-  ),
+    // Remove rows whose source was unchecked (keep rows whose source is still selected)
+    for (let i = insightRows.length - 1; i >= 0; i--) {
+      const stillSelected = resolvedSources.some(s => insightRows[i].dataSource === s || insightRows[i].dataSource.startsWith("Others"));
+      const srcVal = newSources.find(v => v === "Others")
+        ? true
+        : newSources.some(v => insightRows[i].dataSource === v);
+      if (!srcVal && !insightRows[i].dataSource.startsWith("Others")) {
+        insightRows.splice(i, 1);
+      }
+    }
+
+    // Add rows for newly checked sources that don't have a row yet
+    resolvedSources.forEach(src => {
+      const exists = insightRows.some(r => r.dataSource === src || (src.startsWith("Others") && r.dataSource.startsWith("Others")));
+      if (!exists) {
+        insightRows.push({ dataSource: src, gap: "", personnel: "", intervention: "" });
+      }
+    });
+
+    // Remove rows for sources that are fully gone
+    for (let i = insightRows.length - 1; i >= 0; i--) {
+      const row = insightRows[i];
+      const isOthers = row.dataSource.startsWith("Others");
+      const stillPresent = isOthers
+        ? newSources.includes("Others")
+        : newSources.includes(row.dataSource);
+      if (!stillPresent) insightRows.splice(i, 1);
+    }
+  },
+  { deep: true }
+);
+
+// Also update "Others" row label when othersSourceText changes
+watch(
+  () => form.othersSourceText,
+  (val) => {
+    const idx = insightRows.findIndex(r => r.dataSource.startsWith("Others"));
+    if (idx !== -1) {
+      insightRows[idx].dataSource = val.trim() ? "Others: " + val.trim() : "Others";
+    }
+  }
 );
 
 // ── METHODS ──
@@ -805,14 +832,6 @@ function validateEmail() {
   emailHint.msg  = "✓ Valid CarSU email";
   emailHint.type = "success";
   return true;
-}
-
-function addInsightRow() {
-  insightRows.push({ dataSource: "", gap: "", personnel: "", intervention: "" });
-}
-
-function removeInsightRow(idx) {
-  if (insightRows.length > 1) insightRows.splice(idx, 1);
 }
 
 function validate() {
@@ -862,11 +881,6 @@ async function submitForm() {
   }
 
   const leadInterventions = [];
-  positionLevels.forEach((level) => {
-    interventions[level.key].forEach((iv, idx) => {
-      leadInterventions.push({ positionLevel: level.label, priority: idx + 1, ...iv });
-    });
-  });
 
   const payload = {
     action:            "submitLNA",
@@ -889,7 +903,6 @@ async function submitForm() {
     clusterSummary,
     dataSources:        selectedSources,
     dataSourceInsights: insightRows,
-    leadInterventions,
     raterFullName:      form.raterFullName.trim(),
   };
 
@@ -1211,6 +1224,88 @@ textarea { resize: vertical; min-height: 72px; }
   .page-nav { padding: 0 16px; }
   .nav-current, .nav-sep { display: none; }
   .source-checklist { grid-template-columns: 1fr 1fr; }
+}
+
+/* ── Competency tabs ── */
+.comp-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 12px;
+}
+.comp-tab {
+  padding: 8px 18px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px 8px 0 0;
+  background: var(--input-bg);
+  color: var(--text-light);
+  font-family: "Source Sans 3", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.02em;
+}
+.comp-tab:hover {
+  border-color: var(--navy);
+  color: var(--navy);
+  background: var(--white);
+}
+.comp-tab.active {
+  background: var(--navy);
+  color: var(--white);
+  border-color: var(--navy);
+}
+
+.comp-tab-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20px;
+  padding: 14px 0 4px;
+  border-top: 1px solid var(--border);
+}
+.btn-tab-nav {
+  padding: 8px 20px;
+  background: var(--navy);
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  font-family: "Source Sans 3", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-tab-nav:hover:not(:disabled) { background: var(--navy-mid); }
+.btn-tab-nav:disabled { background: #ccc; cursor: not-allowed; }
+.comp-tab-page {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-light);
+}
+
+/* ── Rating pills in legend ── */
+.rating-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  margin-right: 4px;
+}
+.rating-pill.cl  { background: var(--navy); color: var(--white); }
+.rating-pill.pct { background: var(--gold); color: var(--navy); }
+
+/* ── Competency page table selects ── */
+.comp-page-table .comp-select {
+  width: 100%;
+  min-width: 160px;
+  font-size: 13px;
 }
 
 @keyframes fadeUp {
