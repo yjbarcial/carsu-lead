@@ -40,7 +40,7 @@
         <p>CSU's Learning Needs Assessment (LNA) Tool</p>
       </div>
 
-      <!-- HEADER INFO -->
+      <!-- HEADER INFO — always visible -->
       <div class="section-card">
         <div class="section-header">
           <div class="section-num">H</div>
@@ -48,6 +48,7 @@
             <h3>Office Information</h3>
             <p>Basic details about your office and the submitter</p>
           </div>
+          <div v-if="sectionDone.header" class="section-done-badge">✓ Complete</div>
         </div>
         <div class="section-body">
 
@@ -130,13 +131,28 @@
               </select>
             </div>
 
-            <div class="field-group">
+            <!-- Head of Unit — split name fields -->
+            <div class="field-group span-2">
               <label>Head of Unit/Office/College <span class="req">*</span></label>
-              <input type="text" v-model="form.headOfUnit" placeholder="Full name" />
+              <div class="name-row">
+                <div class="name-sub">
+                  <span class="name-sub-label">Last Name</span>
+                  <input type="text" v-model="form.headLastName" placeholder="Dela Cruz" />
+                </div>
+                <div class="name-sub">
+                  <span class="name-sub-label">First Name</span>
+                  <input type="text" v-model="form.headFirstName" placeholder="Juan" />
+                </div>
+                <div class="name-sub name-sub-mi">
+                  <span class="name-sub-label">M.I.</span>
+                  <input type="text" v-model="form.headMiddleInitial" placeholder="A." maxlength="3" />
+                </div>
+              </div>
             </div>
+
             <div class="field-group">
               <label>Position / Designation <span class="req">*</span></label>
-              <select v-model="form.position" :disabled="!form.officeAffiliation">
+              <select v-model="form.position" :disabled="!form.officeAffiliation || (isOVPAA && !form.unitOfficeCollege)">
                 <option value="">Select position…</option>
                 <option v-for="opt in positionOptions" :key="opt" :value="opt">{{ opt }}</option>
               </select>
@@ -182,281 +198,298 @@
       </div>
 
       <!-- SECTION I: WORKFORCE PROFILE -->
-      <div class="section-card">
+      <div class="section-card section-card-collapsible">
         <div class="section-header">
           <div class="section-num">I</div>
           <div>
             <h3>Workforce Profile by Employment Classification and Position Level</h3>
             <p>Indicate number of personnel per classification per position level</p>
           </div>
+          <div v-if="!sectionDone.header" class="section-locked-badge">Complete Section H first</div>
+          <div v-else-if="sectionDone.workforce" class="section-done-badge">✓ Complete</div>
         </div>
-        <div class="section-body">
-          <p class="section-desc">
-            Indicate the number of personnel per employment classification under
-            each position level within your office. Refer to
-            <strong>Annex A</strong> for descriptions and sample positions.
-          </p>
-          <div class="table-wrapper">
-            <table class="data-table workforce-table">
-              <thead>
-                <tr>
-                  <th style="min-width: 180px; text-align: left">Position Level</th>
-                  <th v-for="t in employmentTypes" :key="t">{{ t }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="level in visiblePositionLevels" :key="level.key">
-                  <td class="row-label">{{ level.label }}</td>
-                  <td v-for="t in employmentTypeKeys" :key="t">
-                    <input
-                      type="number"
-                      min="0"
-                      placeholder="0"
-                      v-model.number="workforce[level.key][t]"
-                      style="text-align: center; width: 60px"
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+        <transition name="reveal">
+          <div v-if="sectionDone.header" class="section-body">
+            <p class="section-desc">
+              Indicate the number of personnel per employment classification under
+              each position level within your office. Refer to
+              <strong>Annex A</strong> for descriptions and sample positions.
+            </p>
+            <div class="table-wrapper">
+              <table class="data-table workforce-table">
+                <thead>
+                  <tr>
+                    <th style="min-width: 180px; text-align: left">Position Level</th>
+                    <th v-for="t in employmentTypes" :key="t">{{ t }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="level in visiblePositionLevels" :key="level.key">
+                    <td class="row-label">{{ level.label }}</td>
+                    <td v-for="t in employmentTypeKeys" :key="t">
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="0"
+                        v-model.number="workforce[level.key][t]"
+                        style="text-align: center; width: 60px"
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        </transition>
       </div>
 
       <!-- SECTION II: COMPETENCY MAPPING -->
-      <div class="section-card">
+      <div class="section-card section-card-collapsible">
         <div class="section-header">
           <div class="section-num">II</div>
           <div>
             <h3>Competency Mapping and Assessment</h3>
             <p>Assess current competency levels across all position levels</p>
           </div>
+          <div v-if="!sectionDone.workforce" class="section-locked-badge">Complete Section I first</div>
+          <div v-else-if="sectionDone.competency" class="section-done-badge">✓ Complete</div>
         </div>
-        <div class="section-body">
-          <div class="section-desc">
-            Using the rating scale below, identify the highest competency level
-            (CL: 1-4) and percentage (%) of personnel demonstrating it. Write
-            <strong>N/A</strong> if the competency does not apply. For detailed
-            descriptions, refer to the
-            <a href="https://tinyurl.com/CompetencyManualandModel" target="_blank">Competency Manual and Model</a>.
-            <div style="margin-top: 14px">
-              <p><i>Rating Scale:</i></p>
-              <img
-                src="/img/rating-scale.png"
-                alt="Rating Scale"
-                style="max-width: 100%; height: auto; display: block; border-radius: 6px;"
-              />
-            </div>
-          </div>
-
-          <!-- Position Level Tabs -->
-          <div class="comp-tabs">
-            <button
-              v-for="lv in visibleCompLevelHeaders"
-              :key="lv"
-              class="comp-tab"
-              :class="{ active: activeCompTab === lv }"
-              @click="activeCompTab = lv"
-            >
-              {{ lv }}
-            </button>
-          </div>
-
-          <!-- Tab Content: one position level at a time -->
-          <div v-for="(lvKey, lvIdx) in visibleCompLevelKeys" :key="lvKey">
-            <div v-show="activeCompTab === visibleCompLevelHeaders[lvIdx]">
-              <div v-for="cluster in competencyClusters" :key="cluster.key" class="comp-table-wrap">
-                <div class="comp-cluster-label">
-                  {{ cluster.name }} Competencies
-                  <span class="cluster-badge">{{ cluster.badge }}</span>
-                </div>
-                <p class="comp-note" style="padding: 8px 0 4px">{{ cluster.note }}</p>
-                <div class="table-wrapper">
-                  <table class="data-table comp-page-table">
-                    <thead>
-                      <tr>
-                        <th style="min-width: 200px">Competency</th>
-                        <th style="width: 180px; text-align: center">Competency Level (CL)</th>
-                        <th style="width: 180px; text-align: center">Percentage (%)</th>
-                        <th style="min-width: 200px">Basis / Key Observations</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="(comp, idx) in cluster.competencies" :key="comp">
-                        <td class="row-label">{{ comp }}</td>
-                        <td>
-                          <select v-model="competencyData[cluster.key][idx][lvKey + '_cl']" class="comp-select">
-                            <option v-for="o in clOptions" :key="o" :value="o">{{ o || "---" }}</option>
-                          </select>
-                        </td>
-                        <td>
-                          <select v-model="competencyData[cluster.key][idx][lvKey + '_pct']" class="comp-select">
-                            <option v-for="o in pctOptions" :key="o" :value="o">{{ o || "---" }}</option>
-                          </select>
-                        </td>
-                        <td>
-                          <textarea rows="2" v-model="competencyData[cluster.key][idx].observations" placeholder="Observations..."></textarea>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <!-- Prev / Next navigation -->
-              <div class="comp-tab-nav">
-                <button
-                  class="btn-tab-nav"
-                  :disabled="lvIdx === 0"
-                  @click="activeCompTab = visibleCompLevelHeaders[lvIdx - 1]"
-                >
-                  ← Previous
-                </button>
-                <span class="comp-tab-page">{{ lvIdx + 1 }} / {{ visibleCompLevelKeys.length }}</span>
-                <button
-                  class="btn-tab-nav"
-                  :disabled="lvIdx === visibleCompLevelKeys.length - 1"
-                  @click="activeCompTab = visibleCompLevelHeaders[lvIdx + 1]"
-                >
-                  Next →
-                </button>
+        <transition name="reveal">
+          <div v-if="sectionDone.workforce" class="section-body">
+            <div class="section-desc">
+              Using the rating scale below, identify the highest competency level
+              (CL: 1-4) and percentage (%) of personnel demonstrating it. Write
+              <strong>N/A</strong> if the competency does not apply. For detailed
+              descriptions, refer to the
+              <a href="https://tinyurl.com/CompetencyManualandModel" target="_blank">Competency Manual and Model</a>.
+              <div style="margin-top: 14px">
+                <p><i>Rating Scale:</i></p>
+                <img
+                  src="/img/rating-scale.png"
+                  alt="Rating Scale"
+                  style="max-width: 100%; height: auto; display: block; border-radius: 6px;"
+                />
               </div>
             </div>
-          </div>
 
-          <hr class="subsection-divider" />
-          <h4 style="font-family: 'Playfair Display', serif; color: var(--navy); margin-bottom: 12px; font-size: 16px;">
-            Competency Cluster Summary
-          </h4>
-          <div class="table-wrapper">
-            <table class="data-table cluster-summary-table">
-              <thead>
-                <tr>
-                  <th>Competency Cluster</th>
-                  <th>Strongest Competency</th>
-                  <th>Weakest Competency</th>
-                  <th style="width: 140px">Intervention Needed? (Y/N)</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="c in clusterSummary" :key="c.cluster">
-                  <td class="row-label">{{ c.cluster }}</td>
-                  <td><input type="text" v-model="c.strongest" placeholder="e.g. Integrity" /></td>
-                  <td><input type="text" v-model="c.weakest" placeholder="e.g. Building Partnership" /></td>
-                  <td>
-                    <select v-model="c.interventionNeeded">
-                      <option value="">---</option>
-                      <option value="Y">Y</option>
-                      <option value="N">N</option>
-                    </select>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <!-- Position Level Tabs -->
+            <div class="comp-tabs">
+              <button
+                v-for="lv in visibleCompLevelHeaders"
+                :key="lv"
+                class="comp-tab"
+                :class="{ active: activeCompTab === lv }"
+                @click="activeCompTab = lv"
+              >
+                {{ lv }}
+              </button>
+            </div>
+
+            <!-- Tab Content: one position level at a time -->
+            <div v-for="(lvKey, lvIdx) in visibleCompLevelKeys" :key="lvKey">
+              <div v-show="activeCompTab === visibleCompLevelHeaders[lvIdx]">
+                <div v-for="cluster in competencyClusters" :key="cluster.key" class="comp-table-wrap">
+                  <div class="comp-cluster-label">
+                    {{ cluster.name }} Competencies
+                    <span class="cluster-badge">{{ cluster.badge }}</span>
+                  </div>
+                  <p class="comp-note" style="padding: 8px 0 4px">{{ cluster.note }}</p>
+                  <div class="table-wrapper">
+                    <table class="data-table comp-page-table">
+                      <thead>
+                        <tr>
+                          <th style="min-width: 200px">Competency</th>
+                          <th style="width: 180px; text-align: center">Competency Level (CL)</th>
+                          <th style="width: 180px; text-align: center">Percentage (%)</th>
+                          <th style="min-width: 200px">Basis / Key Observations</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="(comp, idx) in cluster.competencies" :key="comp">
+                          <td class="row-label">{{ comp }}</td>
+                          <td>
+                            <select v-model="competencyData[cluster.key][idx][lvKey + '_cl']" class="comp-select">
+                              <option v-for="o in clOptions" :key="o" :value="o">{{ o || "---" }}</option>
+                            </select>
+                          </td>
+                          <td>
+                            <select v-model="competencyData[cluster.key][idx][lvKey + '_pct']" class="comp-select">
+                              <option v-for="o in pctOptions" :key="o" :value="o">{{ o || "---" }}</option>
+                            </select>
+                          </td>
+                          <td>
+                            <textarea rows="2" v-model="competencyData[cluster.key][idx].observations" placeholder="Observations..."></textarea>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <!-- Prev / Next navigation -->
+                <div class="comp-tab-nav">
+                  <button
+                    class="btn-tab-nav"
+                    :disabled="lvIdx === 0"
+                    @click="activeCompTab = visibleCompLevelHeaders[lvIdx - 1]"
+                  >
+                    ← Previous
+                  </button>
+                  <span class="comp-tab-page">{{ lvIdx + 1 }} / {{ visibleCompLevelKeys.length }}</span>
+                  <button
+                    class="btn-tab-nav"
+                    :disabled="lvIdx === visibleCompLevelKeys.length - 1"
+                    @click="activeCompTab = visibleCompLevelHeaders[lvIdx + 1]"
+                  >
+                    Next →
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <hr class="subsection-divider" />
+            <h4 style="font-family: 'Playfair Display', serif; color: var(--navy); margin-bottom: 12px; font-size: 16px;">
+              Competency Cluster Summary
+            </h4>
+            <div class="table-wrapper">
+              <table class="data-table cluster-summary-table">
+                <thead>
+                  <tr>
+                    <th>Competency Cluster</th>
+                    <th>Strongest Competency</th>
+                    <th>Weakest Competency</th>
+                    <th style="width: 140px">Intervention Needed? (Y/N)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="c in clusterSummary" :key="c.cluster">
+                    <td class="row-label">{{ c.cluster }}</td>
+                    <td><input type="text" v-model="c.strongest" placeholder="e.g. Integrity" /></td>
+                    <td><input type="text" v-model="c.weakest" placeholder="e.g. Building Partnership" /></td>
+                    <td>
+                      <select v-model="c.interventionNeeded">
+                        <option value="">---</option>
+                        <option value="Y">Y</option>
+                        <option value="N">N</option>
+                      </select>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        </transition>
       </div>
 
       <!-- SECTION III: OTHER LeaD DATA SOURCES -->
-      <div class="section-card">
+      <div class="section-card section-card-collapsible">
         <div class="section-header">
           <div class="section-num">III</div>
           <div>
             <h3>Other LeaD Data Sources</h3>
             <p>Data sources used to identify additional learning needs</p>
           </div>
+          <div v-if="!sectionDone.competency" class="section-locked-badge">Complete Section II first</div>
+          <div v-else-if="sectionDone.dataSources" class="section-done-badge">✓ Complete</div>
         </div>
-        <div class="section-body">
-          <p class="section-desc">
-            In addition to the competency assessment, indicate the data sources
-            your office used to identify additional learning needs. You may also
-            summarize insights or gaps surfaced from these sources.
-          </p>
+        <transition name="reveal">
+          <div v-if="sectionDone.competency" class="section-body">
+            <p class="section-desc">
+              In addition to the competency assessment, indicate the data sources
+              your office used to identify additional learning needs. You may also
+              summarize insights or gaps surfaced from these sources.
+            </p>
 
-          <h4 class="subsec-label">A. Data Source Checklist</h4>
-          <div class="source-checklist">
-            <label
-              v-for="src in dataSources"
-              :key="src.value"
-              class="source-item"
-              :class="{ checked: form.selectedSources.includes(src.value) }"
-            >
-              <input type="checkbox" :value="src.value" v-model="form.selectedSources" />
-              {{ src.label }}
-            </label>
-          </div>
-          <div v-if="form.selectedSources.includes('Others')" style="margin-top: 10px">
-            <input type="text" v-model="form.othersSourceText" placeholder="Please specify other data sources..." />
-          </div>
+            <h4 class="subsec-label">A. Data Source Checklist</h4>
+            <div class="source-checklist">
+              <label
+                v-for="src in dataSources"
+                :key="src.value"
+                class="source-item"
+                :class="{ checked: form.selectedSources.includes(src.value) }"
+              >
+                <input type="checkbox" :value="src.value" v-model="form.selectedSources" />
+                {{ src.label }}
+              </label>
+            </div>
+            <div v-if="form.selectedSources.includes('Others')" style="margin-top: 10px">
+              <input type="text" v-model="form.othersSourceText" placeholder="Please specify other data sources..." />
+            </div>
 
-          <hr class="subsection-divider" />
+            <hr class="subsection-divider" />
 
-          <h4 class="subsec-label">B. Summary of Key Insights or Gaps Identified</h4>
-          <div v-if="insightRows.length === 0" style="padding: 16px; color: var(--text-light); font-size: 13px; font-style: italic;">
-            Select at least one data source above to populate this table.
+            <h4 class="subsec-label">B. Summary of Key Insights or Gaps Identified</h4>
+            <div v-if="insightRows.length === 0" style="padding: 16px; color: var(--text-light); font-size: 13px; font-style: italic;">
+              Select at least one data source above to populate this table.
+            </div>
+            <div v-else class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th style="width: 40px">No.</th>
+                    <th style="min-width: 200px">Data Source</th>
+                    <th>Identified Gap / Issue</th>
+                    <th>Relevant Personnel / Function</th>
+                    <th>Recommended Intervention (if any)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(row, idx) in insightRows" :key="row.dataSource">
+                    <td style="text-align: center; color: var(--text-light); font-weight: 600;">{{ idx + 1 }}</td>
+                    <td class="row-label" style="font-size: 13px; white-space: normal;">{{ row.dataSource }}</td>
+                    <td><textarea rows="2" v-model="row.gap" placeholder="Identified gap or issue..."></textarea></td>
+                    <td><input type="text" v-model="row.personnel" placeholder="Relevant personnel or function..." /></td>
+                    <td><input type="text" v-model="row.intervention" placeholder="Recommended intervention..." /></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-          <div v-else class="table-wrapper">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th style="width: 40px">No.</th>
-                  <th style="min-width: 200px">Data Source</th>
-                  <th>Identified Gap / Issue</th>
-                  <th>Relevant Personnel / Function</th>
-                  <th>Recommended Intervention (if any)</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(row, idx) in insightRows" :key="row.dataSource">
-                  <td style="text-align: center; color: var(--text-light); font-weight: 600;">{{ idx + 1 }}</td>
-                  <td class="row-label" style="font-size: 13px; white-space: normal;">{{ row.dataSource }}</td>
-                  <td><textarea rows="2" v-model="row.gap" placeholder="Identified gap or issue..."></textarea></td>
-                  <td><input type="text" v-model="row.personnel" placeholder="Relevant personnel or function..." /></td>
-                  <td><input type="text" v-model="row.intervention" placeholder="Recommended intervention..." /></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+        </transition>
       </div>
 
-      <!-- CERTIFICATION + SUBMIT -->
-      <div class="section-card">
+      <!-- CERTIFICATION -->
+      <div class="section-card section-card-collapsible">
         <div class="section-header">
           <div class="section-num">IV</div>
           <div>
             <h3>Certification</h3>
             <p>Rater / Head of Office declaration</p>
           </div>
+          <div v-if="!sectionDone.dataSources" class="section-locked-badge">Complete Section III first</div>
         </div>
-        <div class="section-body">
-          <div class="certification-box">
-            <p>
-              I hereby certify that the information provided in this Learning
-              Needs Assessment is accurate and based on actual observation,
-              data, and evidence gathered from the office.
-            </p>
-            <div class="field-group">
-              <label>Full Name of Rater / Head of Office <span class="req">*</span></label>
-              <input type="text" v-model="form.raterFullName" placeholder="Enter full name" style="max-width: 400px" />
+        <transition name="reveal">
+          <div v-if="sectionDone.dataSources" class="section-body">
+            <div class="certification-box">
+              <p>
+                I hereby certify that the information provided in this Learning
+                Needs Assessment is accurate and based on actual observation,
+                data, and evidence gathered from the office.
+              </p>
+              <div class="field-group">
+                <label>Full Name of Rater / Head of Office <span class="req">*</span></label>
+                <input type="text" v-model="form.raterFullName" placeholder="Enter full name" style="max-width: 400px" />
+              </div>
+              <small style="font-size: 11px; color: var(--text-light); display: block; margin-top: 8px;">
+                Signature over Printed Name of Rater/Head of Office
+              </small>
             </div>
-            <small style="font-size: 11px; color: var(--text-light); display: block; margin-top: 8px;">
-              Signature over Printed Name of Rater/Head of Office
-            </small>
           </div>
-        </div>
+        </transition>
       </div>
 
       <!-- SUBMIT -->
-      <div class="submit-area">
-        <p>
-          By submitting, you confirm that all information is accurate and based
-          on actual office data. HRMS will be notified immediately upon submission.
-        </p>
-        <button class="btn-submit" :disabled="isSubmitting" @click="submitForm">
-          Submit LNA
-        </button>
-      </div>
+      <transition name="reveal">
+        <div v-if="sectionDone.certification" class="submit-area">
+          <p>
+            By submitting, you confirm that all information is accurate and based
+            on actual office data. HRMS will be notified immediately upon submission.
+          </p>
+          <button class="btn-submit" :disabled="isSubmitting" @click="submitForm">
+            Submit LNA
+          </button>
+        </div>
+      </transition>
     </div>
   </div>
 </template>
@@ -525,7 +558,7 @@ const visibleCompLevelKeys = computed(() =>
 // Active tab for competency mapping pagination — defaults to first level
 const activeCompTab = ref("1st Level");
 const clOptions  = ["", "N/A", "1 - Basic", "2 - Intermediate", "3 - Advanced", "4 - Expert"];
-const pctOptions = ["", "N/A", "A - 76%-100%", "B - 51%-75%", "C - 26%-50%", "D - 25% -Below"];
+const pctOptions = ["", "N/A", "A - 76%-100%", "B - 51%-75%", "C - 26%-50%", "D - 25% & below"];
 
 const COMPETENCIES = {
   core: [
@@ -669,7 +702,9 @@ const form = reactive({
   officeAffiliation: "",
   unitOfficeCollege: "",
   collegeProgram: "",
-  headOfUnit: "",
+  headLastName: "",
+  headFirstName: "",
+  headMiddleInitial: "",
   position: "",
   datePrepared: "",
   yearCovered: "",
@@ -684,10 +719,31 @@ const form = reactive({
 // ── COMPUTED (depend on form) ──
 const isOVPAA = computed(() => form.officeAffiliation === "OVPAA");
 
+const headOfUnitFull = computed(() => {
+  const parts = [
+    form.headLastName.trim(),
+    form.headFirstName.trim(),
+    form.headMiddleInitial.trim(),
+  ].filter(Boolean);
+  return parts.join(", ");
+});
+
 const positionOptions = computed(() => {
-  if (form.officeAffiliation === "OVPAA") return ["Dean", "Chairperson"];
+  if (form.officeAffiliation === "OVPAA") {
+    const unit = (form.unitOfficeCollege || "").toLowerCase().trim();
+    if (!unit) return ["Dean", "Chairperson", "Director"];
+    if (unit.startsWith("college of") || unit === "professional schools") return ["Dean", "Chairperson"];
+    return ["Director"];
+  }
   if (["OVPAF", "OVPEO", "OVPRDIE", "OVPSAS"].includes(form.officeAffiliation)) return ["Director"];
   return [];
+});
+
+// Reset position whenever positionOptions changes and current value is no longer valid
+watch(positionOptions, (newOpts) => {
+  if (!newOpts.includes(form.position)) {
+    form.position = newOpts.length === 1 ? newOpts[0] : "";
+  }
 });
 
 const visiblePositionLevels = computed(() =>
@@ -695,6 +751,43 @@ const visiblePositionLevels = computed(() =>
     lv.key !== "faculty" || form.officeAffiliation === "OVPAA"
   )
 );
+
+// ── PROGRESSIVE DISCLOSURE ──
+const sectionDone = computed(() => {
+  const emailOk = /^[a-zA-Z0-9._%+\-]+$/.test((form.submitterEmailPrefix || "").trim());
+  const programRequired = isOVPAA.value && selectedCollegePrograms.value.length > 0;
+
+  const header = !!(
+    emailOk &&
+    form.officeAffiliation &&
+    form.unitOfficeCollege &&
+    (!programRequired || form.collegeProgram) &&
+    form.headLastName.trim() &&
+    form.headFirstName.trim() &&
+    form.position &&
+    form.datePrepared &&
+    form.yearCovered &&
+    form.totalPersonnel !== "" && form.totalPersonnel !== null &&
+    form.purpose &&
+    (form.purpose !== "Other" || form.purposeOther.trim())
+  );
+
+  // Workforce: at least one cell filled across visible position levels
+  const workforceDone = visiblePositionLevels.value.some(lv =>
+    employmentTypeKeys.some(t => workforce[lv.key][t] !== null && workforce[lv.key][t] !== "")
+  );
+
+  // Competency: all cluster summary rows have strongest + weakest filled
+  const competency = clusterSummary.every(c => c.strongest.trim() && c.weakest.trim() && c.interventionNeeded);
+
+  // Data sources: at least one source selected
+  const dataSourcesDone = form.selectedSources.length > 0;
+
+  // Certification: rater name filled
+  const certification = !!form.raterFullName.trim();
+
+  return { header, workforce: workforceDone, competency, dataSources: dataSourcesDone, certification };
+});
 
 const collegeOfficeUnitOptions = computed(() => {
   const list = subOfficeMap[form.officeAffiliation] || [];
@@ -718,6 +811,7 @@ watch(() => form.officeAffiliation, () => {
 
 watch(() => form.unitOfficeCollege, () => {
   form.collegeProgram = "";
+  form.position = "";
 });
 
 // ── OTHER REACTIVE STATE ──
@@ -771,25 +865,6 @@ watch(
       return val;
     });
 
-    // Remove rows whose source was unchecked (keep rows whose source is still selected)
-    for (let i = insightRows.length - 1; i >= 0; i--) {
-      const stillSelected = resolvedSources.some(s => insightRows[i].dataSource === s || insightRows[i].dataSource.startsWith("Others"));
-      const srcVal = newSources.find(v => v === "Others")
-        ? true
-        : newSources.some(v => insightRows[i].dataSource === v);
-      if (!srcVal && !insightRows[i].dataSource.startsWith("Others")) {
-        insightRows.splice(i, 1);
-      }
-    }
-
-    // Add rows for newly checked sources that don't have a row yet
-    resolvedSources.forEach(src => {
-      const exists = insightRows.some(r => r.dataSource === src || (src.startsWith("Others") && r.dataSource.startsWith("Others")));
-      if (!exists) {
-        insightRows.push({ dataSource: src, gap: "", personnel: "", intervention: "" });
-      }
-    });
-
     // Remove rows for sources that are fully gone
     for (let i = insightRows.length - 1; i >= 0; i--) {
       const row = insightRows[i];
@@ -799,6 +874,17 @@ watch(
         : newSources.includes(row.dataSource);
       if (!stillPresent) insightRows.splice(i, 1);
     }
+
+    // Add rows for newly checked sources that don't have a row yet
+    resolvedSources.forEach(src => {
+      const exists = insightRows.some(r =>
+        r.dataSource === src ||
+        (src.startsWith("Others") && r.dataSource.startsWith("Others"))
+      );
+      if (!exists) {
+        insightRows.push({ dataSource: src, gap: "", personnel: "", intervention: "" });
+      }
+    });
   },
   { deep: true }
 );
@@ -837,7 +923,6 @@ function validateEmail() {
 function validate() {
   const requiredFields = [
     ["unitOfficeCollege", "Unit/Office/College"],
-    ["headOfUnit",        "Head of Unit"],
     ["position",          "Position"],
     ["datePrepared",      "Date Prepared"],
     ["yearCovered",       "Year Covered"],
@@ -850,6 +935,13 @@ function validate() {
       return false;
     }
   }
+
+  // Validate head of unit name (last name + first name required)
+  if (!form.headLastName.trim() || !form.headFirstName.trim()) {
+    alert("Please fill in the Head of Unit/Office/College Last Name and First Name.");
+    return false;
+  }
+
   // Build full email before validating
   form.submitterEmail = (form.submitterEmailPrefix || "").trim() + "@carsu.edu.ph";
   if (!validateEmail()) {
@@ -880,8 +972,6 @@ async function submitForm() {
       selectedSources.push("Others: " + form.othersSourceText.trim());
   }
 
-  const leadInterventions = [];
-
   const payload = {
     action:            "submitLNA",
     submitterEmail:    form.submitterEmail,
@@ -889,7 +979,7 @@ async function submitForm() {
     officeAffiliation: form.officeAffiliation,
     unitOfficCollege:  form.unitOfficeCollege.trim(),
     collegeProgram:    form.collegeProgram.trim(),
-    headOfUnit:        form.headOfUnit.trim(),
+    headOfUnit:        headOfUnitFull.value,
     position:          form.position.trim(),
     datePrepared:      form.datePrepared,
     yearCovered:       form.yearCovered.trim(),
@@ -1060,6 +1150,29 @@ textarea { resize: vertical; min-height: 72px; }
 .email-hint.error   { color: var(--error); }
 .email-hint.success { color: var(--success); }
 
+/* ── Split name row ── */
+.name-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+.name-sub {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+.name-sub-mi {
+  flex: 0 0 80px;
+}
+.name-sub-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
 .checkbox-item {
   display: flex; align-items: center; gap: 8px; cursor: pointer;
@@ -1128,21 +1241,6 @@ textarea { resize: vertical; min-height: 72px; }
 .source-item:hover { border-color: var(--navy); background: var(--white); }
 .source-item input { accent-color: var(--navy); cursor: pointer; flex-shrink: 0; width: auto; padding: 0; border: none; background: none; }
 .source-item.checked { border-color: var(--navy); background: rgba(26,77,46,0.04); }
-
-.pos-level-header { background: rgba(245,195,0,0.12) !important; font-weight: 700; color: var(--navy); font-size: 13px; }
-.priority-badge {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 24px; height: 24px; background: var(--navy); color: var(--white);
-  border-radius: 50%; font-size: 11px; font-weight: 700; flex-shrink: 0;
-}
-
-.intervention-checks { display: flex; flex-direction: column; gap: 6px; }
-.iv-check {
-  display: flex; align-items: center; gap: 6px; font-size: 12px;
-  text-transform: none; letter-spacing: 0; color: var(--text-light); font-weight: 400; cursor: pointer;
-}
-.iv-check input[type="checkbox"] { width: auto; padding: 0; border: none; background: none; accent-color: var(--navy); }
-.iv-text { flex: 1; padding: 4px 8px; font-size: 12px; }
 
 .certification-box {
   background: rgba(201,168,76,0.08); border: 1.5px solid var(--gold);
@@ -1224,6 +1322,8 @@ textarea { resize: vertical; min-height: 72px; }
   .page-nav { padding: 0 16px; }
   .nav-current, .nav-sep { display: none; }
   .source-checklist { grid-template-columns: 1fr 1fr; }
+  .name-row { flex-direction: column; }
+  .name-sub-mi { flex: unset; width: 100%; }
 }
 
 /* ── Competency tabs ── */
@@ -1287,25 +1387,55 @@ textarea { resize: vertical; min-height: 72px; }
   color: var(--text-light);
 }
 
-/* ── Rating pills in legend ── */
-.rating-pill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px; height: 22px;
-  border-radius: 50%;
-  font-size: 11px;
-  font-weight: 700;
-  margin-right: 4px;
-}
-.rating-pill.cl  { background: var(--navy); color: var(--white); }
-.rating-pill.pct { background: var(--gold); color: var(--navy); }
-
 /* ── Competency page table selects ── */
 .comp-page-table .comp-select {
   width: 100%;
   min-width: 160px;
   font-size: 13px;
+}
+
+/* ── Reveal transition (matches IDP exactly) ── */
+.reveal-enter-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.reveal-enter-from {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+/* ── Section done badge ── */
+.section-done-badge {
+  margin-left: auto;
+  background: rgba(26,107,60,0.15);
+  color: #1a6b3c;
+  font-size: 11px; font-weight: 700;
+  padding: 4px 10px; border-radius: 20px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* ── Section locked badge ── */
+.section-card-collapsible .section-header {
+  flex-wrap: wrap;
+}
+.section-locked-badge {
+  margin-left: auto;
+  background: #f0ece0;
+  color: var(--text-light);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+/* ── Section header flex ── */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 @keyframes fadeUp {

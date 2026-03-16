@@ -1,480 +1,1162 @@
 <template>
-  <div>
-    <!-- Loading Overlay -->
-    <div v-if="isSubmitting" class="overlay active">
-      <div class="spinner"></div>
-      <p>Submitting your LNA, please wait…</p>
-    </div>
+  <!-- Loading overlay -->
+  <div class="overlay" :class="{ active: isLoading }">
+    <div class="spinner"></div>
+    <p>{{ loadingMsg }}</p>
+  </div>
+  
+  <!-- Page nav breadcrumb -->
+  <div class="page-nav">
+    <a href="/" class="back-link">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6" /></svg>
+      Back to Home
+    </a>
+    <span class="nav-sep">/</span>
+    <span class="nav-current">Individual Development Plan (IDP) 2026-2029</span>
+  </div>
 
-    <!-- Page Nav -->
-    <div class="page-nav">
-      <NuxtLink to="/" class="back-link">
-        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6" /></svg>
-        Back to Home
-      </NuxtLink>
-      <span class="nav-sep">/</span>
-      <span class="nav-current">USWAG Plan (LNA Tool)</span>
-    </div>
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- STAGE 1 SUCCESS SCREEN                          -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div v-if="stage === 'stage1-success'" class="success-screen">
+    <div class="success-icon">✓</div>
+    <h2>IDP Successfully Submitted</h2>
+    <p>
+      Your Individual Development Plan has been received. Your supervisor has
+      been notified and has <strong>3 days</strong> to complete their
+      assessment.
+    </p>
+    <div class="ref-id-box">{{ refId }}</div>
+    <p>
+      Please keep your <strong>Reference ID</strong> for your records. You will
+      receive an email confirmation shortly.
+    </p>
+    <p style="color: #1a6b3c; font-weight: 600; margin-top: 16px">
+      📧 A complete copy of your IDP (including your supervisor's assessment)
+      will be emailed to you once your supervisor submits their review.
+    </p>
+    <br />
+    <a href="/" class="btn-return">← Return to Home</a>
+  </div>
 
-    <!-- Success Screen -->
-    <div v-if="screen === 'success'" class="success-screen active">
-      <div class="success-icon">&#10003;</div>
-      <h2>LNA Successfully Submitted</h2>
-      <p>
-        The USWAG PLAN for your office has been received. HRMS has been notified
-        and will process your submission accordingly.
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- STAGE 2 TOKEN SCREEN                            -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div v-if="stage === 'token'" class="token-screen">
+    <h2>Access IDP for Review</h2>
+    <p>
+      Enter your CarSU email address to verify your identity and load the
+      employee's submission.
+    </p>
+    <input
+      v-model="tokenInput"
+      type="text"
+      placeholder="Token (auto-filled from email link)"
+      style="margin-bottom: 12px"
+    />
+    <input
+      v-model="supervisorEmailInput"
+      type="email"
+      placeholder="Your CarSU email (e.g. name@carsu.edu.ph)"
+      style="margin-bottom: 16px"
+    />
+    <div class="token-error">{{ tokenError }}</div>
+    <button class="btn-load" @click="loadByToken">Verify &amp; Load IDP</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- STAGE 2 SUCCESS SCREEN                          -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div v-if="stage === 'stage2-success'" class="success-screen">
+    <div class="success-icon">✓</div>
+    <h2>Assessment Submitted</h2>
+    <p>
+      Your assessment for this IDP has been recorded. HRMS has been notified
+      that the IDP is now fully complete. Thank you.
+    </p>
+    <div
+      style="
+        margin: 16px 0;
+        padding: 14px 18px;
+        background: rgba(26, 77, 46, 0.07);
+        border-left: 4px solid var(--navy);
+        border-radius: 8px;
+        text-align: left;
+      "
+    >
+      <p style="margin: 0 0 4px; font-weight: 600; color: var(--navy)">
+        📧 Employee has been notified
       </p>
-      <div class="ref-id-box">{{ refId }}</div>
+      <p style="margin: 0; color: var(--text-light); font-size: 14px">
+        A complete copy of the IDP — including your assessment — has been
+        automatically emailed to the employee.
+      </p>
+    </div>
+  </div>
+
+  <!-- print area -->
+  <div id="printArea" style="display: none"></div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- STAGE 1: EMPLOYEE FORM                          -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div v-if="stage === 'stage1'" class="container">
+    <div class="form-title-block">
+      <h2>Individual Development Plan (IDP) 2026-2029</h2>
       <p>
-        Please keep your <strong>Reference ID</strong> for your records. A
-        confirmation email has been sent to your address.
+        Complete all sections carefully. Your supervisor will be notified
+        automatically upon submission.
       </p>
     </div>
 
-    <!-- Main Form -->
-    <div v-if="screen === 'form'" class="container">
-      <div class="form-title-block">
-        <span class="eyebrow">HRMS — Learning &amp; Development</span>
-        <h2>USWAG PLAN</h2>
-        <h3>Unified System for Workforce Assessment and Growth Plan</h3>
-        <p>CSU's Learning Needs Assessment (LNA) Tool</p>
-      </div>
-
-      <!-- HEADER INFO — always visible -->
-      <div class="section-card">
-        <div class="section-header">
-          <div class="section-num">H</div>
-          <div>
-            <h3>Office Information</h3>
-            <p>Basic details about your office and the submitter</p>
-          </div>
-          <div v-if="sectionDone.header" class="section-done-badge">✓ Complete</div>
+    <!-- ── HEADER INFO ── -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-num">H</div>
+        <div>
+          <h3>Personnel Information</h3>
+          <p>Basic details and submission purpose</p>
         </div>
-        <div class="section-body">
+      </div>
+      <div class="section-body">
 
-          <div class="field-grid field-grid-2" style="margin-bottom: 18px">
-            <div class="field-group span-2">
-              <label>Your CarSU Email Address <span class="req">*</span></label>
-              <div
-                class="email-prefix-wrapper"
-                :class="{
-                  error: emailHint.type === 'error',
-                  valid: emailHint.type === 'success'
-                }"
-              >
-                <input
-                  type="text"
-                  v-model="form.submitterEmailPrefix"
-                  class="email-prefix-input"
-                  placeholder="yourname"
-                  @blur="validateEmail"
-                />
-                <span class="email-suffix">@carsu.edu.ph</span>
-              </div>
-              <small class="email-hint" :class="emailHint.type">{{ emailHint.msg }}</small>
+        <!-- Campus — static display only -->
+        <div class="field-group" style="margin-bottom: 20px">
+          <label>Campus</label>
+          <div class="static-value">CSU Main Campus</div>
+        </div>
+
+        <!-- Office Affiliation -->
+        <div class="field-group" style="margin-bottom: 20px">
+          <label>Office Affiliation <span class="req">*</span></label>
+          <div class="checkbox-group">
+            <label
+              v-for="option in officeOptions"
+              :key="option"
+              class="checkbox-item"
+              :class="{ checked: form.officeAffiliation === option }"
+            >
+              <input
+                type="radio"
+                name="officeAffiliation"
+                :value="option"
+                v-model="form.officeAffiliation"
+              />
+              {{ option }}
+            </label>
+          </div>
+        </div>
+
+        <!-- College / Office / Unit -->
+        <div class="field-grid field-grid-2" style="margin-bottom: 18px">
+          <div class="field-group span-2">
+            <label>College / Office / Unit <span class="req">*</span></label>
+            <select
+              v-if="collegeOfficeUnitOptions.length > 0"
+              v-model="form.collegeOfficeUnit"
+              :class="{ error: errors.collegeOfficeUnit }"
+            >
+              <option value="">Select office / unit…</option>
+              <option v-for="opt in collegeOfficeUnitOptions" :key="opt" :value="opt">{{ opt }}</option>
+            </select>
+            <input
+              v-else
+              type="text"
+              v-model="form.collegeOfficeUnit"
+              :class="{ error: errors.collegeOfficeUnit }"
+              placeholder="Type your college / office / unit"
+            />
+          </div>
+          <!-- Program selector — only for OVPAA colleges with programs -->
+          <div v-if="isOVPAA && selectedCollegePrograms.length > 0" class="field-group span-2" style="margin-top: 4px">
+            <label>Program / Department <span class="req">*</span></label>
+            <select v-model="form.collegeProgram" :class="{ error: errors.collegeProgram }">
+              <option value="">Select program…</option>
+              <option v-for="p in selectedCollegePrograms" :key="p" :value="p">{{ p }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Name of Personnel -->
+        <div class="field-group" style="margin-bottom: 18px">
+          <label>Name of Personnel <span class="req">*</span></label>
+          <div class="name-grid">
+            <div>
+              <input type="text" v-model="form.lastName" :class="{ error: errors.lastName }" placeholder="Last Name" />
+              <small class="field-hint">Last Name</small>
+            </div>
+            <div>
+              <input type="text" v-model="form.firstName" :class="{ error: errors.firstName }" placeholder="First Name" />
+              <small class="field-hint">First Name</small>
+            </div>
+            <div class="mi-col">
+              <input type="text" v-model="form.middleInitial" :class="{ error: errors.middleInitial }" placeholder="M.I." maxlength="3" />
+              <small class="field-hint">M.I.</small>
             </div>
           </div>
+        </div>
 
-          <!-- Campus — static display -->
-          <div class="field-group" style="margin-bottom: 20px">
-            <label>Campus</label>
-            <div class="static-value">CSU Main Campus</div>
-          </div>
+        <div class="field-grid field-grid-2" style="margin-bottom: 18px">
 
-          <!-- Office Affiliation -->
-          <div class="field-group" style="margin-bottom: 20px">
-            <label>Office Affiliation <span class="req">*</span></label>
-            <div class="checkbox-group">
-              <label
-                v-for="o in officeOptions"
-                :key="o"
-                class="checkbox-item"
-                :class="{ checked: form.officeAffiliation === o }"
-              >
-                <input
-                  type="radio"
-                  name="officeAffiliation"
-                  :value="o"
-                  v-model="form.officeAffiliation"
-                />
-                {{ o }}
-              </label>
+          <!-- Employee Email -->
+          <div class="field-group">
+            <label>Your CarSU Email Address <span class="req">*</span></label>
+            <div class="email-prefix-wrapper" :class="{ error: emailHints.employee.type === 'error', valid: emailHints.employee.type === 'success' }">
+              <input
+                type="text"
+                v-model="form.employeeEmailPrefix"
+                class="email-prefix-input"
+                placeholder="yourname"
+                @blur="validateEmail('employee')"
+              />
+              <span class="email-suffix">@carsu.edu.ph</span>
             </div>
+            <small class="email-hint" :class="emailHints.employee.type">{{ emailHints.employee.msg }}</small>
           </div>
 
-          <div class="field-grid field-grid-2" style="margin-bottom: 18px">
+          <!-- Date Prepared -->
+          <div class="field-group">
+            <label>Date Prepared <span class="req">*</span></label>
+            <input type="date" v-model="form.datePrepared" :class="{ error: errors.datePrepared }" />
+          </div>
 
-            <!-- Name of Unit/Office/College — dynamic dropdown -->
-            <div class="field-group span-2">
-              <label>Name of Unit / Office / College <span class="req">*</span></label>
-              <select
-                v-if="collegeOfficeUnitOptions.length > 0"
-                v-model="form.unitOfficeCollege"
-              >
-                <option value="">Select office / unit…</option>
-                <option v-for="opt in collegeOfficeUnitOptions" :key="opt" :value="opt">{{ opt }}</option>
+          <!-- Educational Attainment -->
+          <div class="field-group span-2">
+            <label>Highest Educational Attainment <span class="req">*</span></label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <select v-model="form.educAttainment" :class="{ error: errors.educAttainment }">
+                <option value="">Select…</option>
+                <option>Bachelor's Degree</option>
+                <option>Post-Baccalaureate Certificate</option>
+                <option>Master's Degree</option>
+                <option>Post-Master's Certificate</option>
+                <option>Doctorate Degree (Ph.D. / Ed.D. / etc.)</option>
+                <option>Post-Doctoral</option>
               </select>
               <input
-                v-else
                 type="text"
-                v-model="form.unitOfficeCollege"
-                placeholder="e.g. College of Engineering"
+                v-model="form.educAttainmentSpec"
+                :class="{ error: errors.educAttainmentSpec }"
+                placeholder="Specify degree / program (e.g. BS Computer Science)"
               />
-            </div>
-
-            <!-- Program selector — only for OVPAA colleges with programs -->
-            <div v-if="isOVPAA && selectedCollegePrograms.length > 0" class="field-group span-2" style="margin-top: 4px">
-              <label>Program / Department <span class="req">*</span></label>
-              <select v-model="form.collegeProgram">
-                <option value="">Select program…</option>
-                <option v-for="p in selectedCollegePrograms" :key="p" :value="p">{{ p }}</option>
-              </select>
-            </div>
-
-            <div class="field-group">
-              <label>Head of Unit/Office/College <span class="req">*</span></label>
-              <input type="text" v-model="form.headOfUnit" placeholder="Full name" />
-            </div>
-            <div class="field-group">
-              <label>Position / Designation <span class="req">*</span></label>
-              <select v-model="form.position" :disabled="!form.officeAffiliation || (isOVPAA && !form.unitOfficeCollege)">
-                <option value="">Select position…</option>
-                <option v-for="opt in positionOptions" :key="opt" :value="opt">{{ opt }}</option>
-              </select>
-            </div>
-            <div class="field-group">
-              <label>Date Prepared <span class="req">*</span></label>
-              <input type="date" v-model="form.datePrepared" />
-            </div>
-            <div class="field-group">
-              <label>Year Covered <span class="req">*</span></label>
-              <select v-model="form.yearCovered">
-                <option value="">Select year…</option>
-                <option>2026-2027</option>
-                <option>2026-2028</option>
-                <option>2026-2029</option>
-              </select>
-            </div>
-            <div class="field-group">
-              <label>Total Personnel <span class="req">*</span></label>
-              <input type="number" v-model="form.totalPersonnel" min="0" placeholder="0" />
             </div>
           </div>
 
+          <!-- Current Position / Designation -->
+          <div class="field-group span-2">
+            <label>Current Position / Designation <span class="req">*</span></label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div>
+                <small class="field-hint" style="margin-bottom:4px;display:block;">Personnel Type</small>
+                <select v-model="form.personnelType" :class="{ error: errors.personnelType }" @change="form.currentPosition = ''">
+                  <option value="">Select type…</option>
+                  <option value="administrative">Administrative Personnel</option>
+                  <option v-if="form.officeAffiliation === 'OVPAA'" value="faculty">Faculty</option>
+                </select>
+              </div>
+              <div>
+                <small class="field-hint" style="margin-bottom:4px;display:block;">Position / Designation</small>
+                <select v-model="form.currentPosition" :class="{ error: errors.currentPosition }" :disabled="!form.personnelType">
+                  <option value="">Select position…</option>
+                  <template v-if="form.personnelType === 'administrative'">
+                    <option>Admin Aide I – Utility</option>
+                    <option>Admin Aide I – Clerk</option>
+                    <option>Admin Aide II – Utility</option>
+                    <option>Admin Aide II – Clerk</option>
+                    <option>Admin Aide III – Clerk</option>
+                    <option>Admin Aide IV – Mechanic</option>
+                    <option>Admin Aide IV – Clerk</option>
+                    <option>Admin Aide IV – Driver</option>
+                    <option>Security Guard I</option>
+                    <option>Farm Worker I</option>
+                    <option>Admin Assistant I</option>
+                    <option>Admin Assistant II</option>
+                    <option>Admin Assistant III</option>
+                    <option>Admin Assistant IV</option>
+                    <option>Admin Officer I</option>
+                    <option>Admin Officer II</option>
+                    <option>Admin Officer III</option>
+                    <option>Admin Officer IV</option>
+                    <option>Admin Officer V</option>
+                    <option>Accountant III</option>
+                    <option>College Librarian I</option>
+                    <option>College Librarian III</option>
+                    <option>Nurse I</option>
+                    <option>Nurse II</option>
+                    <option>Chief Administrative Officer (CAO)</option>
+                    <option>Board Secretary V</option>
+                    <option>Guidance Counselor III</option>
+                    <option>Programmer II</option>
+                    <option>Database Administrator</option>
+                    <option>System Analyst</option>
+                    <option>Planning Officer</option>
+                    <option>Attorney II</option>
+                    <option>Attorney III</option>
+                    <option>Physician</option>
+                    <option>Procurement Officer</option>
+                  </template>
+                  <template v-if="form.personnelType === 'faculty'">
+                    <option>Instructor I</option>
+                    <option>Instructor II</option>
+                    <option>Instructor III</option>
+                    <option>Assistant Professor I</option>
+                    <option>Assistant Professor II</option>
+                    <option>Assistant Professor III</option>
+                    <option>Assistant Professor IV</option>
+                    <option>Associate Professor I</option>
+                    <option>Associate Professor II</option>
+                    <option>Associate Professor III</option>
+                    <option>Associate Professor IV</option>
+                    <option>Associate Professor V</option>
+                    <option>Associate Professor VI</option>
+                    <option>Professor I</option>
+                    <option>Professor II</option>
+                    <option>Professor III</option>
+                    <option>Professor IV</option>
+                    <option>Professor V</option>
+                    <option>Professor VI</option>
+                    <option>University Professor</option>
+                  </template>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Year Covered -->
           <div class="field-group">
+            <label>Year Covered <span class="req">*</span></label>
+            <input type="text" v-model="form.yearCovered" :class="{ error: errors.yearCovered }" placeholder="e.g. 2025" />
+          </div>
+
+          <!-- Years in Position -->
+          <div class="field-group">
+            <label>Years in Position <span class="req">*</span></label>
+            <input type="number" v-model="form.yearsInPosition" :class="{ error: errors.yearsInPosition }" min="0" placeholder="0" />
+          </div>
+
+          <!-- Years in CSU -->
+          <div class="field-group">
+            <label>Years in CSU <span class="req">*</span></label>
+            <input type="number" v-model="form.yearsInCSU" :class="{ error: errors.yearsInCSU }" min="0" placeholder="0" />
+          </div>
+
+          <!-- Supervisor Name -->
+          <div class="field-group">
+            <label>Immediate Supervisor Name <span class="req">*</span></label>
+            <input type="text" v-model="form.supervisorName" :class="{ error: errors.supervisorName }" placeholder="e.g. Dr. Juan Dela Cruz" />
+          </div>
+
+          <!-- Supervisor Email -->
+          <div class="field-group">
+            <label>Supervisor CarSU Email <span class="req">*</span></label>
+            <div class="email-prefix-wrapper" :class="{ error: emailHints.supervisor.type === 'error', valid: emailHints.supervisor.type === 'success' }">
+              <input
+                type="text"
+                v-model="form.supervisorEmailPrefix"
+                class="email-prefix-input"
+                placeholder="supervisor"
+                @blur="validateEmail('supervisor')"
+              />
+              <span class="email-suffix">@carsu.edu.ph</span>
+            </div>
+            <small class="email-hint" :class="emailHints.supervisor.type">{{ emailHints.supervisor.msg }}</small>
+          </div>
+
+          <!-- Purpose -->
+          <div class="field-group span-2">
             <label>Purpose <span class="req">*</span></label>
             <div class="checkbox-group">
               <label
-                v-for="p in purposeOptions"
-                :key="p"
+                v-for="option in purposeOptions"
+                :key="option"
                 class="checkbox-item"
-                :class="{ checked: form.purpose === p }"
+                :class="{ checked: form.headerPurpose === option }"
               >
-                <input type="radio" name="purpose" :value="p" v-model="form.purpose" />
-                {{ p }}
-              </label>
-            </div>
-            <div v-if="form.purpose === 'Other'" class="other-specify visible" style="margin-top: 10px">
-              <input type="text" v-model="form.purposeOther" placeholder="Please specify..." />
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- SECTION I: WORKFORCE PROFILE -->
-      <div class="section-card section-card-collapsible">
-        <div class="section-header">
-          <div class="section-num">I</div>
-          <div>
-            <h3>Workforce Profile by Employment Classification and Position Level</h3>
-            <p>Indicate number of personnel per classification per position level</p>
-          </div>
-          <div v-if="!sectionDone.header" class="section-locked-badge">Complete Section H first</div>
-          <div v-else-if="sectionDone.workforce" class="section-done-badge">✓ Complete</div>
-        </div>
-        <transition name="reveal">
-          <div v-if="sectionDone.header" class="section-body">
-            <p class="section-desc">
-              Indicate the number of personnel per employment classification under
-              each position level within your office. Refer to
-              <strong>Annex A</strong> for descriptions and sample positions.
-            </p>
-            <div class="table-wrapper">
-              <table class="data-table workforce-table">
-                <thead>
-                  <tr>
-                    <th style="min-width: 180px; text-align: left">Position Level</th>
-                    <th v-for="t in employmentTypes" :key="t">{{ t }}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="level in visiblePositionLevels" :key="level.key">
-                    <td class="row-label">{{ level.label }}</td>
-                    <td v-for="t in employmentTypeKeys" :key="t">
-                      <input
-                        type="number"
-                        min="0"
-                        placeholder="0"
-                        v-model.number="workforce[level.key][t]"
-                        style="text-align: center; width: 60px"
-                      />
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </transition>
-      </div>
-
-      <!-- SECTION II: COMPETENCY MAPPING -->
-      <div class="section-card section-card-collapsible">
-        <div class="section-header">
-          <div class="section-num">II</div>
-          <div>
-            <h3>Competency Mapping and Assessment</h3>
-            <p>Assess current competency levels across all position levels</p>
-          </div>
-          <div v-if="!sectionDone.workforce" class="section-locked-badge">Complete Section I first</div>
-          <div v-else-if="sectionDone.competency" class="section-done-badge">✓ Complete</div>
-        </div>
-        <transition name="reveal">
-          <div v-if="sectionDone.workforce" class="section-body">
-            <div class="section-desc">
-              Using the rating scale below, identify the highest competency level
-              (CL: 1-4) and percentage (%) of personnel demonstrating it. Write
-              <strong>N/A</strong> if the competency does not apply. For detailed
-              descriptions, refer to the
-              <a href="https://tinyurl.com/CompetencyManualandModel" target="_blank">Competency Manual and Model</a>.
-              <div style="margin-top: 14px">
-                <p><i>Rating Scale:</i></p>
-                <img
-                  src="/img/rating-scale.png"
-                  alt="Rating Scale"
-                  style="max-width: 100%; height: auto; display: block; border-radius: 6px;"
+                <input
+                  type="radio"
+                  name="headerPurpose"
+                  :value="option"
+                  v-model="form.headerPurpose"
                 />
-              </div>
-            </div>
-
-            <!-- Position Level Tabs -->
-            <div class="comp-tabs">
-              <button
-                v-for="lv in visibleCompLevelHeaders"
-                :key="lv"
-                class="comp-tab"
-                :class="{ active: activeCompTab === lv }"
-                @click="activeCompTab = lv"
-              >
-                {{ lv }}
-              </button>
-            </div>
-
-            <!-- Tab Content: one position level at a time -->
-            <div v-for="(lvKey, lvIdx) in visibleCompLevelKeys" :key="lvKey">
-              <div v-show="activeCompTab === visibleCompLevelHeaders[lvIdx]">
-                <div v-for="cluster in competencyClusters" :key="cluster.key" class="comp-table-wrap">
-                  <div class="comp-cluster-label">
-                    {{ cluster.name }} Competencies
-                    <span class="cluster-badge">{{ cluster.badge }}</span>
-                  </div>
-                  <p class="comp-note" style="padding: 8px 0 4px">{{ cluster.note }}</p>
-                  <div class="table-wrapper">
-                    <table class="data-table comp-page-table">
-                      <thead>
-                        <tr>
-                          <th style="min-width: 200px">Competency</th>
-                          <th style="width: 180px; text-align: center">Competency Level (CL)</th>
-                          <th style="width: 180px; text-align: center">Percentage (%)</th>
-                          <th style="min-width: 200px">Basis / Key Observations</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr v-for="(comp, idx) in cluster.competencies" :key="comp">
-                          <td class="row-label">{{ comp }}</td>
-                          <td>
-                            <select v-model="competencyData[cluster.key][idx][lvKey + '_cl']" class="comp-select">
-                              <option v-for="o in clOptions" :key="o" :value="o">{{ o || "---" }}</option>
-                            </select>
-                          </td>
-                          <td>
-                            <select v-model="competencyData[cluster.key][idx][lvKey + '_pct']" class="comp-select">
-                              <option v-for="o in pctOptions" :key="o" :value="o">{{ o || "---" }}</option>
-                            </select>
-                          </td>
-                          <td>
-                            <textarea rows="2" v-model="competencyData[cluster.key][idx].observations" placeholder="Observations..."></textarea>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                <!-- Prev / Next navigation -->
-                <div class="comp-tab-nav">
-                  <button
-                    class="btn-tab-nav"
-                    :disabled="lvIdx === 0"
-                    @click="activeCompTab = visibleCompLevelHeaders[lvIdx - 1]"
-                  >
-                    ← Previous
-                  </button>
-                  <span class="comp-tab-page">{{ lvIdx + 1 }} / {{ visibleCompLevelKeys.length }}</span>
-                  <button
-                    class="btn-tab-nav"
-                    :disabled="lvIdx === visibleCompLevelKeys.length - 1"
-                    @click="activeCompTab = visibleCompLevelHeaders[lvIdx + 1]"
-                  >
-                    Next →
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <hr class="subsection-divider" />
-            <h4 style="font-family: 'Playfair Display', serif; color: var(--navy); margin-bottom: 12px; font-size: 16px;">
-              Competency Cluster Summary
-            </h4>
-            <div class="table-wrapper">
-              <table class="data-table cluster-summary-table">
-                <thead>
-                  <tr>
-                    <th>Competency Cluster</th>
-                    <th>Strongest Competency</th>
-                    <th>Weakest Competency</th>
-                    <th style="width: 140px">Intervention Needed? (Y/N)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="c in clusterSummary" :key="c.cluster">
-                    <td class="row-label">{{ c.cluster }}</td>
-                    <td><input type="text" v-model="c.strongest" placeholder="e.g. Integrity" /></td>
-                    <td><input type="text" v-model="c.weakest" placeholder="e.g. Building Partnership" /></td>
-                    <td>
-                      <select v-model="c.interventionNeeded">
-                        <option value="">---</option>
-                        <option value="Y">Y</option>
-                        <option value="N">N</option>
-                      </select>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </transition>
-      </div>
-
-      <!-- SECTION III: OTHER LeaD DATA SOURCES -->
-      <div class="section-card section-card-collapsible">
-        <div class="section-header">
-          <div class="section-num">III</div>
-          <div>
-            <h3>Other LeaD Data Sources</h3>
-            <p>Data sources used to identify additional learning needs</p>
-          </div>
-          <div v-if="!sectionDone.competency" class="section-locked-badge">Complete Section II first</div>
-          <div v-else-if="sectionDone.dataSources" class="section-done-badge">✓ Complete</div>
-        </div>
-        <transition name="reveal">
-          <div v-if="sectionDone.competency" class="section-body">
-            <p class="section-desc">
-              In addition to the competency assessment, indicate the data sources
-              your office used to identify additional learning needs. You may also
-              summarize insights or gaps surfaced from these sources.
-            </p>
-
-            <h4 class="subsec-label">A. Data Source Checklist</h4>
-            <div class="source-checklist">
-              <label
-                v-for="src in dataSources"
-                :key="src.value"
-                class="source-item"
-                :class="{ checked: form.selectedSources.includes(src.value) }"
-              >
-                <input type="checkbox" :value="src.value" v-model="form.selectedSources" />
-                {{ src.label }}
+                {{ option }}
               </label>
             </div>
-            <div v-if="form.selectedSources.includes('Others')" style="margin-top: 10px">
-              <input type="text" v-model="form.othersSourceText" placeholder="Please specify other data sources..." />
-            </div>
-
-            <hr class="subsection-divider" />
-
-            <h4 class="subsec-label">B. Summary of Key Insights or Gaps Identified</h4>
-            <div v-if="insightRows.length === 0" style="padding: 16px; color: var(--text-light); font-size: 13px; font-style: italic;">
-              Select at least one data source above to populate this table.
-            </div>
-            <div v-else class="table-wrapper">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th style="width: 40px">No.</th>
-                    <th style="min-width: 200px">Data Source</th>
-                    <th>Identified Gap / Issue</th>
-                    <th>Relevant Personnel / Function</th>
-                    <th>Recommended Intervention (if any)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(row, idx) in insightRows" :key="row.dataSource">
-                    <td style="text-align: center; color: var(--text-light); font-weight: 600;">{{ idx + 1 }}</td>
-                    <td class="row-label" style="font-size: 13px; white-space: normal;">{{ row.dataSource }}</td>
-                    <td><textarea rows="2" v-model="row.gap" placeholder="Identified gap or issue..."></textarea></td>
-                    <td><input type="text" v-model="row.personnel" placeholder="Relevant personnel or function..." /></td>
-                    <td><input type="text" v-model="row.intervention" placeholder="Recommended intervention..." /></td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="other-specify" :class="{ visible: form.headerPurpose === 'Other' }">
+              <input type="text" v-model="form.headerPurposeOther" placeholder="Please specify…" />
             </div>
           </div>
-        </transition>
-      </div>
 
-      <!-- CERTIFICATION -->
-      <div class="section-card section-card-collapsible">
-        <div class="section-header">
-          <div class="section-num">IV</div>
-          <div>
-            <h3>Certification</h3>
-            <p>Rater / Head of Office declaration</p>
-          </div>
-          <div v-if="!sectionDone.dataSources" class="section-locked-badge">Complete Section III first</div>
         </div>
-        <transition name="reveal">
-          <div v-if="sectionDone.dataSources" class="section-body">
-            <div class="certification-box">
-              <p>
-                I hereby certify that the information provided in this Learning
-                Needs Assessment is accurate and based on actual observation,
-                data, and evidence gathered from the office.
-              </p>
-              <div class="field-group">
-                <label>Full Name of Rater / Head of Office <span class="req">*</span></label>
-                <input type="text" v-model="form.raterFullName" placeholder="Enter full name" style="max-width: 400px" />
-              </div>
-              <small style="font-size: 11px; color: var(--text-light); display: block; margin-top: 8px;">
-                Signature over Printed Name of Rater/Head of Office
-              </small>
-            </div>
-          </div>
-        </transition>
       </div>
+    </div>
 
-      <!-- SUBMIT -->
+    <!-- ── SECTION I: COMPETENCY ASSESSMENT ── -->
+    <div class="section-card section-card-collapsible">
+      <div class="section-header">
+        <div class="section-num">I</div>
+        <div>
+          <h3>Competency Assessment</h3>
+          <p>Identify key competencies to develop</p>
+        </div>
+        <div v-if="!form.headerPurpose" class="section-locked-badge">Complete Section H first</div>
+      </div>
       <transition name="reveal">
-        <div v-if="sectionDone.certification" class="submit-area">
-          <p>
-            By submitting, you confirm that all information is accurate and based
-            on actual office data. HRMS will be notified immediately upon submission.
-          </p>
-          <button class="btn-submit" :disabled="isSubmitting" @click="submitForm">
-            Submit LNA
+      <div v-if="form.headerPurpose" class="section-body">
+        <div class="section-desc">
+          Identify key competencies you need to develop based on your current or
+          target role. For detailed descriptions and behavioral indicators,
+          please refer to the
+          <a href="https://tinyurl.com/CompetencyManualandModel" target="_blank"
+            >Competency Manual and Model</a
+          >.
+        </div>
+
+        <div class="field-group" style="margin-bottom: 20px">
+          <label>Purpose <span class="req">*</span></label>
+          <div class="checkbox-group">
+            <label
+              v-for="option in compPurposeOptions"
+              :key="option.value"
+              class="checkbox-item"
+              :class="{ checked: form.compPurpose === option.value }"
+            >
+              <input
+                type="radio"
+                name="compPurpose"
+                :value="option.value"
+                v-model="form.compPurpose"
+              />
+              {{ option.label }}
+            </label>
+          </div>
+          <div
+            class="other-specify"
+            :class="{ visible: form.compPurpose === 'Others' }"
+          >
+            <input
+              type="text"
+              v-model="form.compPurposeOther"
+              placeholder="Please specify…"
+            />
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="dynamic-table">
+            <thead>
+              <tr>
+                <th style="width: 40px">No.</th>
+                <th style="min-width:180px">Target Competency</th>
+                <th style="width: 150px">Current Level</th>
+                <th style="width: 150px">Required Level</th>
+                <th>Suggested LeaD Interventions</th>
+                <th style="width: 120px">Target Timeline</th>
+                <th style="width: 40px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(row, idx) in competencyRows" :key="idx">
+                <td class="row-num-cell">{{ idx + 1 }}</td>
+                <td>
+                  <select v-model="row.targetCompetency" @change="row.competencyGroup = getCompetencyCluster(row.targetCompetency); row.requiredLevel = getRequiredLevel(row.targetCompetency, form.currentPosition)">
+                    <option value="">Select…</option>
+                    <optgroup label="Core">
+                      <option v-for="c in allCompetencies.Core" :key="c" :value="c">{{ c }}</option>
+                    </optgroup>
+                    <optgroup label="Leadership">
+                      <option v-for="c in allCompetencies.Leadership" :key="c" :value="c">{{ c }}</option>
+                    </optgroup>
+                    <optgroup label="Organizational">
+                      <option v-for="c in allCompetencies.Organizational" :key="c" :value="c">{{ c }}</option>
+                    </optgroup>
+                    <optgroup label="Technical">
+                      <option v-for="c in allCompetencies.Technical" :key="c" :value="c">{{ c }}</option>
+                    </optgroup>
+                  </select>
+                </td>
+                <td>
+                  <select v-model="row.currentLevel">
+                    <option value="">Select…</option>
+                    <option value="1 - Basic">1 - Basic</option>
+                    <option value="2 - Intermediate">2 - Intermediate</option>
+                    <option value="3 - Advanced">3 - Advanced</option>
+                    <option value="4 - Expert">4 - Expert</option>
+                  </select>
+                </td>
+                <td>
+                  <div v-if="row.requiredLevel" class="required-level-badge">{{ row.requiredLevel }}</div>
+                  <div v-else class="required-level-empty">Auto-set</div>
+                </td>
+                <td>
+                  <select v-model="row.leadInterventions" style="min-width:200px">
+                    <option value="">Select…</option>
+                    <optgroup label="On-the-Job Learning">
+                      <option>Observation / Demonstration</option>
+                      <option>Delegation</option>
+                      <option>Coaching</option>
+                      <option>Mentoring</option>
+                      <option>Deployment</option>
+                      <option>Job Rotation / Assignment</option>
+                      <option>Detail and Secondment</option>
+                      <option>Reading</option>
+                      <option>Flexible Learning</option>
+                      <option>Brainstorming / Group Discussion</option>
+                      <option>Experiential Learning</option>
+                    </optgroup>
+                    <optgroup label="Off-the-Job Learning">
+                      <option>Special Short Courses and Lectures</option>
+                      <option>Conferences, Training Programs, Conventions, Seminars, and Cum Paper Presentations</option>
+                      <option>Pursue Higher Education</option>
+                    </optgroup>
+                  </select>
+                </td>
+                <td>
+                  <select v-model="row.targetTimeline">
+                    <option value="">Select…</option>
+                    <option>2026-2027</option>
+                    <option>2027-2028</option>
+                    <option>2028-2029</option>
+                  </select>
+                </td>
+                <td>
+                  <button
+                    class="btn-remove-row"
+                    @click="removeRow(competencyRows, idx)"
+                    title="Remove row"
+                  >
+                    ×
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-actions">
+          <button class="btn-add-row" @click="addCompetencyRow">
+            + Add Row
           </button>
         </div>
+      </div>
       </transition>
+    </div>
+
+    <!-- ── SECTION II: AGAP ── -->
+    <div class="section-card section-card-collapsible">
+      <div class="section-header">
+        <div class="section-num">II</div>
+        <div>
+          <h3>Academic Growth and Advancement Program (AGAP)</h3>
+          <p>Plans for academic advancement</p>
+        </div>
+        <div v-if="!sectionIComplete" class="section-locked-badge">Complete Section I first</div>
+      </div>
+      <transition name="reveal">
+      <div v-if="sectionIComplete" class="section-body">
+        <div class="section-desc">
+          Outline your plans for academic advancement, such as enrolling in
+          graduate or certification programs. Ensure alignment with your role
+          and CSU's academic goals.
+        </div>
+        <div class="table-wrapper">
+          <table class="dynamic-table">
+            <thead>
+              <tr>
+                <th style="width: 40px">No.</th>
+                <th>Degree Program</th>
+                <th>Target HEI</th>
+                <th style="width: 120px">Mode of Study</th>
+                <th>Target Scholarship Grant</th>
+                <th style="width: 130px">Target Timeline</th>
+                <th style="width: 40px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(row, idx) in agapRows" :key="idx">
+                <td class="row-num-cell">{{ idx + 1 }}</td>
+                <td>
+                  <select v-model="row.degreeProgram">
+                    <option value="">Select…</option>
+                    <option>Post-Baccalaureate Certificate</option>
+                    <option>Master's Degree</option>
+                    <option>Post-Master's Certificate</option>
+                    <option>Doctorate Degree (Ph.D. / Ed.D. / etc.)</option>
+                    <option>Post-Doctoral</option>
+                  </select>
+                </td>
+                <td>
+                  <input type="text" v-model="row.targetHEI" placeholder="" />
+                </td>
+                <td>
+                  <select v-model="row.modeOfStudy">
+                    <option value="">Select…</option>
+                    <option>Full-time</option>
+                    <option>Part-time</option>
+                    <option>Online</option>
+                    <option>Blended</option>
+                  </select>
+                </td>
+                <td>
+                  <input type="text" v-model="row.scholarshipGrant" placeholder="" />
+                </td>
+                <td>
+                  <select v-model="row.targetTimeline">
+                    <option value="">Select…</option>
+                    <option>2026-2027</option>
+                    <option>2027-2028</option>
+                    <option>2028-2029</option>
+                  </select>
+                </td>
+                <td>
+                  <button class="btn-remove-row" @click="removeRow(agapRows, idx)" title="Remove row">×</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-actions">
+          <button class="btn-add-row" @click="addAgapRow">+ Add Row</button>
+        </div>
+      </div>
+      </transition>
+    </div>
+
+    <!-- ── SECTION III: PRO-ACT ── -->
+    <div class="section-card section-card-collapsible">
+      <div class="section-header">
+        <div class="section-num">III</div>
+        <div>
+          <h3>Professional Advancement through Capacity-Building and Trainings (Pro-ACT)</h3>
+          <p>Training and workshop interventions</p>
+        </div>
+        <div v-if="!sectionIIComplete" class="section-locked-badge">Complete Section II first</div>
+      </div>
+      <transition name="reveal">
+      <div v-if="sectionIIComplete" class="section-body">
+        <div class="section-desc">
+          If a training intervention is identified in Part I (Competency
+          Assessment), provide more detailed information here.
+        </div>
+        <div class="table-wrapper">
+          <table class="dynamic-table">
+            <thead>
+              <tr>
+                <th style="width: 40px">No.</th>
+                <th>Training / Workshop Title</th>
+                <th>Target Competency / Skill</th>
+                <th style="width: 130px">Mode of Activity</th>
+                <th>Trainer / Provider</th>
+                <th style="width: 130px">Target Timeline</th>
+                <th style="width: 40px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <template v-if="filledCompetencies.length === 0">
+                <tr>
+                  <td colspan="6" style="text-align:center; color: var(--text-light); font-style:italic; padding: 20px;">
+                    Add competencies in Section I to populate this table.
+                  </td>
+                </tr>
+              </template>
+              <tr v-for="(competency, idx) in filledCompetencies" :key="competency">
+                <td class="row-num-cell">{{ idx + 1 }}</td>
+                <td>
+                  <input type="text" v-model="proactRows[idx].trainingTitle" placeholder="" />
+                </td>
+                <td>
+                  <div class="proact-skill-label">{{ competency }}</div>
+                </td>
+                <td>
+                  <select v-model="proactRows[idx].modeOfActivity">
+                    <option value="">Select…</option>
+                    <option>Face-to-face</option>
+                    <option>Online</option>
+                    <option>Blended</option>
+                    <option>On-the-job</option>
+                  </select>
+                </td>
+                <td>
+                  <input type="text" v-model="proactRows[idx].trainerProvider" placeholder="" />
+                </td>
+                <td>
+                  <select v-model="proactRows[idx].targetTimeline">
+                    <option value="">Select…</option>
+                    <option>2026-2027</option>
+                    <option>2027-2028</option>
+                    <option>2028-2029</option>
+                  </select>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p v-if="filledCompetencies.length > 0" style="font-size:13px; color:var(--text-light); margin-top:10px;">
+          Rows are auto-generated based on competencies entered in Section I.
+        </p>
+      </div>
+      </transition>
+    </div>
+
+    <!-- ── SUBMIT STAGE 1 ── -->
+    <transition name="reveal">
+      <div v-if="sectionIIIComplete" class="submit-area">
+        <p>
+          By submitting, you confirm that all information provided is accurate.
+          Your supervisor will be notified automatically.
+        </p>
+        <button class="btn-submit" :disabled="isSubmitting" @click="submitStage1">
+          {{ isSubmitting ? "Submitting…" : "Submit IDP" }}
+        </button>
+      </div>
+    </transition>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- STAGE 2: SUPERVISOR REVIEW                      -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div v-if="stage === 'stage2'" class="container">
+    <!-- Title bar with ref ID -->
+    <div
+      style="
+        text-align: center;
+        margin-bottom: 40px;
+        padding-bottom: 32px;
+        border-bottom: 3px solid var(--navy);
+      "
+    >
+      <h2
+        style="
+          font-family: 'Playfair Display', serif;
+          font-size: 28px;
+          color: var(--navy);
+          margin-bottom: 6px;
+        "
+      >
+        Individual Development Plan (IDP)
+      </h2>
+      <p style="color: var(--text-light); font-size: 14px">
+        Supervisor's Review — Read-only view of employee submission. Complete
+        Section IV below.
+      </p>
+      <div
+        style="
+          margin-top: 12px;
+          display: inline-block;
+          background: var(--navy);
+          color: var(--gold-light);
+          font-family: monospace;
+          font-size: 16px;
+          font-weight: 700;
+          padding: 8px 20px;
+          border-radius: 8px;
+          letter-spacing: 0.08em;
+        "
+      >
+        {{ idpData.refId }}
+      </div>
+    </div>
+
+    <!-- ── H: PERSONNEL INFO (READ-ONLY) ── -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-num">H</div>
+        <div>
+          <h3>Personnel Information</h3>
+          <p>Employee-submitted details</p>
+        </div>
+        <div class="readonly-badge">Read-only</div>
+      </div>
+      <div class="section-body">
+        <div class="ro-grid ro-grid-2" style="margin-bottom: 16px">
+          <div class="ro-field">
+            <div class="ro-label">Campus</div>
+            <div class="ro-value">{{ idpData.campus || "—" }}</div>
+          </div>
+          <div class="ro-field">
+            <div class="ro-label">Office Affiliation</div>
+            <div class="ro-value">{{ idpData.officeAffiliation || "—" }}</div>
+          </div>
+          <div class="ro-field span-2">
+            <div class="ro-label">College / Office / Unit</div>
+            <div class="ro-value">{{ idpData.collegeOfficeUnit || "—" }}</div>
+          </div>
+          <div class="ro-field">
+            <div class="ro-label">Name of Personnel</div>
+            <div class="ro-value">{{ idpData.nameOfPersonnel || "—" }}</div>
+          </div>
+          <div class="ro-field">
+            <div class="ro-label">Date Prepared</div>
+            <div class="ro-value">{{ idpData.datePrepared || "—" }}</div>
+          </div>
+          <div class="ro-field">
+            <div class="ro-label">Current Position / Designation</div>
+            <div class="ro-value">{{ idpData.currentPosition || "—" }}</div>
+          </div>
+          <div class="ro-field">
+            <div class="ro-label">Year Covered</div>
+            <div class="ro-value">{{ idpData.yearCovered || "—" }}</div>
+          </div>
+          <div class="ro-field">
+            <div class="ro-label">Years in Position</div>
+            <div class="ro-value">{{ idpData.yearsInPosition || "—" }}</div>
+          </div>
+          <div class="ro-field">
+            <div class="ro-label">Years in CSU</div>
+            <div class="ro-value">{{ idpData.yearsInCSU || "—" }}</div>
+          </div>
+          <div class="ro-field">
+            <div class="ro-label">Purpose</div>
+            <div class="ro-value">{{ idpData.headerPurpose || "—" }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── I: COMPETENCY (READ-ONLY) ── -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-num">I</div>
+        <div><h3>Competency Assessment</h3></div>
+        <div class="readonly-badge">Read-only</div>
+      </div>
+      <div class="section-body">
+        <div class="ro-field" style="margin-bottom: 16px">
+          <div class="ro-label">Purpose</div>
+          <div class="ro-value">{{ idpData.competencyPurpose || "—" }}</div>
+        </div>
+        <div class="ro-table-wrapper">
+          <table class="ro-table">
+            <thead>
+              <tr>
+                <th style="width: 50px">No.</th>
+                <th>Target Competency</th>
+                <th>Current Level</th>
+                <th>Required Level</th>
+                <th>Suggested LeaD Interventions</th>
+                <th>Resource / Support Needed</th>
+                <th>Target Timeline</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="!idpData.competencyRows?.length">
+                <td colspan="7" class="empty-row-cell">No entries provided.</td>
+              </tr>
+              <tr v-for="(row, idx) in idpData.competencyRows" :key="idx">
+                <td>{{ row.priority || idx + 1 }}</td>
+                <td>{{ row.targetCompetency || "—" }}</td>
+                <td>{{ row.currentLevel || "—" }}</td>
+                <td>{{ row.requiredLevel || "—" }}</td>
+                <td>{{ row.leadInterventions || "—" }}</td>
+                <td>{{ row.resourceSupport || "—" }}</td>
+                <td>{{ row.targetTimeline || "—" }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── II: AGAP (READ-ONLY) ── -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-num">II</div>
+        <div><h3>Academic Growth and Advancement Program (AGAP)</h3></div>
+        <div class="readonly-badge">Read-only</div>
+      </div>
+      <div class="section-body">
+        <div class="ro-table-wrapper">
+          <table class="ro-table">
+            <thead>
+              <tr>
+                <th style="width: 50px">No.</th>
+                <th>Degree Program</th>
+                <th>Target HEI</th>
+                <th>Mode of Study</th>
+                <th>Source of Funding</th>
+                <th>Target Scholarship Grant</th>
+                <th>Target Timeline</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="!idpData.agapRows?.length">
+                <td colspan="7" class="empty-row-cell">No entries provided.</td>
+              </tr>
+              <tr v-for="(row, idx) in idpData.agapRows" :key="idx">
+                <td>{{ row.priority || idx + 1 }}</td>
+                <td>{{ row.degreeProgram || "—" }}</td>
+                <td>{{ row.targetHEI || "—" }}</td>
+                <td>{{ row.modeOfStudy || "—" }}</td>
+                <td>{{ row.sourceOfFunding || "—" }}</td>
+                <td>{{ row.scholarshipGrant || "—" }}</td>
+                <td>{{ row.targetTimeline || "—" }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── III: PRO-ACT (READ-ONLY) ── -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-num">III</div>
+        <div>
+          <h3>
+            Professional Advancement through Capacity-Building and Trainings
+            (Pro-ACT)
+          </h3>
+        </div>
+        <div class="readonly-badge">Read-only</div>
+      </div>
+      <div class="section-body">
+        <div class="ro-table-wrapper">
+          <table class="ro-table">
+            <thead>
+              <tr>
+                <th style="width: 50px">No.</th>
+                <th>Training / Workshop Title</th>
+                <th>Target Competency / Skill</th>
+                <th>Mode of Activity</th>
+                <th>Source of Funding</th>
+                <th>Trainer / Provider</th>
+                <th>Target Timeline</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="!idpData.proactRows?.length">
+                <td colspan="7" class="empty-row-cell">No entries provided.</td>
+              </tr>
+              <tr v-for="(row, idx) in idpData.proactRows" :key="idx">
+                <td>{{ row.priority || idx + 1 }}</td>
+                <td>{{ row.trainingTitle || "—" }}</td>
+                <td>{{ row.targetSkill || "—" }}</td>
+                <td>{{ row.modeOfActivity || "—" }}</td>
+                <td>{{ row.sourceOfFunding || "—" }}</td>
+                <td>{{ row.trainerProvider || "—" }}</td>
+                <td>{{ row.targetTimeline || "—" }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── IV: SUPERVISOR ASSESSMENT (FILLABLE) ── -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-num">IV</div>
+        <div>
+          <h3>Supervisor's Assessment and Endorsement</h3>
+          <p>
+            Complete all fields below — this section is for the supervisor only
+          </p>
+        </div>
+      </div>
+      <div class="section-body">
+        <table class="assessment-table">
+          <thead>
+            <tr>
+              <th style="width: 180px">Assessment Area</th>
+              <th style="width: 240px">Guide Question</th>
+              <th>Supervisor's Response</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- 1. Performance Gaps -->
+            <tr>
+              <td class="area-label">1. Observed Performance Gaps</td>
+              <td class="guide-q">
+                Are there any gaps in the employee's current performance that
+                may be addressed through training, coaching, or mentoring?
+              </td>
+              <td class="response-cell">
+                <div class="checkbox-group" style="margin-bottom: 12px">
+                  <label
+                    class="checkbox-item"
+                    :class="{ checked: assessment.perfGapsYN === 'Yes' }"
+                  >
+                    <input
+                      type="radio"
+                      name="perfGapsYN"
+                      value="Yes"
+                      v-model="assessment.perfGapsYN"
+                    />
+                    Yes
+                  </label>
+                  <label
+                    class="checkbox-item"
+                    :class="{ checked: assessment.perfGapsYN === 'No' }"
+                  >
+                    <input
+                      type="radio"
+                      name="perfGapsYN"
+                      value="No"
+                      v-model="assessment.perfGapsYN"
+                    />
+                    No
+                  </label>
+                </div>
+                <div v-if="assessment.perfGapsYN === 'Yes'">
+                  <label class="field-label">If Yes, specify:</label>
+                  <textarea
+                    v-model="assessment.perfGapsSpec"
+                    rows="3"
+                    placeholder="Describe the performance gaps…"
+                  ></textarea>
+                </div>
+              </td>
+            </tr>
+            <!-- 2. Readiness -->
+            <tr>
+              <td class="area-label">2. Readiness for Advancement</td>
+              <td class="guide-q">
+                Based on your observation, is the employee ready for higher
+                responsibilities or academic growth (e.g., scholarship,
+                promotion readiness)?
+              </td>
+              <td class="response-cell">
+                <div class="checkbox-group" style="margin-bottom: 12px">
+                  <label
+                    class="checkbox-item"
+                    :class="{ checked: assessment.readinessYN === 'Yes' }"
+                  >
+                    <input
+                      type="radio"
+                      name="readinessYN"
+                      value="Yes"
+                      v-model="assessment.readinessYN"
+                    />
+                    Yes
+                  </label>
+                  <label
+                    class="checkbox-item"
+                    :class="{ checked: assessment.readinessYN === 'No' }"
+                  >
+                    <input
+                      type="radio"
+                      name="readinessYN"
+                      value="No"
+                      v-model="assessment.readinessYN"
+                    />
+                    No
+                  </label>
+                </div>
+                <label class="field-label">Remarks:</label>
+                <textarea
+                  v-model="assessment.readinessRemarks"
+                  rows="3"
+                  placeholder="Your remarks on readiness…"
+                ></textarea>
+              </td>
+            </tr>
+            <!-- 3. Interventions -->
+            <tr>
+              <td class="area-label">3. Recommended L&amp;D Interventions</td>
+              <td class="guide-q">
+                What specific learning and development interventions do you
+                recommend for this employee? <em>(Check all applicable)</em>
+              </td>
+              <td class="response-cell">
+                <div class="checkbox-group">
+                  <label
+                    v-for="opt in interventionOptions"
+                    :key="opt"
+                    class="checkbox-item"
+                    :class="{ checked: assessment.interventions.includes(opt) }"
+                  >
+                    <input
+                      type="checkbox"
+                      :value="opt"
+                      v-model="assessment.interventions"
+                    />
+                    {{ opt }}
+                  </label>
+                </div>
+                <div
+                  class="other-specify"
+                  :class="{
+                    visible: assessment.interventions.includes('Others'),
+                  }"
+                >
+                  <input
+                    type="text"
+                    v-model="assessment.interventionOther"
+                    placeholder="Specify other intervention…"
+                  />
+                </div>
+              </td>
+            </tr>
+            <!-- 4. Implementation Period -->
+            <tr>
+              <td class="area-label">4. Preferred Implementation Period</td>
+              <td class="guide-q">
+                When should the recommended interventions ideally be
+                implemented?
+              </td>
+              <td class="response-cell">
+                <div class="checkbox-group">
+                  <label
+                    v-for="opt in implOptions"
+                    :key="opt"
+                    class="checkbox-item"
+                    :class="{
+                      checked: assessment.implementationPeriod.includes(opt),
+                    }"
+                  >
+                    <input
+                      type="checkbox"
+                      :value="opt"
+                      v-model="assessment.implementationPeriod"
+                    />
+                    {{ opt }}
+                  </label>
+                </div>
+              </td>
+            </tr>
+            <!-- 5. Additional Comments -->
+            <tr>
+              <td class="area-label">
+                5. Additional Comments or Development Notes
+              </td>
+              <td class="guide-q">
+                Any other suggestions or remarks to support the employee's
+                development plan?
+              </td>
+              <td class="response-cell">
+                <textarea
+                  v-model="assessment.additionalComments"
+                  rows="4"
+                  placeholder="Your additional comments or development notes…"
+                ></textarea>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Certification block -->
+        <div class="cert-block">
+          <p>
+            <em
+              >I hereby certify that I have reviewed and assessed the Individual
+              Development Plan (IDP) of the concerned personnel and confirm that
+              the proposed goals and interventions are aligned with their role,
+              performance needs, and the strategic direction of the office.</em
+            >
+          </p>
+          <div class="sup-name">{{ idpData.supervisorName || "—" }}</div>
+          <small>Signature over Printed Name of Immediate Supervisor</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SUBMIT STAGE 2 ── -->
+    <div class="submit-area">
+      <p>
+        By submitting, you confirm that your assessment is complete and
+        accurate. HR will be notified immediately.
+      </p>
+      <button class="btn-submit" :disabled="isSubmitting" @click="submitStage2">
+        {{ isSubmitting ? "Submitting…" : "Submit Assessment" }}
+      </button>
     </div>
   </div>
 </template>
@@ -482,118 +1164,121 @@
 <script setup>
 import { ref, reactive, computed, watch, onMounted } from "vue";
 
+// ── NOTE FOR MIGRATION ──────────────────────────────────────────────────────
+// APPS_SCRIPT_URL below is temporary for the current Google Sheets backend.
+// When NestJS backend is ready, replace this with your API endpoint, e.g.:
+//   const API_URL = '/api/idp'
+// and update submitStage1() and submitStage2() to use axios calls instead.
+// ────────────────────────────────────────────────────────────────────────────
 const config = useRuntimeConfig();
-const API = config.public.apiBase;
+const API = config.public.apiBase; // resolves to http://localhost:3001
+// ── Stage control ──────────────────────────────────────────────────────────
+// Possible values: 'stage1' | 'token' | 'stage2' | 'stage1-success' | 'stage2-success'
+const stage = ref("stage1");
 
-const screen = ref("form");
+// ── Loading state ──────────────────────────────────────────────────────────
+const isLoading = ref(false);
 const isSubmitting = ref(false);
+const loadingMsg = ref("Submitting your IDP, please wait…");
+
+// ── Stage 1 form data ──────────────────────────────────────────────────────
+const form = reactive({
+  campus: "CSU Main Campus",
+  officeAffiliation: "",
+  collegeOfficeUnit: "",
+  collegeProgram: "",
+  personnelType: "",  // "administrative" | "faculty"
+  lastName: "",
+  firstName: "",
+  middleInitial: "",
+  employeeEmailPrefix: "",
+  employeeEmail: "",
+  educAttainment: "",
+  educAttainmentSpec: "",
+  datePrepared: "",
+  currentPosition: "",
+  yearCovered: "",
+  yearsInPosition: "",
+  yearsInCSU: "",
+  supervisorName: "",
+  supervisorEmailPrefix: "",
+  supervisorEmail: "",
+  headerPurpose: "",
+  headerPurposeOther: "",
+  compPurpose: "",
+  compPurposeOther: "",
+});
+
+const errors = reactive({});
+const emailHints = reactive({
+  employee: { msg: "", type: "" },
+  supervisor: { msg: "", type: "" },
+});
+
+// Dynamic table rows
+const competencyRows = ref([
+  {
+    competencyGroup: "",  // auto-set by getCompetencyCluster on selection
+    targetCompetency: "",
+    currentLevel: "",
+    requiredLevel: "",
+    leadInterventions: "",
+    targetTimeline: "",
+  },
+]);
+const agapRows = ref([
+  {
+    degreeProgram: "",
+    targetHEI: "",
+    modeOfStudy: "",
+    scholarshipGrant: "",
+    targetTimeline: "",
+  },
+]);
+const proactRows = ref([
+  {
+    trainingTitle: "",
+    targetSkill: "",
+    modeOfActivity: "",
+    trainerProvider: "",
+    targetTimeline: "",
+  },
+]);
+
+// Stage 1 result
 const refId = ref("");
 
-// ── EMAIL HINT STATE (matches IDP pattern) ──
-const emailHint = reactive({ msg: "", type: "" });
+// ── Stage 2 state ──────────────────────────────────────────────────────────
+const tokenInput = ref("");
+const supervisorEmailInput = ref("");
+const tokenError = ref("");
+const currentToken = ref("");
+const supervisorEmail = ref("");
+const idpData = reactive({});
 
-// ── CONSTANTS ──
+const assessment = reactive({
+  perfGapsYN: "",
+  perfGapsSpec: "",
+  readinessYN: "",
+  readinessRemarks: "",
+  interventions: [],
+  interventionOther: "",
+  implementationPeriod: [],
+  additionalComments: "",
+});
+
+// ── Static options ─────────────────────────────────────────────────────────
+const campusOptions = ["CSU Main Campus"];
 const officeOptions = [
   "OVPAF",
   "OVPAA",
   "OVPEO",
-  "OVPRDIE",
   "OVPSAS",
+  "OVPRDIE",
 ];
 
-const purposeOptions = [
-  "Initial Assessment",
-  "Mid-Year Review",
-  "Annual Review",
-  "Other",
-];
-
-const employmentTypes = [
-  "Permanent", "Temporary", "Contractual", "Casual",
-  "Coterminus", "COS", "Job Order", "Others",
-];
-const employmentTypeKeys = [
-  "permanent", "temporary", "contractual", "casual",
-  "coterminus", "cos", "jobOrder", "others",
-];
-
-const positionLevels = [
-  { key: "first",        label: "First Level Positions" },
-  { key: "secondNonSup", label: "Second Level (Non-Supervisory)" },
-  { key: "secondSup",    label: "Second Level (Supervisory)" },
-  { key: "third",        label: "Third Level Positions" },
-  { key: "faculty",      label: "Faculty Positions" },
-];
-
-const compLevelHeaders = ["1st Level", "2nd (Non-Sup)", "2nd (Sup)", "3rd Level", "Faculty"];
-const compLevelKeys    = ["first", "secondNonSup", "secondSup", "third", "faculty"];
-
-const visibleCompLevelHeaders = computed(() =>
-  form.officeAffiliation === "OVPAA"
-    ? compLevelHeaders
-    : compLevelHeaders.filter(h => h !== "Faculty")
-);
-
-const visibleCompLevelKeys = computed(() =>
-  form.officeAffiliation === "OVPAA"
-    ? compLevelKeys
-    : compLevelKeys.filter(k => k !== "faculty")
-);
-
-// Active tab for competency mapping pagination — defaults to first level
-const activeCompTab = ref("1st Level");
-const clOptions  = ["", "N/A", "1 - Basic", "2 - Intermediate", "3 - Advanced", "4 - Expert"];
-const pctOptions = ["", "N/A", "A - 76%-100%", "B - 51%-75%", "C - 26%-50%", "D - 25% & below"];
-
-const COMPETENCIES = {
-  core: [
-    "Integrity", "Accountability", "Scientific & Technological Excellence",
-    "Delivering Service Excellence", "Environmental Consciousness", "Building Partnership",
-  ],
-  leadership: [
-    "Developing People", "Facilitating Change", "Conflict Management",
-    "Leading Innovation", "Strategic Planning", "Leading Others", "Decisiveness",
-  ],
-  org: [
-    "Teamwork", "Commitment to Learning", "Customer Focus", "Adaptability and Flexibility",
-    "Critical Thinking", "Effective Communication", "Valuing Diversity",
-    "Self-Awareness and Confidence", "Stress Tolerance", "Resource Management",
-    "Knowledge Management", "Initiative", "Result Orientation", "Community Engagement",
-    "Organizational Commitment", "Planning and Organizing",
-    "Emotional and Psychological Maturity", "Safety and Risk Management",
-    "Interpersonal Effectiveness",
-  ],
-  technical: [
-    "Research Engagement", "Diagnostic Information Gathering", "Attention to Details",
-    "Written Communication", "Oral Communication", "Conceptual and Analytical Thinking",
-    "Computer Literacy", "Planning and Project Management", "Logical Reasoning",
-  ],
-};
-
-const competencyClusters = [
-  { key: "core",       name: "Core",          badge: "Core",           note: "Foundational attributes expected of all personnel regardless of position.",      competencies: COMPETENCIES.core },
-  { key: "leadership", name: "Leadership",     badge: "Leadership",     note: "Skills and behaviors required to effectively lead individuals, teams, and units.", competencies: COMPETENCIES.leadership },
-  { key: "org",        name: "Organizational", badge: "Organizational", note: "Collective attributes that define the institution's way of working.",              competencies: COMPETENCIES.org },
-  { key: "technical",  name: "Technical",      badge: "Technical",      note: "Job-specific knowledge, skills, and abilities for effective role performance.",    competencies: COMPETENCIES.technical },
-];
-
-const dataSources = [
-  { value: "Individual Development Plan (IDP)",                      label: "Individual Development Plan (IDP)" },
-  { value: "Training Evaluation Results",                            label: "Training Evaluation Results" },
-  { value: "HR Records (Coaching logs, leave patterns, discipline)", label: "HR Records" },
-  { value: "IPCR/OPCR/DPCR Reviews",                                label: "IPCR/OPCR/DPCR Reviews" },
-  { value: "Audit or Accreditation Results (ISO, AACCUP, etc.)",    label: "Audit / Accreditation Results" },
-  { value: "Strategic Plan or SPMS Review",                         label: "Strategic Plan / SPMS Review" },
-  { value: "Focus Group Discussion (FGD)",                          label: "Focus Group Discussion (FGD)" },
-  { value: "Client/Stakeholder Feedback",                           label: "Client/Stakeholder Feedback" },
-  { value: "Risk Assessment",                                        label: "Risk Assessment" },
-  { value: "Interview",                                              label: "Interview" },
-  { value: "Questionnaire",                                          label: "Questionnaire" },
-  { value: "Test",                                                   label: "Test" },
-  { value: "Others",                                                 label: "Others" },
-];
-
-// ── OFFICE/UNIT MAP ──
+// Sub-office / college options per office affiliation
+// For OVPAA colleges, value is { name, programs: [] }
 const subOfficeMap = {
   OVPAF: [
     "Human Resource Management Services (HRMS)",
@@ -680,87 +1365,8 @@ const subOfficeMap = {
   ],
 };
 
-// ── FORM STATE — declared before computed/watch that reference it ──
-const form = reactive({
-  submitterEmailPrefix: "",
-  submitterEmail: "",
-  officeAffiliation: "",
-  unitOfficeCollege: "",
-  collegeProgram: "",
-  headOfUnit: "",
-  position: "",
-  datePrepared: "",
-  yearCovered: "",
-  totalPersonnel: "",
-  purpose: "",
-  purposeOther: "",
-  selectedSources: [],
-  othersSourceText: "",
-  raterFullName: "",
-});
-
-// ── COMPUTED (depend on form) ──
+// For OVPAA: colleges with sub-programs
 const isOVPAA = computed(() => form.officeAffiliation === "OVPAA");
-
-const positionOptions = computed(() => {
-  if (form.officeAffiliation === "OVPAA") {
-    const unit = (form.unitOfficeCollege || "").toLowerCase().trim();
-    if (!unit) return ["Dean", "Chairperson", "Director"];
-    if (unit.startsWith("college of") || unit === "professional schools") return ["Dean", "Chairperson"];
-    return ["Director"];
-  }
-  if (["OVPAF", "OVPEO", "OVPRDIE", "OVPSAS"].includes(form.officeAffiliation)) return ["Director"];
-  return [];
-});
-
-// Reset position whenever positionOptions changes and current value is no longer valid
-watch(positionOptions, (newOpts) => {
-  if (!newOpts.includes(form.position)) {
-    form.position = newOpts.length === 1 ? newOpts[0] : "";
-  }
-});
-
-const visiblePositionLevels = computed(() =>
-  positionLevels.filter(lv =>
-    lv.key !== "faculty" || form.officeAffiliation === "OVPAA"
-  )
-);
-
-// ── PROGRESSIVE DISCLOSURE ──
-const sectionDone = computed(() => {
-  const emailOk = /^[a-zA-Z0-9._%+\-]+$/.test((form.submitterEmailPrefix || "").trim());
-  const programRequired = isOVPAA.value && selectedCollegePrograms.value.length > 0;
-
-  const header = !!(
-    emailOk &&
-    form.officeAffiliation &&
-    form.unitOfficeCollege &&
-    (!programRequired || form.collegeProgram) &&
-    form.headOfUnit.trim() &&
-    form.position &&
-    form.datePrepared &&
-    form.yearCovered &&
-    form.totalPersonnel !== "" && form.totalPersonnel !== null &&
-    form.purpose &&
-    (form.purpose !== "Other" || form.purposeOther.trim())
-  );
-
-  // Workforce: at least one cell filled across visible position levels
-  const workforceDone = visiblePositionLevels.value.some(lv =>
-    employmentTypeKeys.some(t => workforce[lv.key][t] !== null && workforce[lv.key][t] !== "")
-  );
-
-  // Competency: all cluster summary rows have strongest + weakest filled
-  const competency = clusterSummary.every(c => c.strongest.trim() && c.weakest.trim() && c.interventionNeeded);
-
-  // Data sources: at least one source selected
-  const dataSources = form.selectedSources.length > 0;
-
-  // Certification: rater name filled
-  const certification = !!form.raterFullName.trim();
-
-  return { header, workforce: workforceDone, competency, dataSources, certification };
-});
 
 const collegeOfficeUnitOptions = computed(() => {
   const list = subOfficeMap[form.officeAffiliation] || [];
@@ -771,234 +1377,439 @@ const collegeOfficeUnitOptions = computed(() => {
 const selectedCollegePrograms = computed(() => {
   if (!isOVPAA.value) return [];
   const colleges = subOfficeMap["OVPAA"] || [];
-  const found = colleges.find(c => typeof c === "object" && c.name === form.unitOfficeCollege);
+  const found = colleges.find(c => typeof c === "object" && c.name === form.collegeOfficeUnit);
   return found ? found.programs : [];
 });
 
-// ── WATCHERS (depend on form) ──
+// Reset downstream when affiliation changes
 watch(() => form.officeAffiliation, () => {
-  form.unitOfficeCollege = "";
+  form.collegeOfficeUnit = "";
   form.collegeProgram = "";
-  form.position = "";
+  form.personnelType = "";
+  form.currentPosition = "";
 });
 
-watch(() => form.unitOfficeCollege, () => {
+watch(() => form.collegeOfficeUnit, () => {
   form.collegeProgram = "";
-  form.position = "";
+});
+// ── Section completion computed flags ─────────────────────────────────────
+const sectionIComplete = computed(() => {
+  // Section I (Competency) is "done" once purpose is chosen — rows are optional
+  return !!form.compPurpose;
 });
 
-// ── OTHER REACTIVE STATE ──
-const workforce = reactive(
-  Object.fromEntries(
-    positionLevels.map((lv) => [
-      lv.key,
-      Object.fromEntries(employmentTypeKeys.map((t) => [t, null])),
-    ]),
-  ),
-);
-
-const makeCompRow = (comp) => ({
-  competency: comp,
-  ...Object.fromEntries(
-    compLevelKeys.flatMap((lv) => [
-      [lv + "_cl", ""],
-      [lv + "_pct", ""],
-    ]),
-  ),
-  observations: "",
+const sectionIIComplete = computed(() => {
+  // Section II (AGAP) always shows once Section I purpose picked — rows optional
+  return sectionIComplete.value;
 });
 
-const competencyData = reactive(
-  Object.fromEntries(
-    Object.entries(COMPETENCIES).map(([key, comps]) => [
-      key,
-      comps.map(makeCompRow),
-    ]),
-  ),
-);
+const sectionIIIComplete = computed(() => {
+  // Section III (Pro-ACT) always shows once Section II visible — rows optional
+  return sectionIIComplete.value;
+});
 
-const clusterSummary = reactive([
-  { cluster: "Core",           strongest: "", weakest: "", interventionNeeded: "" },
-  { cluster: "Leadership",     strongest: "", weakest: "", interventionNeeded: "" },
-  { cluster: "Organizational", strongest: "", weakest: "", interventionNeeded: "" },
-  { cluster: "Technical",      strongest: "", weakest: "", interventionNeeded: "" },
-]);
+// Competencies actually entered in Section I — drives Pro-ACT table rows
+const filledCompetencies = computed(() => {
+  const list = competencyRows.value
+    .map(r => r.targetCompetency)
+    .filter(c => c && c.trim());
+  // Keep proactRows in sync — grow or shrink as needed
+  while (proactRows.value.length < list.length) {
+    proactRows.value.push({ trainingTitle: "", targetSkill: "", modeOfActivity: "", trainerProvider: "", targetTimeline: "" });
+  }
+  // Sync targetSkill on each row
+  list.forEach((c, i) => { proactRows.value[i].targetSkill = c; });
+  return list;
+});
 
-const insightRows = reactive([]);
-
-// Sync insightRows whenever selectedSources changes
-watch(
-  () => [...form.selectedSources],
-  (newSources) => {
-    // Resolve display labels for selected sources
-    const resolvedSources = newSources.map(val => {
-      if (val === "Others") {
-        return form.othersSourceText.trim() ? "Others: " + form.othersSourceText.trim() : "Others";
-      }
-      return val;
-    });
-
-    // Remove rows whose source was unchecked (keep rows whose source is still selected)
-    for (let i = insightRows.length - 1; i >= 0; i--) {
-      const stillSelected = resolvedSources.some(s => insightRows[i].dataSource === s || insightRows[i].dataSource.startsWith("Others"));
-      const srcVal = newSources.find(v => v === "Others")
-        ? true
-        : newSources.some(v => insightRows[i].dataSource === v);
-      if (!srcVal && !insightRows[i].dataSource.startsWith("Others")) {
-        insightRows.splice(i, 1);
-      }
-    }
-
-    // Add rows for newly checked sources that don't have a row yet
-    resolvedSources.forEach(src => {
-      const exists = insightRows.some(r => r.dataSource === src || (src.startsWith("Others") && r.dataSource.startsWith("Others")));
-      if (!exists) {
-        insightRows.push({ dataSource: src, gap: "", personnel: "", intervention: "" });
-      }
-    });
-
-    // Remove rows for sources that are fully gone
-    for (let i = insightRows.length - 1; i >= 0; i--) {
-      const row = insightRows[i];
-      const isOthers = row.dataSource.startsWith("Others");
-      const stillPresent = isOthers
-        ? newSources.includes("Others")
-        : newSources.includes(row.dataSource);
-      if (!stillPresent) insightRows.splice(i, 1);
-    }
+const purposeOptions = [
+  "Initial Assessment",
+  "Mid-Year Review",
+  "Annual Review",
+  "Other",
+];
+const compPurposeOptions = [
+  {
+    value: "To meet the competencies of my current position.",
+    label: "Meet competencies of current position",
   },
-  { deep: true }
-);
+  {
+    value: "To increase the level of competencies of the current position.",
+    label: "Increase level of current competencies",
+  },
+  {
+    value: "To meet the competencies of the next higher position.",
+    label: "Meet competencies of next higher position",
+  },
+  {
+    value: "To acquire new competencies across different functions/positions.",
+    label: "Acquire new competencies across functions",
+  },
+  { value: "Others", label: "Others" },
+];
+const interventionOptions = [
+  "Technical Training",
+  "Soft Skills",
+  "Leadership Development",
+  "Coaching/Mentoring",
+  "Academic Advancement",
+  "Job Rotation/Cross-training",
+  "Others",
+];
+const implOptions = ["Q1", "Q2", "Q3", "Q4", "Within this year", "Next year"];
 
-// Also update "Others" row label when othersSourceText changes
-watch(
-  () => form.othersSourceText,
-  (val) => {
-    const idx = insightRows.findIndex(r => r.dataSource.startsWith("Others"));
-    if (idx !== -1) {
-      insightRows[idx].dataSource = val.trim() ? "Others: " + val.trim() : "Others";
+// ── Competency lists ────────────────────────────────────────────────────────
+const competencyData = {
+  Core: computed(() => {
+    const base = ["Integrity","Accountability","Scientific and Technological Excellence","Delivering Service Excellence","Environmental Consciousness","Building Partnership"];
+    if (form.personnelType === "faculty") base.push("Faculty Specializing in Environment");
+    return base;
+  }),
+  Leadership: ["Developing People","Facilitating Change","Conflict Management","Leading Innovation","Strategic Planning","Leading Others","Decisiveness"],
+  Organizational: ["Teamwork","Commitment to Learning","Customer Focus","Adaptability and Flexibility","Critical Thinking","Effective Communication","Valuing Diversity","Self-Awareness and Confidence","Stress Tolerance","Resource Management","Knowledge Management","Initiative","Result Orientation","Community Engagement","Organizational Commitment","Planning and Organizing","Emotional and Psychological Maturity","Safety and Risk Management","Interpersonal Effectiveness"],
+  Technical: computed(() => {
+    const base = ["Research Engagement","Diagnostic Information Gathering","Attention to Details","Written Communication","Oral Communication","Conceptual and Analytical Thinking","Computer Literacy","Planning and Project Management","Logical Reasoning"];
+    if (form.personnelType === "faculty") {
+      base.push("Language Faculty","IT Faculty","Math and Allied Fields Faculty Members");
     }
+    return base;
+  }),
+};
+
+function getCompetencyOptions(group) {
+  if (!group) return [];
+  const v = competencyData[group];
+  if (!v) return [];
+  return typeof v.value !== "undefined" ? v.value : v;
+}
+
+// Flat computed lists per cluster (reactive to personnelType)
+const allCompetencies = computed(() => ({
+  Core: getCompetencyOptions("Core"),
+  Leadership: getCompetencyOptions("Leadership"),
+  Organizational: getCompetencyOptions("Organizational"),
+  Technical: getCompetencyOptions("Technical"),
+}));
+
+// Reverse lookup: competency name → cluster name
+function getCompetencyCluster(competency) {
+  if (!competency) return "";
+  for (const [grp, list] of Object.entries(allCompetencies.value)) {
+    if (list.includes(competency)) return grp;
   }
-);
+  return "";
+}
 
-// ── METHODS ──
-function validateEmail() {
-  const prefix = (form.submitterEmailPrefix || "").trim();
-  form.submitterEmail = prefix + "@carsu.edu.ph";
+// Required level lookup — based on position group
+// Levels: "1 - Basic", "2 - Intermediate", "3 - Advanced", "4 - Expert"
+function getPositionGroup(position) {
+  const p = (position || "").toLowerCase();
+  if (p.includes("university professor") || p.includes("professor v") || p.includes("professor vi")) return "senior_faculty";
+  if (p.includes("professor")) return "faculty_mid";
+  if (p.includes("instructor") || p.includes("assistant professor")) return "faculty_junior";
+  if (p.includes("admin officer iv") || p.includes("admin officer v") || p.includes("cao") || p.includes("board sec") || p.includes("attorney") || p.includes("physician") || p.includes("planning officer")) return "admin_senior";
+  if (p.includes("admin officer")) return "admin_mid";
+  return "admin_junior";
+}
 
-  if (!prefix) {
-    emailHint.msg  = "";
-    emailHint.type = "";
+// Required levels per competency category per position group
+const reqLevelMatrix = {
+  // [posGroup]: { Core, Leadership, Organizational, Technical }
+  senior_faculty:  { Core: "4 - Expert", Leadership: "4 - Expert", Organizational: "3 - Advanced", Technical: "4 - Expert" },
+  faculty_mid:     { Core: "3 - Advanced", Leadership: "3 - Advanced", Organizational: "3 - Advanced", Technical: "3 - Advanced" },
+  faculty_junior:  { Core: "2 - Intermediate", Leadership: "2 - Intermediate", Organizational: "2 - Intermediate", Technical: "2 - Intermediate" },
+  admin_senior:    { Core: "3 - Advanced", Leadership: "3 - Advanced", Organizational: "3 - Advanced", Technical: "2 - Intermediate" },
+  admin_mid:       { Core: "2 - Intermediate", Leadership: "2 - Intermediate", Organizational: "2 - Intermediate", Technical: "2 - Intermediate" },
+  admin_junior:    { Core: "1 - Basic", Leadership: "1 - Basic", Organizational: "1 - Basic", Technical: "1 - Basic" },
+};
+
+function getRequiredLevel(competency, position) {
+  if (!competency || !position) return "";
+  const posGroup = getPositionGroup(position);
+  const matrix = reqLevelMatrix[posGroup] || {};
+  // Find which group this competency belongs to
+  for (const [grp, list] of Object.entries(competencyData)) {
+    const arr = typeof list.value !== "undefined" ? list.value : list;
+    if (arr.includes(competency)) return matrix[grp] || "";
+  }
+  return "";
+}
+
+// ── Lifecycle ──────────────────────────────────────────────────────────────
+onMounted(() => {
+  // Set today's date as default
+  form.datePrepared = new Date().toISOString().split("T")[0];
+
+  // Check if this is a supervisor link (token in URL)
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get("token");
+  if (token) {
+    tokenInput.value = token;
+    tokenError.value = "Please enter your CarSU email address to continue.";
+    stage.value = "token";
+  }
+});
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+function validateEmail(who) {
+  if (who === "employee") {
+    form.employeeEmail = (form.employeeEmailPrefix || "").trim() + "@carsu.edu.ph";
+  } else {
+    form.supervisorEmail = (form.supervisorEmailPrefix || "").trim() + "@carsu.edu.ph";
+  }
+  const val = who === "employee" ? form.employeeEmail : form.supervisorEmail;
+  const hint = emailHints[who];
+  const prefix = who === "employee" ? form.employeeEmailPrefix : form.supervisorEmailPrefix;
+  if (!prefix || !prefix.trim()) {
+    hint.msg = "";
+    hint.type = "";
     return false;
   }
-  if (!/^[a-zA-Z0-9._%+\-]+$/.test(prefix)) {
-    emailHint.msg  = "Invalid characters in email prefix.";
-    emailHint.type = "error";
+  if (!/^[a-zA-Z0-9._%+\-]+$/.test(prefix.trim())) {
+    hint.msg = "Invalid characters in email prefix.";
+    hint.type = "error";
     return false;
   }
-  emailHint.msg  = "✓ Valid CarSU email";
-  emailHint.type = "success";
+  hint.msg = "✓ Valid CarSU email";
+  hint.type = "success";
   return true;
 }
 
-function validate() {
-  const requiredFields = [
-    ["unitOfficeCollege", "Unit/Office/College"],
-    ["headOfUnit",        "Head of Unit"],
-    ["position",          "Position"],
-    ["datePrepared",      "Date Prepared"],
-    ["yearCovered",       "Year Covered"],
-    ["totalPersonnel",    "Total Personnel"],
-    ["raterFullName",     "Rater Full Name"],
+function addCompetencyRow() {
+  competencyRows.value.push({
+    competencyGroup: "",
+    targetCompetency: "",
+    currentLevel: "",
+    requiredLevel: "",
+    leadInterventions: "",
+    targetTimeline: "",
+  });
+}
+function addAgapRow() {
+  agapRows.value.push({
+    degreeProgram: "",
+    targetHEI: "",
+    modeOfStudy: "",
+    scholarshipGrant: "",
+    targetTimeline: "",
+  });
+}
+function addProactRow() {
+  proactRows.value.push({
+    trainingTitle: "",
+    targetSkill: "",
+    modeOfActivity: "",
+    trainerProvider: "",
+    targetTimeline: "",
+  });
+}
+function removeRow(arr, idx) {
+  if (arr.length <= 1) return;
+  arr.splice(idx, 1);
+}
+
+// ── Stage 1 validation ─────────────────────────────────────────────────────
+function validateStage1() {
+  let ok = true;
+  const required = [
+    "lastName",
+    "firstName",
+    "datePrepared",
+    "currentPosition",
+    "yearCovered",
+    "yearsInPosition",
+    "yearsInCSU",
+    "collegeOfficeUnit",
+    "supervisorName",
+    "educAttainment",
+    "educAttainmentSpec",
   ];
-  for (const [field] of requiredFields) {
-    if (!String(form[field] || "").trim()) {
-      alert("Please fill in all required fields.");
-      return false;
-    }
-  }
-  // Build full email before validating
-  form.submitterEmail = (form.submitterEmailPrefix || "").trim() + "@carsu.edu.ph";
-  if (!validateEmail()) {
-    alert("Please enter a valid CarSU email prefix.");
-    return false;
-  }
+  required.forEach((field) => {
+    if (!form[field]?.toString().trim()) {
+      errors[field] = true;
+      ok = false;
+    } else delete errors[field];
+  });
+  // Build full emails from prefixes before validating
+  form.employeeEmail = (form.employeeEmailPrefix || "").trim() + "@carsu.edu.ph";
+  form.supervisorEmail = (form.supervisorEmailPrefix || "").trim() + "@carsu.edu.ph";
+  if (!validateEmail("employee")) ok = false;
+  if (!validateEmail("supervisor")) ok = false;
   if (!form.officeAffiliation) {
     alert("Please select an Office Affiliation.");
-    return false;
+    ok = false;
   }
-  if (!form.purpose) {
+  if (!form.headerPurpose) {
     alert("Please select a Purpose.");
-    return false;
+    ok = false;
   }
-  return true;
+  if (!form.compPurpose) {
+    alert("Please select a Competency Assessment Purpose.");
+    ok = false;
+  }
+  return ok;
 }
 
-async function submitForm() {
-  if (!validate()) return;
-  isSubmitting.value = true;
+// ── Stage 1 submit ─────────────────────────────────────────────────────────
+async function submitStage1() {
+  if (!validateStage1()) return;
 
-  let purpose = form.purpose === "Other" ? form.purposeOther || "Other" : form.purpose;
+  let headerPurpose = form.headerPurpose;
+  if (headerPurpose === "Other")
+    headerPurpose = form.headerPurposeOther || "Other";
 
-  let selectedSources = [...form.selectedSources];
-  if (selectedSources.includes("Others")) {
-    selectedSources = selectedSources.filter((v) => v !== "Others");
-    if (form.othersSourceText.trim())
-      selectedSources.push("Others: " + form.othersSourceText.trim());
-  }
-
-  const leadInterventions = [];
+  let compPurpose = form.compPurpose;
+  if (compPurpose === "Others") compPurpose = form.compPurposeOther || "Others";
 
   const payload = {
-    action:            "submitLNA",
-    submitterEmail:    form.submitterEmail,
-    campus:            "CSU Main Campus",
+    action: "submitStage1",
+    employeeEmail: form.employeeEmail,
+    campus: "CSU Main Campus",
     officeAffiliation: form.officeAffiliation,
-    unitOfficCollege:  form.unitOfficeCollege.trim(),
-    collegeProgram:    form.collegeProgram.trim(),
-    headOfUnit:        form.headOfUnit.trim(),
-    position:          form.position.trim(),
-    datePrepared:      form.datePrepared,
-    yearCovered:       form.yearCovered.trim(),
-    totalPersonnel:    form.totalPersonnel,
-    purpose,
-    workforceProfile:   workforce,
-    coreCompetencies:   competencyData.core,
-    leadershipComps:    competencyData.leadership,
-    orgComps:           competencyData.org,
-    technicalComps:     competencyData.technical,
-    clusterSummary,
-    dataSources:        selectedSources,
-    dataSourceInsights: insightRows,
-    raterFullName:      form.raterFullName.trim(),
+    collegeOfficeUnit: form.collegeOfficeUnit,
+    nameOfPersonnel: [form.lastName, form.firstName, form.middleInitial].filter(Boolean).join(", "),
+    lastName: form.lastName,
+    firstName: form.firstName,
+    middleInitial: form.middleInitial,
+    educAttainment: form.educAttainment,
+    educAttainmentSpec: form.educAttainmentSpec,
+    datePrepared: form.datePrepared,
+    currentPosition: form.currentPosition,
+    yearCovered: form.yearCovered,
+    yearsInPosition: form.yearsInPosition,
+    yearsInCSU: form.yearsInCSU,
+    supervisorName: form.supervisorName,
+    supervisorEmail: form.supervisorEmail,
+    headerPurpose,
+    competencyPurpose: compPurpose,
+    competencyRows: competencyRows.value.map((r, i) => ({
+      priority: i + 1,
+      ...r,
+    })),
+    agapRows: agapRows.value.map((r, i) => ({ priority: i + 1, ...r })),
+    proactRows: proactRows.value.map((r, i) => ({ priority: i + 1, ...r })),
   };
 
+  isLoading.value = true;
+  loadingMsg.value = "Submitting your IDP, please wait…";
+  isSubmitting.value = true;
+
   try {
-    const res = await fetch(`${API}/api/lna`, {
+    const res = await fetch(`${API}/api/idp`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
+    if (!res.ok) {
+      const errText = await res.text();
+      alert("Submission failed (" + res.status + "): " + errText);
+      return;
+    }
     const data = await res.json();
     if (data.refId) {
       refId.value = data.refId;
-      screen.value = "success";
+      stage.value = "stage1-success";
     } else {
       alert("Submission failed: " + (data.error || "Unknown error"));
     }
-  } catch {
-    alert("Network error. Please try again.");
+  } catch (err) {
+    console.error("Submit error:", err);
+    alert("Network error: " + err.message + "\n\nMake sure the backend is running on " + API);
   } finally {
+    isLoading.value = false;
     isSubmitting.value = false;
   }
 }
 
-onMounted(() => {
-  form.datePrepared = new Date().toISOString().split("T")[0];
-});
+// ── Stage 2: load by token ─────────────────────────────────────────────────
+function loadByToken() {
+  if (!tokenInput.value.trim()) {
+    alert("Please enter your token.");
+    return;
+  }
+  if (!supervisorEmailInput.value.trim()) {
+    alert("Please enter your CarSU email address.");
+    return;
+  }
+  supervisorEmail.value = supervisorEmailInput.value.trim();
+  currentToken.value = tokenInput.value.trim();
+  tokenError.value = "";
+  loadSubmission(currentToken.value);
+}
+
+async function loadSubmission(token) {
+  if (!supervisorEmail.value) {
+    tokenError.value = "Please enter your CarSU email address to continue.";
+    stage.value = "token";
+    return;
+  }
+  isLoading.value = true;
+  loadingMsg.value = "Loading IDP submission…";
+
+  try {
+    // Token verification: new API endpoint
+    const res = await fetch(`${API}/api/idp/${token}`);
+    const data = await res.json();
+    if (data.refId) {
+      idpData.value = data;
+      stage.value = "stage2";
+    } else {
+      alert("Token not found.");
+      stage.value = "token";
+    }
+  } catch {
+    alert("Network error. Please try again.");
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+// ── Stage 2 submit ─────────────────────────────────────────────────────────
+async function submitStage2() {
+  if (!assessment.perfGapsYN) {
+    alert("Please indicate if there are performance gaps.");
+    return;
+  }
+  if (!assessment.readinessYN) {
+    alert("Please indicate readiness for advancement.");
+    return;
+  }
+
+  let interventions = [...assessment.interventions];
+  if (interventions.includes("Others")) {
+    interventions = interventions.filter((v) => v !== "Others");
+    if (assessment.interventionOther.trim())
+      interventions.push("Others: " + assessment.interventionOther.trim());
+  }
+
+  isLoading.value = true;
+  loadingMsg.value = "Submitting your assessment…";
+  isSubmitting.value = true;
+
+  try {
+    // Supervisor submit: new API endpoint
+    const res = await fetch(`${API}/api/idp/${idpData.value.refId}/supervisor`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(assessment)
+    });
+    const data = await res.json();
+    if (data.success) {
+      stage.value = "stage2-success";
+    } else {
+      alert("Submission failed: " + data.error);
+    }
+  } catch {
+    alert("Network error. Please try again.");
+  } finally {
+    isLoading.value = false;
+    isSubmitting.value = false;
+  }
+}
 </script>
 
 <style scoped>
+/* ── CSS Variables ── */
 :root {
   --navy: #1a4d2e;
   --navy-mid: #2d6a3f;
@@ -1012,390 +1823,787 @@ onMounted(() => {
   --error: #c0392b;
   --success: #1a6b3c;
   --input-bg: #f8f7f4;
+  --readonly-bg: #f0ede8;
   --shadow: 0 4px 24px rgba(26, 77, 46, 0.1);
   --shadow-sm: 0 2px 8px rgba(26, 77, 46, 0.07);
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* ── Base ── */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Header ── */
+.site-header {
+  background: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  border-bottom: 3px solid var(--navy);
+}
+.header-inner {
+  width: 100%;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.header-img {
+  width: auto;
+  max-width: 700px;
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+
+/* ── Page Nav ── */
 .page-nav {
-  background: var(--navy); padding: 0 28px;
-  display: flex; align-items: center;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  background: var(--navy);
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 .page-nav a.back-link {
-  display: inline-flex; align-items: center; gap: 9px; padding: 10px 0;
-  color: rgba(255,255,255,0.75); text-decoration: none;
-  font-size: 12.5px; font-weight: 500; letter-spacing: 0.02em;
-  transition: color 0.2s; position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 0;
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: none;
+  font-size: 12.5px;
+  font-weight: 500;
+  font-family: "Source Sans 3", sans-serif;
+  letter-spacing: 0.02em;
+  transition: color 0.2s;
+  position: relative;
 }
 .page-nav a.back-link::after {
-  content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
-  background: var(--gold); transform: scaleX(0); transform-origin: left;
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gold);
+  transform: scaleX(0);
+  transform-origin: left;
   transition: transform 0.25s ease;
 }
-.page-nav a.back-link:hover { color: #fff; }
-.page-nav a.back-link:hover::after { transform: scaleX(1); }
+.page-nav a.back-link:hover {
+  color: #fff;
+}
+.page-nav a.back-link:hover::after {
+  transform: scaleX(1);
+}
 .page-nav a.back-link svg {
-  width: 13px; height: 13px; stroke: currentColor; fill: none;
-  stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
-  transition: transform 0.2s; flex-shrink: 0; opacity: 0.8;
+  width: 13px;
+  height: 13px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.8;
+  transition: transform 0.2s, opacity 0.2s;
 }
-.page-nav a.back-link:hover svg { transform: translateX(-3px); opacity: 1; }
-.nav-sep { color: rgba(255,255,255,0.25); font-size: 13px; margin: 0 10px; user-select: none; }
-.nav-current { font-size: 12.5px; color: var(--gold); font-weight: 600; letter-spacing: 0.03em; }
+.page-nav a.back-link:hover svg {
+  transform: translateX(-3px);
+  opacity: 1;
+}
+.page-nav .nav-sep {
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 13px;
+  margin: 0 10px;
+  user-select: none;
+}
+.page-nav .nav-current {
+  font-size: 12.5px;
+  color: var(--gold);
+  font-weight: 600;
+  font-family: "Source Sans 3", sans-serif;
+  letter-spacing: 0.03em;
+}
 
-.container { max-width: 1140px; margin: 0 auto; padding: 48px 40px 80px; }
+/* ── Container ── */
+.container {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 48px 40px 80px;
+}
 
+/* ── Form title ── */
 .form-title-block {
-  text-align: center; margin-bottom: 40px;
-  padding-bottom: 32px; border-bottom: 3px solid var(--navy);
+  text-align: center;
+  margin-bottom: 40px;
+  padding-bottom: 32px;
+  border-bottom: 2px solid var(--gold);
 }
-.form-title-block .eyebrow {
-  font-size: 11px; font-weight: 600; color: var(--gold);
-  letter-spacing: 0.14em; text-transform: uppercase; display: block; margin-bottom: 10px;
+.form-title-block h2 {
+  font-family: "Playfair Display", serif;
+  font-size: 28px;
+  color: var(--navy);
+  margin-bottom: 6px;
 }
-.form-title-block h2 { font-family: "Playfair Display", serif; font-size: 28px; color: var(--navy); margin-bottom: 4px; }
-.form-title-block h3 { font-family: "Playfair Display", serif; font-size: 16px; color: var(--text-light); font-weight: 600; font-style: italic; margin-bottom: 8px; }
-.form-title-block p  { color: var(--text-light); font-size: 14px; }
+.form-title-block p {
+  color: var(--text-light);
+  font-size: 14px;
+}
 
+/* ── Section card ── */
 .section-card {
-  background: var(--white); border-radius: 12px; box-shadow: var(--shadow-sm);
-  margin-bottom: 28px; overflow: hidden; border: 1px solid var(--border);
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 28px;
+  overflow: hidden;
+  border: 1px solid var(--border);
   animation: fadeUp 0.4s ease both;
 }
-.section-header { background: var(--navy); padding: 16px 28px; display: flex; align-items: center; gap: 12px; }
-.section-num {
-  background: var(--gold); color: var(--navy); width: 28px; height: 28px;
-  border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 13px; flex-shrink: 0;
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-.section-header h3 { color: var(--white); font-size: 15px; font-weight: 600; letter-spacing: 0.03em; }
-.section-header p  { color: rgba(255,255,255,0.6); font-size: 12px; margin-top: 1px; }
-.section-body { padding: 36px; }
+.section-header {
+  background: var(--navy);
+  padding: 16px 28px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.section-num {
+  background: var(--gold);
+  color: var(--navy);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.section-header h3 {
+  color: var(--white);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+.section-header p {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  margin-top: 1px;
+}
+.section-body {
+  padding: 36px;
+}
+.readonly-badge {
+  margin-left: auto;
+  background: rgba(245, 195, 0, 0.2);
+  color: var(--gold-light);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
 
-.field-grid   { display: grid; gap: 18px; }
-.field-grid-2 { grid-template-columns: 1fr 1fr; }
-.field-group  { display: flex; flex-direction: column; gap: 6px; }
-.field-group.span-2 { grid-column: span 2; }
-
-label { font-size: 12px; font-weight: 600; color: var(--navy-mid); text-transform: uppercase; letter-spacing: 0.05em; }
-.req  { color: var(--error); margin-left: 2px; }
-
+/* ── Form fields ── */
+.field-grid {
+  display: grid;
+  gap: 18px;
+}
+.field-grid-2 {
+  grid-template-columns: 1fr 1fr;
+}
+.field-grid-3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.field-group.span-2 {
+  grid-column: span 2;
+}
+label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--navy-mid);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+label .req {
+  color: var(--error);
+  margin-left: 2px;
+}
 input[type="text"],
 input[type="email"],
 input[type="date"],
 input[type="number"],
 select,
 textarea {
-  width: 100%; padding: 10px 14px;
-  border: 1.5px solid var(--border); border-radius: 8px;
-  background: var(--input-bg); font-family: "Source Sans 3", sans-serif;
-  font-size: 14px; color: var(--text);
-  transition: border-color 0.2s, box-shadow 0.2s; outline: none;
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--input-bg);
+  font-family: "Source Sans 3", sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
 }
-input:focus, select:focus, textarea:focus {
-  border-color: var(--navy); box-shadow: 0 0 0 3px rgba(26,77,46,0.08); background: var(--white);
+select {
+  width: 220px;
+  min-width: 160px;
+  max-width: 100%;
+  font-size: 15px;
+  cursor: pointer;
+  margin-bottom: 12px;
 }
-input.error { border-color: var(--error); }
-textarea { resize: vertical; min-height: 72px; }
-
-/* ── Email prefix widget ── */
-.email-prefix-wrapper {
-  display: flex; align-items: center;
-  border: 1.5px solid var(--border); border-radius: 8px;
-  background: var(--input-bg); overflow: hidden; transition: border-color 0.2s;
-}
-.email-prefix-wrapper:focus-within {
+input:focus,
+select:focus,
+textarea:focus {
   border-color: var(--navy);
-  box-shadow: 0 0 0 3px rgba(26,77,46,0.08);
+  box-shadow: 0 0 0 3px rgba(26, 77, 46, 0.08);
   background: var(--white);
 }
-.email-prefix-wrapper.error { border-color: var(--error); }
-.email-prefix-wrapper.valid { border-color: var(--success); }
-.email-prefix-input {
-  flex: 1; border: none !important; background: transparent !important;
-  border-radius: 0 !important; padding: 10px 12px;
-  font-size: 14px; color: var(--text); outline: none; box-shadow: none !important;
+input.error,
+select.error {
+  border-color: var(--error);
 }
-.email-suffix {
-  padding: 10px 12px 10px 10px; font-size: 13px; color: var(--text-light);
-  white-space: nowrap; font-weight: 500; background: transparent;
-  border-left: 1.5px solid var(--border);
+input.valid {
+  border-color: var(--success);
 }
-
-.email-hint         { font-size: 12px; margin-top: 2px; min-height: 16px; display: block; }
-.email-hint.error   { color: var(--error); }
-.email-hint.success { color: var(--success); }
-
-.checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
-.checkbox-item {
-  display: flex; align-items: center; gap: 8px; cursor: pointer;
-  padding: 8px 14px; border: 1.5px solid var(--border); border-radius: 8px;
-  background: var(--input-bg); transition: all 0.2s;
-  font-size: 13px; text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--text);
-}
-.checkbox-item:hover { border-color: var(--navy); background: var(--white); }
-.checkbox-item input { width: auto; padding: 0; border: none; background: none; accent-color: var(--navy); cursor: pointer; }
-.checkbox-item.checked { border-color: var(--navy); background: rgba(26,77,46,0.05); }
-
-.other-specify { margin-top: 10px; display: none; }
-.other-specify.visible { display: block; }
-
-.section-desc {
-  background: rgba(245,195,0,0.1); border-left: 3px solid var(--gold);
-  padding: 12px 16px; border-radius: 0 8px 8px 0; margin-bottom: 20px;
-  font-size: 13px; color: var(--text-light); line-height: 1.6;
-}
-.section-desc a { color: var(--navy); }
-
-.table-wrapper { overflow-x: auto; margin-top: 8px; }
-.data-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
-.data-table thead tr { background: var(--navy-mid); }
-.data-table thead th {
-  padding: 10px 12px; color: var(--white); font-weight: 600; font-size: 11px;
-  text-transform: uppercase; letter-spacing: 0.05em; text-align: left;
-  border-right: 1px solid rgba(255,255,255,0.1); white-space: nowrap;
-}
-.data-table thead th:last-child { border-right: none; }
-.data-table tbody tr { border-bottom: 1px solid var(--border); }
-.data-table tbody tr:nth-child(even) { background: #faf9f6; }
-.data-table tbody td { padding: 8px 10px; vertical-align: middle; border-right: 1px solid var(--border); }
-.data-table tbody td:last-child { border-right: none; }
-.data-table td input,
-.data-table td select,
-.data-table td textarea { padding: 6px 10px; font-size: 13px; border-radius: 6px; }
-.data-table td textarea { min-height: 56px; }
-.row-label { font-weight: 600; color: var(--navy-mid); background: rgba(26,77,46,0.03) !important; white-space: nowrap; }
-
-.workforce-table th, .workforce-table td { text-align: center; }
-.workforce-table td:first-child { text-align: left; }
-
-.comp-table-wrap { margin-bottom: 32px; }
-.comp-cluster-label {
-  background: var(--navy); color: var(--white);
-  font-family: "Playfair Display", serif; font-size: 14px; font-weight: 600;
-  padding: 10px 16px; border-radius: 8px 8px 0 0;
-  display: flex; align-items: center; gap: 10px;
-}
-.cluster-badge {
-  font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
-  background: rgba(245,195,0,0.2); border: 1px solid rgba(245,195,0,0.4);
-  color: var(--gold-light); padding: 3px 10px; border-radius: 20px;
-}
-.comp-note { font-size: 12px; color: var(--text-light); font-style: italic; margin-bottom: 8px; }
-.cluster-summary-table thead th:first-child { width: 140px; }
-
-.source-checklist { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 8px; }
-.source-item {
-  display: flex; align-items: center; gap: 8px; padding: 8px 12px;
-  border: 1.5px solid var(--border); border-radius: 8px; background: var(--input-bg);
-  font-size: 13px; cursor: pointer; transition: all 0.2s;
-  text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--text);
-}
-.source-item:hover { border-color: var(--navy); background: var(--white); }
-.source-item input { accent-color: var(--navy); cursor: pointer; flex-shrink: 0; width: auto; padding: 0; border: none; background: none; }
-.source-item.checked { border-color: var(--navy); background: rgba(26,77,46,0.04); }
-
-.pos-level-header { background: rgba(245,195,0,0.12) !important; font-weight: 700; color: var(--navy); font-size: 13px; }
-.priority-badge {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 24px; height: 24px; background: var(--navy); color: var(--white);
-  border-radius: 50%; font-size: 11px; font-weight: 700; flex-shrink: 0;
+textarea {
+  resize: vertical;
+  min-height: 80px;
 }
 
-.intervention-checks { display: flex; flex-direction: column; gap: 6px; }
-.iv-check {
-  display: flex; align-items: center; gap: 6px; font-size: 12px;
-  text-transform: none; letter-spacing: 0; color: var(--text-light); font-weight: 400; cursor: pointer;
+/* ── Email hint ── */
+.email-hint {
+  font-size: 12px;
+  margin-top: 2px;
+  min-height: 16px;
+  display: block;
 }
-.iv-check input[type="checkbox"] { width: auto; padding: 0; border: none; background: none; accent-color: var(--navy); }
-.iv-text { flex: 1; padding: 4px 8px; font-size: 12px; }
-
-.certification-box {
-  background: rgba(201,168,76,0.08); border: 1.5px solid var(--gold);
-  border-radius: 10px; padding: 24px 28px; margin-top: 8px;
+.email-hint.error {
+  color: var(--error);
 }
-.certification-box p { font-size: 13px; color: var(--text-light); font-style: italic; margin-bottom: 16px; }
-
-.submit-area {
-  background: var(--white); border: 1px solid var(--border);
-  border-radius: 12px; padding: 36px; text-align: center; box-shadow: var(--shadow-sm);
-}
-.submit-area p { font-size: 13px; color: var(--text-light); margin-bottom: 18px; }
-.btn-submit {
-  padding: 14px 48px; background: var(--navy); color: var(--white); border: none;
-  border-radius: 10px; font-family: "Source Sans 3", sans-serif; font-size: 16px;
-  font-weight: 600; cursor: pointer; letter-spacing: 0.03em;
-  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-  box-shadow: 0 4px 16px rgba(26,77,46,0.2);
-}
-.btn-submit:hover { background: var(--navy-mid); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(26,77,46,0.25); }
-.btn-submit:disabled { background: #aaa; cursor: not-allowed; transform: none; box-shadow: none; }
-
-.overlay {
-  display: none; position: fixed; inset: 0; background: rgba(13,27,62,0.6);
-  z-index: 999; align-items: center; justify-content: center; flex-direction: column; gap: 16px;
-}
-.overlay.active { display: flex; }
-.spinner {
-  width: 48px; height: 48px; border: 4px solid rgba(255,255,255,0.2);
-  border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite;
-}
-.overlay p { color: var(--white); font-size: 15px; }
-
-.success-screen {
-  display: none; max-width: 560px; margin: 80px auto; text-align: center;
-  background: var(--white); border-radius: 16px; padding: 48px 40px;
-  box-shadow: var(--shadow); border: 1px solid var(--border);
-}
-.success-screen.active { display: block; }
-.success-icon {
-  width: 72px; height: 72px; background: rgba(26,107,60,0.1); border-radius: 50%;
-  display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto 24px;
-}
-.success-screen h2 { font-family: "Playfair Display", serif; font-size: 24px; color: var(--navy); margin-bottom: 12px; }
-.success-screen p  { color: var(--text-light); font-size: 14px; margin-bottom: 20px; }
-.ref-id-box {
-  background: var(--navy); color: var(--gold-light); font-family: monospace;
-  font-size: 22px; font-weight: 700; padding: 16px 24px; border-radius: 10px;
-  letter-spacing: 0.1em; margin: 16px 0 24px;
+.email-hint.success {
+  color: var(--success);
 }
 
-.subsection-divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
-.subsec-label { font-size: 13px; font-weight: 600; color: var(--navy-mid); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
-
-.btn-add-row {
-  display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
-  background: var(--navy); color: var(--white); border: none; border-radius: 8px;
-  font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s;
-  font-family: "Source Sans 3", sans-serif;
-}
-.btn-add-row:hover { background: var(--navy-mid); }
-.btn-remove-row {
-  background: none; border: none; cursor: pointer; color: var(--error);
-  padding: 4px; border-radius: 4px; font-size: 18px; line-height: 1; transition: background 0.15s;
-}
-.btn-remove-row:hover    { background: rgba(192,57,43,0.08); }
-.btn-remove-row:disabled { opacity: 0.3; cursor: not-allowed; }
-
-.static-value {
-  background: #f0ede8; border: 1.5px solid var(--border); border-radius: 8px;
-  padding: 10px 14px; font-size: 14px; color: var(--text); font-weight: 600;
-}
-
-@media (max-width: 640px) {
-  .container { padding: 24px 16px 60px; }
-  .field-grid-2 { grid-template-columns: 1fr; }
-  .field-group.span-2 { grid-column: span 1; }
-  .section-body { padding: 24px 20px; }
-  .page-nav { padding: 0 16px; }
-  .nav-current, .nav-sep { display: none; }
-  .source-checklist { grid-template-columns: 1fr 1fr; }
-}
-
-/* ── Competency tabs ── */
-.comp-tabs {
+/* ── Checkbox groups ── */
+.checkbox-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 20px;
-  border-bottom: 2px solid var(--border);
-  padding-bottom: 12px;
+  gap: 10px;
+  margin-top: 4px;
 }
-.comp-tab {
-  padding: 8px 18px;
-  border: 1.5px solid var(--border);
-  border-radius: 8px 8px 0 0;
-  background: var(--input-bg);
-  color: var(--text-light);
-  font-family: "Source Sans 3", sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  letter-spacing: 0.02em;
-}
-.comp-tab:hover {
-  border-color: var(--navy);
-  color: var(--navy);
-  background: var(--white);
-}
-.comp-tab.active {
-  background: var(--navy);
-  color: var(--white);
-  border-color: var(--navy);
-}
-
-.comp-tab-nav {
+.checkbox-item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-top: 20px;
-  padding: 14px 0 4px;
-  border-top: 1px solid var(--border);
+  gap: 8px;
+  cursor: pointer;
+  padding: 8px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--input-bg);
+  transition: all 0.2s;
+  font-size: 13px;
 }
-.btn-tab-nav {
-  padding: 8px 20px;
+.checkbox-item:hover {
+  border-color: var(--navy);
+  background: var(--white);
+}
+.checkbox-item input[type="checkbox"],
+.checkbox-item input[type="radio"] {
+  width: auto;
+  padding: 0;
+  border: none;
+  background: none;
+  accent-color: var(--navy);
+  cursor: pointer;
+}
+.checkbox-item.checked {
+  border-color: var(--navy);
+  background: rgba(26, 77, 46, 0.05);
+}
+
+/* ── Other specify ── */
+.other-specify {
+  margin-top: 10px;
+  display: none;
+}
+.other-specify.visible {
+  display: block;
+}
+
+/* ── Dynamic tables ── */
+.table-wrapper {
+  overflow-x: auto;
+  margin-top: 16px;
+}
+.dynamic-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+  min-width: 700px;
+}
+.dynamic-table thead tr {
+  background: var(--navy-mid);
+}
+.dynamic-table thead th {
+  padding: 10px 12px;
+  color: var(--white);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: left;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+.dynamic-table thead th:last-child {
+  border-right: none;
+}
+.dynamic-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.dynamic-table tbody tr:hover {
+  background: #f5f4f0;
+}
+.dynamic-table tbody td {
+  padding: 8px 10px;
+  vertical-align: top;
+  border-right: 1px solid var(--border);
+}
+.dynamic-table tbody td:last-child {
+  border-right: none;
+  text-align: center;
+}
+.dynamic-table td input,
+.dynamic-table td select,
+.dynamic-table td textarea {
+  padding: 6px 10px;
+  font-size: 13px;
+  border-radius: 6px;
+}
+.priority-num {
+  width: 36px;
+  text-align: center;
+  font-weight: 600;
+  color: var(--navy);
+  background: rgba(245, 195, 0, 0.15);
+  border-color: var(--gold);
+}
+.table-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+.btn-add-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
   background: var(--navy);
   color: var(--white);
   border: none;
   border-radius: 8px;
-  font-family: "Source Sans 3", sans-serif;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
+  font-family: "Source Sans 3", sans-serif;
 }
-.btn-tab-nav:hover:not(:disabled) { background: var(--navy-mid); }
-.btn-tab-nav:disabled { background: #ccc; cursor: not-allowed; }
-.comp-tab-page {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-light);
+.btn-add-row:hover {
+  background: var(--navy-mid);
+}
+.btn-remove-row {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--error);
+  padding: 4px;
+  border-radius: 4px;
+  font-size: 18px;
+  line-height: 1;
+  transition: background 0.15s;
+}
+.btn-remove-row:hover {
+  background: rgba(192, 57, 43, 0.08);
 }
 
-/* ── Rating pills in legend ── */
-.rating-pill {
-  display: inline-flex;
+/* ── Section desc ── */
+.section-desc {
+  background: rgba(245, 195, 0, 0.1);
+  border-left: 3px solid var(--gold);
+  padding: 12px 16px;
+  border-radius: 0 8px 8px 0;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: var(--text-light);
+  line-height: 1.6;
+}
+.section-desc a {
+  color: var(--navy);
+}
+
+/* ── Submit area ── */
+.submit-area {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 36px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+.submit-area p {
+  font-size: 13px;
+  color: var(--text-light);
+  margin-bottom: 18px;
+}
+.btn-submit {
+  padding: 14px 48px;
+  background: var(--navy);
+  color: var(--white);
+  border: none;
+  border-radius: 10px;
+  font-family: "Source Sans 3", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(26, 77, 46, 0.2);
+}
+.btn-submit:hover {
+  background: var(--navy-mid);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(26, 77, 46, 0.25);
+}
+.btn-submit:active {
+  transform: translateY(0);
+}
+.btn-submit:disabled {
+  background: #aaa;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ── Loading overlay ── */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(13, 27, 62, 0.6);
+  z-index: 999;
   align-items: center;
   justify-content: center;
-  width: 22px; height: 22px;
-  border-radius: 50%;
-  font-size: 11px;
-  font-weight: 700;
-  margin-right: 4px;
+  flex-direction: column;
+  gap: 16px;
 }
-.rating-pill.cl  { background: var(--navy); color: var(--white); }
-.rating-pill.pct { background: var(--gold); color: var(--navy); }
+.overlay.active {
+  display: flex;
+}
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(255, 255, 255, 0.2);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.overlay p {
+  color: var(--white);
+  font-size: 15px;
+}
 
-/* ── Competency page table selects ── */
-.comp-page-table .comp-select {
+/* ── Success screen ── */
+.success-screen {
+  max-width: 560px;
+  margin: 80px auto;
+  text-align: center;
+  background: var(--white);
+  border-radius: 16px;
+  padding: 48px 40px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+.success-icon {
+  width: 72px;
+  height: 72px;
+  background: rgba(26, 107, 60, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  margin: 0 auto 24px;
+}
+.success-screen h2 {
+  font-family: "Playfair Display", serif;
+  font-size: 24px;
+  color: var(--navy);
+  margin-bottom: 12px;
+}
+.success-screen p {
+  color: var(--text-light);
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+.ref-id-box {
+  background: var(--navy);
+  color: var(--gold-light);
+  font-family: monospace;
+  font-size: 22px;
+  font-weight: 700;
+  padding: 16px 24px;
+  border-radius: 10px;
+  letter-spacing: 0.1em;
+  margin: 16px 0 24px;
+}
+.btn-return {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 12px;
+  padding: 11px 24px;
+  background: rgba(26, 77, 46, 0.08);
+  color: var(--navy);
+  border: 1.5px solid rgba(26, 77, 46, 0.2);
+  border-radius: 9px;
+  font-family: "Source Sans 3", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.btn-return:hover {
+  background: var(--navy);
+  color: #fff;
+}
+
+/* ── Token screen ── */
+.token-screen {
+  max-width: 480px;
+  margin: 80px auto;
+  background: var(--white);
+  border-radius: 16px;
+  padding: 48px 40px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+.token-screen h2 {
+  font-family: "Playfair Display", serif;
+  font-size: 24px;
+  color: var(--navy);
+  margin-bottom: 10px;
+}
+.token-screen p {
+  color: var(--text-light);
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+.btn-load {
   width: 100%;
-  min-width: 160px;
+  padding: 13px;
+  background: var(--navy);
+  color: var(--white);
+  border: none;
+  border-radius: 10px;
+  font-family: "Source Sans 3", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-load:hover {
+  background: var(--navy-mid);
+}
+.token-error {
+  color: var(--error);
+  font-size: 13px;
+  margin-top: 10px;
+}
+
+/* ── Read-only fields (Stage 2) ── */
+.ro-grid {
+  display: grid;
+  gap: 16px;
+}
+.ro-grid-2 {
+  grid-template-columns: 1fr 1fr;
+}
+.ro-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ro-field.span-2 {
+  grid-column: span 2;
+}
+.ro-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.ro-value {
+  background: var(--readonly-bg);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--text);
+  min-height: 40px;
+}
+.ro-table-wrapper {
+  overflow-x: auto;
+  margin-top: 16px;
+}
+.ro-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+  min-width: 600px;
+}
+.ro-table thead tr {
+  background: var(--navy-mid);
+}
+.ro-table thead th {
+  padding: 10px 12px;
+  color: var(--white);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: left;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+.ro-table thead th:last-child {
+  border-right: none;
+}
+.ro-table tbody tr {
+  border-bottom: 1px solid var(--border);
+}
+.ro-table tbody tr:nth-child(even) {
+  background: #f9f8f5;
+}
+.ro-table tbody td {
+  padding: 10px 12px;
+  vertical-align: top;
+  border-right: 1px solid var(--border);
   font-size: 13px;
 }
-
-/* ── Reveal transition (matches IDP exactly) ── */
-.reveal-enter-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
+.ro-table tbody td:last-child {
+  border-right: none;
 }
-.reveal-enter-from {
-  opacity: 0;
-  transform: translateY(-8px);
-}
-
-/* ── Section done badge ── */
-.section-done-badge {
-  margin-left: auto;
-  background: rgba(26,107,60,0.15);
-  color: #1a6b3c;
-  font-size: 11px; font-weight: 700;
-  padding: 4px 10px; border-radius: 20px;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
+.empty-row-cell {
+  text-align: center;
+  color: var(--text-light);
+  font-style: italic;
 }
 
-/* ── Section locked badge (matches IDP) ── */
+/* ── Assessment table (Stage 2) ── */
+.assessment-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+.assessment-table th,
+.assessment-table td {
+  border: 1.5px solid var(--border);
+  padding: 14px 16px;
+  vertical-align: top;
+}
+.assessment-table thead th {
+  background: var(--navy);
+  color: var(--white);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+.area-label {
+  font-weight: 600;
+  color: var(--navy-mid);
+  font-size: 13px;
+  min-width: 160px;
+}
+.guide-q {
+  color: var(--text-light);
+  font-size: 13px;
+  min-width: 220px;
+}
+.response-cell {
+  min-width: 260px;
+}
+.field-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--navy-mid);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── Certification block ── */
+.cert-block {
+  background: rgba(245, 195, 0, 0.08);
+  border: 1.5px solid var(--gold);
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin-top: 24px;
+}
+.cert-block p {
+  font-size: 13px;
+  color: var(--text-light);
+  font-style: italic;
+  margin-bottom: 16px;
+}
+.sup-name {
+  font-weight: 600;
+  color: var(--navy);
+  font-size: 16px;
+  padding: 12px 0;
+  border-bottom: 2px solid var(--navy);
+  display: inline-block;
+  min-width: 300px;
+  font-family: "Playfair Display", serif;
+}
+.cert-block small {
+  font-size: 11px;
+  color: var(--text-light);
+  display: block;
+  margin-top: 4px;
+}
+
+/* ── Section locked badge ── */
 .section-card-collapsible .section-header {
   flex-wrap: wrap;
 }
@@ -1412,18 +2620,156 @@ textarea { resize: vertical; min-height: 72px; }
   white-space: nowrap;
 }
 
-/* ── Section header flex ── */
-.section-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+/* ── Pro-ACT pre-filled skill label ── */
+.proact-skill-label {
+  background: var(--readonly-bg);
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 500;
+  min-width: 160px;
 }
 
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
+/* ── Row number cell ── */
+.row-num-cell {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-light);
+  vertical-align: middle;
 }
-@keyframes spin {
-  to { transform: rotate(360deg); }
+
+/* ── Required level badge ── */
+.required-level-badge {
+  background: var(--navy);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 6px;
+  text-align: center;
+  white-space: nowrap;
+}
+.required-level-empty {
+  font-size: 11px;
+  color: var(--text-light);
+  font-style: italic;
+  text-align: center;
+}
+
+/* ── Static value display ── */
+.static-value {
+  background: var(--readonly-bg);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ── Reveal transition ── */
+.reveal-enter-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.reveal-enter-from {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+/* ── Name grid ── */
+.name-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 90px;
+  gap: 12px;
+  align-items: start;
+}
+.name-grid input {
+  width: 100%;
+}
+.field-hint {
+  display: block;
+  font-size: 11px;
+  color: var(--text-light);
+  margin-top: 4px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
+/* ── Email prefix widget ── */
+.email-prefix-wrapper {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--input-bg);
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.email-prefix-wrapper:focus-within {
+  border-color: var(--navy);
+  background: var(--white);
+}
+.email-prefix-wrapper.error { border-color: var(--error); }
+.email-prefix-wrapper.valid { border-color: var(--success); }
+.email-prefix-input {
+  flex: 1;
+  border: none !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  box-shadow: none !important;
+}
+.email-suffix {
+  padding: 10px 12px 10px 0;
+  font-size: 13px;
+  color: var(--text-light);
+  white-space: nowrap;
+  font-weight: 500;
+  background: transparent;
+  border-left: 1.5px solid var(--border);
+  padding-left: 10px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .container {
+    padding: 24px 16px 60px;
+  }
+  .field-grid-2,
+  .field-grid-3 {
+    grid-template-columns: 1fr;
+  }
+  .field-group.span-2 {
+    grid-column: span 1;
+  }
+  .section-body {
+    padding: 24px 20px;
+  }
+  .header-inner {
+    padding: 8px 16px;
+  }
+  .page-nav {
+    padding: 0 16px;
+  }
+  .page-nav .nav-current,
+  .page-nav .nav-sep {
+    display: none;
+  }
+  .ro-grid-2 {
+    grid-template-columns: 1fr;
+  }
+  .ro-field.span-2 {
+    grid-column: span 1;
+  }
+  .token-screen {
+    margin: 40px 16px;
+    padding: 32px 20px;
+  }
 }
 </style>
