@@ -230,7 +230,6 @@
                       <input
                         type="number"
                         min="0"
-                        placeholder="0"
                         v-model.number="workforce[level.key][t]"
                         style="text-align: center; width: 60px"
                       />
@@ -358,19 +357,37 @@
                     <th>Competency Cluster</th>
                     <th>Strongest Competency</th>
                     <th>Weakest Competency</th>
-                    <th style="width: 140px">Intervention Needed? (Y/N)</th>
+                    <th style="width: 160px">Intervention Needed?</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="c in clusterSummary" :key="c.cluster">
                     <td class="row-label">{{ c.cluster }}</td>
-                    <td><input type="text" v-model="c.strongest" placeholder="e.g. Integrity" /></td>
-                    <td><input type="text" v-model="c.weakest" placeholder="e.g. Building Partnership" /></td>
+                    <td>
+                      <select v-model="c.strongest">
+                        <option value="">Select competency…</option>
+                        <option
+                          v-for="comp in clusterCompetencyMap[c.cluster]"
+                          :key="'s-' + comp"
+                          :value="comp"
+                        >{{ comp }}</option>
+                      </select>
+                    </td>
+                    <td>
+                      <select v-model="c.weakest">
+                        <option value="">Select competency…</option>
+                        <option
+                          v-for="comp in clusterCompetencyMap[c.cluster]"
+                          :key="'w-' + comp"
+                          :value="comp"
+                        >{{ comp }}</option>
+                      </select>
+                    </td>
                     <td>
                       <select v-model="c.interventionNeeded">
                         <option value="">---</option>
-                        <option value="Y">Y</option>
-                        <option value="N">N</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
                       </select>
                     </td>
                   </tr>
@@ -504,7 +521,7 @@ const screen = ref("form");
 const isSubmitting = ref(false);
 const refId = ref("");
 
-// ── EMAIL HINT STATE (matches IDP pattern) ──
+// ── EMAIL HINT STATE ──
 const emailHint = reactive({ msg: "", type: "" });
 
 // ── CONSTANTS ──
@@ -555,7 +572,6 @@ const visibleCompLevelKeys = computed(() =>
     : compLevelKeys.filter(k => k !== "faculty")
 );
 
-// Active tab for competency mapping pagination — defaults to first level
 const activeCompTab = ref("1st Level");
 const clOptions  = ["", "N/A", "1 - Basic", "2 - Intermediate", "3 - Advanced", "4 - Expert"];
 const pctOptions = ["", "N/A", "A - 76%-100%", "B - 51%-75%", "C - 26%-50%", "D - 25% & below"];
@@ -583,6 +599,14 @@ const COMPETENCIES = {
     "Written Communication", "Oral Communication", "Conceptual and Analytical Thinking",
     "Computer Literacy", "Planning and Project Management", "Logical Reasoning",
   ],
+};
+
+// Maps cluster display name → its competency list (used by Cluster Summary dropdowns)
+const clusterCompetencyMap = {
+  Core:           COMPETENCIES.core,
+  Leadership:     COMPETENCIES.leadership,
+  Organizational: COMPETENCIES.org,
+  Technical:      COMPETENCIES.technical,
 };
 
 const competencyClusters = [
@@ -695,7 +719,7 @@ const subOfficeMap = {
   ],
 };
 
-// ── FORM STATE — declared before computed/watch that reference it ──
+// ── FORM STATE ──
 const form = reactive({
   submitterEmailPrefix: "",
   submitterEmail: "",
@@ -716,7 +740,7 @@ const form = reactive({
   raterFullName: "",
 });
 
-// ── COMPUTED (depend on form) ──
+// ── COMPUTED ──
 const isOVPAA = computed(() => form.officeAffiliation === "OVPAA");
 
 const headOfUnitFull = computed(() => {
@@ -739,7 +763,6 @@ const positionOptions = computed(() => {
   return [];
 });
 
-// Reset position whenever positionOptions changes and current value is no longer valid
 watch(positionOptions, (newOpts) => {
   if (!newOpts.includes(form.position)) {
     form.position = newOpts.length === 1 ? newOpts[0] : "";
@@ -772,13 +795,11 @@ const sectionDone = computed(() => {
     (form.purpose !== "Other" || form.purposeOther.trim())
   );
 
-  // Workforce: at least one cell filled across visible position levels
-  const workforceDone = visiblePositionLevels.value.some(lv =>
-    employmentTypeKeys.some(t => workforce[lv.key][t] !== null && workforce[lv.key][t] !== "")
-  );
+  // Workforce: always done once Section H is complete — cells default to 0
+  const workforceDone = true;
 
-  // Competency: all cluster summary rows have strongest + weakest filled
-  const competency = clusterSummary.every(c => c.strongest.trim() && c.weakest.trim() && c.interventionNeeded);
+  // Competency: all cluster summary rows filled
+  const competency = clusterSummary.every(c => c.strongest && c.weakest && c.interventionNeeded);
 
   // Data sources: at least one source selected
   const dataSourcesDone = form.selectedSources.length > 0;
@@ -802,7 +823,7 @@ const selectedCollegePrograms = computed(() => {
   return found ? found.programs : [];
 });
 
-// ── WATCHERS (depend on form) ──
+// ── WATCHERS ──
 watch(() => form.officeAffiliation, () => {
   form.unitOfficeCollege = "";
   form.collegeProgram = "";
@@ -814,12 +835,12 @@ watch(() => form.unitOfficeCollege, () => {
   form.position = "";
 });
 
-// ── OTHER REACTIVE STATE ──
+// ── WORKFORCE — all cells default to 0 ──
 const workforce = reactive(
   Object.fromEntries(
     positionLevels.map((lv) => [
       lv.key,
-      Object.fromEntries(employmentTypeKeys.map((t) => [t, null])),
+      Object.fromEntries(employmentTypeKeys.map((t) => [t, 0])),
     ]),
   ),
 );
@@ -857,7 +878,6 @@ const insightRows = reactive([]);
 watch(
   () => [...form.selectedSources],
   (newSources) => {
-    // Resolve display labels for selected sources
     const resolvedSources = newSources.map(val => {
       if (val === "Others") {
         return form.othersSourceText.trim() ? "Others: " + form.othersSourceText.trim() : "Others";
@@ -865,7 +885,7 @@ watch(
       return val;
     });
 
-    // Remove rows for sources that are fully gone
+    // Remove rows for sources that are gone
     for (let i = insightRows.length - 1; i >= 0; i--) {
       const row = insightRows[i];
       const isOthers = row.dataSource.startsWith("Others");
@@ -875,7 +895,7 @@ watch(
       if (!stillPresent) insightRows.splice(i, 1);
     }
 
-    // Add rows for newly checked sources that don't have a row yet
+    // Add rows for newly checked sources
     resolvedSources.forEach(src => {
       const exists = insightRows.some(r =>
         r.dataSource === src ||
@@ -889,7 +909,7 @@ watch(
   { deep: true }
 );
 
-// Also update "Others" row label when othersSourceText changes
+// Update "Others" row label when othersSourceText changes
 watch(
   () => form.othersSourceText,
   (val) => {
@@ -936,13 +956,11 @@ function validate() {
     }
   }
 
-  // Validate head of unit name (last name + first name required)
   if (!form.headLastName.trim() || !form.headFirstName.trim()) {
     alert("Please fill in the Head of Unit/Office/College Last Name and First Name.");
     return false;
   }
 
-  // Build full email before validating
   form.submitterEmail = (form.submitterEmailPrefix || "").trim() + "@carsu.edu.ph";
   if (!validateEmail()) {
     alert("Please enter a valid CarSU email prefix.");
@@ -1394,7 +1412,7 @@ textarea { resize: vertical; min-height: 72px; }
   font-size: 13px;
 }
 
-/* ── Reveal transition (matches IDP exactly) ── */
+/* ── Reveal transition ── */
 .reveal-enter-active {
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
@@ -1431,7 +1449,6 @@ textarea { resize: vertical; min-height: 72px; }
   white-space: nowrap;
 }
 
-/* ── Section header flex ── */
 .section-header {
   display: flex;
   align-items: center;
