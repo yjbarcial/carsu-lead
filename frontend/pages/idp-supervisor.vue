@@ -23,10 +23,10 @@
         </ul>
         <p>
           By continuing, you acknowledge your responsibility to handle this information
-          with confidentiality and in accordance with CarSU's data privacy policies.
+          with confidentiality and in accordance with Caraga State University's data privacy policies.
         </p>
         <p>
-          For data privacy concerns, contact the <strong>CarSU Data Protection Officer</strong>.
+          For data privacy concerns, contact the <strong>Caraga State University HRMS</strong>.
         </p>
         <label class="privacy-checkbox">
           <input type="checkbox" v-model="privacyAgreed" />

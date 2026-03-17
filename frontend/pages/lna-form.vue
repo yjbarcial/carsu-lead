@@ -24,12 +24,12 @@
           </ul>
           <p>
             Your information will be stored securely and accessed only by authorized
-            CarSU HR and L&D personnel. It will not be disclosed to third parties without
-            consent, except as required by law.
+          Caraga State University Human Resource and Management Services and Learning and Development personnel. It will not be disclosed to third parties without
+          your consent, except as required by law.
           </p>
           <p>
             You have the right to access, correct, or request deletion of your data.
-            For concerns, contact the <strong>CarSU Data Protection Officer</strong>.
+            For concerns, contact the <strong>Caraga State University HRMS</strong>.
           </p>
           <label class="privacy-checkbox">
             <input type="checkbox" v-model="privacyAgreed" />
