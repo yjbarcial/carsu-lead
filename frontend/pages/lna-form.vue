@@ -1,5 +1,50 @@
 <template>
   <div>
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- DATA PRIVACY NOTICE MODAL                       -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div v-if="showPrivacyModal" class="privacy-overlay">
+      <div class="privacy-modal">
+        <div class="privacy-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <h2>Data Privacy Notice</h2>
+        </div>
+        <div class="privacy-body">
+          <p>
+            In compliance with the <strong>Data Privacy Act of 2012 (R.A. 10173)</strong>,
+            Caraga State University informs you that the personal and office information
+            you provide in this <strong>USWAG Plan (LNA Tool)</strong> will be collected
+            and processed for the following purposes:
+          </p>
+          <ul>
+            <li>Assessment of your office's learning and development needs</li>
+            <li>Planning of training programs and capacity-building interventions</li>
+            <li>Human resource reporting and institutional planning</li>
+            <li>Generation of official LNA records processed by HRMS</li>
+          </ul>
+          <p>
+            Your information will be stored securely and accessed only by authorized
+            CarSU HR and L&D personnel. It will not be disclosed to third parties without
+            consent, except as required by law.
+          </p>
+          <p>
+            You have the right to access, correct, or request deletion of your data.
+            For concerns, contact the <strong>CarSU Data Protection Officer</strong>.
+          </p>
+          <label class="privacy-checkbox">
+            <input type="checkbox" v-model="privacyAgreed" />
+            <span>I have read and understood this notice, and I consent to the collection and processing of my personal data.</span>
+          </label>
+        </div>
+        <div class="privacy-footer">
+          <NuxtLink to="/" class="btn-privacy-decline">Decline</NuxtLink>
+          <button class="btn-privacy-agree" :disabled="!privacyAgreed" @click="acceptPrivacy">
+            Agree &amp; Continue
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Loading Overlay -->
     <div v-if="isSubmitting" class="overlay active">
       <div class="spinner"></div>
@@ -516,6 +561,13 @@ import { ref, reactive, computed, watch, onMounted } from "vue";
 
 const config = useRuntimeConfig();
 const API = config.public.apiBase;
+
+// ── Privacy Modal ──
+const showPrivacyModal = ref(true);
+const privacyAgreed = ref(false);
+function acceptPrivacy() {
+  if (privacyAgreed.value) showPrivacyModal.value = false;
+}
 
 const screen = ref("form");
 const isSubmitting = ref(false);
@@ -1040,6 +1092,114 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* ── Privacy Modal ── */
+.privacy-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+}
+.privacy-modal {
+  background: #fff;
+  border-radius: 14px;
+  max-width: 560px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  overflow: hidden;
+}
+.privacy-header {
+  background: var(--navy, #1a4d2e);
+  color: #fff;
+  padding: 24px 28px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.privacy-header svg {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  color: #a8d5b5;
+}
+.privacy-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+.privacy-body {
+  padding: 24px 28px;
+  font-size: 0.9rem;
+  color: #333;
+  line-height: 1.65;
+  max-height: 55vh;
+  overflow-y: auto;
+}
+.privacy-body p { margin: 0 0 12px; }
+.privacy-body ul {
+  margin: 0 0 12px;
+  padding-left: 20px;
+}
+.privacy-body ul li { margin-bottom: 4px; }
+.privacy-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 14px;
+  background: #f0f7f3;
+  border: 1.5px solid #b6d9c3;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #1a4d2e;
+}
+.privacy-checkbox input[type="checkbox"] {
+  margin-top: 2px;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  accent-color: var(--navy, #1a4d2e);
+  cursor: pointer;
+}
+.privacy-footer {
+  padding: 16px 28px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+.btn-privacy-decline {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 1.5px solid #ccc;
+  background: #fff;
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+}
+.btn-privacy-agree {
+  padding: 10px 24px;
+  border-radius: 8px;
+  border: none;
+  background: var(--navy, #1a4d2e);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.btn-privacy-agree:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 :root {
   --navy: #1a4d2e;
   --navy-mid: #2d6a3f;
