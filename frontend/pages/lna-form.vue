@@ -210,9 +210,10 @@
               <label>Year Covered <span class="req">*</span></label>
               <select v-model="form.yearCovered">
                 <option value="">Select year…</option>
-                <option>2026-2027</option>
-                <option>2026-2028</option>
-                <option>2026-2029</option>
+                <option>2026</option>
+                <option>2027</option>
+                <option>2028</option>
+                <option>2029</option>
               </select>
             </div>
             <div class="field-group">
@@ -501,7 +502,27 @@
                     <td class="row-label" style="font-size: 13px; white-space: normal;">{{ row.dataSource }}</td>
                     <td><textarea rows="2" v-model="row.gap" placeholder="Identified gap or issue..."></textarea></td>
                     <td><input type="text" v-model="row.personnel" placeholder="Relevant personnel or function..." /></td>
-                    <td><input type="text" v-model="row.intervention" placeholder="Recommended intervention..." /></td>
+                    <td><select v-model="row.intervention" style="min-width:200px">
+                      <option value="">Select…</option>
+                      <optgroup label="On-the-Job Learning">
+                        <option>Observation / Demonstration</option>
+                        <option>Delegation</option>
+                        <option>Coaching</option>
+                        <option>Mentoring</option>
+                        <option>Deployment</option>
+                        <option>Job Rotation / Assignment</option>
+                        <option>Detail and Secondment</option>
+                        <option>Reading</option>
+                        <option>Flexible Learning</option>
+                        <option>Brainstorming / Group Discussion</option>
+                        <option>Experiential Learning</option>
+                      </optgroup>
+                      <optgroup label="Off-the-Job Learning">
+                        <option>Special Short Courses and Lectures</option>
+                        <option>Conferences, Training Programs, Conventions, Seminars, and Cum Paper Presentations</option>
+                        <option>Pursue Higher Education</option>
+                      </optgroup>
+                    </select></td>
                   </tr>
                 </tbody>
               </table>
