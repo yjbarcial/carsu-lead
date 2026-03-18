@@ -59,7 +59,7 @@
     <span class="nav-sep">/</span>
     <span class="nav-current">Individual Development Plan (IDP) 2026-2029</span>
   </div>
-
+ 
   <!-- ═══════════════════════════════════════════════ -->
   <!-- STAGE 1 SUCCESS SCREEN                          -->
   <!-- ═══════════════════════════════════════════════ -->
@@ -83,7 +83,7 @@
     <br />
     <a href="/" class="btn-return">← Return to Home</a>
   </div>
-
+ 
   <!-- ═══════════════════════════════════════════════ -->
   <!-- STAGE 2 TOKEN SCREEN                            -->
   <!-- ═══════════════════════════════════════════════ -->
@@ -108,7 +108,7 @@
     <div class="token-error">{{ tokenError }}</div>
     <button class="btn-load" @click="loadByToken">Verify &amp; Load IDP</button>
   </div>
-
+ 
   <!-- ═══════════════════════════════════════════════ -->
   <!-- STAGE 2 SUCCESS SCREEN                          -->
   <!-- ═══════════════════════════════════════════════ -->
@@ -138,10 +138,10 @@
       </p>
     </div>
   </div>
-
+ 
   <!-- print area -->
   <div id="printArea" style="display: none"></div>
-
+ 
   <!-- ═══════════════════════════════════════════════ -->
   <!-- STAGE 1: EMPLOYEE FORM                          -->
   <!-- ═══════════════════════════════════════════════ -->
@@ -153,7 +153,7 @@
         automatically upon submission.
       </p>
     </div>
-
+ 
     <!-- ── HEADER INFO ── -->
     <div class="section-card">
       <div class="section-header">
@@ -164,13 +164,13 @@
         </div>
       </div>
       <div class="section-body">
-
+ 
         <!-- Campus — static display only -->
         <div class="field-group" style="margin-bottom: 20px">
           <label>Campus</label>
           <div class="static-value">CSU Main Campus</div>
         </div>
-
+ 
         <!-- Office Affiliation -->
         <div class="field-group" style="margin-bottom: 20px">
           <label>Office Affiliation <span class="req">*</span></label>
@@ -191,7 +191,7 @@
             </label>
           </div>
         </div>
-
+ 
         <!-- College / Office / Unit -->
         <div class="field-grid field-grid-2" style="margin-bottom: 18px">
           <div class="field-group span-2">
@@ -221,7 +221,7 @@
             </select>
           </div>
         </div>
-
+ 
         <!-- Name of Personnel -->
         <div class="field-group" style="margin-bottom: 18px">
           <label>Name of Personnel <span class="req">*</span></label>
@@ -240,9 +240,9 @@
             </div>
           </div>
         </div>
-
+ 
         <div class="field-grid field-grid-2" style="margin-bottom: 18px">
-
+ 
           <!-- Employee Email -->
           <div class="field-group">
             <label>Your CarSU Email Address <span class="req">*</span></label>
@@ -258,13 +258,13 @@
             </div>
             <small class="email-hint" :class="emailHints.employee.type">{{ emailHints.employee.msg }}</small>
           </div>
-
+ 
           <!-- Date Prepared -->
           <div class="field-group">
             <label>Date Prepared <span class="req">*</span></label>
             <input type="date" v-model="form.datePrepared" :class="{ error: errors.datePrepared }" />
           </div>
-
+ 
           <!-- Educational Attainment -->
           <div class="field-group span-2">
             <label>Highest Educational Attainment <span class="req">*</span></label>
@@ -286,7 +286,7 @@
               />
             </div>
           </div>
-
+ 
           <!-- Current Position / Designation -->
           <div class="field-group span-2">
             <label>Current Position / Designation <span class="req">*</span></label>
@@ -328,6 +328,7 @@
                     <option>College Librarian III</option>
                     <option>Nurse I</option>
                     <option>Nurse II</option>
+                    <option>Registrar III</option>
                     <option>Chief Administrative Officer (CAO)</option>
                     <option>Board Secretary V</option>
                     <option>Guidance Counselor III</option>
@@ -366,31 +367,31 @@
               </div>
             </div>
           </div>
-
+ 
           <!-- Year Covered -->
           <div class="field-group">
             <label>Year Covered <span class="req">*</span></label>
             <input type="text" v-model="form.yearCovered" :class="{ error: errors.yearCovered }" placeholder="e.g. 2025" />
           </div>
-
+ 
           <!-- Years in Position -->
           <div class="field-group">
             <label>Years in Position <span class="req">*</span></label>
             <input type="number" v-model="form.yearsInPosition" :class="{ error: errors.yearsInPosition }" min="0" placeholder="0" />
           </div>
-
+ 
           <!-- Years in CSU -->
           <div class="field-group">
             <label>Years in CSU <span class="req">*</span></label>
             <input type="number" v-model="form.yearsInCSU" :class="{ error: errors.yearsInCSU }" min="0" placeholder="0" />
           </div>
-
+ 
           <!-- Supervisor Name -->
           <div class="field-group">
             <label>Immediate Supervisor Name <span class="req">*</span></label>
             <input type="text" v-model="form.supervisorName" :class="{ error: errors.supervisorName }" placeholder="e.g. Dr. Juan Dela Cruz" />
           </div>
-
+ 
           <!-- Supervisor Email -->
           <div class="field-group">
             <label>Supervisor CarSU Email <span class="req">*</span></label>
@@ -406,7 +407,7 @@
             </div>
             <small class="email-hint" :class="emailHints.supervisor.type">{{ emailHints.supervisor.msg }}</small>
           </div>
-
+ 
           <!-- Purpose -->
           <div class="field-group span-2">
             <label>Purpose <span class="req">*</span></label>
@@ -430,11 +431,11 @@
               <input type="text" v-model="form.headerPurposeOther" placeholder="Please specify…" />
             </div>
           </div>
-
+ 
         </div>
       </div>
     </div>
-
+ 
     <!-- ── SECTION I: COMPETENCY ASSESSMENT ── -->
     <div class="section-card section-card-collapsible">
       <div class="section-header">
@@ -455,7 +456,7 @@
             >Competency Manual and Model</a
           >.
         </div>
-
+ 
         <div class="field-group" style="margin-bottom: 20px">
           <label>Purpose <span class="req">*</span></label>
           <div class="checkbox-group">
@@ -485,7 +486,7 @@
             />
           </div>
         </div>
-
+ 
         <div class="table-wrapper">
           <table class="dynamic-table">
             <thead>
@@ -503,7 +504,7 @@
               <tr v-for="(row, idx) in competencyRows" :key="idx">
                 <td class="row-num-cell">{{ idx + 1 }}</td>
                 <td>
-                  <select v-model="row.targetCompetency" @change="row.competencyGroup = getCompetencyCluster(row.targetCompetency); row.requiredLevel = getRequiredLevel(row.targetCompetency, form.currentPosition)">
+                  <select v-model="row.targetCompetency" @change="row.competencyGroup = getCompetencyCluster(row.targetCompetency)">
                     <option value="">Select…</option>
                     <optgroup label="Core">
                       <option v-for="c in allCompetencies.Core" :key="c" :value="c">{{ c }}</option>
@@ -529,8 +530,8 @@
                   </select>
                 </td>
                 <td>
-                  <div v-if="row.requiredLevel" class="required-level-badge">{{ row.requiredLevel }}</div>
-                  <div v-else class="required-level-empty">Auto-set</div>
+                  <div v-if="getRequiredLevel(row.targetCompetency, form.currentPosition)" class="required-level-badge">{{ getRequiredLevel(row.targetCompetency, form.currentPosition) }}</div>
+                  <div v-else class="required-level-empty">{{ row.targetCompetency ? '--' : 'Auto-set' }}</div>
                 </td>
                 <td>
                   <select v-model="row.leadInterventions" style="min-width:200px">
@@ -584,7 +585,7 @@
       </div>
       </transition>
     </div>
-
+ 
     <!-- ── SECTION II: AGAP ── -->
     <div class="section-card section-card-collapsible">
       <div class="section-header">
@@ -664,7 +665,7 @@
       </div>
       </transition>
     </div>
-
+ 
     <!-- ── SECTION III: PRO-ACT ── -->
     <div class="section-card section-card-collapsible">
       <div class="section-header">
@@ -740,7 +741,7 @@
       </div>
       </transition>
     </div>
-
+ 
     <!-- ── SUBMIT STAGE 1 ── -->
     <transition name="reveal">
       <div v-if="sectionIIIComplete" class="submit-area">
@@ -754,7 +755,7 @@
       </div>
     </transition>
   </div>
-
+ 
   <!-- ═══════════════════════════════════════════════ -->
   <!-- STAGE 2: SUPERVISOR REVIEW                      -->
   <!-- ═══════════════════════════════════════════════ -->
@@ -799,7 +800,7 @@
         {{ idpData.refId }}
       </div>
     </div>
-
+ 
     <!-- ── H: PERSONNEL INFO (READ-ONLY) ── -->
     <div class="section-card">
       <div class="section-header">
@@ -855,7 +856,7 @@
         </div>
       </div>
     </div>
-
+ 
     <!-- ── I: COMPETENCY (READ-ONLY) ── -->
     <div class="section-card">
       <div class="section-header">
@@ -889,7 +890,7 @@
                 <td>{{ row.priority || idx + 1 }}</td>
                 <td>{{ row.targetCompetency || "—" }}</td>
                 <td>{{ row.currentLevel || "—" }}</td>
-                <td>{{ row.requiredLevel || "—" }}</td>
+                <td>{{ getRequiredLevel(row.targetCompetency, idpData.currentPosition) || "—" }}</td>
                 <td>{{ row.leadInterventions || "—" }}</td>
                 <td>{{ row.resourceSupport || "—" }}</td>
                 <td>{{ row.targetTimeline || "—" }}</td>
@@ -899,7 +900,7 @@
         </div>
       </div>
     </div>
-
+ 
     <!-- ── II: AGAP (READ-ONLY) ── -->
     <div class="section-card">
       <div class="section-header">
@@ -939,7 +940,7 @@
         </div>
       </div>
     </div>
-
+ 
     <!-- ── III: PRO-ACT (READ-ONLY) ── -->
     <div class="section-card">
       <div class="section-header">
@@ -984,7 +985,7 @@
         </div>
       </div>
     </div>
-
+ 
     <!-- ── IV: SUPERVISOR ASSESSMENT (FILLABLE) ── -->
     <div class="section-card">
       <div class="section-header">
@@ -1176,7 +1177,7 @@
             </tr>
           </tbody>
         </table>
-
+ 
         <!-- Certification block -->
         <div class="cert-block">
           <p>
@@ -1192,7 +1193,7 @@
         </div>
       </div>
     </div>
-
+ 
     <!-- ── SUBMIT STAGE 2 ── -->
     <div class="submit-area">
       <p>
@@ -1205,10 +1206,10 @@
     </div>
   </div>
 </template>
-
+ 
 <script setup>
 import { ref, reactive, computed, watch, onMounted } from "vue";
-
+ 
 // ── NOTE FOR MIGRATION ──────────────────────────────────────────────────────
 // APPS_SCRIPT_URL below is temporary for the current Google Sheets backend.
 // When NestJS backend is ready, replace this with your API endpoint, e.g.:
@@ -1225,14 +1226,14 @@ const privacyAgreed = ref(false);
 function acceptPrivacy() {
   if (privacyAgreed.value) showPrivacyModal.value = false;
 }
-
+ 
 const stage = ref("stage1");
-
+ 
 // ── Loading state ──────────────────────────────────────────────────────────
 const isLoading = ref(false);
 const isSubmitting = ref(false);
 const loadingMsg = ref("Submitting your IDP, please wait…");
-
+ 
 // ── Stage 1 form data ──────────────────────────────────────────────────────
 const form = reactive({
   campus: "CSU Main Campus",
@@ -1260,20 +1261,19 @@ const form = reactive({
   compPurpose: "",
   compPurposeOther: "",
 });
-
+ 
 const errors = reactive({});
 const emailHints = reactive({
   employee: { msg: "", type: "" },
   supervisor: { msg: "", type: "" },
 });
-
+ 
 // Dynamic table rows
 const competencyRows = ref([
   {
     competencyGroup: "",  // auto-set by getCompetencyCluster on selection
     targetCompetency: "",
     currentLevel: "",
-    requiredLevel: "",
     leadInterventions: "",
     targetTimeline: "",
   },
@@ -1296,10 +1296,10 @@ const proactRows = ref([
     targetTimeline: "",
   },
 ]);
-
+ 
 // Stage 1 result
 const refId = ref("");
-
+ 
 // ── Stage 2 state ──────────────────────────────────────────────────────────
 const tokenInput = ref("");
 const supervisorEmailInput = ref("");
@@ -1307,7 +1307,7 @@ const tokenError = ref("");
 const currentToken = ref("");
 const supervisorEmail = ref("");
 const idpData = reactive({});
-
+ 
 const assessment = reactive({
   perfGapsYN: "",
   perfGapsSpec: "",
@@ -1318,7 +1318,7 @@ const assessment = reactive({
   implementationPeriod: [],
   additionalComments: "",
 });
-
+ 
 // ── Static options ─────────────────────────────────────────────────────────
 const campusOptions = ["CSU Main Campus"];
 const officeOptions = [
@@ -1328,7 +1328,7 @@ const officeOptions = [
   "OVPSAS",
   "OVPRDIE",
 ];
-
+ 
 // Sub-office / college options per office affiliation
 // For OVPAA colleges, value is { name, programs: [] }
 const subOfficeMap = {
@@ -1416,23 +1416,23 @@ const subOfficeMap = {
     "RDIE Publication Management Office",
   ],
 };
-
+ 
 // For OVPAA: colleges with sub-programs
 const isOVPAA = computed(() => form.officeAffiliation === "OVPAA");
-
+ 
 const collegeOfficeUnitOptions = computed(() => {
   const list = subOfficeMap[form.officeAffiliation] || [];
   if (isOVPAA.value) return list.map(c => typeof c === "string" ? c : c.name);
   return list;
 });
-
+ 
 const selectedCollegePrograms = computed(() => {
   if (!isOVPAA.value) return [];
   const colleges = subOfficeMap["OVPAA"] || [];
   const found = colleges.find(c => typeof c === "object" && c.name === form.collegeOfficeUnit);
   return found ? found.programs : [];
 });
-
+ 
 // Reset downstream when affiliation changes
 watch(() => form.officeAffiliation, () => {
   form.collegeOfficeUnit = "";
@@ -1440,26 +1440,27 @@ watch(() => form.officeAffiliation, () => {
   form.personnelType = "";
   form.currentPosition = "";
 });
-
+ 
 watch(() => form.collegeOfficeUnit, () => {
   form.collegeProgram = "";
 });
+ 
 // ── Section completion computed flags ─────────────────────────────────────
 const sectionIComplete = computed(() => {
   // Section I (Competency) is "done" once purpose is chosen — rows are optional
   return !!form.compPurpose;
 });
-
+ 
 const sectionIIComplete = computed(() => {
   // Section II (AGAP) always shows once Section I purpose picked — rows optional
   return sectionIComplete.value;
 });
-
+ 
 const sectionIIIComplete = computed(() => {
   // Section III (Pro-ACT) always shows once Section II visible — rows optional
   return sectionIIComplete.value;
 });
-
+ 
 // Competencies actually entered in Section I — drives Pro-ACT table rows
 const filledCompetencies = computed(() => {
   const list = competencyRows.value
@@ -1473,7 +1474,7 @@ const filledCompetencies = computed(() => {
   list.forEach((c, i) => { proactRows.value[i].targetSkill = c; });
   return list;
 });
-
+ 
 const purposeOptions = [
   "Initial Assessment",
   "Mid-Year Review",
@@ -1509,7 +1510,7 @@ const interventionOptions = [
   "Others",
 ];
 const implOptions = ["Q1", "Q2", "Q3", "Q4", "Within this year", "Next year"];
-
+ 
 // ── Competency lists ────────────────────────────────────────────────────────
 const competencyData = {
   Core: computed(() => {
@@ -1527,14 +1528,14 @@ const competencyData = {
     return base;
   }),
 };
-
+ 
 function getCompetencyOptions(group) {
   if (!group) return [];
   const v = competencyData[group];
   if (!v) return [];
   return typeof v.value !== "undefined" ? v.value : v;
 }
-
+ 
 // Flat computed lists per cluster (reactive to personnelType)
 const allCompetencies = computed(() => ({
   Core: getCompetencyOptions("Core"),
@@ -1542,7 +1543,7 @@ const allCompetencies = computed(() => ({
   Organizational: getCompetencyOptions("Organizational"),
   Technical: getCompetencyOptions("Technical"),
 }));
-
+ 
 // Reverse lookup: competency name → cluster name
 function getCompetencyCluster(competency) {
   if (!competency) return "";
@@ -1551,47 +1552,872 @@ function getCompetencyCluster(competency) {
   }
   return "";
 }
+ 
+// ── Required Level Lookup ────────────────────────────────────────────────────
+// Source: CSU Competency Model (official document)
+// Levels: 1 = Basic, 2 = Intermediate, 3 = Advanced, 4 = Expert
+// null = no required competency level for that position
+//
+// COLUMN KEY for admin tables (pages 1-2):
+//   AideIII, SecGuard, FarmW, AstI, AstII, AstIII, AstIV,
+//   OffI, OffII, OffIII, OffIV, OffV,
+//   AideI-U, AideI-C, AideII-U, AideII-C, AideIV-M, AideIV-C, AideIV-D
+ 
+const LEVEL_LABEL = { 1: "1 - Basic", 2: "2 - Intermediate", 3: "3 - Advanced", 4: "4 - Expert" };
 
-// Required level lookup — based on position group
-// Levels: "1 - Basic", "2 - Intermediate", "3 - Advanced", "4 - Expert"
-function getPositionGroup(position) {
-  const p = (position || "").toLowerCase();
-  if (p.includes("university professor") || p.includes("professor v") || p.includes("professor vi")) return "senior_faculty";
-  if (p.includes("professor")) return "faculty_mid";
-  if (p.includes("instructor") || p.includes("assistant professor")) return "faculty_junior";
-  if (p.includes("admin officer iv") || p.includes("admin officer v") || p.includes("cao") || p.includes("board sec") || p.includes("attorney") || p.includes("physician") || p.includes("planning officer")) return "admin_senior";
-  if (p.includes("admin officer")) return "admin_mid";
-  return "admin_junior";
-}
+// ── CSU Competency Model (Corrected Final) ────────────────────────────────────
+const competencyModel = {
 
-// Required levels per competency category per position group
-const reqLevelMatrix = {
-  // [posGroup]: { Core, Leadership, Organizational, Technical }
-  senior_faculty:  { Core: "4 - Expert", Leadership: "4 - Expert", Organizational: "3 - Advanced", Technical: "4 - Expert" },
-  faculty_mid:     { Core: "3 - Advanced", Leadership: "3 - Advanced", Organizational: "3 - Advanced", Technical: "3 - Advanced" },
-  faculty_junior:  { Core: "2 - Intermediate", Leadership: "2 - Intermediate", Organizational: "2 - Intermediate", Technical: "2 - Intermediate" },
-  admin_senior:    { Core: "3 - Advanced", Leadership: "3 - Advanced", Organizational: "3 - Advanced", Technical: "2 - Intermediate" },
-  admin_mid:       { Core: "2 - Intermediate", Leadership: "2 - Intermediate", Organizational: "2 - Intermediate", Technical: "2 - Intermediate" },
-  admin_junior:    { Core: "1 - Basic", Leadership: "1 - Basic", Organizational: "1 - Basic", Technical: "1 - Basic" },
+  "Admin Aide I – Utility": {
+    "Integrity":1,"Accountability":1,"Scientific and Technological Excellence":1,
+    "Delivering Service Excellence":1,"Environmental Consciousness":2,"Building Partnership":1,
+    "Teamwork":1,"Commitment to Learning":1,"Customer Focus":1,
+    "Adaptability and Flexibility":1,"Effective Communication":1,"Valuing Diversity":1,
+    "Self-Awareness and Confidence":1,"Stress Tolerance":1,"Resource Management":1,
+    "Knowledge Management":1,"Initiative":1,"Result Orientation":1,
+    "Organizational Commitment":1,"Planning and Organizing":1,
+    "Emotional and Psychological Maturity":1,"Safety and Risk Management":2,
+    "Interpersonal Effectiveness":1,
+    "Oral Communication":1,"Logical Reasoning":1,
+  },
+
+  "Admin Aide I – Clerk": {
+    "Integrity":2,"Accountability":2,"Scientific and Technological Excellence":1,
+    "Delivering Service Excellence":2,"Environmental Consciousness":2,"Building Partnership":2,
+    "Teamwork":1,"Commitment to Learning":1,"Customer Focus":2,
+    "Adaptability and Flexibility":1,"Effective Communication":1,"Valuing Diversity":1,
+    "Self-Awareness and Confidence":1,"Stress Tolerance":1,"Resource Management":1,
+    "Knowledge Management":1,"Initiative":1,"Result Orientation":1,
+    "Organizational Commitment":1,"Planning and Organizing":1,
+    "Emotional and Psychological Maturity":1,"Safety and Risk Management":1,
+    "Interpersonal Effectiveness":1,
+    "Attention to Details":1,"Written Communication":1,
+    "Oral Communication":1,"Computer Literacy":1,"Logical Reasoning":1,
+  },
+
+  "Admin Aide II – Utility": {
+    "Integrity":1,"Accountability":1,"Scientific and Technological Excellence":1,
+    "Delivering Service Excellence":1,"Environmental Consciousness":2,"Building Partnership":1,
+    "Teamwork":1,"Commitment to Learning":1,"Customer Focus":1,
+    "Adaptability and Flexibility":1,"Effective Communication":1,"Valuing Diversity":1,
+    "Self-Awareness and Confidence":1,"Stress Tolerance":1,"Resource Management":1,
+    "Knowledge Management":1,"Initiative":1,"Result Orientation":1,
+    "Organizational Commitment":1,"Planning and Organizing":1,
+    "Emotional and Psychological Maturity":1,"Safety and Risk Management":2,
+    "Interpersonal Effectiveness":1,
+    "Oral Communication":1,"Logical Reasoning":1,
+  },
+
+  "Admin Aide II – Clerk": {
+    "Integrity":2,"Accountability":2,"Scientific and Technological Excellence":1,
+    "Delivering Service Excellence":2,"Environmental Consciousness":2,"Building Partnership":2,
+    "Teamwork":1,"Commitment to Learning":1,"Customer Focus":2,
+    "Adaptability and Flexibility":1,"Effective Communication":1,"Valuing Diversity":1,
+    "Self-Awareness and Confidence":1,"Stress Tolerance":1,"Resource Management":1,
+    "Knowledge Management":1,"Initiative":1,"Result Orientation":1,
+    "Organizational Commitment":1,"Planning and Organizing":1,
+    "Emotional and Psychological Maturity":1,"Safety and Risk Management":1,
+    "Interpersonal Effectiveness":1,
+    "Attention to Details":1,"Written Communication":1,
+    "Oral Communication":1,"Computer Literacy":1,"Logical Reasoning":1,
+  },
+
+  "Admin Aide III – Clerk": {
+    "Integrity":2,"Accountability":2,"Scientific and Technological Excellence":1,
+    "Delivering Service Excellence":2,"Environmental Consciousness":2,"Building Partnership":2,
+    "Teamwork":1,"Commitment to Learning":1,"Customer Focus":2,
+    "Adaptability and Flexibility":1,"Effective Communication":1,"Valuing Diversity":1,
+    "Self-Awareness and Confidence":1,"Stress Tolerance":1,"Resource Management":1,
+    "Knowledge Management":1,"Initiative":1,"Result Orientation":1,
+    "Organizational Commitment":1,"Planning and Organizing":1,
+    "Emotional and Psychological Maturity":1,"Safety and Risk Management":1,
+    "Interpersonal Effectiveness":1,
+    "Oral Communication":1,"Logical Reasoning":1,
+  },
+
+  "Admin Aide IV – Mechanic": {
+    "Integrity":2,"Accountability":2,"Scientific and Technological Excellence":1,
+    "Delivering Service Excellence":2,"Environmental Consciousness":2,"Building Partnership":1,
+    "Teamwork":1,"Commitment to Learning":1,"Customer Focus":1,
+    "Adaptability and Flexibility":1,"Effective Communication":1,"Valuing Diversity":1,
+    "Self-Awareness and Confidence":1,"Stress Tolerance":1,"Resource Management":1,
+    "Knowledge Management":1,"Initiative":1,"Result Orientation":1,
+    "Organizational Commitment":1,"Planning and Organizing":1,
+    "Emotional and Psychological Maturity":1,"Safety and Risk Management":2,
+    "Interpersonal Effectiveness":1,
+    "Oral Communication":1,"Logical Reasoning":1,
+  },
+
+  "Admin Aide IV – Clerk": {
+    "Integrity":2,"Accountability":2,"Scientific and Technological Excellence":1,
+    "Delivering Service Excellence":2,"Environmental Consciousness":2,"Building Partnership":2,
+    "Teamwork":1,"Commitment to Learning":1,"Customer Focus":2,
+    "Adaptability and Flexibility":1,"Effective Communication":1,"Valuing Diversity":1,
+    "Self-Awareness and Confidence":1,"Stress Tolerance":1,"Resource Management":1,
+    "Knowledge Management":1,"Initiative":1,"Result Orientation":1,
+    "Organizational Commitment":1,"Planning and Organizing":1,
+    "Emotional and Psychological Maturity":1,"Safety and Risk Management":1,
+    "Interpersonal Effectiveness":1,
+    "Attention to Details":1,"Written Communication":1,
+    "Oral Communication":1,"Computer Literacy":1,"Logical Reasoning":1,
+  },
+
+  "Admin Aide IV – Driver": {
+    "Integrity":2,"Accountability":2,"Scientific and Technological Excellence":1,
+    "Delivering Service Excellence":2,"Environmental Consciousness":2,"Building Partnership":1,
+    "Teamwork":1,"Commitment to Learning":1,"Customer Focus":2,
+    "Adaptability and Flexibility":1,"Effective Communication":1,"Valuing Diversity":1,
+    "Self-Awareness and Confidence":1,"Stress Tolerance":3,"Resource Management":1,
+    "Knowledge Management":1,"Initiative":2,"Result Orientation":1,
+    "Organizational Commitment":1,"Planning and Organizing":1,
+    "Emotional and Psychological Maturity":1,"Safety and Risk Management":3,
+    "Interpersonal Effectiveness":1,
+    "Oral Communication":1,"Logical Reasoning":1,
+  },
+
+  "Security Guard I": {
+    "Integrity":3,"Accountability":3,"Scientific and Technological Excellence":1,
+    "Delivering Service Excellence":3,"Environmental Consciousness":2,"Building Partnership":1,
+    "Teamwork":2,"Commitment to Learning":1,"Customer Focus":2,
+    "Adaptability and Flexibility":2,"Effective Communication":1,"Valuing Diversity":1,
+    "Self-Awareness and Confidence":1,"Stress Tolerance":3,"Resource Management":1,
+    "Knowledge Management":1,"Initiative":2,"Result Orientation":1,
+    "Organizational Commitment":1,"Planning and Organizing":1,
+    "Emotional and Psychological Maturity":1,"Safety and Risk Management":3,
+    "Interpersonal Effectiveness":1,
+    "Oral Communication":1,"Computer Literacy":1,"Logical Reasoning":1,
+  },
+
+  "Farm Worker I": {
+    "Integrity":1,"Accountability":2,"Scientific and Technological Excellence":1,
+    "Delivering Service Excellence":1,"Environmental Consciousness":2,"Building Partnership":1,
+    "Teamwork":1,"Commitment to Learning":1,"Customer Focus":1,
+    "Adaptability and Flexibility":1,"Effective Communication":1,"Valuing Diversity":1,
+    "Self-Awareness and Confidence":1,"Stress Tolerance":1,"Resource Management":1,
+    "Knowledge Management":1,"Initiative":1,"Result Orientation":1,
+    "Organizational Commitment":1,"Planning and Organizing":1,
+    "Emotional and Psychological Maturity":1,"Safety and Risk Management":2,
+    "Interpersonal Effectiveness":1,
+    "Oral Communication":1,"Logical Reasoning":1,
+  },
+
+  "Admin Assistant I": {
+    "Integrity":2,"Accountability":2,"Scientific and Technological Excellence":1,
+    "Delivering Service Excellence":2,"Environmental Consciousness":2,"Building Partnership":2,
+    "Teamwork":2,"Commitment to Learning":1,"Customer Focus":2,
+    "Adaptability and Flexibility":2,"Effective Communication":1,"Valuing Diversity":1,
+    "Self-Awareness and Confidence":1,"Stress Tolerance":1,"Resource Management":1,
+    "Knowledge Management":1,"Initiative":1,"Result Orientation":1,
+    "Organizational Commitment":1,"Planning and Organizing":2,
+    "Emotional and Psychological Maturity":1,"Safety and Risk Management":1,
+    "Interpersonal Effectiveness":1,
+    "Attention to Details":1,"Written Communication":1,
+    "Oral Communication":1,"Computer Literacy":1,"Logical Reasoning":1,
+  },
+
+  "Admin Assistant II": {
+    "Integrity":2,"Accountability":2,"Scientific and Technological Excellence":1,
+    "Delivering Service Excellence":2,"Environmental Consciousness":2,"Building Partnership":2,
+    "Teamwork":2,"Commitment to Learning":1,"Customer Focus":2,
+    "Adaptability and Flexibility":2,"Effective Communication":1,"Valuing Diversity":1,
+    "Self-Awareness and Confidence":1,"Stress Tolerance":1,"Resource Management":1,
+    "Knowledge Management":1,"Initiative":1,"Result Orientation":1,
+    "Organizational Commitment":1,"Planning and Organizing":2,
+    "Emotional and Psychological Maturity":1,"Safety and Risk Management":1,
+    "Interpersonal Effectiveness":1,
+    "Attention to Details":1,"Written Communication":1,
+    "Oral Communication":1,"Computer Literacy":1,"Logical Reasoning":1,
+  },
+
+  "Admin Assistant III": {
+    "Integrity":2,"Accountability":2,"Scientific and Technological Excellence":1,
+    "Delivering Service Excellence":2,"Environmental Consciousness":2,"Building Partnership":2,
+    "Teamwork":2,"Commitment to Learning":1,"Customer Focus":2,
+    "Adaptability and Flexibility":2,"Effective Communication":1,"Valuing Diversity":1,
+    "Self-Awareness and Confidence":1,"Stress Tolerance":1,"Resource Management":1,
+    "Knowledge Management":1,"Initiative":1,"Result Orientation":1,
+    "Organizational Commitment":1,"Planning and Organizing":2,
+    "Emotional and Psychological Maturity":1,"Safety and Risk Management":1,
+    "Interpersonal Effectiveness":1,
+    "Attention to Details":1,"Written Communication":1,
+    "Oral Communication":1,"Computer Literacy":1,"Logical Reasoning":1,
+  },
+
+  "Admin Assistant IV": {
+    "Integrity":2,"Accountability":2,"Scientific and Technological Excellence":1,
+    "Delivering Service Excellence":2,"Environmental Consciousness":2,"Building Partnership":2,
+    "Teamwork":2,"Commitment to Learning":1,"Customer Focus":2,
+    "Adaptability and Flexibility":2,"Effective Communication":1,"Valuing Diversity":1,
+    "Self-Awareness and Confidence":1,"Stress Tolerance":1,"Resource Management":1,
+    "Knowledge Management":1,"Initiative":1,"Result Orientation":1,
+    "Organizational Commitment":1,"Planning and Organizing":2,
+    "Emotional and Psychological Maturity":1,"Safety and Risk Management":1,
+    "Interpersonal Effectiveness":1,
+    "Attention to Details":1,"Written Communication":1,
+    "Oral Communication":1,"Computer Literacy":1,"Logical Reasoning":1,
+  },
+
+  "Admin Officer I": {
+    "Integrity":3,"Accountability":3,"Scientific and Technological Excellence":2,
+    "Delivering Service Excellence":3,"Environmental Consciousness":3,"Building Partnership":3,
+    "Teamwork":3,"Commitment to Learning":2,"Customer Focus":3,
+    "Adaptability and Flexibility":3,"Effective Communication":2,"Valuing Diversity":2,
+    "Self-Awareness and Confidence":2,"Stress Tolerance":2,"Resource Management":2,
+    "Knowledge Management":2,"Initiative":2,"Result Orientation":2,
+    "Organizational Commitment":2,"Planning and Organizing":2,
+    "Emotional and Psychological Maturity":2,"Safety and Risk Management":2,
+    "Interpersonal Effectiveness":2,
+    "Attention to Details":2,"Written Communication":2,
+    "Oral Communication":2,"Computer Literacy":2,"Logical Reasoning":2,
+  },
+
+  "Admin Officer II": {
+    "Integrity":3,"Accountability":3,"Scientific and Technological Excellence":2,
+    "Delivering Service Excellence":3,"Environmental Consciousness":3,"Building Partnership":3,
+    "Teamwork":3,"Commitment to Learning":2,"Customer Focus":3,
+    "Adaptability and Flexibility":3,"Effective Communication":2,"Valuing Diversity":2,
+    "Self-Awareness and Confidence":2,"Stress Tolerance":2,"Resource Management":2,
+    "Knowledge Management":2,"Initiative":2,"Result Orientation":2,
+    "Organizational Commitment":2,"Planning and Organizing":2,
+    "Emotional and Psychological Maturity":2,"Safety and Risk Management":2,
+    "Interpersonal Effectiveness":2,
+    "Attention to Details":2,"Written Communication":2,
+    "Oral Communication":2,"Computer Literacy":2,"Logical Reasoning":2,
+  },
+
+  "Admin Officer III": {
+    "Integrity":3,"Accountability":3,"Scientific and Technological Excellence":2,
+    "Delivering Service Excellence":3,"Environmental Consciousness":3,"Building Partnership":3,
+    "Teamwork":3,"Commitment to Learning":3,"Customer Focus":3,
+    "Adaptability and Flexibility":3,"Effective Communication":2,"Valuing Diversity":2,
+    "Self-Awareness and Confidence":2,"Stress Tolerance":2,"Resource Management":2,
+    "Knowledge Management":2,"Initiative":2,"Result Orientation":2,
+    "Organizational Commitment":2,"Planning and Organizing":2,
+    "Emotional and Psychological Maturity":2,"Safety and Risk Management":2,
+    "Interpersonal Effectiveness":2,
+    "Attention to Details":2,"Written Communication":2,
+    "Oral Communication":2,"Computer Literacy":2,"Logical Reasoning":2,
+  },
+
+  "Admin Officer IV": {
+    "Integrity":3,"Accountability":3,"Scientific and Technological Excellence":2,
+    "Delivering Service Excellence":3,"Environmental Consciousness":3,"Building Partnership":3,
+    "Teamwork":3,"Commitment to Learning":3,"Customer Focus":3,
+    "Adaptability and Flexibility":3,"Effective Communication":3,"Valuing Diversity":3,
+    "Self-Awareness and Confidence":3,"Stress Tolerance":3,"Resource Management":3,
+    "Knowledge Management":3,"Initiative":3,"Result Orientation":3,
+    "Organizational Commitment":3,"Planning and Organizing":3,
+    "Emotional and Psychological Maturity":3,"Safety and Risk Management":3,
+    "Interpersonal Effectiveness":3,
+    "Attention to Details":3,"Written Communication":3,
+    "Oral Communication":3,"Computer Literacy":2,"Logical Reasoning":3,
+  },
+
+  "Admin Officer V": {
+    "Integrity":4,"Accountability":4,"Scientific and Technological Excellence":2,
+    "Delivering Service Excellence":4,"Environmental Consciousness":4,"Building Partnership":4,
+    "Developing People":4,"Facilitating Change":4,"Conflict Management":4,
+    "Leading Innovation":3,"Strategic Planning":3,"Leading Others":4,"Decisiveness":4,
+    "Teamwork":4,"Commitment to Learning":4,"Customer Focus":4,
+    "Adaptability and Flexibility":4,"Critical Thinking":4,"Effective Communication":4,
+    "Valuing Diversity":4,"Self-Awareness and Confidence":4,"Stress Tolerance":4,
+    "Resource Management":4,"Knowledge Management":4,"Initiative":4,"Result Orientation":4,
+    "Organizational Commitment":4,"Planning and Organizing":4,
+    "Emotional and Psychological Maturity":4,"Safety and Risk Management":4,
+    "Interpersonal Effectiveness":4,
+    "Attention to Details":4,"Written Communication":4,
+    "Oral Communication":4,"Computer Literacy":2,"Logical Reasoning":4,
+  },
+
+  "Accountant III": {
+    "Integrity":4,"Accountability":4,"Scientific and Technological Excellence":2,
+    "Delivering Service Excellence":4,"Environmental Consciousness":2,"Building Partnership":3,
+    "Developing People":2,"Facilitating Change":2,"Conflict Management":2,
+    "Leading Innovation":1,"Strategic Planning":1,"Leading Others":2,"Decisiveness":2,
+    "Teamwork":4,"Commitment to Learning":3,"Customer Focus":3,
+    "Adaptability and Flexibility":3,"Critical Thinking":3,"Effective Communication":4,
+    "Valuing Diversity":4,"Self-Awareness and Confidence":4,"Stress Tolerance":4,
+    "Resource Management":4,"Knowledge Management":4,"Initiative":4,"Result Orientation":4,
+    "Organizational Commitment":4,"Planning and Organizing":4,
+    "Emotional and Psychological Maturity":4,"Safety and Risk Management":4,
+    "Interpersonal Effectiveness":4,
+    "Attention to Details":4,"Written Communication":4,
+    "Oral Communication":4,"Computer Literacy":2,"Logical Reasoning":4,
+  },
+
+  "College Librarian I": {
+    "Integrity":2,"Accountability":2,"Scientific and Technological Excellence":2,
+    "Delivering Service Excellence":3,"Environmental Consciousness":2,"Building Partnership":2,
+    "Teamwork":2,"Commitment to Learning":2,"Customer Focus":3,
+    "Adaptability and Flexibility":3,"Critical Thinking":3,"Effective Communication":3,
+    "Valuing Diversity":3,"Self-Awareness and Confidence":3,"Stress Tolerance":3,
+    "Resource Management":3,"Knowledge Management":3,"Initiative":3,"Result Orientation":3,
+    "Organizational Commitment":3,"Planning and Organizing":3,
+    "Emotional and Psychological Maturity":3,"Safety and Risk Management":3,
+    "Interpersonal Effectiveness":3,
+    "Attention to Details":3,"Written Communication":3,
+    "Oral Communication":3,"Computer Literacy":2,"Logical Reasoning":3,
+  },
+
+  "College Librarian III": {
+    "Integrity":3,"Accountability":3,"Scientific and Technological Excellence":2,
+    "Delivering Service Excellence":4,"Environmental Consciousness":2,"Building Partnership":3,
+    "Developing People":2,"Facilitating Change":2,"Conflict Management":2,
+    "Leading Innovation":1,"Strategic Planning":1,"Leading Others":2,"Decisiveness":2,
+    "Teamwork":3,"Commitment to Learning":3,"Customer Focus":3,
+    "Adaptability and Flexibility":3,"Critical Thinking":3,"Effective Communication":4,
+    "Valuing Diversity":4,"Self-Awareness and Confidence":4,"Stress Tolerance":4,
+    "Resource Management":4,"Knowledge Management":4,"Initiative":4,"Result Orientation":4,
+    "Organizational Commitment":4,"Planning and Organizing":4,
+    "Emotional and Psychological Maturity":4,"Safety and Risk Management":4,
+    "Interpersonal Effectiveness":4,
+    "Attention to Details":4,"Written Communication":4,
+    "Oral Communication":4,"Computer Literacy":2,"Logical Reasoning":4,
+  },
+
+  "Nurse I": {
+    "Integrity":2,"Accountability":2,"Scientific and Technological Excellence":2,
+    "Delivering Service Excellence":3,"Environmental Consciousness":2,"Building Partnership":2,
+    "Teamwork":1,"Commitment to Learning":1,"Customer Focus":3,
+    "Adaptability and Flexibility":2,"Critical Thinking":2,"Effective Communication":2,
+    "Valuing Diversity":2,"Self-Awareness and Confidence":2,"Stress Tolerance":3,
+    "Resource Management":2,"Knowledge Management":2,"Initiative":2,"Result Orientation":2,
+    "Organizational Commitment":2,"Planning and Organizing":2,
+    "Emotional and Psychological Maturity":2,"Safety and Risk Management":2,
+    "Interpersonal Effectiveness":2,
+    "Attention to Details":2,"Written Communication":2,
+    "Oral Communication":2,"Computer Literacy":2,"Logical Reasoning":2,
+  },
+
+  "Nurse II": {
+    "Integrity":2,"Accountability":2,"Scientific and Technological Excellence":2,
+    "Delivering Service Excellence":3,"Environmental Consciousness":2,"Building Partnership":2,
+    "Teamwork":2,"Commitment to Learning":1,"Customer Focus":3,
+    "Adaptability and Flexibility":2,"Critical Thinking":2,"Effective Communication":2,
+    "Valuing Diversity":2,"Self-Awareness and Confidence":2,"Stress Tolerance":3,
+    "Resource Management":2,"Knowledge Management":2,"Initiative":2,"Result Orientation":2,
+    "Organizational Commitment":2,"Planning and Organizing":2,
+    "Emotional and Psychological Maturity":2,"Safety and Risk Management":2,
+    "Interpersonal Effectiveness":2,
+    "Attention to Details":2,"Written Communication":2,
+    "Oral Communication":2,"Computer Literacy":2,"Logical Reasoning":2,
+  },
+
+  "Registrar III": {
+    "Integrity":4,"Accountability":4,"Scientific and Technological Excellence":2,
+    "Delivering Service Excellence":4,"Environmental Consciousness":2,"Building Partnership":3,
+    "Developing People":2,"Facilitating Change":2,"Conflict Management":2,
+    "Leading Innovation":2,"Strategic Planning":2,"Leading Others":2,"Decisiveness":2,
+    "Teamwork":4,"Commitment to Learning":3,"Customer Focus":4,
+    "Adaptability and Flexibility":3,"Critical Thinking":3,"Effective Communication":4,
+    "Valuing Diversity":4,"Self-Awareness and Confidence":4,"Stress Tolerance":4,
+    "Resource Management":4,"Knowledge Management":4,"Initiative":4,"Result Orientation":4,
+    "Organizational Commitment":4,"Planning and Organizing":4,
+    "Emotional and Psychological Maturity":4,"Safety and Risk Management":4,
+    "Interpersonal Effectiveness":4,
+    "Attention to Details":4,"Written Communication":4,
+    "Oral Communication":4,"Computer Literacy":2,"Logical Reasoning":4,
+  },
+
+  "Chief Administrative Officer (CAO)": {
+    "Integrity":4,"Accountability":4,"Scientific and Technological Excellence":2,
+    "Delivering Service Excellence":4,"Environmental Consciousness":4,"Building Partnership":4,
+    "Developing People":4,"Facilitating Change":4,"Conflict Management":4,
+    "Leading Innovation":4,"Strategic Planning":4,"Leading Others":4,"Decisiveness":4,
+    "Teamwork":4,"Commitment to Learning":4,"Customer Focus":4,
+    "Adaptability and Flexibility":4,"Critical Thinking":4,"Effective Communication":4,
+    "Valuing Diversity":4,"Self-Awareness and Confidence":4,"Stress Tolerance":4,
+    "Resource Management":4,"Knowledge Management":4,"Initiative":4,"Result Orientation":4,
+    "Organizational Commitment":4,"Planning and Organizing":4,
+    "Emotional and Psychological Maturity":4,"Safety and Risk Management":4,
+    "Interpersonal Effectiveness":4,
+    "Attention to Details":4,"Written Communication":4,
+    "Oral Communication":4,"Computer Literacy":2,"Logical Reasoning":4,
+  },
+
+  "Board Secretary V": {
+    "Integrity":4,"Accountability":4,"Scientific and Technological Excellence":2,
+    "Delivering Service Excellence":4,"Environmental Consciousness":3,"Building Partnership":3,
+    "Developing People":2,"Facilitating Change":2,"Conflict Management":2,
+    "Leading Innovation":2,"Strategic Planning":2,"Leading Others":2,"Decisiveness":2,
+    "Teamwork":4,"Commitment to Learning":3,"Customer Focus":4,
+    "Adaptability and Flexibility":3,"Critical Thinking":4,"Effective Communication":4,
+    "Valuing Diversity":4,"Self-Awareness and Confidence":4,"Stress Tolerance":4,
+    "Resource Management":4,"Knowledge Management":4,"Initiative":4,"Result Orientation":4,
+    "Organizational Commitment":4,"Planning and Organizing":4,
+    "Emotional and Psychological Maturity":4,"Safety and Risk Management":4,
+    "Interpersonal Effectiveness":4,
+    "Attention to Details":4,"Written Communication":4,
+    "Oral Communication":4,"Computer Literacy":2,"Logical Reasoning":4,
+  },
+
+  "Guidance Counselor III": {
+    "Integrity":3,"Accountability":3,"Scientific and Technological Excellence":2,
+    "Delivering Service Excellence":4,"Environmental Consciousness":2,"Building Partnership":3,
+    "Developing People":2,"Facilitating Change":2,"Conflict Management":2,
+    "Leading Innovation":2,"Strategic Planning":2,"Leading Others":2,"Decisiveness":2,
+    "Teamwork":4,"Commitment to Learning":3,"Customer Focus":4,
+    "Adaptability and Flexibility":3,"Critical Thinking":4,"Effective Communication":4,
+    "Valuing Diversity":4,"Self-Awareness and Confidence":4,"Stress Tolerance":4,
+    "Resource Management":4,"Knowledge Management":4,"Initiative":4,"Result Orientation":4,
+    "Organizational Commitment":4,"Planning and Organizing":4,
+    "Emotional and Psychological Maturity":4,"Safety and Risk Management":4,
+    "Interpersonal Effectiveness":4,
+    "Attention to Details":4,"Written Communication":4,
+    "Oral Communication":4,"Computer Literacy":2,"Logical Reasoning":4,
+  },
+
+  "Programmer II": {
+    "Integrity":2,"Accountability":2,"Scientific and Technological Excellence":2,
+    "Delivering Service Excellence":3,"Environmental Consciousness":2,"Building Partnership":2,
+    "Teamwork":2,"Commitment to Learning":1,"Customer Focus":2,
+    "Adaptability and Flexibility":3,"Critical Thinking":2,"Effective Communication":2,
+    "Valuing Diversity":2,"Self-Awareness and Confidence":2,"Stress Tolerance":3,
+    "Resource Management":2,"Knowledge Management":2,"Initiative":2,"Result Orientation":2,
+    "Organizational Commitment":2,"Planning and Organizing":2,
+    "Emotional and Psychological Maturity":2,"Safety and Risk Management":2,
+    "Interpersonal Effectiveness":2,
+    "Attention to Details":2,"Written Communication":2,
+    "Oral Communication":2,"Computer Literacy":4,"Logical Reasoning":2,
+  },
+
+  "Database Administrator": {
+    "Integrity":3,"Accountability":3,"Scientific and Technological Excellence":2,
+    "Delivering Service Excellence":3,"Environmental Consciousness":2,"Building Partnership":2,
+    "Teamwork":2,"Commitment to Learning":2,"Customer Focus":2,
+    "Adaptability and Flexibility":3,"Critical Thinking":2,"Effective Communication":2,
+    "Valuing Diversity":2,"Self-Awareness and Confidence":2,"Stress Tolerance":3,
+    "Resource Management":2,"Knowledge Management":2,"Initiative":2,"Result Orientation":2,
+    "Organizational Commitment":2,"Planning and Organizing":2,
+    "Emotional and Psychological Maturity":2,"Safety and Risk Management":2,
+    "Interpersonal Effectiveness":2,
+    "Attention to Details":2,"Written Communication":2,
+    "Oral Communication":2,"Computer Literacy":4,"Logical Reasoning":2,
+  },
+
+  "System Analyst": {
+    "Integrity":3,"Accountability":3,"Scientific and Technological Excellence":2,
+    "Delivering Service Excellence":3,"Environmental Consciousness":2,"Building Partnership":2,
+    "Teamwork":2,"Commitment to Learning":2,"Customer Focus":3,
+    "Adaptability and Flexibility":3,"Critical Thinking":2,"Effective Communication":2,
+    "Valuing Diversity":2,"Self-Awareness and Confidence":2,"Stress Tolerance":3,
+    "Resource Management":2,"Knowledge Management":2,"Initiative":2,"Result Orientation":2,
+    "Organizational Commitment":2,"Planning and Organizing":2,
+    "Emotional and Psychological Maturity":2,"Safety and Risk Management":2,
+    "Interpersonal Effectiveness":2,
+    "Attention to Details":2,"Written Communication":2,
+    "Oral Communication":2,"Computer Literacy":4,"Logical Reasoning":2,
+  },
+
+  "Planning Officer": {
+    "Integrity":3,"Accountability":3,"Scientific and Technological Excellence":2,
+    "Delivering Service Excellence":4,"Environmental Consciousness":3,"Building Partnership":3,
+    "Developing People":2,"Facilitating Change":2,"Conflict Management":2,
+    "Leading Innovation":3,"Strategic Planning":3,"Leading Others":2,"Decisiveness":2,
+    "Teamwork":4,"Commitment to Learning":4,"Customer Focus":4,
+    "Adaptability and Flexibility":4,"Critical Thinking":4,"Effective Communication":4,
+    "Valuing Diversity":4,"Self-Awareness and Confidence":4,"Stress Tolerance":4,
+    "Resource Management":4,"Knowledge Management":4,"Initiative":4,"Result Orientation":4,
+    "Organizational Commitment":4,"Planning and Organizing":4,
+    "Emotional and Psychological Maturity":4,"Safety and Risk Management":4,
+    "Interpersonal Effectiveness":4,
+    "Attention to Details":4,"Written Communication":4,
+    "Oral Communication":4,"Computer Literacy":2,"Logical Reasoning":4,
+  },
+
+  "Attorney II": {
+    "Integrity":4,"Accountability":4,"Scientific and Technological Excellence":2,
+    "Delivering Service Excellence":3,"Environmental Consciousness":2,"Building Partnership":3,
+    "Facilitating Change":4,"Conflict Management":4,
+    "Strategic Planning":4,"Decisiveness":4,
+    "Teamwork":2,"Commitment to Learning":2,"Customer Focus":3,
+    "Adaptability and Flexibility":3,"Critical Thinking":4,"Effective Communication":4,
+    "Valuing Diversity":4,"Self-Awareness and Confidence":4,"Stress Tolerance":4,
+    "Resource Management":4,"Knowledge Management":4,"Initiative":4,"Result Orientation":4,
+    "Organizational Commitment":4,"Planning and Organizing":4,
+    "Emotional and Psychological Maturity":4,"Safety and Risk Management":4,
+    "Interpersonal Effectiveness":4,
+    "Attention to Details":4,"Written Communication":4,
+    "Oral Communication":4,"Computer Literacy":2,"Logical Reasoning":4,
+  },
+
+  "Attorney III": {
+    "Integrity":4,"Accountability":4,"Scientific and Technological Excellence":2,
+    "Delivering Service Excellence":3,"Environmental Consciousness":2,"Building Partnership":3,
+    "Facilitating Change":4,"Conflict Management":4,
+    "Strategic Planning":4,"Decisiveness":4,
+    "Teamwork":3,"Commitment to Learning":3,"Customer Focus":3,
+    "Adaptability and Flexibility":3,"Critical Thinking":4,"Effective Communication":4,
+    "Valuing Diversity":4,"Self-Awareness and Confidence":4,"Stress Tolerance":4,
+    "Resource Management":4,"Knowledge Management":4,"Initiative":4,"Result Orientation":4,
+    "Organizational Commitment":4,"Planning and Organizing":4,
+    "Emotional and Psychological Maturity":4,"Safety and Risk Management":4,
+    "Interpersonal Effectiveness":4,
+    "Attention to Details":4,"Written Communication":4,
+    "Oral Communication":4,"Computer Literacy":2,"Logical Reasoning":4,
+  },
+
+  "Physician": {
+    "Integrity":3,"Accountability":3,"Scientific and Technological Excellence":2,
+    "Delivering Service Excellence":4,"Environmental Consciousness":2,"Building Partnership":2,
+    "Developing People":4,"Facilitating Change":4,"Conflict Management":4,
+    "Leading Innovation":4,"Strategic Planning":4,"Decisiveness":4,
+    "Teamwork":2,"Commitment to Learning":3,"Customer Focus":4,
+    "Adaptability and Flexibility":2,"Critical Thinking":4,"Effective Communication":4,
+    "Valuing Diversity":4,"Self-Awareness and Confidence":4,"Stress Tolerance":4,
+    "Resource Management":4,"Knowledge Management":4,"Initiative":4,"Result Orientation":4,
+    "Organizational Commitment":4,"Planning and Organizing":4,
+    "Emotional and Psychological Maturity":4,"Safety and Risk Management":4,
+    "Interpersonal Effectiveness":4,
+    "Attention to Details":4,"Written Communication":4,
+    "Oral Communication":4,"Computer Literacy":2,"Logical Reasoning":4,
+  },
+
+  "Procurement Officer": {
+    "Integrity":4,"Accountability":4,"Scientific and Technological Excellence":2,
+    "Delivering Service Excellence":4,"Environmental Consciousness":2,"Building Partnership":2,
+    "Teamwork":4,"Commitment to Learning":3,"Customer Focus":4,
+    "Adaptability and Flexibility":4,"Effective Communication":2,
+    "Valuing Diversity":2,"Self-Awareness and Confidence":2,"Stress Tolerance":3,
+    "Resource Management":2,"Knowledge Management":2,"Initiative":2,"Result Orientation":2,
+    "Organizational Commitment":2,"Planning and Organizing":2,
+    "Emotional and Psychological Maturity":2,"Safety and Risk Management":2,
+    "Interpersonal Effectiveness":2,
+    "Attention to Details":2,"Written Communication":2,
+    "Oral Communication":2,"Computer Literacy":2,"Logical Reasoning":2,
+  },
+
+  // ── FACULTY ────────────────────────────────────────────────────────────────
+
+  "Instructor I": {
+    "Integrity":2,"Accountability":2,"Scientific and Technological Excellence":2,
+    "Delivering Service Excellence":2,"Environmental Consciousness":2,
+    "Faculty Specializing in Environment":3,"Building Partnership":2,
+    "Facilitating Change":2,"Conflict Management":1,"Leading Innovation":1,
+    "Strategic Planning":2,"Leading Others":1,"Decisiveness":2,
+    "Teamwork":2,"Commitment to Learning":2,"Customer Focus":2,
+    "Adaptability and Flexibility":3,"Critical Thinking":2,"Effective Communication":3,
+    "Valuing Diversity":3,"Self-Awareness and Confidence":3,"Stress Tolerance":3,
+    "Resource Management":2,"Knowledge Management":3,"Initiative":2,"Result Orientation":2,
+    "Community Engagement":1,"Organizational Commitment":2,"Planning and Organizing":3,
+    "Emotional and Psychological Maturity":3,"Safety and Risk Management":2,
+    "Interpersonal Effectiveness":2,
+    "Research Engagement":1,"Diagnostic Information Gathering":2,"Attention to Details":2,
+    "Written Communication":2,"Oral Communication":2,"Conceptual and Analytical Thinking":2,
+    "Computer Literacy":2,"Logical Reasoning":2,
+    "Language Faculty":3,"IT Faculty":3,"Math and Allied Fields Faculty Members":3,
+  },
+
+  "Instructor II": {
+    "Integrity":2,"Accountability":2,"Scientific and Technological Excellence":2,
+    "Delivering Service Excellence":2,"Environmental Consciousness":2,
+    "Faculty Specializing in Environment":3,"Building Partnership":2,
+    "Facilitating Change":2,"Conflict Management":1,"Leading Innovation":1,
+    "Strategic Planning":2,"Leading Others":1,"Decisiveness":2,
+    "Teamwork":2,"Commitment to Learning":2,"Customer Focus":2,
+    "Adaptability and Flexibility":3,"Critical Thinking":2,"Effective Communication":3,
+    "Valuing Diversity":3,"Self-Awareness and Confidence":3,"Stress Tolerance":3,
+    "Resource Management":2,"Knowledge Management":3,"Initiative":2,"Result Orientation":2,
+    "Community Engagement":1,"Organizational Commitment":2,"Planning and Organizing":3,
+    "Emotional and Psychological Maturity":3,"Safety and Risk Management":2,
+    "Interpersonal Effectiveness":2,
+    "Research Engagement":1,"Diagnostic Information Gathering":2,"Attention to Details":2,
+    "Written Communication":2,"Oral Communication":2,"Conceptual and Analytical Thinking":2,
+    "Computer Literacy":2,"Logical Reasoning":2,
+    "Language Faculty":3,"IT Faculty":3,"Math and Allied Fields Faculty Members":3,
+  },
+
+  "Instructor III": {
+    "Integrity":2,"Accountability":2,"Scientific and Technological Excellence":2,
+    "Delivering Service Excellence":2,"Environmental Consciousness":2,
+    "Faculty Specializing in Environment":3,"Building Partnership":2,
+    "Facilitating Change":2,"Conflict Management":1,"Leading Innovation":1,
+    "Strategic Planning":2,"Leading Others":1,"Decisiveness":2,
+    "Teamwork":2,"Commitment to Learning":2,"Customer Focus":2,
+    "Adaptability and Flexibility":3,"Critical Thinking":2,"Effective Communication":3,
+    "Valuing Diversity":3,"Self-Awareness and Confidence":3,"Stress Tolerance":3,
+    "Resource Management":2,"Knowledge Management":3,"Initiative":2,"Result Orientation":2,
+    "Community Engagement":1,"Organizational Commitment":2,"Planning and Organizing":3,
+    "Emotional and Psychological Maturity":3,"Safety and Risk Management":2,
+    "Interpersonal Effectiveness":2,
+    "Research Engagement":1,"Diagnostic Information Gathering":2,"Attention to Details":2,
+    "Written Communication":2,"Oral Communication":2,"Conceptual and Analytical Thinking":2,
+    "Computer Literacy":2,"Logical Reasoning":2,
+    "Language Faculty":3,"IT Faculty":3,"Math and Allied Fields Faculty Members":3,
+  },
+
+  "Assistant Professor I": {
+    "Integrity":2,"Accountability":2,"Scientific and Technological Excellence":2,
+    "Delivering Service Excellence":2,"Environmental Consciousness":2,
+    "Faculty Specializing in Environment":3,"Building Partnership":2,
+    "Facilitating Change":2,"Conflict Management":2,"Leading Innovation":2,
+    "Strategic Planning":2,"Leading Others":2,"Decisiveness":2,
+    "Teamwork":2,"Commitment to Learning":2,"Customer Focus":2,
+    "Adaptability and Flexibility":3,"Critical Thinking":2,"Effective Communication":3,
+    "Valuing Diversity":3,"Self-Awareness and Confidence":3,"Stress Tolerance":3,
+    "Resource Management":2,"Knowledge Management":3,"Initiative":2,"Result Orientation":2,
+    "Community Engagement":1,"Organizational Commitment":2,"Planning and Organizing":3,
+    "Emotional and Psychological Maturity":3,"Safety and Risk Management":2,
+    "Interpersonal Effectiveness":2,
+    "Research Engagement":2,"Diagnostic Information Gathering":2,"Attention to Details":2,
+    "Written Communication":3,"Oral Communication":3,"Conceptual and Analytical Thinking":2,
+    "Computer Literacy":2,"Planning and Project Management":1,"Logical Reasoning":3,
+    "Language Faculty":4,"IT Faculty":4,"Math and Allied Fields Faculty Members":4,
+  },
+
+  "Assistant Professor II": {
+    "Integrity":2,"Accountability":2,"Scientific and Technological Excellence":2,
+    "Delivering Service Excellence":2,"Environmental Consciousness":2,
+    "Faculty Specializing in Environment":3,"Building Partnership":2,
+    "Facilitating Change":2,"Conflict Management":2,"Leading Innovation":2,
+    "Strategic Planning":2,"Leading Others":2,"Decisiveness":2,
+    "Teamwork":2,"Commitment to Learning":2,"Customer Focus":2,
+    "Adaptability and Flexibility":3,"Critical Thinking":2,"Effective Communication":3,
+    "Valuing Diversity":3,"Self-Awareness and Confidence":3,"Stress Tolerance":3,
+    "Resource Management":2,"Knowledge Management":3,"Initiative":2,"Result Orientation":2,
+    "Community Engagement":1,"Organizational Commitment":2,"Planning and Organizing":3,
+    "Emotional and Psychological Maturity":3,"Safety and Risk Management":3,
+    "Interpersonal Effectiveness":2,
+    "Research Engagement":2,"Diagnostic Information Gathering":2,"Attention to Details":2,
+    "Written Communication":3,"Oral Communication":3,"Conceptual and Analytical Thinking":2,
+    "Computer Literacy":2,"Planning and Project Management":1,"Logical Reasoning":3,
+    "Language Faculty":4,"IT Faculty":4,"Math and Allied Fields Faculty Members":4,
+  },
+
+  "Assistant Professor III": {
+    "Integrity":2,"Accountability":2,"Scientific and Technological Excellence":2,
+    "Delivering Service Excellence":2,"Environmental Consciousness":2,
+    "Faculty Specializing in Environment":3,"Building Partnership":2,
+    "Facilitating Change":2,"Conflict Management":2,"Leading Innovation":2,
+    "Strategic Planning":2,"Leading Others":2,"Decisiveness":2,
+    "Teamwork":2,"Commitment to Learning":2,"Customer Focus":2,
+    "Adaptability and Flexibility":3,"Critical Thinking":2,"Effective Communication":3,
+    "Valuing Diversity":3,"Self-Awareness and Confidence":3,"Stress Tolerance":3,
+    "Resource Management":2,"Knowledge Management":3,"Initiative":2,"Result Orientation":2,
+    "Community Engagement":1,"Organizational Commitment":2,"Planning and Organizing":3,
+    "Emotional and Psychological Maturity":3,"Safety and Risk Management":3,
+    "Interpersonal Effectiveness":2,
+    "Research Engagement":2,"Diagnostic Information Gathering":2,"Attention to Details":2,
+    "Written Communication":3,"Oral Communication":3,"Conceptual and Analytical Thinking":2,
+    "Computer Literacy":2,"Planning and Project Management":2,"Logical Reasoning":3,
+    "Language Faculty":4,"IT Faculty":4,"Math and Allied Fields Faculty Members":4,
+  },
+
+  "Assistant Professor IV": {
+    "Integrity":2,"Accountability":2,"Scientific and Technological Excellence":2,
+    "Delivering Service Excellence":2,"Environmental Consciousness":2,
+    "Faculty Specializing in Environment":3,"Building Partnership":2,
+    "Facilitating Change":2,"Conflict Management":2,"Leading Innovation":2,
+    "Strategic Planning":2,"Leading Others":2,"Decisiveness":2,
+    "Teamwork":2,"Commitment to Learning":2,"Customer Focus":2,
+    "Adaptability and Flexibility":3,"Critical Thinking":2,"Effective Communication":3,
+    "Valuing Diversity":3,"Self-Awareness and Confidence":3,"Stress Tolerance":3,
+    "Resource Management":2,"Knowledge Management":3,"Initiative":2,"Result Orientation":2,
+    "Community Engagement":1,"Organizational Commitment":2,"Planning and Organizing":3,
+    "Emotional and Psychological Maturity":3,"Safety and Risk Management":3,
+    "Interpersonal Effectiveness":2,
+    "Research Engagement":2,"Diagnostic Information Gathering":2,"Attention to Details":2,
+    "Written Communication":3,"Oral Communication":3,"Conceptual and Analytical Thinking":2,
+    "Computer Literacy":2,"Planning and Project Management":2,"Logical Reasoning":3,
+    "Language Faculty":4,"IT Faculty":4,"Math and Allied Fields Faculty Members":4,
+  },
+
+  "Associate Professor I": {
+    "Integrity":3,"Accountability":3,"Scientific and Technological Excellence":3,
+    "Delivering Service Excellence":3,"Environmental Consciousness":3,
+    "Faculty Specializing in Environment":4,"Building Partnership":3,
+    "Facilitating Change":3,"Conflict Management":3,"Leading Innovation":3,
+    "Strategic Planning":3,"Leading Others":3,"Decisiveness":3,
+    "Teamwork":3,"Commitment to Learning":3,"Customer Focus":3,
+    "Adaptability and Flexibility":4,"Critical Thinking":3,"Effective Communication":4,
+    "Valuing Diversity":4,"Self-Awareness and Confidence":4,"Stress Tolerance":4,
+    "Resource Management":3,"Knowledge Management":4,"Initiative":3,"Result Orientation":3,
+    "Community Engagement":3,"Organizational Commitment":3,"Planning and Organizing":4,
+    "Emotional and Psychological Maturity":4,"Safety and Risk Management":3,
+    "Interpersonal Effectiveness":3,
+    "Research Engagement":3,"Diagnostic Information Gathering":3,"Attention to Details":3,
+    "Written Communication":4,"Oral Communication":4,"Conceptual and Analytical Thinking":3,
+    "Computer Literacy":2,"Planning and Project Management":3,"Logical Reasoning":3,
+    "Language Faculty":4,"IT Faculty":4,"Math and Allied Fields Faculty Members":4,
+  },
+
+  "Associate Professor II": {
+    "Integrity":3,"Accountability":3,"Scientific and Technological Excellence":3,
+    "Delivering Service Excellence":3,"Environmental Consciousness":3,
+    "Faculty Specializing in Environment":4,"Building Partnership":3,
+    "Facilitating Change":3,"Conflict Management":3,"Leading Innovation":3,
+    "Strategic Planning":3,"Leading Others":3,"Decisiveness":3,
+    "Teamwork":3,"Commitment to Learning":3,"Customer Focus":3,
+    "Adaptability and Flexibility":4,"Critical Thinking":3,"Effective Communication":4,
+    "Valuing Diversity":4,"Self-Awareness and Confidence":4,"Stress Tolerance":4,
+    "Resource Management":3,"Knowledge Management":4,"Initiative":3,"Result Orientation":3,
+    "Community Engagement":3,"Organizational Commitment":3,"Planning and Organizing":4,
+    "Emotional and Psychological Maturity":4,"Safety and Risk Management":3,
+    "Interpersonal Effectiveness":3,
+    "Research Engagement":3,"Diagnostic Information Gathering":3,"Attention to Details":3,
+    "Written Communication":4,"Oral Communication":4,"Conceptual and Analytical Thinking":3,
+    "Computer Literacy":2,"Planning and Project Management":3,"Logical Reasoning":3,
+    "Language Faculty":4,"IT Faculty":4,"Math and Allied Fields Faculty Members":4,
+  },
+
+  "Associate Professor III": {
+    "Integrity":3,"Accountability":3,"Scientific and Technological Excellence":3,
+    "Delivering Service Excellence":3,"Environmental Consciousness":3,
+    "Faculty Specializing in Environment":4,"Building Partnership":3,
+    "Developing People":3,"Facilitating Change":3,"Conflict Management":3,
+    "Leading Innovation":3,"Strategic Planning":3,"Leading Others":3,"Decisiveness":3,
+    "Teamwork":3,"Commitment to Learning":3,"Customer Focus":3,
+    "Adaptability and Flexibility":4,"Critical Thinking":3,"Effective Communication":4,
+    "Valuing Diversity":4,"Self-Awareness and Confidence":4,"Stress Tolerance":4,
+    "Resource Management":3,"Knowledge Management":4,"Initiative":3,"Result Orientation":3,
+    "Community Engagement":3,"Organizational Commitment":3,"Planning and Organizing":4,
+    "Emotional and Psychological Maturity":4,"Safety and Risk Management":3,
+    "Interpersonal Effectiveness":3,
+    "Research Engagement":3,"Diagnostic Information Gathering":3,"Attention to Details":3,
+    "Written Communication":4,"Oral Communication":4,"Conceptual and Analytical Thinking":3,
+    "Computer Literacy":2,"Planning and Project Management":3,"Logical Reasoning":3,
+    "Language Faculty":4,"IT Faculty":4,"Math and Allied Fields Faculty Members":4,
+  },
+
+  "Associate Professor IV": {
+    "Integrity":3,"Accountability":3,"Scientific and Technological Excellence":3,
+    "Delivering Service Excellence":3,"Environmental Consciousness":3,
+    "Faculty Specializing in Environment":4,"Building Partnership":3,
+    "Developing People":3,"Facilitating Change":3,"Conflict Management":3,
+    "Leading Innovation":3,"Strategic Planning":3,"Leading Others":3,"Decisiveness":3,
+    "Teamwork":3,"Commitment to Learning":3,"Customer Focus":3,
+    "Adaptability and Flexibility":4,"Critical Thinking":3,"Effective Communication":4,
+    "Valuing Diversity":4,"Self-Awareness and Confidence":4,"Stress Tolerance":4,
+    "Resource Management":3,"Knowledge Management":4,"Initiative":3,"Result Orientation":3,
+    "Community Engagement":3,"Organizational Commitment":3,"Planning and Organizing":4,
+    "Emotional and Psychological Maturity":4,"Safety and Risk Management":3,
+    "Interpersonal Effectiveness":3,
+    "Research Engagement":3,"Diagnostic Information Gathering":3,"Attention to Details":3,
+    "Written Communication":4,"Oral Communication":4,"Conceptual and Analytical Thinking":3,
+    "Computer Literacy":2,"Planning and Project Management":3,"Logical Reasoning":3,
+    "Language Faculty":4,"IT Faculty":4,"Math and Allied Fields Faculty Members":4,
+  },
+
+  "Associate Professor V": {
+    "Integrity":3,"Accountability":3,"Scientific and Technological Excellence":3,
+    "Delivering Service Excellence":3,"Environmental Consciousness":3,
+    "Faculty Specializing in Environment":4,"Building Partnership":3,
+    "Developing People":3,"Facilitating Change":3,"Conflict Management":3,
+    "Leading Innovation":3,"Strategic Planning":3,"Leading Others":3,"Decisiveness":3,
+    "Teamwork":3,"Commitment to Learning":3,"Customer Focus":3,
+    "Adaptability and Flexibility":4,"Critical Thinking":3,"Effective Communication":4,
+    "Valuing Diversity":4,"Self-Awareness and Confidence":4,"Stress Tolerance":4,
+    "Resource Management":3,"Knowledge Management":4,"Initiative":3,"Result Orientation":3,
+    "Community Engagement":3,"Organizational Commitment":3,"Planning and Organizing":4,
+    "Emotional and Psychological Maturity":4,"Safety and Risk Management":3,
+    "Interpersonal Effectiveness":3,
+    "Research Engagement":3,"Diagnostic Information Gathering":3,"Attention to Details":3,
+    "Written Communication":4,"Oral Communication":4,"Conceptual and Analytical Thinking":3,
+    "Computer Literacy":2,"Planning and Project Management":3,"Logical Reasoning":3,
+    "Language Faculty":4,"IT Faculty":4,"Math and Allied Fields Faculty Members":4,
+  },
+
+  // Associate Professor VI = NONE per corrected list (no required levels defined)
+
+  // Professor I–III: Developing People = 3, all else 4 (except CompLit=2, LogReason=3)
+  "Professor I": {
+    "Integrity":4,"Accountability":4,"Scientific and Technological Excellence":4,
+    "Delivering Service Excellence":4,"Environmental Consciousness":4,
+    "Faculty Specializing in Environment":4,"Building Partnership":4,
+    "Developing People":3,"Facilitating Change":4,"Conflict Management":4,
+    "Leading Innovation":4,"Strategic Planning":4,"Leading Others":4,"Decisiveness":4,
+    "Teamwork":4,"Commitment to Learning":4,"Customer Focus":4,
+    "Adaptability and Flexibility":4,"Critical Thinking":4,"Effective Communication":4,
+    "Valuing Diversity":4,"Self-Awareness and Confidence":4,"Stress Tolerance":4,
+    "Resource Management":4,"Knowledge Management":4,"Initiative":4,"Result Orientation":4,
+    "Community Engagement":4,"Organizational Commitment":4,"Planning and Organizing":4,
+    "Emotional and Psychological Maturity":4,"Safety and Risk Management":4,
+    "Interpersonal Effectiveness":4,
+    "Research Engagement":4,"Diagnostic Information Gathering":4,"Attention to Details":4,
+    "Written Communication":4,"Oral Communication":4,"Conceptual and Analytical Thinking":4,
+    "Computer Literacy":2,"Planning and Project Management":4,"Logical Reasoning":3,
+    "Language Faculty":4,"IT Faculty":4,"Math and Allied Fields Faculty Members":4,
+  },
+
+  "Professor II": {
+    "Integrity":4,"Accountability":4,"Scientific and Technological Excellence":4,
+    "Delivering Service Excellence":4,"Environmental Consciousness":4,
+    "Faculty Specializing in Environment":4,"Building Partnership":4,
+    "Developing People":3,"Facilitating Change":4,"Conflict Management":4,
+    "Leading Innovation":4,"Strategic Planning":4,"Leading Others":4,"Decisiveness":4,
+    "Teamwork":4,"Commitment to Learning":4,"Customer Focus":4,
+    "Adaptability and Flexibility":4,"Critical Thinking":4,"Effective Communication":4,
+    "Valuing Diversity":4,"Self-Awareness and Confidence":4,"Stress Tolerance":4,
+    "Resource Management":4,"Knowledge Management":4,"Initiative":4,"Result Orientation":4,
+    "Community Engagement":4,"Organizational Commitment":4,"Planning and Organizing":4,
+    "Emotional and Psychological Maturity":4,"Safety and Risk Management":4,
+    "Interpersonal Effectiveness":4,
+    "Research Engagement":4,"Diagnostic Information Gathering":4,"Attention to Details":4,
+    "Written Communication":4,"Oral Communication":4,"Conceptual and Analytical Thinking":4,
+    "Computer Literacy":2,"Planning and Project Management":4,"Logical Reasoning":3,
+    "Language Faculty":4,"IT Faculty":4,"Math and Allied Fields Faculty Members":4,
+  },
+
+  "Professor III": {
+    "Integrity":4,"Accountability":4,"Scientific and Technological Excellence":4,
+    "Delivering Service Excellence":4,"Environmental Consciousness":4,
+    "Faculty Specializing in Environment":4,"Building Partnership":4,
+    "Developing People":3,"Facilitating Change":4,"Conflict Management":4,
+    "Leading Innovation":4,"Strategic Planning":4,"Leading Others":4,"Decisiveness":4,
+    "Teamwork":4,"Commitment to Learning":4,"Customer Focus":4,
+    "Adaptability and Flexibility":4,"Critical Thinking":4,"Effective Communication":4,
+    "Valuing Diversity":4,"Self-Awareness and Confidence":4,"Stress Tolerance":4,
+    "Resource Management":4,"Knowledge Management":4,"Initiative":4,"Result Orientation":4,
+    "Community Engagement":4,"Organizational Commitment":4,"Planning and Organizing":4,
+    "Emotional and Psychological Maturity":4,"Safety and Risk Management":4,
+    "Interpersonal Effectiveness":4,
+    "Research Engagement":4,"Diagnostic Information Gathering":4,"Attention to Details":4,
+    "Written Communication":4,"Oral Communication":4,"Conceptual and Analytical Thinking":4,
+    "Computer Literacy":2,"Planning and Project Management":4,"Logical Reasoning":3,
+    "Language Faculty":4,"IT Faculty":4,"Math and Allied Fields Faculty Members":4,
+  },
+
+  // Professor IV–VI and University Professor: Developing People = 4, all else same
+  "Professor IV": {
+    "Integrity":4,"Accountability":4,"Scientific and Technological Excellence":4,
+    "Delivering Service Excellence":4,"Environmental Consciousness":4,
+    "Faculty Specializing in Environment":4,"Building Partnership":4,
+    "Developing People":4,"Facilitating Change":4,"Conflict Management":4,
+    "Leading Innovation":4,"Strategic Planning":4,"Leading Others":4,"Decisiveness":4,
+    "Teamwork":4,"Commitment to Learning":4,"Customer Focus":4,
+    "Adaptability and Flexibility":4,"Critical Thinking":4,"Effective Communication":4,
+    "Valuing Diversity":4,"Self-Awareness and Confidence":4,"Stress Tolerance":4,
+    "Resource Management":4,"Knowledge Management":4,"Initiative":4,"Result Orientation":4,
+    "Community Engagement":4,"Organizational Commitment":4,"Planning and Organizing":4,
+    "Emotional and Psychological Maturity":4,"Safety and Risk Management":4,
+    "Interpersonal Effectiveness":4,
+    "Research Engagement":4,"Diagnostic Information Gathering":4,"Attention to Details":4,
+    "Written Communication":4,"Oral Communication":4,"Conceptual and Analytical Thinking":4,
+    "Computer Literacy":2,"Planning and Project Management":4,"Logical Reasoning":3,
+    "Language Faculty":4,"IT Faculty":4,"Math and Allied Fields Faculty Members":4,
+  },
 };
+
+// Professor V, VI, University Professor = identical to Professor IV
+const _prof4data = competencyModel["Professor IV"];
+["Professor V","Professor VI","University Professor"].forEach(p => {
+  competencyModel[p] = { ..._prof4data };
+});
 
 function getRequiredLevel(competency, position) {
   if (!competency || !position) return "";
-  const posGroup = getPositionGroup(position);
-  const matrix = reqLevelMatrix[posGroup] || {};
-  // Find which group this competency belongs to
-  for (const [grp, list] of Object.entries(competencyData)) {
-    const arr = typeof list.value !== "undefined" ? list.value : list;
-    if (arr.includes(competency)) return matrix[grp] || "";
-  }
-  return "";
+  const posData = competencyModel[position];
+  if (!posData) return "";
+  const lvl = posData[competency];
+  if (lvl === null || lvl === undefined) return "";
+  return LEVEL_LABEL[lvl] || "";
 }
-
+ 
 // ── Lifecycle ──────────────────────────────────────────────────────────────
 onMounted(() => {
   // Set today's date as default
   form.datePrepared = new Date().toISOString().split("T")[0];
-
+ 
   // Check if this is a supervisor link (token in URL)
   const params = new URLSearchParams(window.location.search);
   const token = params.get("token");
@@ -1601,7 +2427,7 @@ onMounted(() => {
     stage.value = "token";
   }
 });
-
+ 
 // ── Helpers ────────────────────────────────────────────────────────────────
 function validateEmail(who) {
   if (who === "employee") {
@@ -1626,13 +2452,12 @@ function validateEmail(who) {
   hint.type = "success";
   return true;
 }
-
+ 
 function addCompetencyRow() {
   competencyRows.value.push({
     competencyGroup: "",
     targetCompetency: "",
     currentLevel: "",
-    requiredLevel: "",
     leadInterventions: "",
     targetTimeline: "",
   });
@@ -1659,7 +2484,7 @@ function removeRow(arr, idx) {
   if (arr.length <= 1) return;
   arr.splice(idx, 1);
 }
-
+ 
 // ── Stage 1 validation ─────────────────────────────────────────────────────
 function validateStage1() {
   let ok = true;
@@ -1701,18 +2526,18 @@ function validateStage1() {
   }
   return ok;
 }
-
+ 
 // ── Stage 1 submit ─────────────────────────────────────────────────────────
 async function submitStage1() {
   if (!validateStage1()) return;
-
+ 
   let headerPurpose = form.headerPurpose;
   if (headerPurpose === "Other")
     headerPurpose = form.headerPurposeOther || "Other";
-
+ 
   let compPurpose = form.compPurpose;
   if (compPurpose === "Others") compPurpose = form.compPurposeOther || "Others";
-
+ 
   const payload = {
     action: "submitStage1",
     employeeEmail: form.employeeEmail,
@@ -1737,15 +2562,16 @@ async function submitStage1() {
     competencyRows: competencyRows.value.map((r, i) => ({
       priority: i + 1,
       ...r,
+      requiredLevel: getRequiredLevel(r.targetCompetency, form.currentPosition),
     })),
     agapRows: agapRows.value.map((r, i) => ({ priority: i + 1, ...r })),
     proactRows: proactRows.value.map((r, i) => ({ priority: i + 1, ...r })),
   };
-
+ 
   isLoading.value = true;
   loadingMsg.value = "Submitting your IDP, please wait…";
   isSubmitting.value = true;
-
+ 
   try {
     const res = await fetch(`${API}/api/idp`, {
       method: "POST",
@@ -1772,7 +2598,7 @@ async function submitStage1() {
     isSubmitting.value = false;
   }
 }
-
+ 
 // ── Stage 2: load by token ─────────────────────────────────────────────────
 function loadByToken() {
   if (!tokenInput.value.trim()) {
@@ -1788,7 +2614,7 @@ function loadByToken() {
   tokenError.value = "";
   loadSubmission(currentToken.value);
 }
-
+ 
 async function loadSubmission(token) {
   if (!supervisorEmail.value) {
     tokenError.value = "Please enter your CarSU email address to continue.";
@@ -1797,7 +2623,7 @@ async function loadSubmission(token) {
   }
   isLoading.value = true;
   loadingMsg.value = "Loading IDP submission…";
-
+ 
   try {
     // Token verification: new API endpoint
     const res = await fetch(`${API}/api/idp/${token}`);
@@ -1815,7 +2641,7 @@ async function loadSubmission(token) {
     isLoading.value = false;
   }
 }
-
+ 
 // ── Stage 2 submit ─────────────────────────────────────────────────────────
 async function submitStage2() {
   if (!assessment.perfGapsYN) {
@@ -1826,18 +2652,18 @@ async function submitStage2() {
     alert("Please indicate readiness for advancement.");
     return;
   }
-
+ 
   let interventions = [...assessment.interventions];
   if (interventions.includes("Others")) {
     interventions = interventions.filter((v) => v !== "Others");
     if (assessment.interventionOther.trim())
       interventions.push("Others: " + assessment.interventionOther.trim());
   }
-
+ 
   isLoading.value = true;
   loadingMsg.value = "Submitting your assessment…";
   isSubmitting.value = true;
-
+ 
   try {
     // Supervisor submit: new API endpoint
     const res = await fetch(`${API}/api/idp/${idpData.value.refId}/supervisor`, {
@@ -1859,7 +2685,7 @@ async function submitStage2() {
   }
 }
 </script>
-
+ 
 <style scoped>
 /* ── Privacy Modal ── */
 .privacy-overlay {
@@ -1986,14 +2812,14 @@ async function submitStage2() {
   --shadow: 0 4px 24px rgba(26, 77, 46, 0.1);
   --shadow-sm: 0 2px 8px rgba(26, 77, 46, 0.07);
 }
-
+ 
 /* ── Base ── */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
-
+ 
 /* ── Header ── */
 .site-header {
   background: #fff;
@@ -2017,7 +2843,7 @@ async function submitStage2() {
   display: block;
   object-fit: contain;
 }
-
+ 
 /* ── Page Nav ── */
 .page-nav {
   background: var(--navy);
@@ -2086,14 +2912,14 @@ async function submitStage2() {
   font-family: "Source Sans 3", sans-serif;
   letter-spacing: 0.03em;
 }
-
+ 
 /* ── Container ── */
 .container {
   max-width: 1140px;
   margin: 0 auto;
   padding: 48px 40px 80px;
 }
-
+ 
 /* ── Form title ── */
 .form-title-block {
   text-align: center;
@@ -2111,7 +2937,7 @@ async function submitStage2() {
   color: var(--text-light);
   font-size: 14px;
 }
-
+ 
 /* ── Section card ── */
 .section-card {
   background: var(--white);
@@ -2177,7 +3003,7 @@ async function submitStage2() {
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
-
+ 
 /* ── Form fields ── */
 .field-grid {
   display: grid;
@@ -2251,7 +3077,7 @@ textarea {
   resize: vertical;
   min-height: 80px;
 }
-
+ 
 /* ── Email hint ── */
 .email-hint {
   font-size: 12px;
@@ -2265,7 +3091,7 @@ textarea {
 .email-hint.success {
   color: var(--success);
 }
-
+ 
 /* ── Checkbox groups ── */
 .checkbox-group {
   display: flex;
@@ -2302,7 +3128,7 @@ textarea {
   border-color: var(--navy);
   background: rgba(26, 77, 46, 0.05);
 }
-
+ 
 /* ── Other specify ── */
 .other-specify {
   margin-top: 10px;
@@ -2311,7 +3137,7 @@ textarea {
 .other-specify.visible {
   display: block;
 }
-
+ 
 /* ── Dynamic tables ── */
 .table-wrapper {
   overflow-x: auto;
@@ -2408,7 +3234,7 @@ textarea {
 .btn-remove-row:hover {
   background: rgba(192, 57, 43, 0.08);
 }
-
+ 
 /* ── Section desc ── */
 .section-desc {
   background: rgba(245, 195, 0, 0.1);
@@ -2423,7 +3249,7 @@ textarea {
 .section-desc a {
   color: var(--navy);
 }
-
+ 
 /* ── Submit area ── */
 .submit-area {
   background: var(--white);
@@ -2466,7 +3292,7 @@ textarea {
   transform: none;
   box-shadow: none;
 }
-
+ 
 /* ── Loading overlay ── */
 .overlay {
   display: none;
@@ -2499,7 +3325,7 @@ textarea {
   color: var(--white);
   font-size: 15px;
 }
-
+ 
 /* ── Success screen ── */
 .success-screen {
   max-width: 560px;
@@ -2564,7 +3390,7 @@ textarea {
   background: var(--navy);
   color: #fff;
 }
-
+ 
 /* ── Token screen ── */
 .token-screen {
   max-width: 480px;
@@ -2608,7 +3434,7 @@ textarea {
   font-size: 13px;
   margin-top: 10px;
 }
-
+ 
 /* ── Read-only fields (Stage 2) ── */
 .ro-grid {
   display: grid;
@@ -2688,7 +3514,7 @@ textarea {
   color: var(--text-light);
   font-style: italic;
 }
-
+ 
 /* ── Assessment table (Stage 2) ── */
 .assessment-table {
   width: 100%;
@@ -2730,7 +3556,7 @@ textarea {
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
-
+ 
 /* ── Certification block ── */
 .cert-block {
   background: rgba(245, 195, 0, 0.08);
@@ -2761,7 +3587,7 @@ textarea {
   display: block;
   margin-top: 4px;
 }
-
+ 
 /* ── Section locked badge ── */
 .section-card-collapsible .section-header {
   flex-wrap: wrap;
@@ -2778,7 +3604,7 @@ textarea {
   border: 1px solid var(--border);
   white-space: nowrap;
 }
-
+ 
 /* ── Pro-ACT pre-filled skill label ── */
 .proact-skill-label {
   background: var(--readonly-bg);
@@ -2790,7 +3616,7 @@ textarea {
   font-weight: 500;
   min-width: 160px;
 }
-
+ 
 /* ── Row number cell ── */
 .row-num-cell {
   text-align: center;
@@ -2799,7 +3625,7 @@ textarea {
   color: var(--text-light);
   vertical-align: middle;
 }
-
+ 
 /* ── Required level badge ── */
 .required-level-badge {
   background: var(--navy);
@@ -2817,7 +3643,7 @@ textarea {
   font-style: italic;
   text-align: center;
 }
-
+ 
 /* ── Static value display ── */
 .static-value {
   background: var(--readonly-bg);
@@ -2828,7 +3654,7 @@ textarea {
   color: var(--text);
   font-weight: 600;
 }
-
+ 
 /* ── Reveal transition ── */
 .reveal-enter-active {
   transition: opacity 0.3s ease, transform 0.3s ease;
@@ -2837,7 +3663,7 @@ textarea {
   opacity: 0;
   transform: translateY(-8px);
 }
-
+ 
 /* ── Name grid ── */
 .name-grid {
   display: grid;
@@ -2856,7 +3682,7 @@ textarea {
   font-weight: 500;
   letter-spacing: 0.03em;
 }
-
+ 
 /* ── Email prefix widget ── */
 .email-prefix-wrapper {
   display: flex;
@@ -2894,7 +3720,7 @@ textarea {
   border-left: 1.5px solid var(--border);
   padding-left: 10px;
 }
-
+ 
 /* ── Responsive ── */
 @media (max-width: 640px) {
   .container {
