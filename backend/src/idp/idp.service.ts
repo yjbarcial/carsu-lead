@@ -124,19 +124,22 @@ export class IdpService {
       day: 'numeric',
     });
 
-    // 1. Send completion email to employee
-    if (updated.employeeEmail) {
-      this.mail.sendEmployeeCompletion({
-        to: updated.employeeEmail,
-        name: employeeName,
-        refId: updated.refId,
-        supervisorName: updated.supervisorName,
-      });
-    }
-
-    // 2. Generate PDF and send to HR
+    // Generate PDF once — attach to both employee and HR emails
     try {
       const pdfBuffer = await this.pdf.generateIdpPdf({ ...updated } as any);
+
+      // 1. Send completion email to employee (with PDF)
+      if (updated.employeeEmail) {
+        this.mail.sendEmployeeCompletion({
+          to: updated.employeeEmail,
+          name: employeeName,
+          refId: updated.refId,
+          supervisorName: updated.supervisorName,
+          pdfBuffer,
+        });
+      }
+
+      // 2. Send HR notification (with PDF)
       this.mail.sendHrNotification({
         employeeName,
         refId: updated.refId,

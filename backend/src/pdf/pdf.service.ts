@@ -321,4 +321,329 @@ export class PdfService {
 </body>
 </html>`;
   }
+
+  async generateLnaPdf(lna: Record<string, any>): Promise<Buffer> {
+    const html = this.buildLnaHtml(lna);
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    });
+    try {
+      const page = await browser.newPage();
+      await page.setContent(html, { waitUntil: 'networkidle0' });
+      const pdf = await page.pdf({
+        format: 'A4',
+        landscape: true, // wide tables need landscape to fit all columns
+        printBackground: true,
+        margin: { top: '12mm', bottom: '12mm', left: '12mm', right: '12mm' },
+      });
+      return Buffer.from(pdf);
+    } finally {
+      await browser.close();
+    }
+  }
+
+  private buildLnaHtml(lna: Record<string, any>): string {
+    const s = (v: any) => this.safe(v);
+
+    const workforce = lna.workforceProfile ?? {};
+    const core = lna.coreCompetencies ?? [];
+    const leadership = lna.leadershipComps ?? [];
+    const org = lna.orgComps ?? [];
+    const technical = lna.technicalComps ?? [];
+    const clusterSum = lna.clusterSummaryRaw ?? [];
+    const dataSources = lna.dataSourcesRaw ?? [];
+    const insights = lna.dataSourceInsights ?? [];
+    const interventions = lna.leadInterventions ?? [];
+    // office is now always sent with the correct key from the frontend
+    const officeName = lna.office ?? '';
+    // Certification name: headOfUnit is the authoritative name field (raterName not in form)
+    const certName = lna.headOfUnit ?? '';
+
+    const submittedAt = lna.submittedAt
+      ? new Date(lna.submittedAt).toLocaleDateString('en-PH', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })
+      : '—';
+
+    const thStyle =
+      'border:1px solid #1a5c1a;padding:4px 6px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;color:#fff;background:#003300;text-align:left;word-wrap:break-word;';
+    const tdStyle =
+      'border:1px solid #ccc;padding:4px 6px;font-size:10px;vertical-align:top;word-wrap:break-word;';
+    const tdAlt =
+      'border:1px solid #ccc;padding:4px 6px;font-size:10px;vertical-align:top;background:#f9f8f5;word-wrap:break-word;';
+
+    // Workforce table rows
+    const empTypes = [
+      'Permanent',
+      'Temporary',
+      'Contractual',
+      'Casual',
+      'Coterminus',
+      'COS',
+      'Job Order',
+      'Others',
+    ];
+    const empKeys = [
+      'permanent',
+      'temporary',
+      'contractual',
+      'casual',
+      'coterminus',
+      'cos',
+      'jobOrder',
+      'others',
+    ];
+    const posLevels = [
+      { key: 'first', label: 'First Level' },
+      { key: 'secondNonSup', label: '2nd Level (Non-Sup)' },
+      { key: 'secondSup', label: '2nd Level (Sup)' },
+      { key: 'third', label: 'Third Level' },
+      { key: 'faculty', label: 'Faculty' },
+    ];
+    const wfRows = posLevels
+      .map((lv, i) => {
+        const row =
+          typeof workforce === 'object' ? (workforce[lv.key] ?? {}) : {};
+        const cells = empKeys
+          .map(
+            (k) =>
+              `<td style="${i % 2 === 0 ? tdStyle : tdAlt}text-align:center;">${s(row[k] ?? 0)}</td>`,
+          )
+          .join('');
+        return `<tr><td style="${i % 2 === 0 ? tdStyle : tdAlt}font-weight:600;">${lv.label}</td>${cells}</tr>`;
+      })
+      .join('');
+
+    // Competency cluster renderer
+    const renderCluster = (label: string, rows: any[], lvHeaders: string[]) => {
+      if (!rows.length) return '';
+      const headerCells = lvHeaders
+        .flatMap((h) => [
+          `<th style="${thStyle}text-align:center;min-width:60px;">CL<br><small>${h}</small></th>`,
+          `<th style="${thStyle}text-align:center;min-width:60px;">%<br><small>${h}</small></th>`,
+        ])
+        .join('');
+      const bodyRows = rows
+        .map((row, i) => {
+          const dataCells = lvHeaders
+            .flatMap((h) => {
+              const key = h.toLowerCase().replace(/[^a-z0-9]/g, '');
+              return [
+                `<td style="${i % 2 === 0 ? tdStyle : tdAlt}text-align:center;">${s(row[key + '_cl'] ?? row[h + '_cl'] ?? '')}</td>`,
+                `<td style="${i % 2 === 0 ? tdStyle : tdAlt}text-align:center;">${s(row[key + '_pct'] ?? row[h + '_pct'] ?? '')}</td>`,
+              ];
+            })
+            .join('');
+          return `<tr><td style="${i % 2 === 0 ? tdStyle : tdAlt}">${s(row.competency)}</td>${dataCells}<td style="${i % 2 === 0 ? tdStyle : tdAlt}">${s(row.observations)}</td></tr>`;
+        })
+        .join('');
+
+      // Each level gets 2 cols (CL + %); competency col = 22%, observations = 14%, rest split equally
+      const lvCount = lvHeaders.length;
+      const dataColWidth = Math.floor(58 / (lvCount * 2));
+      const colgroup = `<colgroup>
+        <col style="width:22%;">
+        ${lvHeaders.map(() => `<col style="width:${dataColWidth}%;"><col style="width:${dataColWidth}%;">`).join('')}
+        <col style="width:14%;">
+      </colgroup>`;
+      const headerRow = `<th style="${thStyle}">Competency</th>${headerCells}<th style="${thStyle}">Observations</th>`;
+      return `
+        <h4 style="font-size:11px;color:#003300;margin:14px 0 5px;text-transform:uppercase;letter-spacing:0.05em;">${label}</h4>
+        <div style="margin-bottom:10px;">
+          <table style="width:100%;border-collapse:collapse;table-layout:fixed;">
+            ${colgroup}
+            <thead><tr>${headerRow}</tr></thead>
+            <tbody>${bodyRows}</tbody>
+          </table>
+        </div>`;
+    };
+
+    // Determine level headers from actual data keys
+    const allLvHeaders = [
+      '1st Level',
+      '2nd (Non-Sup)',
+      '2nd (Sup)',
+      '3rd Level',
+      'Faculty',
+    ];
+
+    // Cluster summary rows
+    const clusterSumRows = Array.isArray(clusterSum)
+      ? clusterSum
+          .map(
+            (c: any, i: number) =>
+              `<tr><td style="${i % 2 === 0 ? tdStyle : tdAlt}font-weight:600;">${s(c.cluster)}</td>
+           <td style="${i % 2 === 0 ? tdStyle : tdAlt}">${s(c.strongest)}</td>
+           <td style="${i % 2 === 0 ? tdStyle : tdAlt}">${s(c.weakest)}</td>
+           <td style="${i % 2 === 0 ? tdStyle : tdAlt}text-align:center;">${s(c.interventionNeeded)}</td></tr>`,
+          )
+          .join('')
+      : `<tr><td colspan="4" style="${tdStyle}text-align:center;color:#888;font-style:italic;">No data.</td></tr>`;
+
+    // Data source insights
+    const insightRowsHtml =
+      Array.isArray(insights) && insights.length
+        ? insights
+            .map(
+              (r: any, i: number) =>
+                `<tr><td style="${i % 2 === 0 ? tdStyle : tdAlt}text-align:center;">${i + 1}</td>
+           <td style="${i % 2 === 0 ? tdStyle : tdAlt}">${s(r.dataSource)}</td>
+           <td style="${i % 2 === 0 ? tdStyle : tdAlt}">${s(r.gap)}</td>
+           <td style="${i % 2 === 0 ? tdStyle : tdAlt}">${s(r.personnel)}</td>
+           <td style="${i % 2 === 0 ? tdStyle : tdAlt}">${s(r.intervention)}</td></tr>`,
+            )
+            .join('')
+        : `<tr><td colspan="5" style="${tdStyle}text-align:center;color:#888;font-style:italic;">No insights recorded.</td></tr>`;
+
+    // LeaD interventions
+    const interventionRowsHtml =
+      Array.isArray(interventions) && interventions.length
+        ? interventions
+            .map(
+              (r: any, i: number) =>
+                `<tr><td style="${i % 2 === 0 ? tdStyle : tdAlt}text-align:center;">${i + 1}</td>
+           <td style="${i % 2 === 0 ? tdStyle : tdAlt}">${s(r.cluster)}</td>
+           <td style="${i % 2 === 0 ? tdStyle : tdAlt}">${s(r.intervention)}</td>
+           <td style="${i % 2 === 0 ? tdStyle : tdAlt}">${s(r.timeline)}</td>
+           <td style="${i % 2 === 0 ? tdStyle : tdAlt}">${s(r.remarks)}</td></tr>`,
+            )
+            .join('')
+        : `<tr><td colspan="5" style="${tdStyle}text-align:center;color:#888;font-style:italic;">No interventions recorded.</td></tr>`;
+
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; font-size: 12px; color: #1a1a2e; line-height: 1.5; }
+  h1 { font-size: 17px; color: #003300; }
+  .header { text-align: center; padding-bottom: 14px; border-bottom: 3px solid #003300; margin-bottom: 20px; }
+  .header p { color: #555; font-size: 11px; margin-top: 4px; }
+  .ref-badge { display: inline-block; background: #003300; color: #ffcc00; font-family: monospace; font-size: 13px; font-weight: 700; padding: 4px 14px; border-radius: 6px; letter-spacing: 0.08em; margin-top: 8px; }
+  .section { margin-bottom: 18px; break-inside: avoid; }
+  .section-header { background: #003300; color: #fff; padding: 7px 12px; border-radius: 6px 6px 0 0; display: flex; align-items: center; gap: 8px; }
+  .section-num { background: #ffcc00; color: #003300; width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 10px; flex-shrink: 0; }
+  .section-header h2 { color: #fff; margin: 0; font-size: 13px; }
+  .section-body { border: 1px solid #ccc; border-top: none; border-radius: 0 0 6px 6px; padding: 12px; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .info-field { display: flex; flex-direction: column; gap: 2px; }
+  .info-field.span-2 { grid-column: span 2; }
+  .info-label { font-size: 9px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 0.05em; }
+  .info-value { background: #f0ede8; border: 1px solid #ddd; border-radius: 4px; padding: 5px 8px; font-size: 11px; }
+  table { width: 100%; border-collapse: collapse; }
+  .footer { margin-top: 24px; padding-top: 10px; border-top: 1px solid #ccc; text-align: center; font-size: 10px; color: #999; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>USWAG Plan — Learning Needs Assessment (LNA)</h1>
+  <p>Caraga State University — Office of Human Resource Management Services</p>
+  <p>Ampayon, Butuan City 8600, Philippines</p>
+  <div class="ref-badge">${s(lna.refId)}</div>
+  <p style="margin-top:8px;font-size:10px;color:#555;">Submitted: ${submittedAt}</p>
+</div>
+
+<!-- SECTION H: Office Information -->
+<div class="section">
+  <div class="section-header"><span class="section-num">H</span><h2>Office Information</h2></div>
+  <div class="section-body">
+    <div class="info-grid">
+      <div class="info-field"><div class="info-label">Campus</div><div class="info-value">${s(lna.campus)}</div></div>
+      <div class="info-field"><div class="info-label">Office Affiliation</div><div class="info-value">${s(lna.officeAffiliation)}</div></div>
+      <div class="info-field span-2"><div class="info-label">Office / Unit / College</div><div class="info-value">${s(officeName)}</div></div>
+      <div class="info-field"><div class="info-label">Head of Unit</div><div class="info-value">${s(lna.headOfUnit)}</div></div>
+      <div class="info-field"><div class="info-label">Position / Designation</div><div class="info-value">${s(lna.position)}</div></div>
+      <div class="info-field"><div class="info-label">Date Prepared</div><div class="info-value">${s(lna.datePrepared)}</div></div>
+      <div class="info-field"><div class="info-label">Year Covered</div><div class="info-value">${s(lna.yearCovered)}</div></div>
+      <div class="info-field"><div class="info-label">Total Personnel</div><div class="info-value">${s(lna.totalPersonnel)}</div></div>
+      <div class="info-field span-2"><div class="info-label">Purpose</div><div class="info-value">${s(lna.purpose)}</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION I: Workforce Profile -->
+<div class="section">
+  <div class="section-header"><span class="section-num">I</span><h2>Workforce Profile by Employment Classification and Position Level</h2></div>
+  <div class="section-body">
+    <table style="width:100%;border-collapse:collapse;table-layout:fixed;">
+      <colgroup>
+        <col style="width:18%;">
+        ${empTypes.map(() => '<col style="width:10.25%;">').join('')}
+      </colgroup>
+      <thead>
+        <tr>
+          <th style="${thStyle}">Position Level</th>
+          ${empTypes.map((t) => `<th style="${thStyle}text-align:center;">${t}</th>`).join('')}
+        </tr>
+      </thead>
+      <tbody>${wfRows}</tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SECTION II: Competency Mapping -->
+<div class="section">
+  <div class="section-header"><span class="section-num">II</span><h2>Competency Mapping and Assessment</h2></div>
+  <div class="section-body">
+    ${renderCluster('Core Competencies', Array.isArray(core) ? core : [], allLvHeaders)}
+    ${renderCluster('Leadership Competencies', Array.isArray(leadership) ? leadership : [], allLvHeaders)}
+    ${renderCluster('Organizational Competencies', Array.isArray(org) ? org : [], allLvHeaders)}
+    ${renderCluster('Technical Competencies', Array.isArray(technical) ? technical : [], allLvHeaders)}
+    <h4 style="font-size:12px;color:#003300;margin:14px 0 6px;text-transform:uppercase;letter-spacing:0.05em;">Competency Cluster Summary</h4>
+    <table>
+      <thead><tr>
+        <th style="${thStyle}">Cluster</th>
+        <th style="${thStyle}">Strongest</th>
+        <th style="${thStyle}">Weakest</th>
+        <th style="${thStyle}text-align:center;">Intervention Needed?</th>
+      </tr></thead>
+      <tbody>${clusterSumRows}</tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SECTION III: Data Sources & Insights -->
+<div class="section">
+  <div class="section-header"><span class="section-num">III</span><h2>Other LeaD Data Sources &amp; Insights</h2></div>
+  <div class="section-body">
+    <table>
+      <thead><tr>
+        <th style="${thStyle}width:30px;">No.</th>
+        <th style="${thStyle}">Data Source</th>
+        <th style="${thStyle}">Identified Gap / Issue</th>
+        <th style="${thStyle}">Relevant Personnel</th>
+        <th style="${thStyle}">Recommended Intervention</th>
+      </tr></thead>
+      <tbody>${insightRowsHtml}</tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SECTION IV: Certification -->
+<div class="section">
+  <div class="section-header"><span class="section-num">IV</span><h2>Certification</h2></div>
+  <div class="section-body">
+    <p style="font-size:11px;color:#666;font-style:italic;margin-bottom:14px;">
+      I hereby certify that the information provided in this Learning Needs Assessment is accurate and based on actual observation, data, and evidence gathered from the office.
+    </p>
+    <div style="display:inline-block;padding:8px 0;border-bottom:2px solid #003300;min-width:260px;font-weight:700;font-size:14px;color:#003300;">
+      ${s(certName)}
+    </div>
+    <small style="display:block;font-size:10px;color:#888;margin-top:4px;">Signature over Printed Name of Rater/Head of Office</small>
+  </div>
+</div>
+
+<div class="footer">
+  <p>This document was automatically generated by the CarSU HRMS LeaD System.</p>
+  <p>Caraga State University — Office of Human Resource Management Services | Ampayon, Butuan City 8600, Philippines</p>
+</div>
+
+</body>
+</html>`;
+  }
 }

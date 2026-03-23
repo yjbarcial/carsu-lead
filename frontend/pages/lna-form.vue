@@ -580,16 +580,11 @@
 <script setup>
 import { ref, reactive, computed, watch, onMounted } from "vue";
 
-// Disable SSR for this page — it's a client-only interactive form.
-// This prevents "Cannot access 'x' before initialization" errors during hydration.
-definePageMeta({ ssr: false });
-
 const config = useRuntimeConfig();
 const API = config.public.apiBase;
 
 // ── Privacy Modal ──
-// Start false on SSR to avoid hydration mismatch; shown on client via onMounted
-const showPrivacyModal = ref(false);
+const showPrivacyModal = ref(true);
 const privacyAgreed = ref(false);
 function acceptPrivacy() {
   if (privacyAgreed.value) showPrivacyModal.value = false;
@@ -637,6 +632,10 @@ const positionLevels = [
 
 const compLevelHeaders = ["1st Level", "2nd (Non-Sup)", "2nd (Sup)", "3rd Level", "Faculty"];
 const compLevelKeys    = ["first", "secondNonSup", "secondSup", "third", "faculty"];
+
+// Derived after workforce is initialized (see below) — placeholder refs used in template
+// until the real computeds are declared post-workforce.
+const activeCompTab = ref("1st Level");
 
 const clOptions  = ["", "N/A", "1 - Basic", "2 - Intermediate", "3 - Advanced", "4 - Expert"];
 const pctOptions = ["", "N/A", "A - 76%-100%", "B - 51%-75%", "C - 26%-50%", "D - 25% & below"];
@@ -809,12 +808,10 @@ const form = reactive({
 const isOVPAA = computed(() => form.officeAffiliation === "OVPAA");
 
 const headOfUnitFull = computed(() => {
-  const parts = [
-    form.headLastName.trim(),
-    form.headFirstName.trim(),
-    form.headMiddleInitial.trim(),
-  ].filter(Boolean);
-  return parts.join(", ");
+  const first = form.headFirstName.trim();
+  const mi    = form.headMiddleInitial.trim();
+  const last  = form.headLastName.trim();
+  return [first, mi ? mi + '.' : '', last].filter(Boolean).join(' ');
 });
 
 const positionOptions = computed(() => {
@@ -910,9 +907,8 @@ const workforce = reactive(
   ),
 );
 
-// Returns only position level keys that have at least one non-zero value in the workforce table.
-// Faculty is also excluded for non-OVPAA offices.
-// Uses toRaw-safe access so this is SSR-friendly in Nuxt.
+// Filter out position levels where every employment type cell is 0.
+// Also exclude Faculty for non-OVPAA offices.
 const activeCompLevelKeys = computed(() => {
   const affiliation = form?.officeAffiliation ?? "";
   const baseKeys = affiliation === "OVPAA"
@@ -926,16 +922,13 @@ const activeCompLevelKeys = computed(() => {
   });
 });
 
+const visibleCompLevelKeys = computed(() => activeCompLevelKeys.value);
+
 const visibleCompLevelHeaders = computed(() =>
   activeCompLevelKeys.value.map(k => compLevelHeaders[compLevelKeys.indexOf(k)])
 );
 
-const visibleCompLevelKeys = computed(() => activeCompLevelKeys.value);
-
-const activeCompTab = ref(compLevelHeaders[0]);
-
-// If the currently active tab's position level gets zeroed out in the workforce table,
-// reset to the first still-visible tab so the UI never shows an empty/ghost tab.
+// If the active tab gets zeroed out, reset to the first available tab.
 watch(visibleCompLevelHeaders, (newHeaders) => {
   if (newHeaders.length > 0 && !newHeaders.includes(activeCompTab.value)) {
     activeCompTab.value = newHeaders[0];
@@ -1088,13 +1081,12 @@ async function submitForm() {
   }
 
   const payload = {
-    action:            "submitLNA",
     submitterEmail:    form.submitterEmail,
     campus:            "CSU Main Campus",
     officeAffiliation: form.officeAffiliation,
-    unitOfficCollege:  form.unitOfficeCollege.trim(),
+    office:            form.unitOfficeCollege.trim(),   // matches entity column `office`
     collegeProgram:    form.collegeProgram.trim(),
-    headOfUnit:        headOfUnitFull.value,
+    headOfUnit:        headOfUnitFull.value,            // matches entity column `headOfUnit`
     position:          form.position.trim(),
     datePrepared:      form.datePrepared,
     yearCovered:       form.yearCovered.trim(),
@@ -1105,10 +1097,10 @@ async function submitForm() {
     leadershipComps:    competencyData.leadership,
     orgComps:           competencyData.org,
     technicalComps:     competencyData.technical,
-    clusterSummary,
-    dataSources:        selectedSources,
+    clusterSummaryRaw:  clusterSummary,                // matches entity column `clusterSummaryRaw`
+    dataSourcesRaw:     selectedSources,               // matches entity column `dataSourcesRaw`
     dataSourceInsights: insightRows,
-    raterFullName:      form.raterFullName.trim(),
+    // raterFullName removed — raterName is not a field in this form; headOfUnit is used in certification
   };
 
   try {
@@ -1133,8 +1125,6 @@ async function submitForm() {
 
 onMounted(() => {
   form.datePrepared = new Date().toISOString().split("T")[0];
-  // Show privacy modal only on client to avoid SSR hydration mismatch
-  showPrivacyModal.value = true;
 });
 </script>
 
@@ -1669,4 +1659,4 @@ textarea { resize: vertical; min-height: 72px; }
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
-</style> 
+</style>

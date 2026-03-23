@@ -57,6 +57,7 @@ export class MailService {
     name: string;
     refId: string;
     supervisorName: string;
+    pdfBuffer?: Buffer;
   }) {
     try {
       await this.mailer.sendMail({
@@ -75,13 +76,24 @@ export class MailService {
                 <p style="margin:0 0 8px;font-size:13px;color:#666;">REFERENCE ID</p>
                 <p style="margin:0;font-size:22px;font-weight:bold;letter-spacing:2px;color:#003300;">${opts.refId}</p>
               </div>
-              <p>Please keep a copy of your Reference ID for your records.</p>
+              <p>Your completed IDP is attached to this email as a PDF. Please keep a copy for your records.</p>
               <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
               <p style="font-size:12px;color:#999;">This is an automated message from the CarSU HRMS LeaD System. Please do not reply to this email.</p>
               <p style="font-size:12px;color:#999;">Caraga State University — Office of Human Resource Management Services</p>
             </div>
           </div>
         `,
+        ...(opts.pdfBuffer
+          ? {
+              attachments: [
+                {
+                  filename: `IDP_${opts.refId}_${opts.name.replace(/\s+/g, '_')}.pdf`,
+                  content: opts.pdfBuffer,
+                  contentType: 'application/pdf',
+                },
+              ],
+            }
+          : {}),
       });
       this.logger.log(`Completion email sent to ${opts.to}`);
     } catch (err) {
@@ -214,6 +226,111 @@ export class MailService {
     } catch (err) {
       this.logger.error(
         `Failed to send supervisor email to ${opts.to}: ${err.message}`,
+      );
+    }
+  }
+
+  // ── Sent to HR after LNA submission (with PDF attachment) ────────────────
+  async sendLnaHrNotification(opts: {
+    refId: string;
+    office: string;
+    headOfUnit: string;
+    submitterEmail: string;
+    submittedAt: string;
+    pdfBuffer: Buffer;
+  }) {
+    const hrEmail = process.env.HR_EMAIL ?? 'yjbarcial@gmail.com';
+    try {
+      await this.mailer.sendMail({
+        to: hrEmail,
+        subject: `[CarSU LeaD] LNA Submitted — ${opts.office} (${opts.refId})`,
+        html: `
+          <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;border:1px solid #ddd;border-radius:8px;overflow:hidden;">
+            <div style="background:#003300;padding:24px 32px;">
+              <h2 style="color:#ffcc00;margin:0;">CarSU LeaD System</h2>
+              <p style="color:#cce6cc;margin:4px 0 0;">USWAG Plan (LNA) Submitted — HR Copy</p>
+            </div>
+            <div style="padding:28px 32px;">
+              <p>A Learning Needs Assessment has been submitted and is ready for processing.</p>
+              <div style="background:#f5f5f5;border-radius:6px;padding:16px 20px;margin:20px 0;">
+                <table style="width:100%;font-size:14px;border-collapse:collapse;">
+                  <tr><td style="padding:6px 0;color:#666;width:40%;">Reference ID</td><td style="padding:6px 0;font-weight:bold;letter-spacing:1px;">${opts.refId}</td></tr>
+                  <tr><td style="padding:6px 0;color:#666;">Office / Unit</td><td style="padding:6px 0;font-weight:bold;">${opts.office}</td></tr>
+                  <tr><td style="padding:6px 0;color:#666;">Head of Unit</td><td style="padding:6px 0;">${opts.headOfUnit}</td></tr>
+                  <tr><td style="padding:6px 0;color:#666;">Submitted By</td><td style="padding:6px 0;">${opts.submitterEmail}</td></tr>
+                  <tr><td style="padding:6px 0;color:#666;">Submitted On</td><td style="padding:6px 0;">${opts.submittedAt}</td></tr>
+                </table>
+              </div>
+              <p>The complete LNA document is attached as a PDF to this email.</p>
+              <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
+              <p style="font-size:12px;color:#999;">This is an automated message from the CarSU HRMS LeaD System. Please do not reply to this email.</p>
+              <p style="font-size:12px;color:#999;">Caraga State University — Office of Human Resource Management Services</p>
+            </div>
+          </div>
+        `,
+        attachments: [
+          {
+            filename: `LNA_${opts.refId}_${opts.office.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`,
+            content: opts.pdfBuffer,
+            contentType: 'application/pdf',
+          },
+        ],
+      });
+      this.logger.log(`LNA HR notification with PDF sent to ${hrEmail}`);
+    } catch (err) {
+      this.logger.error(`Failed to send LNA HR notification: ${err.message}`);
+    }
+  }
+
+  // ── Sent to the head of office/submitter after LNA submission ─────────────
+  async sendLnaSubmitterConfirmation(opts: {
+    to: string;
+    headOfUnit: string;
+    refId: string;
+    office: string;
+    submittedAt: string;
+    pdfBuffer: Buffer;
+  }) {
+    try {
+      await this.mailer.sendMail({
+        to: opts.to,
+        subject: `[CarSU LeaD] LNA Submitted — Reference ID: ${opts.refId}`,
+        html: `
+          <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;border:1px solid #ddd;border-radius:8px;overflow:hidden;">
+            <div style="background:#003300;padding:24px 32px;">
+              <h2 style="color:#ffcc00;margin:0;">CarSU LeaD System</h2>
+              <p style="color:#cce6cc;margin:4px 0 0;">USWAG Plan (LNA) Submission Confirmation</p>
+            </div>
+            <div style="padding:28px 32px;">
+              <p>Dear <strong>${opts.headOfUnit}</strong>,</p>
+              <p>The Learning Needs Assessment (USWAG Plan) for your office has been successfully submitted. HRMS has been notified and will process your submission accordingly.</p>
+              <div style="background:#f5f5f5;border-left:4px solid #003300;padding:16px 20px;border-radius:4px;margin:20px 0;">
+                <p style="margin:0 0 8px;font-size:13px;color:#666;">REFERENCE ID</p>
+                <p style="margin:0;font-size:22px;font-weight:bold;letter-spacing:2px;color:#003300;">${opts.refId}</p>
+              </div>
+              <p style="font-size:14px;color:#444;">
+                <strong>Office / Unit:</strong> ${opts.office}<br>
+                <strong>Submitted On:</strong> ${opts.submittedAt}
+              </p>
+              <p>A copy of your submitted LNA is attached to this email as a PDF. Please keep it for your records.</p>
+              <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
+              <p style="font-size:12px;color:#999;">This is an automated message from the CarSU HRMS LeaD System. Please do not reply to this email.</p>
+              <p style="font-size:12px;color:#999;">Caraga State University — Office of Human Resource Management Services</p>
+            </div>
+          </div>
+        `,
+        attachments: [
+          {
+            filename: `LNA_${opts.refId}_${opts.office.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`,
+            content: opts.pdfBuffer,
+            contentType: 'application/pdf',
+          },
+        ],
+      });
+      this.logger.log(`LNA confirmation with PDF sent to ${opts.to}`);
+    } catch (err) {
+      this.logger.error(
+        `Failed to send LNA confirmation to ${opts.to}: ${err.message}`,
       );
     }
   }
