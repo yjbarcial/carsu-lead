@@ -580,11 +580,16 @@
 <script setup>
 import { ref, reactive, computed, watch, onMounted } from "vue";
 
+// Disable SSR for this page — it's a client-only interactive form.
+// This prevents "Cannot access 'x' before initialization" errors during hydration.
+definePageMeta({ ssr: false });
+
 const config = useRuntimeConfig();
 const API = config.public.apiBase;
 
 // ── Privacy Modal ──
-const showPrivacyModal = ref(true);
+// Start false on SSR to avoid hydration mismatch; shown on client via onMounted
+const showPrivacyModal = ref(false);
 const privacyAgreed = ref(false);
 function acceptPrivacy() {
   if (privacyAgreed.value) showPrivacyModal.value = false;
@@ -633,19 +638,6 @@ const positionLevels = [
 const compLevelHeaders = ["1st Level", "2nd (Non-Sup)", "2nd (Sup)", "3rd Level", "Faculty"];
 const compLevelKeys    = ["first", "secondNonSup", "secondSup", "third", "faculty"];
 
-const visibleCompLevelHeaders = computed(() =>
-  form.officeAffiliation === "OVPAA"
-    ? compLevelHeaders
-    : compLevelHeaders.filter(h => h !== "Faculty")
-);
-
-const visibleCompLevelKeys = computed(() =>
-  form.officeAffiliation === "OVPAA"
-    ? compLevelKeys
-    : compLevelKeys.filter(k => k !== "faculty")
-);
-
-const activeCompTab = ref("1st Level");
 const clOptions  = ["", "N/A", "1 - Basic", "2 - Intermediate", "3 - Advanced", "4 - Expert"];
 const pctOptions = ["", "N/A", "A - 76%-100%", "B - 51%-75%", "C - 26%-50%", "D - 25% & below"];
 
@@ -918,6 +910,38 @@ const workforce = reactive(
   ),
 );
 
+// Returns only position level keys that have at least one non-zero value in the workforce table.
+// Faculty is also excluded for non-OVPAA offices.
+// Uses toRaw-safe access so this is SSR-friendly in Nuxt.
+const activeCompLevelKeys = computed(() => {
+  const affiliation = form?.officeAffiliation ?? "";
+  const baseKeys = affiliation === "OVPAA"
+    ? compLevelKeys
+    : compLevelKeys.filter(k => k !== "faculty");
+
+  return baseKeys.filter(k => {
+    const row = workforce?.[k];
+    if (!row) return false;
+    return employmentTypeKeys.some(t => Number(row[t]) > 0);
+  });
+});
+
+const visibleCompLevelHeaders = computed(() =>
+  activeCompLevelKeys.value.map(k => compLevelHeaders[compLevelKeys.indexOf(k)])
+);
+
+const visibleCompLevelKeys = computed(() => activeCompLevelKeys.value);
+
+const activeCompTab = ref(compLevelHeaders[0]);
+
+// If the currently active tab's position level gets zeroed out in the workforce table,
+// reset to the first still-visible tab so the UI never shows an empty/ghost tab.
+watch(visibleCompLevelHeaders, (newHeaders) => {
+  if (newHeaders.length > 0 && !newHeaders.includes(activeCompTab.value)) {
+    activeCompTab.value = newHeaders[0];
+  }
+});
+
 const makeCompRow = (comp) => ({
   competency: comp,
   ...Object.fromEntries(
@@ -1109,6 +1133,8 @@ async function submitForm() {
 
 onMounted(() => {
   form.datePrepared = new Date().toISOString().split("T")[0];
+  // Show privacy modal only on client to avoid SSR hydration mismatch
+  showPrivacyModal.value = true;
 });
 </script>
 
@@ -1643,4 +1669,4 @@ textarea { resize: vertical; min-height: 72px; }
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
-</style>
+</style> 
