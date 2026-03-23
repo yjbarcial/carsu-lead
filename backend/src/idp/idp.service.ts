@@ -166,4 +166,15 @@ export class IdpService {
     if (!record) return null;
     return this.updateSupervisor(record.refId, data);
   }
+
+  async generatePdf(refId: string): Promise<Buffer | null> {
+    const record = await this.repo.findOne({ where: { refId } });
+    if (!record) return null;
+    try {
+      return await this.pdf.generateIdpPdf({ ...record } as any);
+    } catch (err) {
+      console.error('PDF generation failed:', err.message);
+      return null;
+    }
+  }
 }

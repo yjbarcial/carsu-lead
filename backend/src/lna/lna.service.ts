@@ -61,4 +61,15 @@ export class LnaService {
   findAll(): Promise<Lna[]> {
     return this.repo.find({ order: { submittedAt: 'DESC' } });
   }
+
+  async generatePdf(refId: string): Promise<Buffer | null> {
+    const record = await this.repo.findOne({ where: { refId } });
+    if (!record) return null;
+    try {
+      return await this.pdf.generateLnaPdf({ ...record } as any);
+    } catch (err) {
+      this.logger.error(`PDF generation failed for ${refId}: ${err.message}`);
+      return null;
+    }
+  }
 }
