@@ -14,7 +14,8 @@ export class Idp {
   refId: string;
 
   @Column({ default: 'PENDING' })
-  status: string; // PENDING | COMPLETE
+  status: string;
+  // Values: PENDING | SUPERVISOR_NOTIFIED | SUPERVISOR_REVIEWED | COMPLETE
 
   // ── Personnel / header ──────────────────────────────────────────────────
   @Column({ nullable: true }) campus: string;
@@ -49,6 +50,12 @@ export class Idp {
   @Column({ nullable: true }) supervisorApproval: string;
   @Column({ nullable: true }) supervisorSignedAt: string;
   @Column({ type: 'text', nullable: true }) supervisorAssessment: string; // JSON
+
+  @Column({ nullable: true, unique: true })
+  supervisorToken: string; // UUID token sent in supervisor email link
+
+  @Column({ nullable: true })
+  supervisorNotifiedAt: string; // ISO timestamp when supervisor was emailed
 
   @CreateDateColumn()
   submittedAt: Date;

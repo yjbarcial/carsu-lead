@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { v4 as uuidv4 } from 'uuid';
 import { Idp } from './idp.entity';
 import { MailService } from '../mail/mail.service';
 import { PdfService } from '../pdf/pdf.service';
@@ -15,9 +16,11 @@ export class IdpService {
 
   async create(data: Record<string, any>): Promise<Idp> {
     const refId = 'IDP-' + Date.now();
+    const supervisorToken = uuidv4();
 
     const record = this.repo.create({
       refId,
+      supervisorToken,
       status: 'PENDING',
       campus: data.campus ?? 'CSU Main Campus',
       officeAffiliation: data.officeAffiliation ?? '',
@@ -47,12 +50,13 @@ export class IdpService {
 
     const saved = await this.repo.save(record);
 
-    // ── Send emails (non-blocking — errors are logged, not thrown) ──────────
     const employeeName = [data.firstName, data.lastName]
       .filter(Boolean)
       .join(' ');
     const frontendBase = process.env.FRONTEND_URL ?? 'http://localhost:3000';
-    const reviewUrl = `${frontendBase}/idp-supervisor?ref=${saved.refId}`;
+
+    // Use token in supervisor review URL (not refId — token is unguessable)
+    const reviewUrl = `${frontendBase}/idp-supervisor?token=${saved.supervisorToken}`;
 
     if (saved.employeeEmail) {
       this.mail.sendEmployeeConfirmation({
@@ -73,9 +77,21 @@ export class IdpService {
         officeUnit: saved.collegeOfficeUnit,
         reviewUrl,
       });
+
+      // Stamp notification timestamp and advance status
+      await this.repo.update(
+        { refId: saved.refId },
+        {
+          supervisorNotifiedAt: new Date().toISOString(),
+          status: 'SUPERVISOR_NOTIFIED',
+        },
+      );
     }
 
-    return saved;
+    // Return the latest state
+    return (
+      (await this.repo.findOne({ where: { refId: saved.refId } })) ?? saved
+    );
   }
 
   findAll(): Promise<Idp[]> {
@@ -84,6 +100,10 @@ export class IdpService {
 
   findByRef(refId: string): Promise<Idp | null> {
     return this.repo.findOne({ where: { refId } });
+  }
+
+  findByToken(token: string): Promise<Idp | null> {
+    return this.repo.findOne({ where: { supervisorToken: token } });
   }
 
   async updateSupervisor(
@@ -131,5 +151,16 @@ export class IdpService {
     }
 
     return updated;
+  }
+
+  async updateSupervisorByToken(
+    token: string,
+    data: Partial<Idp>,
+  ): Promise<Idp | null> {
+    const record = await this.repo.findOne({
+      where: { supervisorToken: token },
+    });
+    if (!record) return null;
+    return this.updateSupervisor(record.refId, data);
   }
 }

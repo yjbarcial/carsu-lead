@@ -1,9 +1,14 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+} from 'typeorm';
 
 @Entity('lna_submissions')
 export class Lna {
   @PrimaryGeneratedColumn() id: number;
-  @Column() refId: string;
+  @Column({ unique: true }) refId: string;
   @Column() submitterEmail: string;
   @Column({ nullable: true }) campus: string;
   @Column({ nullable: true }) officeAffiliation: string;
@@ -15,6 +20,7 @@ export class Lna {
   @Column({ nullable: true }) totalPersonnel: string;
   @Column({ nullable: true }) purpose: string;
   @Column({ nullable: true }) raterName: string;
+  @Column({ nullable: true }) designation: string;
   @Column({ type: 'jsonb', nullable: true }) workforceProfile: any;
   @Column({ type: 'jsonb', nullable: true }) coreCompetencies: any;
   @Column({ type: 'jsonb', nullable: true }) leadershipComps: any;
