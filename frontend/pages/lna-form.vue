@@ -24,7 +24,7 @@
           </ul>
           <p>
             Your information will be stored securely and accessed only by authorized
-          Caraga State University Human Resource and Management Services and Learning and Development personnel. It will not be disclosed to third parties without
+          <strong>Caraga State University, Human Resource Management Services (Learning and Development) personnel</strong>. It will not be disclosed to third parties without
           your consent, except as required by law.
           </p>
           <p>
@@ -217,7 +217,7 @@
               </select>
             </div>
             <div class="field-group">
-              <label>Total Personnel <span class="req">*</span></label>
+              <label>Total Personnel in Your Office <span class="req">*</span></label>
               <input type="number" v-model="form.totalPersonnel" min="0" placeholder="0" />
             </div>
           </div>
@@ -259,7 +259,7 @@
             <p class="section-desc">
               Indicate the number of personnel per employment classification under
               each position level within your office. Refer to
-              <strong>Annex A</strong> for descriptions and sample positions.
+              <a href="https://drive.google.com/file/d/1V1YBawTYCJFLZEJEJwMvslaXnGi7WErg/view?usp=drive_link" target="_blank" rel="noopener noreferrer"><strong>Annex A</strong></a> for descriptions and sample positions.
             </p>
             <div class="table-wrapper">
               <table class="data-table workforce-table">
@@ -338,7 +338,12 @@
                     {{ cluster.name }} Competencies
                     <span class="cluster-badge">{{ cluster.badge }}</span>
                   </div>
-                  <p class="comp-note" style="padding: 8px 0 4px">{{ cluster.note }}</p>
+                  <p class="comp-note" style="padding: 8px 0 4px">
+                    {{ clusterLevelNote[cluster.key]?.[lvKey] || cluster.note }}
+                  </p>
+                  <p class="comp-caption" style="padding: 0 0 10px">
+                    Assess the competencies of <strong>{{ levelFormalLabel[lvKey] }}</strong> employees within each cluster by selecting the appropriate entries in the respective columns.
+                  </p>
                   <div class="table-wrapper">
                     <table class="data-table comp-page-table">
                       <thead>
@@ -353,14 +358,24 @@
                         <tr v-for="(comp, idx) in cluster.competencies" :key="comp">
                           <td class="row-label">{{ comp }}</td>
                           <td>
-                            <select v-model="competencyData[cluster.key][idx][lvKey + '_cl']" class="comp-select">
+                            <select
+                              v-model="competencyData[cluster.key][idx][lvKey + '_cl']"
+                              class="comp-select"
+                              :class="{ 'comp-select-error': compValidated && !(competencyData[cluster.key][idx][lvKey + '_cl'] || '').trim() }"
+                            >
                               <option v-for="o in clOptions" :key="o" :value="o">{{ o || "---" }}</option>
                             </select>
+                            <span v-if="compValidated && !(competencyData[cluster.key][idx][lvKey + '_cl'] || '').trim()" class="comp-field-error">Required</span>
                           </td>
                           <td>
-                            <select v-model="competencyData[cluster.key][idx][lvKey + '_pct']" class="comp-select">
+                            <select
+                              v-model="competencyData[cluster.key][idx][lvKey + '_pct']"
+                              class="comp-select"
+                              :class="{ 'comp-select-error': compValidated && !(competencyData[cluster.key][idx][lvKey + '_pct'] || '').trim() }"
+                            >
                               <option v-for="o in pctOptions" :key="o" :value="o">{{ o || "---" }}</option>
                             </select>
+                            <span v-if="compValidated && !(competencyData[cluster.key][idx][lvKey + '_pct'] || '').trim()" class="comp-field-error">Required</span>
                           </td>
                           <td>
                             <textarea rows="2" v-model="competencyData[cluster.key][idx].observations" placeholder="Observations..."></textarea>
@@ -384,7 +399,7 @@
                   <button
                     class="btn-tab-nav"
                     :disabled="lvIdx === visibleCompLevelKeys.length - 1"
-                    @click="activeCompTab = visibleCompLevelHeaders[lvIdx + 1]"
+                    @click="compValidated = true; activeCompTab = visibleCompLevelHeaders[lvIdx + 1]"
                   >
                     Next →
                   </button>
@@ -501,7 +516,14 @@
                     <td style="text-align: center; color: var(--text-light); font-weight: 600;">{{ idx + 1 }}</td>
                     <td class="row-label" style="font-size: 13px; white-space: normal;">{{ row.dataSource }}</td>
                     <td><textarea rows="2" v-model="row.gap" placeholder="Identified gap or issue..."></textarea></td>
-                    <td><input type="text" v-model="row.personnel" placeholder="Relevant personnel or function..." /></td>
+                    <td>
+                      <div class="personnel-checks">
+                        <label v-for="opt in personnelLevelOptions" :key="opt" class="personnel-check-item" :class="{ checked: row.personnel.includes(opt) }">
+                          <input type="checkbox" :value="opt" v-model="row.personnel" />
+                          {{ opt }}
+                        </label>
+                      </div>
+                    </td>
                     <td><select v-model="row.intervention" style="min-width:200px">
                       <option value="">Select…</option>
                       <optgroup label="On-the-Job Learning">
@@ -630,12 +652,13 @@ const positionLevels = [
   { key: "faculty",      label: "Faculty Positions" },
 ];
 
-const compLevelHeaders = ["1st Level", "2nd (Non-Sup)", "2nd (Sup)", "3rd Level", "Faculty"];
+const compLevelHeaders = ["1st Level", "2nd level (Non-Supervisory)", "2nd level (Supervisory)", "3rd Level", "Faculty"];
 const compLevelKeys    = ["first", "secondNonSup", "secondSup", "third", "faculty"];
 
 // Derived after workforce is initialized (see below) — placeholder refs used in template
 // until the real computeds are declared post-workforce.
 const activeCompTab = ref("1st Level");
+const compValidated = ref(false); // true after user tries to advance past Section II with empty cells
 
 const clOptions  = ["", "N/A", "1 - Basic", "2 - Intermediate", "3 - Advanced", "4 - Expert"];
 const pctOptions = ["", "N/A", "A - 76%-100%", "B - 51%-75%", "C - 26%-50%", "D - 25% & below"];
@@ -860,8 +883,18 @@ const sectionDone = computed(() => {
   // Workforce: always done once Section H is complete — cells default to 0
   const workforceDone = true;
 
-  // Competency: all cluster summary rows filled
-  const competency = clusterSummary.every(c => c.strongest && c.weakest && c.interventionNeeded);
+  // Competency: cluster summary complete + all CL/pct cells filled for active levels
+  const clusterSummaryDone = clusterSummary.every(c => c.strongest && c.weakest && c.interventionNeeded);
+  const activeLvKeys = (() => {
+    const baseKeys = (form.officeAffiliation === "OVPAA" ? compLevelKeys : compLevelKeys.filter(k => k !== "faculty"));
+    return baseKeys.filter(k => { const row = workforce?.[k]; if (!row) return false; return employmentTypeKeys.some(t => Number(row[t]) > 0); });
+  })();
+  const clDataFilled = Object.entries(competencyData).every(([, rows]) =>
+    rows.every(row =>
+      activeLvKeys.every(k => (row[k + "_cl"] || "").trim() !== "" && (row[k + "_pct"] || "").trim() !== "")
+    )
+  );
+  const competency = clusterSummaryDone && clDataFilled;
 
   // Data sources: at least one source selected
   const dataSourcesDone = form.selectedSources.length > 0;
@@ -962,6 +995,57 @@ const clusterSummary = reactive([
   { cluster: "Technical",      strongest: "", weakest: "", interventionNeeded: "" },
 ]);
 
+// ── Level-aware competency labels ──
+// Maps level key to its full formal label
+const levelFormalLabel = {
+  first:        "First Level Positions",
+  secondNonSup: "Second Level (Non-Supervisory) Positions",
+  secondSup:    "Second Level (Supervisory) Positions",
+  third:        "Third Level Positions",
+  faculty:      "Faculty Positions",
+};
+
+// Per-cluster, per-level formal description shown above the table
+const clusterLevelNote = {
+  core: {
+    first:        "Foundational attributes expected of all personnel regardless of position. These apply to First Level Positions.",
+    secondNonSup: "Foundational attributes expected of all personnel regardless of position. These apply to Second Level (Non-Supervisory) Positions.",
+    secondSup:    "Foundational attributes expected of all personnel regardless of position. These apply to Second Level (Supervisory) Positions.",
+    third:        "Foundational attributes expected of all personnel regardless of position. These apply to Third Level Positions.",
+    faculty:      "Foundational attributes expected of all personnel regardless of position. These apply to Faculty Positions.",
+  },
+  leadership: {
+    first:        "Skills and behaviors required to effectively lead individuals, teams, and units. Assessed for First Level Positions.",
+    secondNonSup: "Skills and behaviors required to effectively lead individuals, teams, and units. Assessed for Second Level (Non-Supervisory) Positions.",
+    secondSup:    "Skills and behaviors required to effectively lead individuals, teams, and units. Assessed for Second Level (Supervisory) Positions.",
+    third:        "Skills and behaviors required to effectively lead individuals, teams, and units. Assessed for Third Level Positions.",
+    faculty:      "Skills and behaviors required to effectively lead individuals, teams, and units. Assessed for Faculty Positions.",
+  },
+  org: {
+    first:        "Collective attributes that define the institution's way of working. Assessed for First Level Positions.",
+    secondNonSup: "Collective attributes that define the institution's way of working. Assessed for Second Level (Non-Supervisory) Positions.",
+    secondSup:    "Collective attributes that define the institution's way of working. Assessed for Second Level (Supervisory) Positions.",
+    third:        "Collective attributes that define the institution's way of working. Assessed for Third Level Positions.",
+    faculty:      "Collective attributes that define the institution's way of working. Assessed for Faculty Positions.",
+  },
+  technical: {
+    first:        "Job-specific knowledge, skills, and abilities for effective role performance. Assessed for First Level Positions.",
+    secondNonSup: "Job-specific knowledge, skills, and abilities for effective role performance. Assessed for Second Level (Non-Supervisory) Positions.",
+    secondSup:    "Job-specific knowledge, skills, and abilities for effective role performance. Assessed for Second Level (Supervisory) Positions.",
+    third:        "Job-specific knowledge, skills, and abilities for effective role performance. Assessed for Third Level Positions.",
+    faculty:      "Job-specific knowledge, skills, and abilities for effective role performance. Assessed for Faculty Positions.",
+  },
+};
+
+// Personnel / function options for insight rows
+const personnelLevelOptions = [
+  "First Level Positions",
+  "Second Level (Supervisory)",
+  "Second Level (Non-Supervisory)",
+  "Third Level Positions",
+  "Faculty Positions",
+];
+
 const insightRows = reactive([]);
 
 // Sync insightRows whenever selectedSources changes
@@ -992,7 +1076,7 @@ watch(
         (src.startsWith("Others") && r.dataSource.startsWith("Others"))
       );
       if (!exists) {
-        insightRows.push({ dataSource: src, gap: "", personnel: "", intervention: "" });
+        insightRows.push({ dataSource: src, gap: "", personnel: [], intervention: "" });
       }
     });
   },
@@ -1036,7 +1120,7 @@ function validate() {
     ["position",          "Position"],
     ["datePrepared",      "Date Prepared"],
     ["yearCovered",       "Year Covered"],
-    ["totalPersonnel",    "Total Personnel"],
+    ["totalPersonnel",    "Total Personnel in Your Office"],
     ["raterFullName",     "Rater Full Name"],
   ];
   for (const [field] of requiredFields) {
@@ -1099,7 +1183,7 @@ async function submitForm() {
     technicalComps:     competencyData.technical,
     clusterSummaryRaw:  clusterSummary,                // matches entity column `clusterSummaryRaw`
     dataSourcesRaw:     selectedSources,               // matches entity column `dataSourcesRaw`
-    dataSourceInsights: insightRows,
+    dataSourceInsights: insightRows.map(r => ({ ...r, personnel: Array.isArray(r.personnel) ? r.personnel.join(", ") : r.personnel })),
     // raterFullName removed — raterName is not a field in this form; headOfUnit is used in certification
   };
 
@@ -1658,5 +1742,57 @@ textarea { resize: vertical; min-height: 72px; }
 }
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* ── Competency validation ── */
+.comp-select-error {
+  border-color: var(--error, #c0392b) !important;
+  background: rgba(192, 57, 43, 0.04) !important;
+}
+.comp-field-error {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--error, #c0392b);
+  margin-top: 3px;
+  letter-spacing: 0.03em;
+}
+
+/* ── Competency level caption ── */
+.comp-caption {
+  font-size: 12px;
+  color: var(--text-light, #5a6070);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* ── Personnel / Function checkboxes ── */
+.personnel-checks {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 220px;
+}
+.personnel-check-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 9px;
+  border: 1.5px solid var(--border, #d8d4c8);
+  border-radius: 6px;
+  background: var(--input-bg, #f8f7f3);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text, #1a1a2e);
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+}
+.personnel-check-item:hover { border-color: var(--navy, #1a4d2e); background: var(--white, #fff); }
+.personnel-check-item.checked { border-color: var(--navy, #1a4d2e); background: rgba(26,77,46,0.05); }
+.personnel-check-item input[type="checkbox"] {
+  width: auto; padding: 0; border: none;
+  background: none; accent-color: var(--navy, #1a4d2e);
+  cursor: pointer; flex-shrink: 0;
 }
 </style>
