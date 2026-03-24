@@ -342,6 +342,7 @@
                     <option>Attorney III</option>
                     <option>Physician</option>
                     <option>Procurement Officer</option>
+                    <option>Director</option>
                   </template>
                   <template v-if="form.personnelType === 'faculty'">
                     <option>Instructor I</option>
@@ -409,6 +410,7 @@
                 <option>Attorney III</option>
                 <option>Physician</option>
                 <option>Procurement Officer</option>
+                <option>Director</option>
               </select>
             </div>
 
@@ -418,12 +420,6 @@
                 <option value="">Select office affiliation first…</option>
               </select>
             </div>
-          </div>
- 
-          <!-- Year Covered -->
-          <div class="field-group">
-            <label>Year Covered <span class="req">*</span></label>
-            <input type="text" v-model="form.yearCovered" :class="{ error: errors.yearCovered }" placeholder="e.g. 2025" />
           </div>
  
           <!-- Years in Position -->
@@ -441,7 +437,8 @@
           <!-- Supervisor Name -->
           <div class="field-group">
             <label>Immediate Supervisor Name <span class="req">*</span></label>
-            <input type="text" v-model="form.supervisorName" :class="{ error: errors.supervisorName }" placeholder="e.g. Dr. Juan Dela Cruz" />
+            <input type="text" v-model="form.supervisorName" :class="{ error: errors.supervisorName }" placeholder="e.g. Dela Cruz, Juan D." />
+            <small class="field-hint">Format: Last name, First name, M.I.</small>
           </div>
  
           <!-- Supervisor Email -->
@@ -558,18 +555,11 @@
                 <td>
                   <select v-model="row.targetCompetency" @change="row.competencyGroup = getCompetencyCluster(row.targetCompetency); row.requiredLevel = getRequiredLevel(row.targetCompetency, form.currentPosition)">
                     <option value="">Select…</option>
-                    <optgroup label="Core">
-                      <option v-for="c in allCompetencies.Core" :key="c" :value="c">{{ c }}</option>
-                    </optgroup>
-                    <optgroup label="Leadership">
-                      <option v-for="c in allCompetencies.Leadership" :key="c" :value="c">{{ c }}</option>
-                    </optgroup>
-                    <optgroup label="Organizational">
-                      <option v-for="c in allCompetencies.Organizational" :key="c" :value="c">{{ c }}</option>
-                    </optgroup>
-                    <optgroup label="Technical">
-                      <option v-for="c in allCompetencies.Technical" :key="c" :value="c">{{ c }}</option>
-                    </optgroup>
+                    <template v-for="cluster in availableClusters" :key="cluster">
+                      <optgroup :label="cluster">
+                        <option v-for="c in allCompetencies[cluster]" :key="c" :value="c">{{ c }}</option>
+                      </optgroup>
+                    </template>
                   </select>
                 </td>
                 <td>
@@ -661,10 +651,10 @@
               <tr>
                 <th style="width: 40px">No.</th>
                 <th>Degree Program</th>
-                <th>Target HEI</th>
-                <th style="width: 120px">Mode of Study</th>
-                <th>Target Scholarship Grant</th>
-                <th style="width: 130px">Target Timeline</th>
+                <th style="min-width: 200px">Target HEI</th>
+                <th style="width: 90px">Mode of Study</th>
+                <th style="min-width: 180px">Target Scholarship Grant</th>
+                <th style="width: 130px">Intended Year of Enrollment</th>
                 <th style="width: 40px"></th>
               </tr>
             </thead>
@@ -682,7 +672,7 @@
                   </select>
                 </td>
                 <td>
-                  <input type="text" v-model="row.targetHEI" placeholder="" />
+                  <input type="text" v-model="row.targetHEI" placeholder="Full name of School" />
                 </td>
                 <td>
                   <select v-model="row.modeOfStudy">
@@ -699,9 +689,10 @@
                 <td>
                   <select v-model="row.targetTimeline">
                     <option value="">Select…</option>
-                    <option>2026-2027</option>
-                    <option>2027-2028</option>
-                    <option>2028-2029</option>
+                    <option>2026</option>
+                    <option>2027</option>
+                    <option>2028</option>
+                    <option>2029</option>
                   </select>
                 </td>
                 <td>
@@ -773,14 +764,15 @@
                   </select>
                 </td>
                 <td>
-                  <input type="text" v-model="proactRows[idx].trainerProvider" placeholder="" />
+                  <input type="text" v-model="proactRows[idx].trainerProvider" placeholder="Optional" />
                 </td>
                 <td>
                   <select v-model="proactRows[idx].targetTimeline">
                     <option value="">Select…</option>
-                    <option>2026-2027</option>
-                    <option>2027-2028</option>
-                    <option>2028-2029</option>
+                    <option>2026</option>
+                    <option>2027</option>
+                    <option>2028</option>
+                    <option>2029</option>
                   </select>
                 </td>
               </tr>
@@ -888,10 +880,6 @@
           <div class="ro-field">
             <div class="ro-label">Current Position / Designation</div>
             <div class="ro-value">{{ idpData.currentPosition || "—" }}</div>
-          </div>
-          <div class="ro-field">
-            <div class="ro-label">Year Covered</div>
-            <div class="ro-value">{{ idpData.yearCovered || "—" }}</div>
           </div>
           <div class="ro-field">
             <div class="ro-label">Years in Position</div>
@@ -1302,7 +1290,6 @@ const form = reactive({
   educAttainmentSpec: "",
   datePrepared: "",
   currentPosition: "",
-  yearCovered: "",
   yearsInPosition: "",
   yearsInCSU: "",
   supervisorName: "",
@@ -1611,6 +1598,21 @@ const allCompetencies = computed(() => ({
   Technical: getCompetencyOptions("Technical"),
 }));
  
+// Which clusters are applicable for the currently selected position
+// A cluster is included if ANY competency in it has a non-null required level for that position.
+// If no position selected yet, all 4 clusters are shown.
+const availableClusters = computed(() => {
+  const allClusters = ["Core", "Leadership", "Organizational", "Technical"];
+  const pos = form.currentPosition;
+  if (!pos) return allClusters;
+  const posData = competencyModel[pos];
+  if (!posData) return allClusters;
+  return allClusters.filter(cluster => {
+    const list = allCompetencies.value[cluster] || [];
+    return list.some(c => posData[c] !== undefined && posData[c] !== null);
+  });
+});
+
 // Reverse lookup: competency name → cluster name
 function getCompetencyCluster(competency) {
   if (!competency) return "";
@@ -2158,6 +2160,23 @@ const competencyModel = {
     "Attention to Details": 2, "Written Communication": 2,
     "Oral Communication": 2, "Computer Literacy": 2, "Logical Reasoning": 2,
   },
+  // ── DIRECTOR ────────────────────────────────────────────────────────
+  "Director": {
+    "Integrity": 4, "Accountability": 4, "Scientific and Technological Excellence": 3,
+    "Delivering Service Excellence": 4, "Environmental Consciousness": 3, "Building Partnership": 4,
+    "Developing People": 4, "Facilitating Change": 4, "Conflict Management": 4,
+    "Leading Innovation": 4, "Strategic Planning": 4, "Leading Others": 4, "Decisiveness": 4,
+    "Critical Thinking": 4,
+    "Teamwork": 4, "Commitment to Learning": 4, "Customer Focus": 4,
+    "Adaptability and Flexibility": 4, "Effective Communication": 4, "Valuing Diversity": 4,
+    "Self-Awareness and Confidence": 4, "Stress Tolerance": 4, "Resource Management": 4,
+    "Knowledge Management": 4, "Initiative": 4, "Result Orientation": 4,
+    "Organizational Commitment": 4, "Planning and Organizing": 4,
+    "Emotional and Psychological Maturity": 4, "Safety and Risk Management": 4,
+    "Interpersonal Effectiveness": 4,
+    "Attention to Details": 4, "Written Communication": 4,
+    "Oral Communication": 4, "Computer Literacy": 3, "Logical Reasoning": 4,
+  },
  
   // ════════════════════════════════════════════════════════════════════
   // FACULTY (Pages 5-8)
@@ -2532,7 +2551,6 @@ function validateStage1() {
     "firstName",
     "datePrepared",
     "currentPosition",
-    "yearCovered",
     "yearsInPosition",
     "yearsInCSU",
     "collegeOfficeUnit",
@@ -2591,7 +2609,6 @@ async function submitStage1() {
     educAttainmentSpec: form.educAttainmentSpec,
     datePrepared: form.datePrepared,
     currentPosition: form.currentPosition,
-    yearCovered: form.yearCovered,
     yearsInPosition: form.yearsInPosition,
     yearsInCSU: form.yearsInCSU,
     supervisorName: form.supervisorName,
