@@ -23,7 +23,7 @@
         </ul>
         <p>
           By continuing, you acknowledge your responsibility to handle this information
-          with confidentiality and in accordance with Caraga State University's data privacy policies.
+          with confidentiality and in accordance with the <strong>Data Privacy Act of 2012 (R.A. 10173)</strong> and its implementing rules and regulations.
         </p>
         <p>
           For data privacy concerns, contact the <strong>Caraga State University HRMS</strong>.
@@ -56,9 +56,9 @@
       </div>
       <h2>Supervisor IDP Review</h2>
       <p>Enter your reference ID and CarSU email to load the employee's submission for review.</p>
-
       <div class="field-group">
         <label>Reference ID <span class="req">*</span></label>
+        <span class="token-guidance">Reference ID was sent to your CarSU email</span>
         <input type="text" v-model="tokenInput" placeholder="e.g. IDP-1234567890" />
       </div>
       <div class="field-group">
@@ -419,10 +419,13 @@ const route = useRoute();
 
 // ── State ──────────────────────────────────────────────────────────────────
 // ── Privacy Modal ──
-const showPrivacyModal = ref(true);
+const showPrivacyModal = ref(false);
 const privacyAgreed = ref(false);
 function acceptPrivacy() {
-  if (privacyAgreed.value) showPrivacyModal.value = false;
+  if (privacyAgreed.value) {
+    showPrivacyModal.value = false;
+    screen.value = 'review';
+  }
 }
 
 const screen = ref('token');   // 'token' | 'review' | 'success'
@@ -507,7 +510,7 @@ async function loadByToken() {
     }
 
     idpData.value = data;
-    screen.value = 'review';
+    showPrivacyModal.value = true;
   } catch (err) {
     tokenError.value = 'Network error: ' + err.message;
   } finally {
@@ -950,6 +953,15 @@ async function submitAssessment() {
   text-transform: uppercase; letter-spacing: 0.05em;
 }
 .req { color: var(--error); margin-left: 2px; }
+
+/* Token guidance label */
+.token-guidance {
+  display: block;
+  font-size: 12px;
+  font-style: italic;
+  color: #888;
+  margin-top: -2px;
+}
 
 /* Email widget */
 .email-prefix-wrapper {
