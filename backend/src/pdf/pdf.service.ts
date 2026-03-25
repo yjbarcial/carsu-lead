@@ -149,7 +149,6 @@ export class PdfService {
       <div class="ro-field"><div class="ro-label">Date Prepared</div><div class="ro-value">${this.safe(idp.datePrepared)}</div></div>
       <div class="ro-field span-2"><div class="ro-label">Highest Educational Attainment</div><div class="ro-value">${this.safe(idp.educAttainment)}${idp.educAttainmentSpec ? ' — ' + this.safe(idp.educAttainmentSpec) : ''}</div></div>
       <div class="ro-field"><div class="ro-label">Current Position / Designation</div><div class="ro-value">${this.safe(idp.currentPosition)}</div></div>
-      <div class="ro-field"><div class="ro-label">Year Covered</div><div class="ro-value">${this.safe(idp.yearCovered)}</div></div>
       <div class="ro-field"><div class="ro-label">Years in Position</div><div class="ro-value">${this.safe(idp.yearsInPosition)}</div></div>
       <div class="ro-field"><div class="ro-label">Years in CSU</div><div class="ro-value">${this.safe(idp.yearsInCSU)}</div></div>
       <div class="ro-field"><div class="ro-label">Immediate Supervisor</div><div class="ro-value">${this.safe(idp.supervisorName)}</div></div>
@@ -216,7 +215,7 @@ export class PdfService {
         <th style="${thStyle}">Target HEI</th>
         <th style="${thStyle}">Mode of Study</th>
         <th style="${thStyle}">Target Scholarship Grant</th>
-        <th style="${thStyle}">Target Timeline</th>
+        <th style="${thStyle}">Intended Year of Enrollment</th>
       </tr></thead>
       <tbody>
         ${
@@ -397,56 +396,91 @@ export class PdfService {
       'others',
     ];
     const posLevels = [
-      { key: 'first', label: 'First Level' },
-      { key: 'secondNonSup', label: '2nd Level (Non-Sup)' },
-      { key: 'secondSup', label: '2nd Level (Sup)' },
-      { key: 'third', label: 'Third Level' },
-      { key: 'faculty', label: 'Faculty' },
+      { key: 'first', label: 'First Level Positions', header: '1st Level' },
+      {
+        key: 'secondNonSup',
+        label: 'Second Level (Non-Supervisory)',
+        header: '2nd (Non-Supervisory)',
+      },
+      {
+        key: 'secondSup',
+        label: 'Second Level (Supervisory)',
+        header: '2nd (Supervisory)',
+      },
+      { key: 'third', label: 'Third Level Positions', header: '3rd Level' },
+      { key: 'faculty', label: 'Faculty Positions', header: 'Faculty' },
     ];
-    const wfRows = posLevels
-      .map((lv, i) => {
-        const row =
-          typeof workforce === 'object' ? (workforce[lv.key] ?? {}) : {};
-        const cells = empKeys
-          .map(
-            (k) =>
-              `<td style="${i % 2 === 0 ? tdStyle : tdAlt}text-align:center;">${s(row[k] ?? 0)}</td>`,
-          )
-          .join('');
-        return `<tr><td style="${i % 2 === 0 ? tdStyle : tdAlt}font-weight:600;">${lv.label}</td>${cells}</tr>`;
-      })
-      .join('');
+
+    // ── KEY FILTER: keep only levels where at least one employment-type cell > 0 ──
+    const activePosLevels = posLevels.filter((lv) => {
+      const row =
+        typeof workforce === 'object' ? (workforce[lv.key] ?? {}) : {};
+      return empKeys.some((k) => Number(row[k] ?? 0) > 0);
+    });
+
+    // Workforce table rows — active levels only
+    const wfRows = activePosLevels.length
+      ? activePosLevels
+          .map((lv, i) => {
+            const row =
+              typeof workforce === 'object' ? (workforce[lv.key] ?? {}) : {};
+            const rowTotal = empKeys.reduce(
+              (sum, k) => sum + Number(row[k] ?? 0),
+              0,
+            );
+            const cells = empKeys
+              .map(
+                (k) =>
+                  `<td style="${i % 2 === 0 ? tdStyle : tdAlt}text-align:center;">${s(row[k] ?? 0)}</td>`,
+              )
+              .join('');
+            return `<tr>
+              <td style="${i % 2 === 0 ? tdStyle : tdAlt}font-weight:600;">${lv.label}</td>
+              ${cells}
+              <td style="${i % 2 === 0 ? tdStyle : tdAlt}text-align:center;font-weight:700;color:#003300;">${rowTotal}</td>
+            </tr>`;
+          })
+          .join('')
+      : `<tr><td colspan="${empTypes.length + 2}" style="${tdStyle}text-align:center;color:#888;font-style:italic;">No workforce data recorded.</td></tr>`;
 
     // Competency cluster renderer
-    const renderCluster = (label: string, rows: any[], lvHeaders: string[]) => {
-      if (!rows.length) return '';
-      const headerCells = lvHeaders
-        .flatMap((h) => [
+    // activeLevels: array of { key, header } — only levels with non-zero workforce
+    const renderCluster = (
+      label: string,
+      rows: any[],
+      activeLevels: { key: string; header: string }[],
+    ) => {
+      if (!rows.length || !activeLevels.length) return '';
+
+      const headerCells = activeLevels
+        .flatMap(({ header: h }) => [
           `<th style="${thStyle}text-align:center;min-width:60px;">CL<br><small>${h}</small></th>`,
           `<th style="${thStyle}text-align:center;min-width:60px;">%<br><small>${h}</small></th>`,
         ])
         .join('');
+
       const bodyRows = rows
         .map((row, i) => {
-          const dataCells = lvHeaders
-            .flatMap((h) => {
-              const key = h.toLowerCase().replace(/[^a-z0-9]/g, '');
-              return [
-                `<td style="${i % 2 === 0 ? tdStyle : tdAlt}text-align:center;">${s(row[key + '_cl'] ?? row[h + '_cl'] ?? '')}</td>`,
-                `<td style="${i % 2 === 0 ? tdStyle : tdAlt}text-align:center;">${s(row[key + '_pct'] ?? row[h + '_pct'] ?? '')}</td>`,
-              ];
-            })
+          const dataCells = activeLevels
+            .flatMap(({ key }) => [
+              // Use the exact storage key: e.g. 'first_cl', 'secondNonSup_cl'
+              `<td style="${i % 2 === 0 ? tdStyle : tdAlt}text-align:center;">${s(row[key + '_cl'] ?? '')}</td>`,
+              `<td style="${i % 2 === 0 ? tdStyle : tdAlt}text-align:center;">${s(row[key + '_pct'] ?? '')}</td>`,
+            ])
             .join('');
-          return `<tr><td style="${i % 2 === 0 ? tdStyle : tdAlt}">${s(row.competency)}</td>${dataCells}<td style="${i % 2 === 0 ? tdStyle : tdAlt}">${s(row.observations)}</td></tr>`;
+          return `<tr>
+            <td style="${i % 2 === 0 ? tdStyle : tdAlt}">${s(row.competency)}</td>
+            ${dataCells}
+            <td style="${i % 2 === 0 ? tdStyle : tdAlt}">${s(row.observations)}</td>
+          </tr>`;
         })
         .join('');
 
-      // Each level gets 2 cols (CL + %); competency col = 22%, observations = 14%, rest split equally
-      const lvCount = lvHeaders.length;
+      const lvCount = activeLevels.length;
       const dataColWidth = Math.floor(58 / (lvCount * 2));
       const colgroup = `<colgroup>
         <col style="width:22%;">
-        ${lvHeaders.map(() => `<col style="width:${dataColWidth}%;"><col style="width:${dataColWidth}%;">`).join('')}
+        ${activeLevels.map(() => `<col style="width:${dataColWidth}%;"><col style="width:${dataColWidth}%;">`).join('')}
         <col style="width:14%;">
       </colgroup>`;
       const headerRow = `<th style="${thStyle}">Competency</th>${headerCells}<th style="${thStyle}">Observations</th>`;
@@ -461,14 +495,8 @@ export class PdfService {
         </div>`;
     };
 
-    // Determine level headers from actual data keys
-    const allLvHeaders = [
-      '1st Level',
-      '2nd (Non-Sup)',
-      '2nd (Sup)',
-      '3rd Level',
-      'Faculty',
-    ];
+    // Level headers derived from active levels only — matches workforce filter above
+    const allLvHeaders = activePosLevels.map((lv) => lv.header);
 
     // Cluster summary rows
     const clusterSumRows = Array.isArray(clusterSum)
@@ -560,7 +588,7 @@ export class PdfService {
       <div class="info-field"><div class="info-label">Position / Designation</div><div class="info-value">${s(lna.position)}</div></div>
       <div class="info-field"><div class="info-label">Date Prepared</div><div class="info-value">${s(lna.datePrepared)}</div></div>
       <div class="info-field"><div class="info-label">Year Covered</div><div class="info-value">${s(lna.yearCovered)}</div></div>
-      <div class="info-field"><div class="info-label">Total Personnel</div><div class="info-value">${s(lna.totalPersonnel)}</div></div>
+      <div class="info-field"><div class="info-label">Total Personnel in Your Office</div><div class="info-value">${s(lna.totalPersonnel)}</div></div>
       <div class="info-field span-2"><div class="info-label">Purpose</div><div class="info-value">${s(lna.purpose)}</div></div>
     </div>
   </div>
@@ -572,13 +600,15 @@ export class PdfService {
   <div class="section-body">
     <table style="width:100%;border-collapse:collapse;table-layout:fixed;">
       <colgroup>
-        <col style="width:18%;">
-        ${empTypes.map(() => '<col style="width:10.25%;">').join('')}
+        <col style="width:17%;">
+        ${empTypes.map(() => '<col style="width:9%;">').join('')}
+        <col style="width:7%;">
       </colgroup>
       <thead>
         <tr>
           <th style="${thStyle}">Position Level</th>
           ${empTypes.map((t) => `<th style="${thStyle}text-align:center;">${t}</th>`).join('')}
+          <th style="${thStyle}text-align:center;">Total</th>
         </tr>
       </thead>
       <tbody>${wfRows}</tbody>
@@ -590,10 +620,10 @@ export class PdfService {
 <div class="section">
   <div class="section-header"><span class="section-num">II</span><h2>Competency Mapping and Assessment</h2></div>
   <div class="section-body">
-    ${renderCluster('Core Competencies', Array.isArray(core) ? core : [], allLvHeaders)}
-    ${renderCluster('Leadership Competencies', Array.isArray(leadership) ? leadership : [], allLvHeaders)}
-    ${renderCluster('Organizational Competencies', Array.isArray(org) ? org : [], allLvHeaders)}
-    ${renderCluster('Technical Competencies', Array.isArray(technical) ? technical : [], allLvHeaders)}
+    ${renderCluster('Core Competencies', Array.isArray(core) ? core : [], activePosLevels)}
+    ${renderCluster('Leadership Competencies', Array.isArray(leadership) ? leadership : [], activePosLevels)}
+    ${renderCluster('Organizational Competencies', Array.isArray(org) ? org : [], activePosLevels)}
+    ${renderCluster('Technical Competencies', Array.isArray(technical) ? technical : [], activePosLevels)}
     <h4 style="font-size:12px;color:#003300;margin:14px 0 6px;text-transform:uppercase;letter-spacing:0.05em;">Competency Cluster Summary</h4>
     <table>
       <thead><tr>

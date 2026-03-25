@@ -572,8 +572,19 @@
                   </select>
                 </td>
                 <td>
-                  <div v-if="row.requiredLevel" class="required-level-badge">{{ row.requiredLevel }}</div>
-                  <div v-else class="required-level-empty">Auto-set</div>
+                  <template v-if="form.currentPosition === 'Director'">
+                    <select v-model="row.requiredLevel" style="min-width: 130px">
+                      <option value="">Select…</option>
+                      <option value="1 - Basic">1 - Basic</option>
+                      <option value="2 - Intermediate">2 - Intermediate</option>
+                      <option value="3 - Advanced">3 - Advanced</option>
+                      <option value="4 - Expert">4 - Expert</option>
+                    </select>
+                  </template>
+                  <template v-else>
+                    <div v-if="row.requiredLevel" class="required-level-badge">{{ row.requiredLevel }}</div>
+                    <div v-else class="required-level-empty">Auto-set</div>
+                  </template>
                 </td>
                 <td>
                   <select v-model="row.leadInterventions" style="min-width:200px">
@@ -1600,13 +1611,13 @@ const allCompetencies = computed(() => ({
  
 // Which clusters are applicable for the currently selected position
 // A cluster is included if ANY competency in it has a non-null required level for that position.
-// If no position selected yet, all 4 clusters are shown.
+// If no position selected yet, or position is Director, all 4 clusters are shown.
 const availableClusters = computed(() => {
   const allClusters = ["Core", "Leadership", "Organizational", "Technical"];
   const pos = form.currentPosition;
-  if (!pos) return allClusters;
+  if (!pos || pos === "Director") return allClusters;
   const posData = competencyModel[pos];
-  if (!posData) return allClusters;
+  if (!posData || Object.keys(posData).length === 0) return allClusters;
   return allClusters.filter(cluster => {
     const list = allCompetencies.value[cluster] || [];
     return list.some(c => posData[c] !== undefined && posData[c] !== null);
@@ -1636,9 +1647,12 @@ const LEVEL_LABEL = { 1: "1 - Basic", 2: "2 - Intermediate", 3: "3 - Advanced", 
  
 // Per-position, per-competency required level table
 // Keys match exact dropdown option values
+// Source: Official CSU Competency Model Document
+// Levels: 1=Basic, 2=Intermediate, 3=Advanced, 4=Expert
+// Competency absent from a position = key not present (excluded from dropdown)
 const competencyModel = {
-  // ── ADMIN AIDE III – Clerk ──────────────────────────────────────────
-  "Admin Aide III – Clerk": {
+  // ── ADMIN AIDE I – Utility ──────────────────────────────────────────
+  "Admin Aide I – Utility": {
     "Integrity": 1, "Accountability": 1, "Scientific and Technological Excellence": 1,
     "Delivering Service Excellence": 1, "Environmental Consciousness": 2, "Building Partnership": 1,
     "Teamwork": 1, "Commitment to Learning": 1, "Customer Focus": 1,
@@ -1649,8 +1663,48 @@ const competencyModel = {
     "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 2,
     "Interpersonal Effectiveness": 1, "Oral Communication": 1, "Logical Reasoning": 1,
   },
-  // ── SECURITY GUARD I ────────────────────────────────────────────────
-  "Security Guard I": {
+  // ── ADMIN AIDE I – Clerk ────────────────────────────────────────────
+  "Admin Aide I – Clerk": {
+    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 1,
+    "Delivering Service Excellence": 2, "Environmental Consciousness": 2, "Building Partnership": 2,
+    "Teamwork": 1, "Commitment to Learning": 1, "Customer Focus": 2,
+    "Adaptability and Flexibility": 1, "Effective Communication": 1, "Valuing Diversity": 1,
+    "Self-Awareness and Confidence": 1, "Stress Tolerance": 1, "Resource Management": 1,
+    "Knowledge Management": 1, "Initiative": 1, "Result Orientation": 1,
+    "Organizational Commitment": 1, "Planning and Organizing": 1,
+    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 1,
+    "Interpersonal Effectiveness": 1,
+    "Attention to Details": 1, "Written Communication": 1,
+    "Oral Communication": 1, "Computer Literacy": 1, "Logical Reasoning": 1,
+  },
+  // ── ADMIN AIDE II – Utility ─────────────────────────────────────────
+  "Admin Aide II – Utility": {
+    "Integrity": 1, "Accountability": 1, "Scientific and Technological Excellence": 1,
+    "Delivering Service Excellence": 1, "Environmental Consciousness": 2, "Building Partnership": 1,
+    "Teamwork": 1, "Commitment to Learning": 1, "Customer Focus": 1,
+    "Adaptability and Flexibility": 1, "Effective Communication": 1, "Valuing Diversity": 1,
+    "Self-Awareness and Confidence": 1, "Stress Tolerance": 1, "Resource Management": 1,
+    "Knowledge Management": 1, "Initiative": 1, "Result Orientation": 1,
+    "Organizational Commitment": 1, "Planning and Organizing": 1,
+    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 2,
+    "Interpersonal Effectiveness": 1, "Oral Communication": 1, "Logical Reasoning": 1,
+  },
+  // ── ADMIN AIDE II – Clerk ───────────────────────────────────────────
+  "Admin Aide II – Clerk": {
+    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 1,
+    "Delivering Service Excellence": 2, "Environmental Consciousness": 2, "Building Partnership": 2,
+    "Teamwork": 1, "Commitment to Learning": 1, "Customer Focus": 2,
+    "Adaptability and Flexibility": 1, "Effective Communication": 1, "Valuing Diversity": 1,
+    "Self-Awareness and Confidence": 1, "Stress Tolerance": 1, "Resource Management": 1,
+    "Knowledge Management": 1, "Initiative": 1, "Result Orientation": 1,
+    "Organizational Commitment": 1, "Planning and Organizing": 1,
+    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 1,
+    "Interpersonal Effectiveness": 1,
+    "Attention to Details": 1, "Written Communication": 1,
+    "Oral Communication": 1, "Computer Literacy": 1, "Logical Reasoning": 1,
+  },
+  // ── ADMIN AIDE III – Clerk ──────────────────────────────────────────
+  "Admin Aide III – Clerk": {
     "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 1,
     "Delivering Service Excellence": 2, "Environmental Consciousness": 2, "Building Partnership": 2,
     "Teamwork": 1, "Commitment to Learning": 1, "Customer Focus": 2,
@@ -1661,9 +1715,60 @@ const competencyModel = {
     "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 1,
     "Interpersonal Effectiveness": 1, "Oral Communication": 1, "Logical Reasoning": 1,
   },
+  // ── ADMIN AIDE IV – Mechanic ────────────────────────────────────────
+  "Admin Aide IV – Mechanic": {
+    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 1,
+    "Delivering Service Excellence": 2, "Environmental Consciousness": 2, "Building Partnership": 1,
+    "Teamwork": 1, "Commitment to Learning": 1, "Customer Focus": 1,
+    "Adaptability and Flexibility": 1, "Effective Communication": 1, "Valuing Diversity": 1,
+    "Self-Awareness and Confidence": 1, "Stress Tolerance": 1, "Resource Management": 1,
+    "Knowledge Management": 1, "Initiative": 1, "Result Orientation": 1,
+    "Organizational Commitment": 1, "Planning and Organizing": 1,
+    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 2,
+    "Interpersonal Effectiveness": 1, "Oral Communication": 1, "Logical Reasoning": 1,
+  },
+  // ── ADMIN AIDE IV – Clerk ───────────────────────────────────────────
+  "Admin Aide IV – Clerk": {
+    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 1,
+    "Delivering Service Excellence": 2, "Environmental Consciousness": 2, "Building Partnership": 2,
+    "Teamwork": 1, "Commitment to Learning": 1, "Customer Focus": 2,
+    "Adaptability and Flexibility": 1, "Effective Communication": 1, "Valuing Diversity": 1,
+    "Self-Awareness and Confidence": 1, "Stress Tolerance": 1, "Resource Management": 1,
+    "Knowledge Management": 1, "Initiative": 1, "Result Orientation": 1,
+    "Organizational Commitment": 1, "Planning and Organizing": 1,
+    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 1,
+    "Interpersonal Effectiveness": 1,
+    "Attention to Details": 1, "Written Communication": 1,
+    "Oral Communication": 1, "Computer Literacy": 1, "Logical Reasoning": 1,
+  },
+  // ── ADMIN AIDE IV – Driver ──────────────────────────────────────────
+  "Admin Aide IV – Driver": {
+    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 1,
+    "Delivering Service Excellence": 2, "Environmental Consciousness": 2, "Building Partnership": 1,
+    "Teamwork": 1, "Commitment to Learning": 1, "Customer Focus": 2,
+    "Adaptability and Flexibility": 1, "Effective Communication": 1, "Valuing Diversity": 1,
+    "Self-Awareness and Confidence": 1, "Stress Tolerance": 3, "Resource Management": 1,
+    "Knowledge Management": 1, "Initiative": 2, "Result Orientation": 1,
+    "Organizational Commitment": 1, "Planning and Organizing": 1,
+    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 3,
+    "Interpersonal Effectiveness": 1, "Oral Communication": 1, "Logical Reasoning": 1,
+  },
+  // ── SECURITY GUARD I ────────────────────────────────────────────────
+  "Security Guard I": {
+    "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 1,
+    "Delivering Service Excellence": 3, "Environmental Consciousness": 2, "Building Partnership": 1,
+    "Teamwork": 2, "Commitment to Learning": 1, "Customer Focus": 2,
+    "Adaptability and Flexibility": 2, "Effective Communication": 1, "Valuing Diversity": 1,
+    "Self-Awareness and Confidence": 1, "Stress Tolerance": 3, "Resource Management": 1,
+    "Knowledge Management": 1, "Initiative": 2, "Result Orientation": 1,
+    "Organizational Commitment": 1, "Planning and Organizing": 1,
+    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 3,
+    "Interpersonal Effectiveness": 1,
+    "Oral Communication": 1, "Computer Literacy": 1, "Logical Reasoning": 1,
+  },
   // ── FARM WORKER I ───────────────────────────────────────────────────
   "Farm Worker I": {
-    "Integrity": 1, "Accountability": 1, "Scientific and Technological Excellence": 1,
+    "Integrity": 1, "Accountability": 2, "Scientific and Technological Excellence": 1,
     "Delivering Service Excellence": 1, "Environmental Consciousness": 2, "Building Partnership": 1,
     "Teamwork": 1, "Commitment to Learning": 1, "Customer Focus": 1,
     "Adaptability and Flexibility": 1, "Effective Communication": 1, "Valuing Diversity": 1,
@@ -1677,53 +1782,53 @@ const competencyModel = {
   "Admin Assistant I": {
     "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 1,
     "Delivering Service Excellence": 2, "Environmental Consciousness": 2, "Building Partnership": 2,
-    "Teamwork": 1, "Commitment to Learning": 1, "Customer Focus": 2,
-    "Adaptability and Flexibility": 1, "Effective Communication": 1, "Valuing Diversity": 1,
+    "Teamwork": 2, "Commitment to Learning": 1, "Customer Focus": 2,
+    "Adaptability and Flexibility": 2, "Effective Communication": 1, "Valuing Diversity": 1,
     "Self-Awareness and Confidence": 1, "Stress Tolerance": 1, "Resource Management": 1,
     "Knowledge Management": 1, "Initiative": 1, "Result Orientation": 1,
-    "Organizational Commitment": 1, "Planning and Organizing": 1,
+    "Organizational Commitment": 1, "Planning and Organizing": 2,
     "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 1,
     "Interpersonal Effectiveness": 1,
-    "Attention to Details": null, "Written Communication": null,
-    "Oral Communication": 1, "Computer Literacy": null, "Logical Reasoning": 1,
+    "Attention to Details": 1, "Written Communication": 1,
+    "Oral Communication": 1, "Computer Literacy": 1, "Logical Reasoning": 1,
   },
   // ── ADMIN ASSISTANT II ──────────────────────────────────────────────
   "Admin Assistant II": {
     "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 1,
     "Delivering Service Excellence": 2, "Environmental Consciousness": 2, "Building Partnership": 2,
-    "Teamwork": 1, "Commitment to Learning": 1, "Customer Focus": 2,
-    "Adaptability and Flexibility": 1, "Effective Communication": 1, "Valuing Diversity": 1,
+    "Teamwork": 2, "Commitment to Learning": 1, "Customer Focus": 2,
+    "Adaptability and Flexibility": 2, "Effective Communication": 1, "Valuing Diversity": 1,
     "Self-Awareness and Confidence": 1, "Stress Tolerance": 1, "Resource Management": 1,
     "Knowledge Management": 1, "Initiative": 1, "Result Orientation": 1,
-    "Organizational Commitment": 1, "Planning and Organizing": 1,
+    "Organizational Commitment": 1, "Planning and Organizing": 2,
     "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 1,
     "Interpersonal Effectiveness": 1,
-    "Attention to Details": null, "Written Communication": null,
-    "Oral Communication": 1, "Computer Literacy": null, "Logical Reasoning": 1,
+    "Attention to Details": 1, "Written Communication": 1,
+    "Oral Communication": 1, "Computer Literacy": 1, "Logical Reasoning": 1,
   },
   // ── ADMIN ASSISTANT III ─────────────────────────────────────────────
   "Admin Assistant III": {
     "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 1,
-    "Delivering Service Excellence": 2, "Environmental Consciousness": 2, "Building Partnership": 1,
-    "Teamwork": 1, "Commitment to Learning": 1, "Customer Focus": 1,
-    "Adaptability and Flexibility": 1, "Effective Communication": 1, "Valuing Diversity": 1,
+    "Delivering Service Excellence": 2, "Environmental Consciousness": 2, "Building Partnership": 2,
+    "Teamwork": 2, "Commitment to Learning": 1, "Customer Focus": 2,
+    "Adaptability and Flexibility": 2, "Effective Communication": 1, "Valuing Diversity": 1,
     "Self-Awareness and Confidence": 1, "Stress Tolerance": 1, "Resource Management": 1,
     "Knowledge Management": 1, "Initiative": 1, "Result Orientation": 1,
-    "Organizational Commitment": 1, "Planning and Organizing": 1,
-    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 2,
+    "Organizational Commitment": 1, "Planning and Organizing": 2,
+    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 1,
     "Interpersonal Effectiveness": 1,
-    "Attention to Details": null, "Written Communication": null,
+    "Attention to Details": 1, "Written Communication": 1,
     "Oral Communication": 1, "Computer Literacy": 1, "Logical Reasoning": 1,
   },
   // ── ADMIN ASSISTANT IV ──────────────────────────────────────────────
   "Admin Assistant IV": {
     "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 1,
     "Delivering Service Excellence": 2, "Environmental Consciousness": 2, "Building Partnership": 2,
-    "Teamwork": 1, "Commitment to Learning": 1, "Customer Focus": 2,
-    "Adaptability and Flexibility": 1, "Effective Communication": 1, "Valuing Diversity": 1,
+    "Teamwork": 2, "Commitment to Learning": 1, "Customer Focus": 2,
+    "Adaptability and Flexibility": 2, "Effective Communication": 1, "Valuing Diversity": 1,
     "Self-Awareness and Confidence": 1, "Stress Tolerance": 1, "Resource Management": 1,
     "Knowledge Management": 1, "Initiative": 1, "Result Orientation": 1,
-    "Organizational Commitment": 1, "Planning and Organizing": 1,
+    "Organizational Commitment": 1, "Planning and Organizing": 2,
     "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 1,
     "Interpersonal Effectiveness": 1,
     "Attention to Details": 1, "Written Communication": 1,
@@ -1731,133 +1836,34 @@ const competencyModel = {
   },
   // ── ADMIN OFFICER I ─────────────────────────────────────────────────
   "Admin Officer I": {
-    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 1,
-    "Delivering Service Excellence": 2, "Environmental Consciousness": 2, "Building Partnership": 1,
-    "Teamwork": 1, "Commitment to Learning": 1, "Customer Focus": 2,
-    "Adaptability and Flexibility": 1, "Effective Communication": 1, "Valuing Diversity": 1,
-    "Self-Awareness and Confidence": 1, "Stress Tolerance": 3, "Resource Management": 1,
-    "Knowledge Management": 1, "Initiative": 2, "Result Orientation": 1,
-    "Organizational Commitment": 1, "Planning and Organizing": 1,
-    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 3,
-    "Interpersonal Effectiveness": 1,
-    "Attention to Details": 1, "Written Communication": 1,
-    "Oral Communication": 1, "Computer Literacy": 1, "Logical Reasoning": 1,
+    "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 3, "Environmental Consciousness": 3, "Building Partnership": 3,
+    "Teamwork": 3, "Commitment to Learning": 2, "Customer Focus": 3,
+    "Adaptability and Flexibility": 3, "Effective Communication": 2, "Valuing Diversity": 2,
+    "Self-Awareness and Confidence": 2, "Stress Tolerance": 2, "Resource Management": 2,
+    "Knowledge Management": 2, "Initiative": 2, "Result Orientation": 2,
+    "Organizational Commitment": 2, "Planning and Organizing": 2,
+    "Emotional and Psychological Maturity": 2, "Safety and Risk Management": 2,
+    "Interpersonal Effectiveness": 2,
+    "Attention to Details": 2, "Written Communication": 2,
+    "Oral Communication": 2, "Computer Literacy": 2, "Logical Reasoning": 2,
   },
   // ── ADMIN OFFICER II ────────────────────────────────────────────────
   "Admin Officer II": {
-    "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 1,
-    "Delivering Service Excellence": 3, "Environmental Consciousness": 2, "Building Partnership": 1,
-    "Teamwork": 2, "Commitment to Learning": 1, "Customer Focus": 2,
-    "Adaptability and Flexibility": 2, "Effective Communication": 1, "Valuing Diversity": 1,
-    "Self-Awareness and Confidence": 1, "Stress Tolerance": 3, "Resource Management": 1,
-    "Knowledge Management": 1, "Initiative": 2, "Result Orientation": 1,
-    "Organizational Commitment": 1, "Planning and Organizing": 1,
-    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 3,
-    "Interpersonal Effectiveness": 1,
-    "Attention to Details": 1, "Written Communication": 1,
-    "Oral Communication": 1, "Computer Literacy": 1, "Logical Reasoning": 1,
+    "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 3, "Environmental Consciousness": 3, "Building Partnership": 3,
+    "Teamwork": 3, "Commitment to Learning": 2, "Customer Focus": 3,
+    "Adaptability and Flexibility": 3, "Effective Communication": 2, "Valuing Diversity": 2,
+    "Self-Awareness and Confidence": 2, "Stress Tolerance": 2, "Resource Management": 2,
+    "Knowledge Management": 2, "Initiative": 2, "Result Orientation": 2,
+    "Organizational Commitment": 2, "Planning and Organizing": 2,
+    "Emotional and Psychological Maturity": 2, "Safety and Risk Management": 2,
+    "Interpersonal Effectiveness": 2,
+    "Attention to Details": 2, "Written Communication": 2,
+    "Oral Communication": 2, "Computer Literacy": 2, "Logical Reasoning": 2,
   },
   // ── ADMIN OFFICER III ───────────────────────────────────────────────
   "Admin Officer III": {
-    "Integrity": 1, "Accountability": 2, "Scientific and Technological Excellence": 1,
-    "Delivering Service Excellence": 1, "Environmental Consciousness": 2, "Building Partnership": 1,
-    "Teamwork": 1, "Commitment to Learning": 1, "Customer Focus": 1,
-    "Adaptability and Flexibility": 1, "Effective Communication": 1, "Valuing Diversity": 1,
-    "Self-Awareness and Confidence": 1, "Stress Tolerance": 1, "Resource Management": 1,
-    "Knowledge Management": 1, "Initiative": 1, "Result Orientation": 1,
-    "Organizational Commitment": 1, "Planning and Organizing": 1,
-    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 2,
-    "Interpersonal Effectiveness": 1,
-    "Attention to Details": 1, "Written Communication": 1,
-    "Oral Communication": 1, "Computer Literacy": 1, "Logical Reasoning": 1,
-  },
-  // ── ADMIN OFFICER IV ────────────────────────────────────────────────
-  "Admin Officer IV": {
-    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 1,
-    "Delivering Service Excellence": 2, "Environmental Consciousness": 2, "Building Partnership": 2,
-    "Teamwork": 2, "Commitment to Learning": 1, "Customer Focus": 2,
-    "Adaptability and Flexibility": 2, "Effective Communication": 1, "Valuing Diversity": 1,
-    "Self-Awareness and Confidence": 1, "Stress Tolerance": 1, "Resource Management": 1,
-    "Knowledge Management": 1, "Initiative": 1, "Result Orientation": 1,
-    "Organizational Commitment": 1, "Planning and Organizing": 2,
-    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 1,
-    "Interpersonal Effectiveness": 1,
-    "Attention to Details": 1, "Written Communication": 1,
-    "Oral Communication": 1, "Computer Literacy": 1, "Logical Reasoning": 1,
-  },
-  // ── ADMIN OFFICER V ─────────────────────────────────────────────────
-  "Admin Officer V": {
-    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 1,
-    "Delivering Service Excellence": 2, "Environmental Consciousness": 2, "Building Partnership": 2,
-    "Developing People": 4, "Facilitating Change": 4, "Conflict Management": 4,
-    "Leading Innovation": 3, "Strategic Planning": 3, "Leading Others": 4, "Decisiveness": 4,
-    "Critical Thinking": 4,
-    "Teamwork": 2, "Commitment to Learning": 1, "Customer Focus": 2,
-    "Adaptability and Flexibility": 2, "Effective Communication": 1, "Valuing Diversity": 1,
-    "Self-Awareness and Confidence": 1, "Stress Tolerance": 1, "Resource Management": 1,
-    "Knowledge Management": 1, "Initiative": 1, "Result Orientation": 1,
-    "Organizational Commitment": 1, "Planning and Organizing": 2,
-    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 1,
-    "Interpersonal Effectiveness": 1,
-    "Attention to Details": 1, "Written Communication": 1,
-    "Oral Communication": 1, "Computer Literacy": 1, "Logical Reasoning": 1,
-  },
-  // ── ADMIN AIDE I – Utility ──────────────────────────────────────────
-  "Admin Aide I – Utility": {
-    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 1,
-    "Delivering Service Excellence": 2, "Environmental Consciousness": 2, "Building Partnership": 2,
-    "Teamwork": 2, "Commitment to Learning": 1, "Customer Focus": 2,
-    "Adaptability and Flexibility": 2, "Effective Communication": 1, "Valuing Diversity": 1,
-    "Self-Awareness and Confidence": 1, "Stress Tolerance": 1, "Resource Management": 1,
-    "Knowledge Management": 1, "Initiative": 1, "Result Orientation": 1,
-    "Organizational Commitment": 1, "Planning and Organizing": 2,
-    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 1,
-    "Interpersonal Effectiveness": 1,
-    "Oral Communication": 1, "Computer Literacy": 1, "Logical Reasoning": 1,
-  },
-  // ── ADMIN AIDE I – Clerk ────────────────────────────────────────────
-  "Admin Aide I – Clerk": {
-    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 1,
-    "Delivering Service Excellence": 2, "Environmental Consciousness": 2, "Building Partnership": 2,
-    "Teamwork": 2, "Commitment to Learning": 1, "Customer Focus": 2,
-    "Adaptability and Flexibility": 2, "Effective Communication": 1, "Valuing Diversity": 1,
-    "Self-Awareness and Confidence": 1, "Stress Tolerance": 1, "Resource Management": 1,
-    "Knowledge Management": 1, "Initiative": 1, "Result Orientation": 1,
-    "Organizational Commitment": 1, "Planning and Organizing": 2,
-    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 1,
-    "Interpersonal Effectiveness": 1,
-    "Oral Communication": 1, "Computer Literacy": 1, "Logical Reasoning": 1,
-  },
-  // ── ADMIN AIDE II – Utility ─────────────────────────────────────────
-  "Admin Aide II – Utility": {
-    "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 3, "Environmental Consciousness": 3, "Building Partnership": 3,
-    "Teamwork": 3, "Commitment to Learning": 2, "Customer Focus": 3,
-    "Adaptability and Flexibility": 3, "Effective Communication": 2, "Valuing Diversity": 2,
-    "Self-Awareness and Confidence": 2, "Stress Tolerance": 2, "Resource Management": 2,
-    "Knowledge Management": 2, "Initiative": 2, "Result Orientation": 2,
-    "Organizational Commitment": 2, "Planning and Organizing": 2,
-    "Emotional and Psychological Maturity": 2, "Safety and Risk Management": 2,
-    "Interpersonal Effectiveness": 2,
-    "Attention to Details": 2, "Written Communication": 2,
-    "Oral Communication": 2, "Computer Literacy": 2, "Logical Reasoning": 2,
-  },
-  // ── ADMIN AIDE II – Clerk ───────────────────────────────────────────
-  "Admin Aide II – Clerk": {
-    "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 3, "Environmental Consciousness": 3, "Building Partnership": 3,
-    "Teamwork": 3, "Commitment to Learning": 2, "Customer Focus": 3,
-    "Adaptability and Flexibility": 3, "Effective Communication": 2, "Valuing Diversity": 2,
-    "Self-Awareness and Confidence": 2, "Stress Tolerance": 2, "Resource Management": 2,
-    "Knowledge Management": 2, "Initiative": 2, "Result Orientation": 2,
-    "Organizational Commitment": 2, "Planning and Organizing": 2,
-    "Emotional and Psychological Maturity": 2, "Safety and Risk Management": 2,
-    "Interpersonal Effectiveness": 2,
-    "Attention to Details": 2, "Written Communication": 2,
-    "Oral Communication": 2, "Computer Literacy": 2, "Logical Reasoning": 2,
-  },
-  // ── ADMIN AIDE IV – Mechanic ────────────────────────────────────────
-  "Admin Aide IV – Mechanic": {
     "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 2,
     "Delivering Service Excellence": 3, "Environmental Consciousness": 3, "Building Partnership": 3,
     "Teamwork": 3, "Commitment to Learning": 3, "Customer Focus": 3,
@@ -1870,8 +1876,8 @@ const competencyModel = {
     "Attention to Details": 2, "Written Communication": 2,
     "Oral Communication": 2, "Computer Literacy": 2, "Logical Reasoning": 2,
   },
-  // ── ADMIN AIDE IV – Clerk ───────────────────────────────────────────
-  "Admin Aide IV – Clerk": {
+  // ── ADMIN OFFICER IV ────────────────────────────────────────────────
+  "Admin Officer IV": {
     "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 2,
     "Delivering Service Excellence": 3, "Environmental Consciousness": 3, "Building Partnership": 3,
     "Teamwork": 3, "Commitment to Learning": 3, "Customer Focus": 3,
@@ -1884,10 +1890,13 @@ const competencyModel = {
     "Attention to Details": 3, "Written Communication": 3,
     "Oral Communication": 3, "Computer Literacy": 2, "Logical Reasoning": 3,
   },
-  // ── ADMIN AIDE IV – Driver ──────────────────────────────────────────
-  "Admin Aide IV – Driver": {
+  // ── ADMIN OFFICER V ─────────────────────────────────────────────────
+  "Admin Officer V": {
     "Integrity": 4, "Accountability": 4, "Scientific and Technological Excellence": 2,
     "Delivering Service Excellence": 4, "Environmental Consciousness": 4, "Building Partnership": 4,
+    "Developing People": 4, "Facilitating Change": 4, "Conflict Management": 4,
+    "Leading Innovation": 3, "Strategic Planning": 3, "Leading Others": 4, "Decisiveness": 4,
+    "Critical Thinking": 4,
     "Teamwork": 4, "Commitment to Learning": 4, "Customer Focus": 4,
     "Adaptability and Flexibility": 4, "Effective Communication": 4, "Valuing Diversity": 4,
     "Self-Awareness and Confidence": 4, "Stress Tolerance": 4, "Resource Management": 4,
@@ -1898,12 +1907,9 @@ const competencyModel = {
     "Attention to Details": 4, "Written Communication": 4,
     "Oral Communication": 4, "Computer Literacy": 2, "Logical Reasoning": 4,
   },
- 
+
   // ════════════════════════════════════════════════════════════════════
-  // PROFESSIONAL / SPECIALIZED ADMIN (Pages 3-4)
-  // Columns: AcctIII, LibI, LibIII, NurseI, NurseII, RegIII,
-  //          CAO, BoardSecV, GC-III, ProgrammerII, DBAmin, SysAnalyst,
-  //          PlanningOfficer, AttorneyII, AttorneyIII, Physician, ProcurementOfficer
+  // PROFESSIONAL / SPECIALIZED ADMIN
   // ════════════════════════════════════════════════════════════════════
   "Accountant III": {
     "Integrity": 4, "Accountability": 4, "Scientific and Technological Excellence": 2,
@@ -1924,8 +1930,6 @@ const competencyModel = {
   "College Librarian I": {
     "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 2,
     "Delivering Service Excellence": 3, "Environmental Consciousness": 2, "Building Partnership": 2,
-    "Developing People": 2, "Facilitating Change": 2, "Conflict Management": 2,
-    "Leading Innovation": 1, "Strategic Planning": 1, "Leading Others": 2, "Decisiveness": 2,
     "Critical Thinking": 3,
     "Teamwork": 2, "Commitment to Learning": 2, "Customer Focus": 3,
     "Adaptability and Flexibility": 3, "Effective Communication": 3, "Valuing Diversity": 3,
@@ -1956,8 +1960,6 @@ const competencyModel = {
   "Nurse I": {
     "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 2,
     "Delivering Service Excellence": 3, "Environmental Consciousness": 2, "Building Partnership": 2,
-    "Developing People": 2, "Facilitating Change": 2, "Conflict Management": 2,
-    "Leading Innovation": 2, "Strategic Planning": 2, "Leading Others": 2, "Decisiveness": 2,
     "Critical Thinking": 2,
     "Teamwork": 1, "Commitment to Learning": 1, "Customer Focus": 3,
     "Adaptability and Flexibility": 2, "Effective Communication": 2, "Valuing Diversity": 2,
@@ -1972,8 +1974,6 @@ const competencyModel = {
   "Nurse II": {
     "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 2,
     "Delivering Service Excellence": 3, "Environmental Consciousness": 2, "Building Partnership": 2,
-    "Developing People": 2, "Facilitating Change": 2, "Conflict Management": 2,
-    "Leading Innovation": 2, "Strategic Planning": 2, "Leading Others": 2, "Decisiveness": 2,
     "Critical Thinking": 2,
     "Teamwork": 2, "Commitment to Learning": 1, "Customer Focus": 3,
     "Adaptability and Flexibility": 2, "Effective Communication": 2, "Valuing Diversity": 2,
@@ -2004,8 +2004,8 @@ const competencyModel = {
   "Board Secretary V": {
     "Integrity": 4, "Accountability": 4, "Scientific and Technological Excellence": 2,
     "Delivering Service Excellence": 4, "Environmental Consciousness": 3, "Building Partnership": 3,
-    "Developing People": 4, "Facilitating Change": 4, "Conflict Management": 4,
-    "Leading Innovation": 4, "Strategic Planning": 4, "Leading Others": 4, "Decisiveness": 4,
+    "Developing People": 2, "Facilitating Change": 2, "Conflict Management": 2,
+    "Leading Innovation": 2, "Strategic Planning": 2, "Leading Others": 2, "Decisiveness": 2,
     "Critical Thinking": 4,
     "Teamwork": 4, "Commitment to Learning": 3, "Customer Focus": 4,
     "Adaptability and Flexibility": 3, "Effective Communication": 4, "Valuing Diversity": 4,
@@ -2036,10 +2036,8 @@ const competencyModel = {
   "Programmer II": {
     "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 2,
     "Delivering Service Excellence": 3, "Environmental Consciousness": 2, "Building Partnership": 2,
-    "Facilitating Change": 2, "Conflict Management": 2, "Leading Innovation": 2,
-    "Strategic Planning": 2, "Decisiveness": 2,
     "Critical Thinking": 2,
-    "Teamwork": 2, "Commitment to Learning": 2, "Customer Focus": 2,
+    "Teamwork": 2, "Commitment to Learning": 1, "Customer Focus": 2,
     "Adaptability and Flexibility": 3, "Effective Communication": 2, "Valuing Diversity": 2,
     "Self-Awareness and Confidence": 2, "Stress Tolerance": 3, "Resource Management": 2,
     "Knowledge Management": 2, "Initiative": 2, "Result Orientation": 2,
@@ -2052,10 +2050,8 @@ const competencyModel = {
   "Database Administrator": {
     "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 2,
     "Delivering Service Excellence": 3, "Environmental Consciousness": 2, "Building Partnership": 2,
-    "Facilitating Change": 2, "Conflict Management": 2, "Leading Innovation": 2,
-    "Strategic Planning": 2, "Decisiveness": 2,
     "Critical Thinking": 2,
-    "Teamwork": 2, "Commitment to Learning": 2, "Customer Focus": 3,
+    "Teamwork": 2, "Commitment to Learning": 2, "Customer Focus": 2,
     "Adaptability and Flexibility": 3, "Effective Communication": 2, "Valuing Diversity": 2,
     "Self-Awareness and Confidence": 2, "Stress Tolerance": 3, "Resource Management": 2,
     "Knowledge Management": 2, "Initiative": 2, "Result Orientation": 2,
@@ -2068,8 +2064,6 @@ const competencyModel = {
   "System Analyst": {
     "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 2,
     "Delivering Service Excellence": 3, "Environmental Consciousness": 2, "Building Partnership": 2,
-    "Facilitating Change": 2, "Conflict Management": 2, "Leading Innovation": 2,
-    "Strategic Planning": 2, "Decisiveness": 2,
     "Critical Thinking": 2,
     "Teamwork": 2, "Commitment to Learning": 2, "Customer Focus": 3,
     "Adaptability and Flexibility": 3, "Effective Communication": 2, "Valuing Diversity": 2,
@@ -2084,8 +2078,8 @@ const competencyModel = {
   "Planning Officer": {
     "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 2,
     "Delivering Service Excellence": 4, "Environmental Consciousness": 3, "Building Partnership": 3,
-    "Facilitating Change": 4, "Conflict Management": 4, "Leading Innovation": 3,
-    "Strategic Planning": 4, "Decisiveness": 4,
+    "Developing People": 2, "Facilitating Change": 2, "Conflict Management": 2,
+    "Leading Innovation": 3, "Strategic Planning": 3, "Leading Others": 2, "Decisiveness": 2,
     "Critical Thinking": 4,
     "Teamwork": 4, "Commitment to Learning": 4, "Customer Focus": 4,
     "Adaptability and Flexibility": 4, "Effective Communication": 4, "Valuing Diversity": 4,
@@ -2097,11 +2091,26 @@ const competencyModel = {
     "Attention to Details": 4, "Written Communication": 4,
     "Oral Communication": 4, "Computer Literacy": 2, "Logical Reasoning": 4,
   },
+  "Registrar III": {
+    "Integrity": 4, "Accountability": 4, "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 4, "Environmental Consciousness": 2, "Building Partnership": 3,
+    "Developing People": 2, "Facilitating Change": 2, "Conflict Management": 2,
+    "Leading Innovation": 2, "Strategic Planning": 2, "Leading Others": 2, "Decisiveness": 2,
+    "Critical Thinking": 3,
+    "Teamwork": 4, "Commitment to Learning": 3, "Customer Focus": 4,
+    "Adaptability and Flexibility": 3, "Effective Communication": 4, "Valuing Diversity": 4,
+    "Self-Awareness and Confidence": 4, "Stress Tolerance": 4, "Resource Management": 4,
+    "Knowledge Management": 4, "Initiative": 4, "Result Orientation": 4,
+    "Organizational Commitment": 4, "Planning and Organizing": 4,
+    "Emotional and Psychological Maturity": 4, "Safety and Risk Management": 4,
+    "Interpersonal Effectiveness": 4,
+    "Attention to Details": 4, "Written Communication": 4,
+    "Oral Communication": 4, "Computer Literacy": 2, "Logical Reasoning": 4,
+  },
   "Attorney II": {
     "Integrity": 4, "Accountability": 4, "Scientific and Technological Excellence": 2,
     "Delivering Service Excellence": 3, "Environmental Consciousness": 2, "Building Partnership": 3,
-    "Facilitating Change": 4, "Conflict Management": 4, "Leading Innovation": 4,
-    "Strategic Planning": 4, "Decisiveness": 4,
+    "Facilitating Change": 4, "Conflict Management": 4, "Strategic Planning": 4, "Decisiveness": 4,
     "Critical Thinking": 4,
     "Teamwork": 2, "Commitment to Learning": 2, "Customer Focus": 3,
     "Adaptability and Flexibility": 3, "Effective Communication": 4, "Valuing Diversity": 4,
@@ -2116,8 +2125,7 @@ const competencyModel = {
   "Attorney III": {
     "Integrity": 4, "Accountability": 4, "Scientific and Technological Excellence": 2,
     "Delivering Service Excellence": 3, "Environmental Consciousness": 2, "Building Partnership": 3,
-    "Facilitating Change": 4, "Conflict Management": 4, "Leading Innovation": 4,
-    "Strategic Planning": 4, "Decisiveness": 4,
+    "Facilitating Change": 4, "Conflict Management": 4, "Strategic Planning": 4, "Decisiveness": 4,
     "Critical Thinking": 4,
     "Teamwork": 3, "Commitment to Learning": 3, "Customer Focus": 3,
     "Adaptability and Flexibility": 3, "Effective Communication": 4, "Valuing Diversity": 4,
@@ -2132,8 +2140,8 @@ const competencyModel = {
   "Physician": {
     "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 2,
     "Delivering Service Excellence": 4, "Environmental Consciousness": 2, "Building Partnership": 2,
-    "Facilitating Change": 4, "Conflict Management": 4, "Leading Innovation": 4,
-    "Strategic Planning": 4, "Decisiveness": 4,
+    "Developing People": 4, "Facilitating Change": 4, "Conflict Management": 4,
+    "Leading Innovation": 4, "Strategic Planning": 4, "Decisiveness": 4,
     "Critical Thinking": 4,
     "Teamwork": 2, "Commitment to Learning": 3, "Customer Focus": 4,
     "Adaptability and Flexibility": 2, "Effective Communication": 4, "Valuing Diversity": 4,
@@ -2148,8 +2156,6 @@ const competencyModel = {
   "Procurement Officer": {
     "Integrity": 4, "Accountability": 4, "Scientific and Technological Excellence": 2,
     "Delivering Service Excellence": 4, "Environmental Consciousness": 2, "Building Partnership": 2,
-    "Facilitating Change": 4, "Conflict Management": 4, "Leading Innovation": 4,
-    "Strategic Planning": 4, "Decisiveness": 4,
     "Teamwork": 4, "Commitment to Learning": 3, "Customer Focus": 4,
     "Adaptability and Flexibility": 4, "Effective Communication": 2, "Valuing Diversity": 2,
     "Self-Awareness and Confidence": 2, "Stress Tolerance": 3, "Resource Management": 2,
@@ -2161,22 +2167,9 @@ const competencyModel = {
     "Oral Communication": 2, "Computer Literacy": 2, "Logical Reasoning": 2,
   },
   // ── DIRECTOR ────────────────────────────────────────────────────────
-  "Director": {
-    "Integrity": 4, "Accountability": 4, "Scientific and Technological Excellence": 3,
-    "Delivering Service Excellence": 4, "Environmental Consciousness": 3, "Building Partnership": 4,
-    "Developing People": 4, "Facilitating Change": 4, "Conflict Management": 4,
-    "Leading Innovation": 4, "Strategic Planning": 4, "Leading Others": 4, "Decisiveness": 4,
-    "Critical Thinking": 4,
-    "Teamwork": 4, "Commitment to Learning": 4, "Customer Focus": 4,
-    "Adaptability and Flexibility": 4, "Effective Communication": 4, "Valuing Diversity": 4,
-    "Self-Awareness and Confidence": 4, "Stress Tolerance": 4, "Resource Management": 4,
-    "Knowledge Management": 4, "Initiative": 4, "Result Orientation": 4,
-    "Organizational Commitment": 4, "Planning and Organizing": 4,
-    "Emotional and Psychological Maturity": 4, "Safety and Risk Management": 4,
-    "Interpersonal Effectiveness": 4,
-    "Attention to Details": 4, "Written Communication": 4,
-    "Oral Communication": 4, "Computer Literacy": 3, "Logical Reasoning": 4,
-  },
+  // No preset required levels — Director can input their own required level.
+  // All 4 clusters are available (empty model = availableClusters shows all).
+  "Director": {},
  
   // ════════════════════════════════════════════════════════════════════
   // FACULTY (Pages 5-8)
@@ -2375,7 +2368,7 @@ const competencyModel = {
     "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 3,
     "Delivering Service Excellence": 3, "Environmental Consciousness": 3,
     "Faculty Specializing in Environment": 4, "Building Partnership": 3,
-    "Developing People": 3, "Facilitating Change": 3, "Conflict Management": 3,
+    "Facilitating Change": 3, "Conflict Management": 3,
     "Leading Innovation": 3, "Strategic Planning": 3, "Leading Others": 3, "Decisiveness": 3,
     "Teamwork": 3, "Commitment to Learning": 3, "Customer Focus": 3,
     "Adaptability and Flexibility": 4, "Critical Thinking": 3, "Effective Communication": 4,
@@ -2394,7 +2387,7 @@ const competencyModel = {
     "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 3,
     "Delivering Service Excellence": 3, "Environmental Consciousness": 3,
     "Faculty Specializing in Environment": 4, "Building Partnership": 3,
-    "Developing People": 3, "Facilitating Change": 3, "Conflict Management": 3,
+    "Facilitating Change": 3, "Conflict Management": 3,
     "Leading Innovation": 3, "Strategic Planning": 3, "Leading Others": 3, "Decisiveness": 3,
     "Teamwork": 3, "Commitment to Learning": 3, "Customer Focus": 3,
     "Adaptability and Flexibility": 4, "Critical Thinking": 3, "Effective Communication": 4,
@@ -2409,29 +2402,12 @@ const competencyModel = {
     "Computer Literacy": 2, "IT Faculty": 4,
     "Planning and Project Management": 3, "Logical Reasoning": 3, "Math and Allied Fields Faculty Members": 4,
   },
-  "Associate Professor VI": {
-    "Integrity": 4, "Accountability": 4, "Scientific and Technological Excellence": 4,
-    "Delivering Service Excellence": 4, "Environmental Consciousness": 4,
-    "Faculty Specializing in Environment": 4, "Building Partnership": 4,
-    "Developing People": 4, "Facilitating Change": 4, "Conflict Management": 4,
-    "Leading Innovation": 4, "Strategic Planning": 4, "Leading Others": 4, "Decisiveness": 4,
-    "Teamwork": 4, "Commitment to Learning": 4, "Customer Focus": 4,
-    "Adaptability and Flexibility": 4, "Critical Thinking": 4, "Effective Communication": 4,
-    "Valuing Diversity": 4, "Self-Awareness and Confidence": 4, "Stress Tolerance": 4,
-    "Resource Management": 4, "Knowledge Management": 4, "Initiative": 4,
-    "Result Orientation": 4, "Community Engagement": 4, "Organizational Commitment": 4,
-    "Planning and Organizing": 4, "Emotional and Psychological Maturity": 4,
-    "Safety and Risk Management": 4, "Interpersonal Effectiveness": 4,
-    "Research Engagement": 4, "Diagnostic Information Gathering": 4, "Attention to Details": 4,
-    "Written Communication": 4, "Oral Communication": 4,
-    "Language Faculty": 4, "Conceptual and Analytical Thinking": 4,
-    "Computer Literacy": 2, "IT Faculty": 4,
-    "Planning and Project Management": 4, "Logical Reasoning": 3, "Math and Allied Fields Faculty Members": 4,
-  },
+  // Associate Professor VI: document lists "NONE" — no required competency levels defined
+  "Associate Professor VI": {},
 };
  
-// Professor I-VI and University Professor all share the same values as Asso Prof VI (all 4s)
-// except Computer Literacy=2 and Logical Reasoning=3 (and Math&Allied=4)
+// Professor I-VI and University Professor all share the same base values
+// except: Professors I-III have Developing People=3, Professors IV-VI and UP have Developing People=4
 const professorTemplate = {
   "Integrity": 4, "Accountability": 4, "Scientific and Technological Excellence": 4,
   "Delivering Service Excellence": 4, "Environmental Consciousness": 4,
@@ -2451,7 +2427,11 @@ const professorTemplate = {
   "Computer Literacy": 2, "IT Faculty": 4,
   "Planning and Project Management": 4, "Logical Reasoning": 3, "Math and Allied Fields Faculty Members": 4,
 };
-["Professor I","Professor II","Professor III","Professor IV","Professor V","Professor VI","University Professor"]
+// Professors I–III: Developing People = 3 (Advanced)
+["Professor I","Professor II","Professor III"]
+  .forEach(pos => { competencyModel[pos] = { ...professorTemplate, "Developing People": 3 }; });
+// Professors IV–VI and University Professor: Developing People = 4 (Expert)
+["Professor IV","Professor V","Professor VI","University Professor"]
   .forEach(pos => { competencyModel[pos] = { ...professorTemplate }; });
  
 // Also alias Registrar III (same data as Accountant III pattern in pages 3-4, col 5):
