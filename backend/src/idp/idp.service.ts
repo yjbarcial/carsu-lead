@@ -36,7 +36,6 @@ export class IdpService {
       educAttainment: data.educAttainment ?? '',
       educAttainmentSpec: data.educAttainmentSpec ?? '',
       currentPosition: data.currentPosition ?? '',
-      yearCovered: data.yearCovered ?? '',
       yearsInPosition: data.yearsInPosition ?? 0,
       yearsInCSU: data.yearsInCSU ?? 0,
       supervisorName: data.supervisorName ?? '',
@@ -48,7 +47,7 @@ export class IdpService {
       proactRowsJson: JSON.stringify(data.proactRows ?? []),
     });
 
-    const saved = await this.repo.save(record);
+    const saved = (await this.repo.save(record)) as Idp;
 
     const employeeName = [data.firstName, data.lastName]
       .filter(Boolean)
