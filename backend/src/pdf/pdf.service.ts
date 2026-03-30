@@ -350,7 +350,7 @@ export class PdfService {
     const leadership = lna.leadershipComps ?? [];
     const org = lna.orgComps ?? [];
     const technical = lna.technicalComps ?? [];
-    const clusterSum = lna.clusterSummaryRaw ?? [];
+    const clusterSumRaw = lna.clusterSummaryRaw ?? {};
     const dataSources = lna.dataSourcesRaw ?? [];
     const insights = lna.dataSourceInsights ?? [];
     const interventions = lna.leadInterventions ?? [];
@@ -498,18 +498,82 @@ export class PdfService {
     // Level headers derived from active levels only — matches workforce filter above
     const allLvHeaders = activePosLevels.map((lv) => lv.header);
 
-    // Cluster summary rows
-    const clusterSumRows = Array.isArray(clusterSum)
-      ? clusterSum
-          .map(
-            (c: any, i: number) =>
-              `<tr><td style="${i % 2 === 0 ? tdStyle : tdAlt}font-weight:600;">${s(c.cluster)}</td>
-           <td style="${i % 2 === 0 ? tdStyle : tdAlt}">${s(c.strongest)}</td>
-           <td style="${i % 2 === 0 ? tdStyle : tdAlt}">${s(c.weakest)}</td>
-           <td style="${i % 2 === 0 ? tdStyle : tdAlt}text-align:center;">${s(c.interventionNeeded)}</td></tr>`,
-          )
-          .join('')
-      : `<tr><td colspan="4" style="${tdStyle}text-align:center;color:#888;font-style:italic;">No data.</td></tr>`;
+    // Cluster summary — supports new per-level keyed shape { [levelKey]: rows[] }
+    // and falls back gracefully to the old flat array shape for legacy records.
+    const levelFormalLabel: Record<string, string> = {
+      first: 'First Level Positions',
+      secondNonSup: 'Second Level (Non-Supervisory) Positions',
+      secondSup: 'Second Level (Supervisory) Positions',
+      third: 'Third Level Positions',
+      faculty: 'Faculty Positions',
+    };
+
+    const renderClusterSummaryRows = (rows: any[]): string =>
+      rows.length
+        ? rows
+            .map(
+              (c: any, i: number) =>
+                `<tr>
+                  <td style="${i % 2 === 0 ? tdStyle : tdAlt}font-weight:600;">${s(c.cluster)}</td>
+                  <td style="${i % 2 === 0 ? tdStyle : tdAlt}">${s(c.strongest)}</td>
+                  <td style="${i % 2 === 0 ? tdStyle : tdAlt}">${s(c.weakest)}</td>
+                  <td style="${i % 2 === 0 ? tdStyle : tdAlt}text-align:center;">${s(c.interventionNeeded)}</td>
+                </tr>`,
+            )
+            .join('')
+        : `<tr><td colspan="4" style="${tdStyle}text-align:center;color:#888;font-style:italic;">No data.</td></tr>`;
+
+    const clusterSummaryHtml = (() => {
+      // New shape: plain object keyed by level key
+      if (
+        !Array.isArray(clusterSumRaw) &&
+        typeof clusterSumRaw === 'object' &&
+        clusterSumRaw !== null
+      ) {
+        const levelKeys = Object.keys(clusterSumRaw);
+        if (levelKeys.length === 0) {
+          return `<p style="font-size:10px;color:#888;font-style:italic;">No cluster summary data.</p>`;
+        }
+        return levelKeys
+          .map((k) => {
+            const levelLabel = levelFormalLabel[k] ?? k;
+            const rows: any[] = Array.isArray(clusterSumRaw[k])
+              ? clusterSumRaw[k]
+              : [];
+            return `
+              <div style="margin-bottom:14px;">
+                <div style="background:#e8f0e8;border-left:3px solid #003300;padding:4px 10px;margin-bottom:6px;font-size:10px;font-weight:700;color:#003300;text-transform:uppercase;letter-spacing:0.04em;">
+                  ${s(levelLabel)}
+                </div>
+                <p style="font-size:10px;color:#555;font-style:italic;margin-bottom:6px;">
+                  Assess the competencies of <strong>${s(levelLabel)}</strong> employees within each cluster.
+                </p>
+                <table style="width:100%;border-collapse:collapse;">
+                  <thead><tr>
+                    <th style="${thStyle}">Cluster</th>
+                    <th style="${thStyle}">Strongest</th>
+                    <th style="${thStyle}">Weakest</th>
+                    <th style="${thStyle}text-align:center;">Intervention Needed?</th>
+                  </tr></thead>
+                  <tbody>${renderClusterSummaryRows(rows)}</tbody>
+                </table>
+              </div>`;
+          })
+          .join('');
+      }
+      // Legacy shape: flat array (old submissions)
+      const legacyRows = Array.isArray(clusterSumRaw) ? clusterSumRaw : [];
+      return `
+        <table style="width:100%;border-collapse:collapse;">
+          <thead><tr>
+            <th style="${thStyle}">Cluster</th>
+            <th style="${thStyle}">Strongest</th>
+            <th style="${thStyle}">Weakest</th>
+            <th style="${thStyle}text-align:center;">Intervention Needed?</th>
+          </tr></thead>
+          <tbody>${renderClusterSummaryRows(legacyRows)}</tbody>
+        </table>`;
+    })();
 
     // Data source insights
     const insightRowsHtml =
@@ -625,15 +689,7 @@ export class PdfService {
     ${renderCluster('Organizational Competencies', Array.isArray(org) ? org : [], activePosLevels)}
     ${renderCluster('Technical Competencies', Array.isArray(technical) ? technical : [], activePosLevels)}
     <h4 style="font-size:12px;color:#003300;margin:14px 0 6px;text-transform:uppercase;letter-spacing:0.05em;">Competency Cluster Summary</h4>
-    <table>
-      <thead><tr>
-        <th style="${thStyle}">Cluster</th>
-        <th style="${thStyle}">Strongest</th>
-        <th style="${thStyle}">Weakest</th>
-        <th style="${thStyle}text-align:center;">Intervention Needed?</th>
-      </tr></thead>
-      <tbody>${clusterSumRows}</tbody>
-    </table>
+    ${clusterSummaryHtml}
   </div>
 </div>
 

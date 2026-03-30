@@ -29,7 +29,7 @@
           </p>
           <p>
             You have the right to access, correct, or request deletion of your data.
-            For concerns, contact the <strong>Caraga State University HRMS</strong>.
+            For concerns, contact the Caraga State University HRMS at <strong>yjbarcial@carsu.edu.ph</strong>.
           </p>
           <label class="privacy-checkbox">
             <input type="checkbox" v-model="privacyAgreed" />
@@ -411,49 +411,55 @@
             <h4 style="font-family: 'Playfair Display', serif; color: var(--navy); margin-bottom: 12px; font-size: 16px;">
               Competency Cluster Summary
             </h4>
-            <div class="table-wrapper">
-              <table class="data-table cluster-summary-table">
-                <thead>
-                  <tr>
-                    <th>Competency Cluster</th>
-                    <th>Strongest Competency</th>
-                    <th>Weakest Competency</th>
-                    <th style="width: 160px">Intervention Needed?</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="c in clusterSummary" :key="c.cluster">
-                    <td class="row-label">{{ c.cluster }}</td>
-                    <td>
-                      <select v-model="c.strongest">
-                        <option value="">Select competency…</option>
-                        <option
-                          v-for="comp in clusterCompetencyMap[c.cluster]"
-                          :key="'s-' + comp"
-                          :value="comp"
-                        >{{ comp }}</option>
-                      </select>
-                    </td>
-                    <td>
-                      <select v-model="c.weakest">
-                        <option value="">Select competency…</option>
-                        <option
-                          v-for="comp in clusterCompetencyMap[c.cluster]"
-                          :key="'w-' + comp"
-                          :value="comp"
-                        >{{ comp }}</option>
-                      </select>
-                    </td>
-                    <td>
-                      <select v-model="c.interventionNeeded">
-                        <option value="">---</option>
-                        <option value="Yes">Yes</option>
-                        <option value="No">No</option>
-                      </select>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            <div v-for="lvSummary in activeClusterSummary" :key="lvSummary.levelKey" style="margin-bottom: 32px;">
+              <h5 class="cluster-summary-level-label">{{ lvSummary.levelLabel }}</h5>
+              <p class="comp-caption" style="margin-bottom: 10px;">
+                Assess the competencies of <strong>{{ lvSummary.levelLabel }}</strong> employees within each cluster by selecting the appropriate entries in the respective columns.
+              </p>
+              <div class="table-wrapper">
+                <table class="data-table cluster-summary-table">
+                  <thead>
+                    <tr>
+                      <th>Competency Cluster</th>
+                      <th>Strongest Competency</th>
+                      <th>Weakest Competency</th>
+                      <th style="width: 160px">Intervention Needed?</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="c in lvSummary.rows" :key="c.cluster">
+                      <td class="row-label">{{ c.cluster }}</td>
+                      <td>
+                        <select v-model="c.strongest">
+                          <option value="">Select competency…</option>
+                          <option
+                            v-for="comp in clusterCompetencyMap[c.cluster]"
+                            :key="'s-' + lvSummary.levelKey + comp"
+                            :value="comp"
+                          >{{ comp }}</option>
+                        </select>
+                      </td>
+                      <td>
+                        <select v-model="c.weakest">
+                          <option value="">Select competency…</option>
+                          <option
+                            v-for="comp in clusterCompetencyMap[c.cluster]"
+                            :key="'w-' + lvSummary.levelKey + comp"
+                            :value="comp"
+                          >{{ comp }}</option>
+                        </select>
+                      </td>
+                      <td>
+                        <select v-model="c.interventionNeeded">
+                          <option value="">---</option>
+                          <option value="Yes">Yes</option>
+                          <option value="No">No</option>
+                        </select>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </transition>
@@ -506,7 +512,7 @@
                   <tr>
                     <th style="width: 40px">No.</th>
                     <th style="min-width: 200px">Data Source</th>
-                    <th>Identified Gap / Issue</th>
+                    <th>Identified Competency Gap / Issue</th>
                     <th>Relevant Personnel / Function</th>
                     <th>Recommended Intervention (if any)</th>
                   </tr>
@@ -884,7 +890,10 @@ const sectionDone = computed(() => {
   const workforceDone = true;
 
   // Competency: cluster summary complete + all CL/pct cells filled for active levels
-  const clusterSummaryDone = clusterSummary.every(c => c.strongest && c.weakest && c.interventionNeeded);
+  const clusterSummaryDone = activeClusterSummary.value.length > 0 &&
+    activeClusterSummary.value.every(({ rows }) =>
+      rows.every(c => c.strongest && c.weakest && c.interventionNeeded)
+    );
   const activeLvKeys = (() => {
     const baseKeys = (form.officeAffiliation === "OVPAA" ? compLevelKeys : compLevelKeys.filter(k => k !== "faculty"));
     return baseKeys.filter(k => { const row = workforce?.[k]; if (!row) return false; return employmentTypeKeys.some(t => Number(row[t]) > 0); });
@@ -988,12 +997,26 @@ const competencyData = reactive(
   ),
 );
 
-const clusterSummary = reactive([
+// Per-level cluster summary: { [levelKey]: [{ cluster, strongest, weakest, interventionNeeded }] }
+const makeClusterSummaryRows = () => [
   { cluster: "Core",           strongest: "", weakest: "", interventionNeeded: "" },
   { cluster: "Leadership",     strongest: "", weakest: "", interventionNeeded: "" },
   { cluster: "Organizational", strongest: "", weakest: "", interventionNeeded: "" },
   { cluster: "Technical",      strongest: "", weakest: "", interventionNeeded: "" },
-]);
+];
+
+const clusterSummaryByLevel = reactive(
+  Object.fromEntries(compLevelKeys.map(k => [k, makeClusterSummaryRows()]))
+);
+
+// Computed: cluster summary rows for only the active levels
+const activeClusterSummary = computed(() =>
+  activeCompLevelKeys.value.map(k => ({
+    levelKey:   k,
+    levelLabel: levelFormalLabel[k],
+    rows:       clusterSummaryByLevel[k],
+  }))
+);
 
 // ── Level-aware competency labels ──
 // Maps level key to its full formal label
@@ -1181,7 +1204,9 @@ async function submitForm() {
     leadershipComps:    competencyData.leadership,
     orgComps:           competencyData.org,
     technicalComps:     competencyData.technical,
-    clusterSummaryRaw:  clusterSummary,                // matches entity column `clusterSummaryRaw`
+    clusterSummaryRaw:  Object.fromEntries(
+      activeCompLevelKeys.value.map(k => [k, clusterSummaryByLevel[k]])
+    ),                                               // matches entity column `clusterSummaryRaw`
     dataSourcesRaw:     selectedSources,               // matches entity column `dataSourcesRaw`
     dataSourceInsights: insightRows.map(r => ({ ...r, personnel: Array.isArray(r.personnel) ? r.personnel.join(", ") : r.personnel })),
     // raterFullName removed — raterName is not a field in this form; headOfUnit is used in certification
@@ -1764,6 +1789,21 @@ textarea { resize: vertical; min-height: 72px; }
   color: var(--text-light, #5a6070);
   font-style: italic;
   line-height: 1.5;
+}
+
+/* ── Cluster summary per-level heading ── */
+.cluster-summary-level-label {
+  font-family: "Source Sans 3", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 6px;
+  padding: 6px 10px;
+  background: rgba(26, 77, 46, 0.07);
+  border-left: 3px solid var(--navy);
+  border-radius: 0 4px 4px 0;
 }
 
 /* ── Personnel / Function checkboxes ── */
