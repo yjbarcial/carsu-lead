@@ -257,9 +257,9 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
             Filters
             <span v-if="idpSubTab==='list' && (idpOfficeFilter||idpPositionFilter)" class="adv-badge">{{ [idpOfficeFilter,idpPositionFilter].filter(Boolean).length }}</span>
-            <span v-if="idpSubTab==='competency' && (idpCompClusterFilter||idpCompCurrentLvlFilter||idpCompRequiredLvlFilter||idpCompInterventionFilter)" class="adv-badge">{{ [idpCompClusterFilter,idpCompCurrentLvlFilter,idpCompRequiredLvlFilter,idpCompInterventionFilter].filter(Boolean).length }}</span>
-            <span v-if="idpSubTab==='agap' && (idpAgapModeFilter||idpAgapScholarshipFilter)" class="adv-badge">{{ [idpAgapModeFilter,idpAgapScholarshipFilter].filter(Boolean).length }}</span>
-            <span v-if="idpSubTab==='proact' && (idpProactModeFilter||idpProactProviderFilter)" class="adv-badge">{{ [idpProactModeFilter,idpProactProviderFilter].filter(Boolean).length }}</span>
+            <span v-if="idpSubTab==='competency' && (idpCompClusterFilter||idpCompTargetCompFilter||idpCompCurrentLvlFilter||idpCompRequiredLvlFilter||idpCompInterventionFilter||idpCompTimelineFilter||idpCompGapFilter)" class="adv-badge">{{ [idpCompClusterFilter,idpCompTargetCompFilter,idpCompCurrentLvlFilter,idpCompRequiredLvlFilter,idpCompInterventionFilter,idpCompTimelineFilter,idpCompGapFilter].filter(Boolean).length }}</span>
+            <span v-if="idpSubTab==='agap' && (idpAgapDegreeFilter||idpAgapHeiFilter||idpAgapModeFilter||idpAgapScholarshipFilter||idpAgapTimelineFilter)" class="adv-badge">{{ [idpAgapDegreeFilter,idpAgapHeiFilter,idpAgapModeFilter,idpAgapScholarshipFilter,idpAgapTimelineFilter].filter(Boolean).length }}</span>
+            <span v-if="idpSubTab==='proact' && (idpProactTitleFilter||idpProactSkillFilter||idpProactModeFilter||idpProactProviderFilter||idpProactTimelineFilter)" class="adv-badge">{{ [idpProactTitleFilter,idpProactSkillFilter,idpProactModeFilter,idpProactProviderFilter,idpProactTimelineFilter].filter(Boolean).length }}</span>
             <span v-if="idpSubTab==='supervisor' && (idpSupPerfGapsFilter||idpSupReadinessFilter||idpSupInterventionFilter||idpSupImplYearFilter||idpSupImplPeriodFilter)" class="adv-badge">{{ [idpSupPerfGapsFilter,idpSupReadinessFilter,idpSupInterventionFilter,idpSupImplYearFilter,idpSupImplPeriodFilter].filter(Boolean).length }}</span>
           </button>
           <span class="result-count">{{ filteredIDPs.length }} record{{ filteredIDPs.length !== 1 ? 's' : '' }}</span>
@@ -304,6 +304,13 @@
                 </select>
               </div>
               <div class="adv-filter-group">
+                <label class="adv-label">Target Competency</label>
+                <select v-model="idpCompTargetCompFilter" class="adv-select">
+                  <option value="">All Competencies</option>
+                  <option v-for="o in compTargetCompOptions" :key="o.v" :value="o.v">{{ o.v }} ({{ o.c }})</option>
+                </select>
+              </div>
+              <div class="adv-filter-group">
                 <label class="adv-label">Current Level</label>
                 <select v-model="idpCompCurrentLvlFilter" class="adv-select">
                   <option value="">Any</option>
@@ -317,6 +324,9 @@
                   <option v-for="o in compRequiredLvlOptions" :key="o.v" :value="o.v">{{ o.v }} ({{ o.c }})</option>
                 </select>
               </div>
+              <button class="btn-clear-adv" @click="idpCompClusterFilter=''; idpCompTargetCompFilter=''; idpCompCurrentLvlFilter=''; idpCompRequiredLvlFilter=''; idpCompInterventionFilter=''">Clear</button>
+            </div>
+            <div class="adv-filter-row">
               <div class="adv-filter-group">
                 <label class="adv-label">Suggested Intervention</label>
                 <select v-model="idpCompInterventionFilter" class="adv-select">
@@ -324,9 +334,24 @@
                   <option v-for="o in compInterventionOptions" :key="o.v" :value="o.v">{{ o.v }} ({{ o.c }})</option>
                 </select>
               </div>
-              <button class="btn-clear-adv" @click="idpCompClusterFilter=''; idpCompCurrentLvlFilter=''; idpCompRequiredLvlFilter=''; idpCompInterventionFilter=''">Clear</button>
+              <div class="adv-filter-group">
+                <label class="adv-label">Target Timeline</label>
+                <select v-model="idpCompTimelineFilter" class="adv-select">
+                  <option value="">All Timelines</option>
+                  <option v-for="o in compTimelineOptions" :key="o.v" :value="o.v">{{ o.v }} ({{ o.c }})</option>
+                </select>
+              </div>
+              <div class="adv-filter-group">
+                <label class="adv-label">Has Gap?</label>
+                <div class="adv-toggle-group">
+                  <button class="adv-toggle" :class="{ active: idpCompGapFilter === '' }" @click="idpCompGapFilter = ''">All</button>
+                  <button class="adv-toggle adv-toggle-red" :class="{ active: idpCompGapFilter === 'Yes' }" @click="idpCompGapFilter = idpCompGapFilter === 'Yes' ? '' : 'Yes'">Yes</button>
+                  <button class="adv-toggle adv-toggle-green" :class="{ active: idpCompGapFilter === 'No' }" @click="idpCompGapFilter = idpCompGapFilter === 'No' ? '' : 'No'">No</button>
+                </div>
+              </div>
+              <button class="btn-clear-adv" @click="idpCompTimelineFilter=''; idpCompGapFilter=''">Clear</button>
             </div>
-            <div v-if="idpCompClusterFilter||idpCompCurrentLvlFilter||idpCompRequiredLvlFilter||idpCompInterventionFilter" class="adv-who-count">
+            <div v-if="idpCompClusterFilter||idpCompTargetCompFilter||idpCompCurrentLvlFilter||idpCompRequiredLvlFilter||idpCompInterventionFilter||idpCompTimelineFilter||idpCompGapFilter" class="adv-who-count">
               <span class="adv-who-num">{{ filteredCompetencyRows.length }}</span> entr{{ filteredCompetencyRows.length !== 1 ? 'ies' : 'y' }} match
               &nbsp;·&nbsp;
               <span class="adv-who-num">{{ new Set(filteredCompetencyRows.map(r => r.refId)).size }}</span> unique employee{{ new Set(filteredCompetencyRows.map(r => r.refId)).size !== 1 ? 's' : '' }}
@@ -336,6 +361,20 @@
           <!-- AGAP advanced filters -->
           <template v-if="idpSubTab === 'agap'">
             <div class="adv-filter-row">
+              <div class="adv-filter-group">
+                <label class="adv-label">Degree Program</label>
+                <select v-model="idpAgapDegreeFilter" class="adv-select">
+                  <option value="">All Programs</option>
+                  <option v-for="o in agapDegreeOptions" :key="o.v" :value="o.v">{{ o.v }} ({{ o.c }})</option>
+                </select>
+              </div>
+              <div class="adv-filter-group">
+                <label class="adv-label">Target HEI</label>
+                <select v-model="idpAgapHeiFilter" class="adv-select">
+                  <option value="">All HEIs</option>
+                  <option v-for="o in agapHeiOptions" :key="o.v" :value="o.v">{{ o.v }} ({{ o.c }})</option>
+                </select>
+              </div>
               <div class="adv-filter-group">
                 <label class="adv-label">Mode of Study</label>
                 <select v-model="idpAgapModeFilter" class="adv-select">
@@ -350,9 +389,19 @@
                   <option v-for="o in agapScholarshipOptions" :key="o.v" :value="o.v">{{ o.v }} ({{ o.c }})</option>
                 </select>
               </div>
-              <button class="btn-clear-adv" @click="idpAgapModeFilter=''; idpAgapScholarshipFilter=''">Clear</button>
+              <button class="btn-clear-adv" @click="idpAgapDegreeFilter=''; idpAgapHeiFilter=''; idpAgapModeFilter=''; idpAgapScholarshipFilter=''; idpAgapTimelineFilter=''">Clear</button>
             </div>
-            <div v-if="idpAgapModeFilter||idpAgapScholarshipFilter" class="adv-who-count">
+            <div class="adv-filter-row">
+              <div class="adv-filter-group">
+                <label class="adv-label">Target Timeline</label>
+                <select v-model="idpAgapTimelineFilter" class="adv-select">
+                  <option value="">All Timelines</option>
+                  <option v-for="o in agapTimelineOptions" :key="o.v" :value="o.v">{{ o.v }} ({{ o.c }})</option>
+                </select>
+              </div>
+              <button class="btn-clear-adv" @click="idpAgapTimelineFilter=''">Clear</button>
+            </div>
+            <div v-if="idpAgapDegreeFilter||idpAgapHeiFilter||idpAgapModeFilter||idpAgapScholarshipFilter||idpAgapTimelineFilter" class="adv-who-count">
               <span class="adv-who-num">{{ filteredAgapRows.length }}</span> entr{{ filteredAgapRows.length !== 1 ? 'ies' : 'y' }} match
               &nbsp;·&nbsp;
               <span class="adv-who-num">{{ new Set(filteredAgapRows.map(r => r.refId)).size }}</span> unique employee{{ new Set(filteredAgapRows.map(r => r.refId)).size !== 1 ? 's' : '' }}
@@ -362,6 +411,20 @@
           <!-- PRO-ACT advanced filters -->
           <template v-if="idpSubTab === 'proact'">
             <div class="adv-filter-row">
+              <div class="adv-filter-group">
+                <label class="adv-label">Training Title</label>
+                <select v-model="idpProactTitleFilter" class="adv-select">
+                  <option value="">All Titles</option>
+                  <option v-for="o in proactTitleOptions" :key="o.v" :value="o.v">{{ o.v }} ({{ o.c }})</option>
+                </select>
+              </div>
+              <div class="adv-filter-group">
+                <label class="adv-label">Target Competency / Skill</label>
+                <select v-model="idpProactSkillFilter" class="adv-select">
+                  <option value="">All Skills</option>
+                  <option v-for="o in proactSkillOptions" :key="o.v" :value="o.v">{{ o.v }} ({{ o.c }})</option>
+                </select>
+              </div>
               <div class="adv-filter-group">
                 <label class="adv-label">Mode of Activity</label>
                 <select v-model="idpProactModeFilter" class="adv-select">
@@ -376,9 +439,19 @@
                   <option v-for="o in proactProviderOptions" :key="o.v" :value="o.v">{{ o.v }} ({{ o.c }})</option>
                 </select>
               </div>
-              <button class="btn-clear-adv" @click="idpProactModeFilter=''; idpProactProviderFilter=''">Clear</button>
+              <button class="btn-clear-adv" @click="idpProactTitleFilter=''; idpProactSkillFilter=''; idpProactModeFilter=''; idpProactProviderFilter=''; idpProactTimelineFilter=''">Clear</button>
             </div>
-            <div v-if="idpProactModeFilter||idpProactProviderFilter" class="adv-who-count">
+            <div class="adv-filter-row">
+              <div class="adv-filter-group">
+                <label class="adv-label">Target Timeline</label>
+                <select v-model="idpProactTimelineFilter" class="adv-select">
+                  <option value="">All Timelines</option>
+                  <option v-for="o in proactTimelineOptions" :key="o.v" :value="o.v">{{ o.v }} ({{ o.c }})</option>
+                </select>
+              </div>
+              <button class="btn-clear-adv" @click="idpProactTimelineFilter=''">Clear</button>
+            </div>
+            <div v-if="idpProactTitleFilter||idpProactSkillFilter||idpProactModeFilter||idpProactProviderFilter||idpProactTimelineFilter" class="adv-who-count">
               <span class="adv-who-num">{{ filteredProactRows.length }}</span> entr{{ filteredProactRows.length !== 1 ? 'ies' : 'y' }} match
               &nbsp;·&nbsp;
               <span class="adv-who-num">{{ new Set(filteredProactRows.map(r => r.refId)).size }}</span> unique employee{{ new Set(filteredProactRows.map(r => r.refId)).size !== 1 ? 's' : '' }}
@@ -626,9 +699,9 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
             Filters
             <span v-if="lnaSubTab==='list' && (lnaPurposeFilter||lnaOfficeFilter)" class="adv-badge">{{ [lnaPurposeFilter,lnaOfficeFilter].filter(Boolean).length }}</span>
-            <span v-if="lnaSubTab==='workforce' && lnaWfLevelFilter" class="adv-badge">1</span>
-            <span v-if="lnaSubTab==='competency' && (lnaClusterFilter||lnaInterventionFilter||lnaCompClusterFilter||lnaCompCompetencyFilter)" class="adv-badge">{{ [lnaClusterFilter,lnaInterventionFilter,lnaCompClusterFilter,lnaCompCompetencyFilter].filter(Boolean).length }}</span>
-            <span v-if="lnaSubTab==='sources' && (lnaDataSourceFilter||lnaInsightSourceFilter||lnaInsightInterventionFilter)" class="adv-badge">{{ [lnaDataSourceFilter,lnaInsightSourceFilter,lnaInsightInterventionFilter].filter(Boolean).length }}</span>
+            <span v-if="lnaSubTab==='workforce' && (lnaWfLevelFilter||lnaWfHasTypeFilter||lnaWfCountFilter)" class="adv-badge">{{ [lnaWfLevelFilter,lnaWfHasTypeFilter,lnaWfCountFilter].filter(Boolean).length }}</span>
+            <span v-if="lnaSubTab==='competency' && (lnaClusterFilter||lnaStrongestFilter||lnaWeakestFilter||lnaInterventionFilter||lnaCompClusterFilter||lnaCompCompetencyFilter||lnaHasObsFilter)" class="adv-badge">{{ [lnaClusterFilter,lnaStrongestFilter,lnaWeakestFilter,lnaInterventionFilter,lnaCompClusterFilter,lnaCompCompetencyFilter,lnaHasObsFilter].filter(Boolean).length }}</span>
+            <span v-if="lnaSubTab==='sources' && (lnaDataSourceFilter||lnaHasSourcesFilter||lnaInsightSourceFilter||lnaInsightPersonnelFilter||lnaInsightInterventionFilter)" class="adv-badge">{{ [lnaDataSourceFilter,lnaHasSourcesFilter,lnaInsightSourceFilter,lnaInsightPersonnelFilter,lnaInsightInterventionFilter].filter(Boolean).length }}</span>
           </button>
           <span class="result-count">{{ filteredLNAs.length }} record{{ filteredLNAs.length !== 1 ? 's' : '' }}</span>
         </div>
@@ -671,9 +744,25 @@
                   <option v-for="o in lnaWfLevelOptions" :key="o.v" :value="o.v">{{ o.v }}</option>
                 </select>
               </div>
-              <button class="btn-clear-adv" @click="lnaWfLevelFilter=''">Clear</button>
+              <div class="adv-filter-group">
+                <label class="adv-label">Has Personnel Type</label>
+                <select v-model="lnaWfHasTypeFilter" class="adv-select">
+                  <option value="">All</option>
+                  <option v-for="o in lnaWfHasTypeOptions" :key="o.v" :value="o.v">{{ o.v }}</option>
+                </select>
+              </div>
+              <div class="adv-filter-group">
+                <label class="adv-label">Personnel Count</label>
+                <div class="adv-toggle-group">
+                  <button class="adv-toggle" :class="{ active: lnaWfCountFilter === '' }" @click="lnaWfCountFilter = ''">All</button>
+                  <button class="adv-toggle" :class="{ active: lnaWfCountFilter === 'gt0' }" @click="lnaWfCountFilter = lnaWfCountFilter === 'gt0' ? '' : 'gt0'">&gt; 0</button>
+                  <button class="adv-toggle" :class="{ active: lnaWfCountFilter === 'gt10' }" @click="lnaWfCountFilter = lnaWfCountFilter === 'gt10' ? '' : 'gt10'">&gt; 10</button>
+                  <button class="adv-toggle" :class="{ active: lnaWfCountFilter === 'gt50' }" @click="lnaWfCountFilter = lnaWfCountFilter === 'gt50' ? '' : 'gt50'">&gt; 50</button>
+                </div>
+              </div>
+              <button class="btn-clear-adv" @click="lnaWfLevelFilter=''; lnaWfHasTypeFilter=''; lnaWfCountFilter=''">Clear</button>
             </div>
-            <div v-if="lnaWfLevelFilter" class="adv-who-count">
+            <div v-if="lnaWfLevelFilter||lnaWfHasTypeFilter||lnaWfCountFilter" class="adv-who-count">
               <span class="adv-who-num">{{ filteredWorkforceRows.length }}</span> row{{ filteredWorkforceRows.length !== 1 ? 's' : '' }} match
               &nbsp;·&nbsp;
               <span class="adv-who-num">{{ new Set(filteredWorkforceRows.map(r=>r.refId)).size }}</span> unique office{{ new Set(filteredWorkforceRows.map(r=>r.refId)).size !== 1 ? 's' : '' }}
@@ -692,6 +781,20 @@
                 </select>
               </div>
               <div class="adv-filter-group">
+                <label class="adv-label">Strongest Competency</label>
+                <select v-model="lnaStrongestFilter" class="adv-select">
+                  <option value="">All</option>
+                  <option v-for="o in lnaStrongestOptions" :key="o.v" :value="o.v">{{ o.v }} ({{ o.c }})</option>
+                </select>
+              </div>
+              <div class="adv-filter-group">
+                <label class="adv-label">Weakest Competency</label>
+                <select v-model="lnaWeakestFilter" class="adv-select">
+                  <option value="">All</option>
+                  <option v-for="o in lnaWeakestOptions" :key="o.v" :value="o.v">{{ o.v }} ({{ o.c }})</option>
+                </select>
+              </div>
+              <div class="adv-filter-group">
                 <label class="adv-label">Intervention Needed?</label>
                 <div class="adv-toggle-group">
                   <button class="adv-toggle" :class="{ active: lnaInterventionFilter === '' }" @click="lnaInterventionFilter=''">All</button>
@@ -699,9 +802,9 @@
                   <button class="adv-toggle adv-toggle-green" :class="{ active: lnaInterventionFilter === 'No' }" @click="lnaInterventionFilter = lnaInterventionFilter==='No'?'':'No'">No</button>
                 </div>
               </div>
-              <button class="btn-clear-adv" @click="lnaClusterFilter=''; lnaInterventionFilter=''">Clear</button>
+              <button class="btn-clear-adv" @click="lnaClusterFilter=''; lnaStrongestFilter=''; lnaWeakestFilter=''; lnaInterventionFilter=''">Clear</button>
             </div>
-            <div v-if="lnaClusterFilter||lnaInterventionFilter" class="adv-who-count" style="margin-bottom:14px">
+            <div v-if="lnaClusterFilter||lnaStrongestFilter||lnaWeakestFilter||lnaInterventionFilter" class="adv-who-count" style="margin-bottom:14px">
               <span class="adv-who-num">{{ filteredClusterRows.length }}</span> entr{{ filteredClusterRows.length !== 1 ? 'ies' : 'y' }} match
               &nbsp;·&nbsp;
               <span class="adv-who-num">{{ new Set(filteredClusterRows.map(r=>r.refId)).size }}</span> unique office{{ new Set(filteredClusterRows.map(r=>r.refId)).size !== 1 ? 's' : '' }}
@@ -723,9 +826,17 @@
                   <option v-for="o in lnaCompCompetencyOptions" :key="o.v" :value="o.v">{{ o.v }} ({{ o.c }})</option>
                 </select>
               </div>
-              <button class="btn-clear-adv" @click="lnaCompClusterFilter=''; lnaCompCompetencyFilter=''">Clear</button>
+              <div class="adv-filter-group">
+                <label class="adv-label">Has Observations?</label>
+                <div class="adv-toggle-group">
+                  <button class="adv-toggle" :class="{ active: lnaHasObsFilter === '' }" @click="lnaHasObsFilter=''">All</button>
+                  <button class="adv-toggle" :class="{ active: lnaHasObsFilter === 'Yes' }" @click="lnaHasObsFilter = lnaHasObsFilter==='Yes'?'':'Yes'">Yes</button>
+                  <button class="adv-toggle" :class="{ active: lnaHasObsFilter === 'No' }" @click="lnaHasObsFilter = lnaHasObsFilter==='No'?'':'No'">No</button>
+                </div>
+              </div>
+              <button class="btn-clear-adv" @click="lnaCompClusterFilter=''; lnaCompCompetencyFilter=''; lnaHasObsFilter=''">Clear</button>
             </div>
-            <div v-if="lnaCompClusterFilter||lnaCompCompetencyFilter" class="adv-who-count">
+            <div v-if="lnaCompClusterFilter||lnaCompCompetencyFilter||lnaHasObsFilter" class="adv-who-count">
               <span class="adv-who-num">{{ filteredCompRows.length }}</span> entr{{ filteredCompRows.length !== 1 ? 'ies' : 'y' }} match
               &nbsp;·&nbsp;
               <span class="adv-who-num">{{ new Set(filteredCompRows.map(r=>r.refId)).size }}</span> unique office{{ new Set(filteredCompRows.map(r=>r.refId)).size !== 1 ? 's' : '' }}
@@ -743,10 +854,18 @@
                   <option v-for="o in lnaDataSourceOptions" :key="o.v" :value="o.v">{{ o.v }} ({{ o.c }})</option>
                 </select>
               </div>
-              <button class="btn-clear-adv" @click="lnaDataSourceFilter=''">Clear</button>
+              <div class="adv-filter-group">
+                <label class="adv-label">Has Sources?</label>
+                <div class="adv-toggle-group">
+                  <button class="adv-toggle" :class="{ active: lnaHasSourcesFilter === '' }" @click="lnaHasSourcesFilter=''">All</button>
+                  <button class="adv-toggle" :class="{ active: lnaHasSourcesFilter === 'Yes' }" @click="lnaHasSourcesFilter = lnaHasSourcesFilter==='Yes'?'':'Yes'">Yes</button>
+                  <button class="adv-toggle" :class="{ active: lnaHasSourcesFilter === 'No' }" @click="lnaHasSourcesFilter = lnaHasSourcesFilter==='No'?'':'No'">No</button>
+                </div>
+              </div>
+              <button class="btn-clear-adv" @click="lnaDataSourceFilter=''; lnaHasSourcesFilter=''">Clear</button>
             </div>
-            <div v-if="lnaDataSourceFilter" class="adv-who-count" style="margin-bottom:14px">
-              <span class="adv-who-num">{{ filteredDataSourceRows.length }}</span> office{{ filteredDataSourceRows.length !== 1 ? 's' : '' }} used this source
+            <div v-if="lnaDataSourceFilter||lnaHasSourcesFilter" class="adv-who-count" style="margin-bottom:14px">
+              <span class="adv-who-num">{{ filteredDataSourceRows.length }}</span> office{{ filteredDataSourceRows.length !== 1 ? 's' : '' }} match
             </div>
 
             <div class="adv-filter-section-label">Key Insights</div>
@@ -759,15 +878,22 @@
                 </select>
               </div>
               <div class="adv-filter-group">
+                <label class="adv-label">Relevant Personnel</label>
+                <select v-model="lnaInsightPersonnelFilter" class="adv-select">
+                  <option value="">All Personnel</option>
+                  <option v-for="o in lnaInsightPersonnelOptions" :key="o.v" :value="o.v">{{ o.v }} ({{ o.c }})</option>
+                </select>
+              </div>
+              <div class="adv-filter-group">
                 <label class="adv-label">Recommended Intervention</label>
                 <select v-model="lnaInsightInterventionFilter" class="adv-select">
                   <option value="">All</option>
                   <option v-for="o in lnaInsightInterventionOptions" :key="o.v" :value="o.v">{{ o.v }} ({{ o.c }})</option>
                 </select>
               </div>
-              <button class="btn-clear-adv" @click="lnaInsightSourceFilter=''; lnaInsightInterventionFilter=''">Clear</button>
+              <button class="btn-clear-adv" @click="lnaInsightSourceFilter=''; lnaInsightPersonnelFilter=''; lnaInsightInterventionFilter=''">Clear</button>
             </div>
-            <div v-if="lnaInsightSourceFilter||lnaInsightInterventionFilter" class="adv-who-count">
+            <div v-if="lnaInsightSourceFilter||lnaInsightPersonnelFilter||lnaInsightInterventionFilter" class="adv-who-count">
               <span class="adv-who-num">{{ filteredInsightRows.length }}</span> insight{{ filteredInsightRows.length !== 1 ? 's' : '' }} match
               &nbsp;·&nbsp;
               <span class="adv-who-num">{{ new Set(filteredInsightRows.map(r=>r.refId)).size }}</span> unique office{{ new Set(filteredInsightRows.map(r=>r.refId)).size !== 1 ? 's' : '' }}
@@ -1219,17 +1345,26 @@ const idpPositionFilter  = ref('');
 
 // IDP - Competency tab
 const idpCompClusterFilter      = ref('');
+const idpCompTargetCompFilter   = ref('');
 const idpCompCurrentLvlFilter   = ref('');
 const idpCompRequiredLvlFilter  = ref('');
 const idpCompInterventionFilter = ref('');
+const idpCompTimelineFilter     = ref('');
+const idpCompGapFilter          = ref('');
 
 // IDP - AGAP tab
-const idpAgapModeFilter        = ref('');
-const idpAgapScholarshipFilter = ref('');
+const idpAgapDegreeFilter       = ref('');
+const idpAgapHeiFilter          = ref('');
+const idpAgapModeFilter         = ref('');
+const idpAgapScholarshipFilter  = ref('');
+const idpAgapTimelineFilter     = ref('');
 
 // IDP - Pro-ACT tab
-const idpProactModeFilter    = ref('');
-const idpProactProviderFilter = ref('');
+const idpProactTitleFilter      = ref('');
+const idpProactSkillFilter      = ref('');
+const idpProactModeFilter       = ref('');
+const idpProactProviderFilter   = ref('');
+const idpProactTimelineFilter   = ref('');
 
 // IDP - Supervisor tab
 const idpSupPerfGapsFilter     = ref('');
@@ -1246,22 +1381,29 @@ const lnaPurposeFilter  = ref('');
 const lnaOfficeFilter   = ref('');
 
 // LNA - Workforce
-const lnaWfLevelFilter  = ref('');
+const lnaWfLevelFilter    = ref('');
+const lnaWfHasTypeFilter  = ref('');
+const lnaWfCountFilter    = ref('');
 
 // LNA - Competency (cluster summary)
 const lnaClusterFilter          = ref('');
+const lnaStrongestFilter        = ref('');
+const lnaWeakestFilter          = ref('');
 const lnaInterventionFilter     = ref('');   // Yes / No / ''
 
 // LNA - Competency (detailed mapping)
 const lnaCompClusterFilter      = ref('');
 const lnaCompCompetencyFilter   = ref('');
+const lnaHasObsFilter           = ref('');
 
 // LNA - Sources (data sources table)
 const lnaDataSourceFilter       = ref('');
+const lnaHasSourcesFilter       = ref('');
 
 // LNA - Insights
-const lnaInsightSourceFilter    = ref('');
-const lnaInsightInterventionFilter = ref('');
+const lnaInsightSourceFilter         = ref('');
+const lnaInsightPersonnelFilter      = ref('');
+const lnaInsightInterventionFilter    = ref('');
 
 const sortState = reactive({ idp: { col: -1, asc: true }, lna: { col: -1, asc: true } });
 const ovActive = ref(null); // null | 'idp-all' | 'idp-pending' | 'idp-supervisor' | 'idp-complete' | 'lna-all' | 'lna-offices' | 'lna-flagged'
@@ -1374,6 +1516,13 @@ const compClusterOptions = computed(() => {
   }));
   return Object.entries(freq).sort((a,b)=>a[0].localeCompare(b[0])).map(([v,c])=>({v,c}));
 });
+const compTargetCompOptions = computed(() => {
+  const freq = {};
+  baseFilteredIDPs.value.forEach(r => (r._competencyRows||[]).forEach(row => {
+    const v = (row.targetCompetency||'').trim(); if (v) freq[v] = (freq[v]||0)+1;
+  }));
+  return Object.entries(freq).sort((a,b)=>a[0].localeCompare(b[0])).map(([v,c])=>({v,c}));
+});
 const compCurrentLvlOptions = computed(() => {
   const freq = {};
   baseFilteredIDPs.value.forEach(r => (r._competencyRows||[]).forEach(row => {
@@ -1395,18 +1544,48 @@ const compInterventionOptions = computed(() => {
   }));
   return Object.entries(freq).sort((a,b)=>b[1]-a[1]).map(([v,c])=>({v,c}));
 });
+const compTimelineOptions = computed(() => {
+  const freq = {};
+  baseFilteredIDPs.value.forEach(r => (r._competencyRows||[]).forEach(row => {
+    const v = (row.targetTimeline||'').trim(); if (v) freq[v] = (freq[v]||0)+1;
+  }));
+  return Object.entries(freq).sort((a,b)=>a[0].localeCompare(b[0])).map(([v,c])=>({v,c}));
+});
 
 // Filtered competency rows (applies adv filters on top)
 const filteredCompetencyRows = computed(() => {
-  return idpCompetencyRows.value.filter(r =>
-    (!idpCompClusterFilter.value      || r.competencyGroup === idpCompClusterFilter.value)
-    && (!idpCompCurrentLvlFilter.value  || r.currentLevel    === idpCompCurrentLvlFilter.value)
-    && (!idpCompRequiredLvlFilter.value || r.requiredLevel   === idpCompRequiredLvlFilter.value)
-    && (!idpCompInterventionFilter.value|| r.leadInterventions === idpCompInterventionFilter.value)
-  );
+  return idpCompetencyRows.value.filter(r => {
+    const curLvl = parseInt(r.currentLevel) || 0;
+    const reqLvl = parseInt(r.requiredLevel) || 0;
+    const hasGap = reqLvl > curLvl;
+    const gapMatch = !idpCompGapFilter.value ||
+      (idpCompGapFilter.value === 'Yes' && hasGap) ||
+      (idpCompGapFilter.value === 'No' && !hasGap);
+    return (!idpCompClusterFilter.value      || r.competencyGroup === idpCompClusterFilter.value)
+    && (!idpCompTargetCompFilter.value      || r.targetCompetency === idpCompTargetCompFilter.value)
+    && (!idpCompCurrentLvlFilter.value      || r.currentLevel === idpCompCurrentLvlFilter.value)
+    && (!idpCompRequiredLvlFilter.value     || r.requiredLevel === idpCompRequiredLvlFilter.value)
+    && (!idpCompInterventionFilter.value    || r.leadInterventions === idpCompInterventionFilter.value)
+    && (!idpCompTimelineFilter.value        || r.targetTimeline === idpCompTimelineFilter.value)
+    && gapMatch;
+  });
 });
 
 // ── AGAP filter options ─────────────────────────────────────────────────────
+const agapDegreeOptions = computed(() => {
+  const freq = {};
+  baseFilteredIDPs.value.forEach(r => (r._agapRows||[]).forEach(row => {
+    const v = (row.degreeProgram||'').trim(); if (v) freq[v] = (freq[v]||0)+1;
+  }));
+  return Object.entries(freq).sort((a,b)=>a[0].localeCompare(b[0])).map(([v,c])=>({v,c}));
+});
+const agapHeiOptions = computed(() => {
+  const freq = {};
+  baseFilteredIDPs.value.forEach(r => (r._agapRows||[]).forEach(row => {
+    const v = (row.targetHEI||'').trim(); if (v) freq[v] = (freq[v]||0)+1;
+  }));
+  return Object.entries(freq).sort((a,b)=>a[0].localeCompare(b[0])).map(([v,c])=>({v,c}));
+});
 const agapModeOptions = computed(() => {
   const freq = {};
   baseFilteredIDPs.value.forEach(r => (r._agapRows||[]).forEach(row => {
@@ -1421,14 +1600,38 @@ const agapScholarshipOptions = computed(() => {
   }));
   return Object.entries(freq).sort((a,b)=>b[1]-a[1]).map(([v,c])=>({v,c}));
 });
+const agapTimelineOptions = computed(() => {
+  const freq = {};
+  baseFilteredIDPs.value.forEach(r => (r._agapRows||[]).forEach(row => {
+    const v = (row.targetTimeline||'').trim(); if (v) freq[v] = (freq[v]||0)+1;
+  }));
+  return Object.entries(freq).sort((a,b)=>a[0].localeCompare(b[0])).map(([v,c])=>({v,c}));
+});
 const filteredAgapRows = computed(() => {
   return idpAgapRows.value.filter(r =>
-    (!idpAgapModeFilter.value       || r.modeOfStudy      === idpAgapModeFilter.value)
-    && (!idpAgapScholarshipFilter.value || r.scholarshipGrant === idpAgapScholarshipFilter.value)
+    (!idpAgapDegreeFilter.value         || r.degreeProgram === idpAgapDegreeFilter.value)
+    && (!idpAgapHeiFilter.value          || r.targetHEI === idpAgapHeiFilter.value)
+    && (!idpAgapModeFilter.value         || r.modeOfStudy === idpAgapModeFilter.value)
+    && (!idpAgapScholarshipFilter.value  || r.scholarshipGrant === idpAgapScholarshipFilter.value)
+    && (!idpAgapTimelineFilter.value    || r.targetTimeline === idpAgapTimelineFilter.value)
   );
 });
 
 // ── Pro-ACT filter options ──────────────────────────────────────────────────
+const proactTitleOptions = computed(() => {
+  const freq = {};
+  baseFilteredIDPs.value.forEach(r => (r._proactRows||[]).forEach(row => {
+    const v = (row.trainingTitle||'').trim(); if (v) freq[v] = (freq[v]||0)+1;
+  }));
+  return Object.entries(freq).sort((a,b)=>a[0].localeCompare(b[0])).map(([v,c])=>({v,c}));
+});
+const proactSkillOptions = computed(() => {
+  const freq = {};
+  baseFilteredIDPs.value.forEach(r => (r._proactRows||[]).forEach(row => {
+    const v = (row.targetSkill||'').trim(); if (v) freq[v] = (freq[v]||0)+1;
+  }));
+  return Object.entries(freq).sort((a,b)=>a[0].localeCompare(b[0])).map(([v,c])=>({v,c}));
+});
 const proactModeOptions = computed(() => {
   const freq = {};
   baseFilteredIDPs.value.forEach(r => (r._proactRows||[]).forEach(row => {
@@ -1443,10 +1646,20 @@ const proactProviderOptions = computed(() => {
   }));
   return Object.entries(freq).sort((a,b)=>b[1]-a[1]).map(([v,c])=>({v,c}));
 });
+const proactTimelineOptions = computed(() => {
+  const freq = {};
+  baseFilteredIDPs.value.forEach(r => (r._proactRows||[]).forEach(row => {
+    const v = (row.targetTimeline||'').trim(); if (v) freq[v] = (freq[v]||0)+1;
+  }));
+  return Object.entries(freq).sort((a,b)=>a[0].localeCompare(b[0])).map(([v,c])=>({v,c}));
+});
 const filteredProactRows = computed(() => {
   return idpProactRows.value.filter(r =>
-    (!idpProactModeFilter.value    || r.modeOfActivity  === idpProactModeFilter.value)
-    && (!idpProactProviderFilter.value || r.trainerProvider === idpProactProviderFilter.value)
+    (!idpProactTitleFilter.value       || r.trainingTitle === idpProactTitleFilter.value)
+    && (!idpProactSkillFilter.value     || r.targetSkill === idpProactSkillFilter.value)
+    && (!idpProactModeFilter.value      || r.modeOfActivity === idpProactModeFilter.value)
+    && (!idpProactProviderFilter.value   || r.trainerProvider === idpProactProviderFilter.value)
+    && (!idpProactTimelineFilter.value   || r.targetTimeline === idpProactTimelineFilter.value)
   );
 });
 
@@ -1625,8 +1838,35 @@ const lnaWfLevelOptions = computed(() => {
   });
   return POSITION_LEVELS.filter(lv => seen.has(lv.label)).map(lv=>({v:lv.label,c:null}));
 });
+const lnaWfHasTypeOptions = computed(() => {
+  const freq = {};
+  lnaWorkforceRows.value.forEach(r => {
+    EMP_TYPE_KEYS.forEach(k => {
+      if (Number(r[k]) > 0) {
+        const label = k.charAt(0).toUpperCase() + k.slice(1);
+        freq[label] = (freq[label]||0) + 1;
+      }
+    });
+  });
+  return Object.entries(freq).sort((a,b)=>a[0].localeCompare(b[0])).map(([v,c])=>({v,c}));
+});
 const filteredWorkforceRows = computed(() =>
-  lnaWorkforceRows.value.filter(r => !lnaWfLevelFilter.value || r.levelLabel === lnaWfLevelFilter.value)
+  lnaWorkforceRows.value.filter(r => {
+    const levelMatch = !lnaWfLevelFilter.value || r.levelLabel === lnaWfLevelFilter.value;
+    let typeMatch = true;
+    if (lnaWfHasTypeFilter.value) {
+      const key = lnaWfHasTypeFilter.value.toLowerCase();
+      typeMatch = Number(r[key]) > 0;
+    }
+    let countMatch = true;
+    if (lnaWfCountFilter.value) {
+      const t = r.total || 0;
+      if (lnaWfCountFilter.value === 'gt0') countMatch = t > 0;
+      else if (lnaWfCountFilter.value === 'gt10') countMatch = t > 10;
+      else if (lnaWfCountFilter.value === 'gt50') countMatch = t > 50;
+    }
+    return levelMatch && typeMatch && countMatch;
+  })
 );
 
 // Competency - cluster summary filter options
@@ -1635,12 +1875,25 @@ const lnaClusterOptions = computed(() => {
   lnaClusterRows.value.forEach(r => { const v=(r.cluster||'').trim(); if(v) freq[v]=(freq[v]||0)+1; });
   return Object.entries(freq).sort((a,b)=>a[0].localeCompare(b[0])).map(([v,c])=>({v,c}));
 });
+const lnaStrongestOptions = computed(() => {
+  const freq = {};
+  lnaClusterRows.value.forEach(r => { const v=(r.strongest||'').trim(); if(v) freq[v]=(freq[v]||0)+1; });
+  return Object.entries(freq).sort((a,b)=>a[0].localeCompare(b[0])).map(([v,c])=>({v,c}));
+});
+const lnaWeakestOptions = computed(() => {
+  const freq = {};
+  lnaClusterRows.value.forEach(r => { const v=(r.weakest||'').trim(); if(v) freq[v]=(freq[v]||0)+1; });
+  return Object.entries(freq).sort((a,b)=>a[0].localeCompare(b[0])).map(([v,c])=>({v,c}));
+});
 const filteredClusterRows = computed(() =>
   lnaClusterRows.value.filter(r => {
     const intMatch = !lnaInterventionFilter.value ||
       (lnaInterventionFilter.value === 'Yes' && (r.interventionNeeded === 'Y' || r.interventionNeeded === 'Yes')) ||
       (lnaInterventionFilter.value === 'No'  && (r.interventionNeeded === 'N' || r.interventionNeeded === 'No'));
-    return (!lnaClusterFilter.value || r.cluster === lnaClusterFilter.value) && intMatch;
+    return (!lnaClusterFilter.value || r.cluster === lnaClusterFilter.value)
+      && (!lnaStrongestFilter.value || r.strongest === lnaStrongestFilter.value)
+      && (!lnaWeakestFilter.value || r.weakest === lnaWeakestFilter.value)
+      && intMatch;
   })
 );
 
@@ -1658,10 +1911,16 @@ const lnaCompCompetencyOptions = computed(() => {
   return Object.entries(freq).sort((a,b)=>a[0].localeCompare(b[0])).map(([v,c])=>({v,c}));
 });
 const filteredCompRows = computed(() =>
-  lnaCompRows.value.filter(r =>
-    (!lnaCompClusterFilter.value    || r.cluster    === lnaCompClusterFilter.value)
+  lnaCompRows.value.filter(r => {
+    let obsMatch = true;
+    if (lnaHasObsFilter.value) {
+      const hasObs = !!(r.observations && r.observations.trim());
+      obsMatch = lnaHasObsFilter.value === 'Yes' ? hasObs : !hasObs;
+    }
+    return (!lnaCompClusterFilter.value    || r.cluster    === lnaCompClusterFilter.value)
     && (!lnaCompCompetencyFilter.value || r.competency === lnaCompCompetencyFilter.value)
-  )
+    && obsMatch;
+  })
 );
 
 // Sources - data source options
@@ -1673,9 +1932,15 @@ const lnaDataSourceOptions = computed(() => {
   return Object.entries(freq).sort((a,b)=>b[1]-a[1]).map(([v,c])=>({v,c}));
 });
 const filteredDataSourceRows = computed(() =>
-  filteredLNAs.value.filter(r =>
-    !lnaDataSourceFilter.value || (r.dataSources||[]).includes(lnaDataSourceFilter.value)
-  )
+  filteredLNAs.value.filter(r => {
+    let srcMatch = !lnaDataSourceFilter.value || (r.dataSources||[]).includes(lnaDataSourceFilter.value);
+    let hasMatch = true;
+    if (lnaHasSourcesFilter.value) {
+      const hasSources = (r.dataSources||[]).length > 0;
+      hasMatch = lnaHasSourcesFilter.value === 'Yes' ? hasSources : !hasSources;
+    }
+    return srcMatch && hasMatch;
+  })
 );
 
 // Insights filter options
@@ -1684,6 +1949,11 @@ const lnaInsightSourceOptions = computed(() => {
   lnaInsightRows.value.forEach(r => { const v=(r.dataSource||'').trim(); if(v) freq[v]=(freq[v]||0)+1; });
   return Object.entries(freq).sort((a,b)=>b[1]-a[1]).map(([v,c])=>({v,c}));
 });
+const lnaInsightPersonnelOptions = computed(() => {
+  const freq = {};
+  lnaInsightRows.value.forEach(r => { const v=(r.personnel||'').trim(); if(v) freq[v]=(freq[v]||0)+1; });
+  return Object.entries(freq).sort((a,b)=>a[0].localeCompare(b[0])).map(([v,c])=>({v,c}));
+});
 const lnaInsightInterventionOptions = computed(() => {
   const freq = {};
   lnaInsightRows.value.forEach(r => { const v=(r.intervention||'').trim(); if(v) freq[v]=(freq[v]||0)+1; });
@@ -1691,7 +1961,8 @@ const lnaInsightInterventionOptions = computed(() => {
 });
 const filteredInsightRows = computed(() =>
   lnaInsightRows.value.filter(r =>
-    (!lnaInsightSourceFilter.value       || r.dataSource   === lnaInsightSourceFilter.value)
+    (!lnaInsightSourceFilter.value         || r.dataSource   === lnaInsightSourceFilter.value)
+    && (!lnaInsightPersonnelFilter.value    || r.personnel === lnaInsightPersonnelFilter.value)
     && (!lnaInsightInterventionFilter.value || r.intervention === lnaInsightInterventionFilter.value)
   )
 );
