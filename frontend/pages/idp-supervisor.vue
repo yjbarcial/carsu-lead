@@ -5,37 +5,67 @@
   <div v-if="showPrivacyModal" class="privacy-overlay">
     <div class="privacy-modal">
       <div class="privacy-header">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        </svg>
         <h2>Data Privacy Notice</h2>
       </div>
       <div class="privacy-body">
         <p>
-          In compliance with the <strong>Data Privacy Act of 2012 (R.A. 10173)</strong>,
-          Caraga State University informs you that as a <strong>Supervisor</strong>,
-          you are accessing an employee's <strong>Individual Development Plan (IDP)</strong>
-          for the purpose of conducting an official performance and development assessment.
+          In compliance with the
+          <strong>Data Privacy Act of 2012 (R.A. 10173)</strong>, Caraga State
+          University informs you that as a <strong>Supervisor</strong>, you are
+          accessing an employee's
+          <strong>Individual Development Plan (IDP)</strong>
+          for the purpose of conducting an official performance and development
+          assessment.
         </p>
         <ul>
-          <li>The employee's personal and professional information shown here is confidential</li>
-          <li>Access is strictly limited to your role as the designated reviewing supervisor</li>
-          <li>Your assessment will be recorded and shared with the employee and HR</li>
-          <li>Unauthorized sharing or reproduction of this data is prohibited</li>
+          <li>
+            The employee's personal and professional information shown here is
+            confidential
+          </li>
+          <li>
+            Access is strictly limited to your role as the designated reviewing
+            supervisor
+          </li>
+          <li>
+            Your assessment will be recorded and shared with the employee and HR
+          </li>
+          <li>
+            Unauthorized sharing or reproduction of this data is prohibited
+          </li>
         </ul>
         <p>
-          By continuing, you acknowledge your responsibility to handle this information
-          with confidentiality and in accordance with the <strong>Data Privacy Act of 2012 (R.A. 10173)</strong> and its implementing rules and regulations.
+          By continuing, you acknowledge your responsibility to handle this
+          information with confidentiality and in accordance with the
+          <strong>Data Privacy Act of 2012 (R.A. 10173)</strong> and its
+          implementing rules and regulations.
         </p>
         <p>
-          For data privacy concerns, contact the <strong>Caraga State University HRMS</strong>.
+          For data privacy concerns, contact the Caraga State University HRMS at
+          <strong>yjbarcial@carsu.edu.ph</strong>.
         </p>
         <label class="privacy-checkbox">
           <input type="checkbox" v-model="privacyAgreed" />
-          <span>I understand and agree to handle the employee's data with confidentiality as required by the Data Privacy Act of 2012.</span>
+          <span
+            >I understand and agree to handle the employee's data with
+            confidentiality as required by the Data Privacy Act of 2012.</span
+          >
         </label>
       </div>
       <div class="privacy-footer">
         <a href="/" class="btn-privacy-decline">Decline</a>
-        <button class="btn-privacy-agree" :disabled="!privacyAgreed" @click="acceptPrivacy">
+        <button
+          class="btn-privacy-agree"
+          :disabled="!privacyAgreed"
+          @click="acceptPrivacy"
+        >
           Agree &amp; Continue
         </button>
       </div>
@@ -55,22 +85,38 @@
         <img src="/img/csu-logo-square1.png" alt="CarSU" />
       </div>
       <h2>Supervisor IDP Review</h2>
-      <p>Enter your reference ID and CarSU email to load the employee's submission for review.</p>
+      <p>
+        Enter your reference ID and CarSU email to load the employee's
+        submission for review.
+      </p>
       <div class="field-group">
         <label>Reference ID <span class="req">*</span></label>
-        <span class="token-guidance">Reference ID was sent to your CarSU email</span>
-        <input type="text" v-model="tokenInput" placeholder="e.g. IDP-1234567890" />
+        <span class="token-guidance"
+          >Reference ID was sent to your CarSU email</span
+        >
+        <input
+          type="text"
+          v-model="tokenInput"
+          placeholder="e.g. IDP-1234567890"
+        />
       </div>
       <div class="field-group">
         <label>Your CarSU Email <span class="req">*</span></label>
         <div class="email-prefix-wrapper" :class="{ error: emailError }">
-          <input type="text" v-model="supervisorEmailPrefix" class="email-prefix-input" placeholder="yourname" />
+          <input
+            type="text"
+            v-model="supervisorEmailPrefix"
+            class="email-prefix-input"
+            placeholder="yourname"
+          />
           <span class="email-suffix">@carsu.edu.ph</span>
         </div>
       </div>
 
       <p v-if="tokenError" class="token-error">{{ tokenError }}</p>
-      <button class="btn-load" @click="loadByToken" :disabled="isLoading">Verify &amp; Load IDP</button>
+      <button class="btn-load" @click="loadByToken" :disabled="isLoading">
+        Verify &amp; Load IDP
+      </button>
     </div>
   </div>
 
@@ -89,8 +135,11 @@
     <div class="container">
       <!-- Title -->
       <div class="page-title">
-        <h2>Individual Development Plan (IDP)</h2>
-        <p>Supervisor's Review — Read-only view of employee submission. Complete Section IV below.</p>
+        <h2>Individual Development Plan (IDP) 2026-2029</h2>
+        <p>
+          Supervisor's Review — Read-only view of employee submission. Complete
+          Section IV below.
+        </p>
         <div class="ref-badge">{{ idpData.refId }}</div>
       </div>
 
@@ -108,47 +157,51 @@
           <div class="ro-grid ro-grid-2">
             <div class="ro-field">
               <div class="ro-label">Campus</div>
-              <div class="ro-value">{{ idpData.campus || '—' }}</div>
+              <div class="ro-value">{{ idpData.campus || "—" }}</div>
             </div>
             <div class="ro-field">
               <div class="ro-label">Office Affiliation</div>
-              <div class="ro-value">{{ idpData.officeAffiliation || '—' }}</div>
+              <div class="ro-value">{{ idpData.officeAffiliation || "—" }}</div>
             </div>
             <div class="ro-field span-2">
               <div class="ro-label">College / Office / Unit</div>
-              <div class="ro-value">{{ idpData.collegeOfficeUnit || '—' }}</div>
+              <div class="ro-value">{{ idpData.collegeOfficeUnit || "—" }}</div>
             </div>
             <div class="ro-field">
               <div class="ro-label">Name of Personnel</div>
-              <div class="ro-value">{{ idpData.nameOfPersonnel || '—' }}</div>
+              <div class="ro-value">{{ idpData.nameOfPersonnel || "—" }}</div>
             </div>
             <div class="ro-field">
               <div class="ro-label">Date Prepared</div>
-              <div class="ro-value">{{ idpData.datePrepared || '—' }}</div>
+              <div class="ro-value">{{ idpData.datePrepared || "—" }}</div>
             </div>
             <div class="ro-field">
               <div class="ro-label">Highest Educational Attainment</div>
-              <div class="ro-value">{{ idpData.educAttainment || '—' }}{{ idpData.educAttainmentSpec ? ' — ' + idpData.educAttainmentSpec : '' }}</div>
+              <div class="ro-value">
+                {{ idpData.educAttainment || "—"
+                }}{{
+                  idpData.educAttainmentSpec
+                    ? " — " + idpData.educAttainmentSpec
+                    : ""
+                }}
+              </div>
             </div>
             <div class="ro-field">
               <div class="ro-label">Current Position / Designation</div>
-              <div class="ro-value">{{ idpData.currentPosition || '—' }}</div>
+              <div class="ro-value">{{ idpData.currentPosition || "—" }}</div>
             </div>
-            <div class="ro-field">
-              <div class="ro-label">Year Covered</div>
-              <div class="ro-value">{{ idpData.yearCovered || '—' }}</div>
-            </div>
+
             <div class="ro-field">
               <div class="ro-label">Years in Position</div>
-              <div class="ro-value">{{ idpData.yearsInPosition ?? '—' }}</div>
+              <div class="ro-value">{{ idpData.yearsInPosition ?? "—" }}</div>
             </div>
             <div class="ro-field">
               <div class="ro-label">Years in CSU</div>
-              <div class="ro-value">{{ idpData.yearsInCSU ?? '—' }}</div>
+              <div class="ro-value">{{ idpData.yearsInCSU ?? "—" }}</div>
             </div>
             <div class="ro-field span-2">
               <div class="ro-label">Purpose</div>
-              <div class="ro-value">{{ idpData.headerPurpose || '—' }}</div>
+              <div class="ro-value">{{ idpData.headerPurpose || "—" }}</div>
             </div>
           </div>
         </div>
@@ -164,13 +217,13 @@
         <div class="section-body">
           <div class="ro-field" style="margin-bottom: 16px">
             <div class="ro-label">Assessment Purpose</div>
-            <div class="ro-value">{{ idpData.competencyPurpose || '—' }}</div>
+            <div class="ro-value">{{ idpData.competencyPurpose || "—" }}</div>
           </div>
           <div class="table-wrapper">
             <table class="ro-table">
               <thead>
                 <tr>
-                  <th style="width:40px">No.</th>
+                  <th style="width: 40px">No.</th>
                   <th>Target Competency</th>
                   <th>Cluster</th>
                   <th>Current Level</th>
@@ -185,12 +238,18 @@
                 </tr>
                 <tr v-for="(row, i) in competencyRows" :key="i">
                   <td class="tc">{{ i + 1 }}</td>
-                  <td>{{ row.targetCompetency || '—' }}</td>
-                  <td><span class="cluster-badge" :class="clusterClass(row.competencyGroup)">{{ row.competencyGroup || '—' }}</span></td>
-                  <td>{{ row.currentLevel || '—' }}</td>
-                  <td>{{ row.requiredLevel || '—' }}</td>
-                  <td>{{ row.leadInterventions || '—' }}</td>
-                  <td>{{ row.targetTimeline || '—' }}</td>
+                  <td>{{ row.targetCompetency || "—" }}</td>
+                  <td>
+                    <span
+                      class="cluster-badge"
+                      :class="clusterClass(row.competencyGroup)"
+                      >{{ row.competencyGroup || "—" }}</span
+                    >
+                  </td>
+                  <td>{{ row.currentLevel || "—" }}</td>
+                  <td>{{ row.requiredLevel || "—" }}</td>
+                  <td>{{ row.leadInterventions || "—" }}</td>
+                  <td>{{ row.targetTimeline || "—" }}</td>
                 </tr>
               </tbody>
             </table>
@@ -210,7 +269,7 @@
             <table class="ro-table">
               <thead>
                 <tr>
-                  <th style="width:40px">No.</th>
+                  <th style="width: 40px">No.</th>
                   <th>Degree Program</th>
                   <th>Target HEI</th>
                   <th>Mode of Study</th>
@@ -224,11 +283,11 @@
                 </tr>
                 <tr v-for="(row, i) in agapRows" :key="i">
                   <td class="tc">{{ i + 1 }}</td>
-                  <td>{{ row.degreeProgram || '—' }}</td>
-                  <td>{{ row.targetHEI || '—' }}</td>
-                  <td>{{ row.modeOfStudy || '—' }}</td>
-                  <td>{{ row.scholarshipGrant || '—' }}</td>
-                  <td>{{ row.targetTimeline || '—' }}</td>
+                  <td>{{ row.degreeProgram || "—" }}</td>
+                  <td>{{ row.targetHEI || "—" }}</td>
+                  <td>{{ row.modeOfStudy || "—" }}</td>
+                  <td>{{ row.scholarshipGrant || "—" }}</td>
+                  <td>{{ row.targetTimeline || "—" }}</td>
                 </tr>
               </tbody>
             </table>
@@ -240,7 +299,12 @@
       <div class="section-card">
         <div class="section-header">
           <div class="section-num">III</div>
-          <div><h3>Professional Advancement through Capacity-Building and Trainings (Pro-ACT)</h3></div>
+          <div>
+            <h3>
+              Professional Advancement through Capacity-Building and Trainings
+              (Pro-ACT)
+            </h3>
+          </div>
           <div class="readonly-badge">Read-only</div>
         </div>
         <div class="section-body">
@@ -248,7 +312,7 @@
             <table class="ro-table">
               <thead>
                 <tr>
-                  <th style="width:40px">No.</th>
+                  <th style="width: 40px">No.</th>
                   <th>Training / Workshop Title</th>
                   <th>Target Competency / Skill</th>
                   <th>Mode of Activity</th>
@@ -262,11 +326,11 @@
                 </tr>
                 <tr v-for="(row, i) in proactRows" :key="i">
                   <td class="tc">{{ i + 1 }}</td>
-                  <td>{{ row.trainingTitle || '—' }}</td>
-                  <td>{{ row.targetSkill || '—' }}</td>
-                  <td>{{ row.modeOfActivity || '—' }}</td>
-                  <td>{{ row.trainerProvider || '—' }}</td>
-                  <td>{{ row.targetTimeline || '—' }}</td>
+                  <td>{{ row.trainingTitle || "—" }}</td>
+                  <td>{{ row.targetSkill || "—" }}</td>
+                  <td>{{ row.modeOfActivity || "—" }}</td>
+                  <td>{{ row.trainerProvider || "—" }}</td>
+                  <td>{{ row.targetTimeline || "—" }}</td>
                 </tr>
               </tbody>
             </table>
@@ -280,15 +344,18 @@
           <div class="section-num">IV</div>
           <div>
             <h3>Supervisor's Assessment and Endorsement</h3>
-            <p>Complete all fields below — this section is for the supervisor only</p>
+            <p>
+              Complete all fields below — this section is for the supervisor
+              only
+            </p>
           </div>
         </div>
         <div class="section-body">
           <table class="assessment-table">
             <thead>
               <tr>
-                <th style="width:180px">Assessment Area</th>
-                <th style="width:240px">Guide Question</th>
+                <th style="width: 180px">Assessment Area</th>
+                <th style="width: 240px">Guide Question</th>
                 <th>Supervisor's Response</th>
               </tr>
             </thead>
@@ -296,82 +363,195 @@
               <!-- 1. Performance gaps -->
               <tr>
                 <td class="area-label">1. Observed Performance Gaps</td>
-                <td class="guide-q">Are there any gaps in the employee's current performance that may be addressed through training, coaching, or mentoring?</td>
+                <td class="guide-q">
+                  Are there any gaps in the employee's current performance that
+                  may be addressed through training, coaching, or mentoring?
+                </td>
                 <td class="response-cell">
-                  <div class="checkbox-group" style="margin-bottom:12px">
-                    <label class="checkbox-item" :class="{ checked: assessment.perfGapsYN === 'Yes' }">
-                      <input type="radio" v-model="assessment.perfGapsYN" value="Yes" /> Yes
+                  <div class="checkbox-group" style="margin-bottom: 12px">
+                    <label
+                      class="checkbox-item"
+                      :class="{ checked: assessment.perfGapsYN === 'Yes' }"
+                    >
+                      <input
+                        type="radio"
+                        v-model="assessment.perfGapsYN"
+                        value="Yes"
+                      />
+                      Yes
                     </label>
-                    <label class="checkbox-item" :class="{ checked: assessment.perfGapsYN === 'No' }">
-                      <input type="radio" v-model="assessment.perfGapsYN" value="No" /> No
+                    <label
+                      class="checkbox-item"
+                      :class="{ checked: assessment.perfGapsYN === 'No' }"
+                    >
+                      <input
+                        type="radio"
+                        v-model="assessment.perfGapsYN"
+                        value="No"
+                      />
+                      No
                     </label>
                   </div>
-                  <div v-if="assessment.perfGapsYN === 'Yes'" style="margin-top:8px">
+                  <div
+                    v-if="assessment.perfGapsYN === 'Yes'"
+                    style="margin-top: 8px"
+                  >
                     <label class="field-label">If Yes, specify:</label>
-                    <textarea v-model="assessment.perfGapsSpec" rows="3" placeholder="Describe the performance gaps…"></textarea>
+                    <textarea
+                      v-model="assessment.perfGapsSpec"
+                      rows="3"
+                      placeholder="Describe the performance gaps…"
+                    ></textarea>
                   </div>
                 </td>
               </tr>
               <!-- 2. Readiness -->
               <tr>
                 <td class="area-label">2. Readiness for Advancement</td>
-                <td class="guide-q">Based on your observation, is the employee ready for higher responsibilities or academic growth (e.g., scholarship, promotion readiness)?</td>
+                <td class="guide-q">
+                  Based on your observation, is the employee ready for higher
+                  responsibilities or academic growth (e.g., scholarship,
+                  promotion readiness)?
+                </td>
                 <td class="response-cell">
-                  <div class="checkbox-group" style="margin-bottom:12px">
-                    <label class="checkbox-item" :class="{ checked: assessment.readinessYN === 'Yes' }">
-                      <input type="radio" v-model="assessment.readinessYN" value="Yes" /> Yes
+                  <div class="checkbox-group" style="margin-bottom: 12px">
+                    <label
+                      class="checkbox-item"
+                      :class="{ checked: assessment.readinessYN === 'Yes' }"
+                    >
+                      <input
+                        type="radio"
+                        v-model="assessment.readinessYN"
+                        value="Yes"
+                      />
+                      Yes
                     </label>
-                    <label class="checkbox-item" :class="{ checked: assessment.readinessYN === 'No' }">
-                      <input type="radio" v-model="assessment.readinessYN" value="No" /> No
+                    <label
+                      class="checkbox-item"
+                      :class="{ checked: assessment.readinessYN === 'No' }"
+                    >
+                      <input
+                        type="radio"
+                        v-model="assessment.readinessYN"
+                        value="No"
+                      />
+                      No
                     </label>
                   </div>
                   <label class="field-label">Remarks:</label>
-                  <textarea v-model="assessment.readinessRemarks" rows="3" placeholder="Your remarks on readiness…"></textarea>
+                  <textarea
+                    v-model="assessment.readinessRemarks"
+                    rows="3"
+                    placeholder="Your remarks on readiness…"
+                  ></textarea>
                 </td>
               </tr>
               <!-- 3. Recommended interventions -->
               <tr>
                 <td class="area-label">3. Recommended L&amp;D Interventions</td>
-                <td class="guide-q">What specific learning and development interventions do you recommend? <em>(Check all applicable)</em></td>
+                <td class="guide-q">
+                  What specific learning and development interventions do you
+                  recommend? <em>(Check all applicable)</em>
+                </td>
                 <td class="response-cell">
                   <div class="checkbox-group">
-                    <label v-for="opt in interventionOptions" :key="opt" class="checkbox-item" :class="{ checked: assessment.interventions.includes(opt) }">
-                      <input type="checkbox" :value="opt" v-model="assessment.interventions" /> {{ opt }}
+                    <label
+                      v-for="opt in interventionOptions"
+                      :key="opt"
+                      class="checkbox-item"
+                      :class="{
+                        checked: assessment.interventions.includes(opt),
+                      }"
+                    >
+                      <input
+                        type="checkbox"
+                        :value="opt"
+                        v-model="assessment.interventions"
+                      />
+                      {{ opt }}
                     </label>
                   </div>
-                  <div v-if="assessment.interventions.includes('Others')" style="margin-top:10px">
-                    <input type="text" v-model="assessment.interventionOther" placeholder="Specify other intervention…" />
+                  <div
+                    v-if="assessment.interventions.includes('Others')"
+                    style="margin-top: 10px"
+                  >
+                    <input
+                      type="text"
+                      v-model="assessment.interventionOther"
+                      placeholder="Specify other intervention…"
+                    />
                   </div>
                 </td>
               </tr>
               <!-- 4. Implementation period -->
               <tr>
                 <td class="area-label">4. Preferred Implementation Period</td>
-                <td class="guide-q">When should the recommended interventions ideally be implemented? Select a year first, then the quarter or period.</td>
+                <td class="guide-q">
+                  When should the recommended interventions ideally be
+                  implemented? Select a year first, then the quarter or period.
+                </td>
                 <td class="response-cell">
                   <!-- Year dropdown -->
-                  <div style="margin-bottom: 12px; display: flex; align-items: center; gap: 10px;">
-                    <small class="impl-hint" style="margin-bottom:0; white-space:nowrap;">Year</small>
-                    <select v-model="assessment.implYear" style="width: auto; min-width: 120px; margin-bottom: 0;">
+                  <div
+                    style="
+                      margin-bottom: 12px;
+                      display: flex;
+                      align-items: center;
+                      gap: 10px;
+                    "
+                  >
+                    <small
+                      class="impl-hint"
+                      style="margin-bottom: 0; white-space: nowrap"
+                      >Year</small
+                    >
+                    <select
+                      v-model="assessment.implYear"
+                      style="width: auto; min-width: 120px; margin-bottom: 0"
+                    >
                       <option value="">Select year…</option>
-                      <option v-for="yr in yearOptions" :key="yr" :value="yr">{{ yr }}</option>
+                      <option v-for="yr in yearOptions" :key="yr" :value="yr">
+                        {{ yr }}
+                      </option>
                     </select>
                   </div>
                   <!-- Quarter / period — single select via radio -->
                   <small class="impl-hint">Quarter / Period</small>
                   <div class="checkbox-group">
-                    <label v-for="opt in periodOptions" :key="opt" class="checkbox-item" :class="{ checked: assessment.implementationPeriod === opt }">
-                      <input type="radio" name="implPeriod" :value="opt" v-model="assessment.implementationPeriod" /> {{ opt }}
+                    <label
+                      v-for="opt in periodOptions"
+                      :key="opt"
+                      class="checkbox-item"
+                      :class="{
+                        checked: assessment.implementationPeriod === opt,
+                      }"
+                    >
+                      <input
+                        type="radio"
+                        name="implPeriod"
+                        :value="opt"
+                        v-model="assessment.implementationPeriod"
+                      />
+                      {{ opt }}
                     </label>
                   </div>
                 </td>
               </tr>
               <!-- 5. Additional comments -->
               <tr>
-                <td class="area-label">5. Additional Comments or Development Notes</td>
-                <td class="guide-q">Any other suggestions or remarks to support the employee's development plan?</td>
+                <td class="area-label">
+                  5. Additional Comments or Development Notes
+                </td>
+                <td class="guide-q">
+                  Any other suggestions or remarks to support the employee's
+                  development plan?
+                </td>
                 <td class="response-cell">
-                  <textarea v-model="assessment.additionalComments" rows="4" placeholder="Your additional comments or development notes…"></textarea>
+                  <textarea
+                    v-model="assessment.additionalComments"
+                    rows="4"
+                    placeholder="Your additional comments or development notes…"
+                  ></textarea>
                 </td>
               </tr>
             </tbody>
@@ -379,8 +559,16 @@
 
           <!-- Certification block -->
           <div class="cert-block">
-            <p><em>I hereby certify that I have reviewed and assessed the Individual Development Plan (IDP) of the concerned personnel and confirm that the proposed goals and interventions are aligned with their role, performance needs, and the strategic direction of the office.</em></p>
-            <div class="sup-name">{{ idpData.supervisorName || '—' }}</div>
+            <p>
+              <em
+                >I hereby certify that I have reviewed and assessed the
+                Individual Development Plan (IDP) of the concerned personnel and
+                confirm that the proposed goals and interventions are aligned
+                with their role, performance needs, and the strategic direction
+                of the office.</em
+              >
+            </p>
+            <div class="sup-name">{{ idpData.supervisorName || "—" }}</div>
             <small>Signature over Printed Name of Immediate Supervisor</small>
           </div>
         </div>
@@ -388,8 +576,17 @@
 
       <!-- Submit -->
       <div class="submit-area">
-        <p>By submitting, you confirm that your assessment is complete and accurate. HR will be notified immediately.</p>
-        <button class="btn-submit" @click="submitAssessment" :disabled="isLoading">Submit Assessment</button>
+        <p>
+          By submitting, you confirm that your assessment is complete and
+          accurate. HR will be notified immediately.
+        </p>
+        <button
+          class="btn-submit"
+          @click="submitAssessment"
+          :disabled="isLoading"
+        >
+          Submit Assessment
+        </button>
       </div>
     </div>
   </div>
@@ -399,7 +596,10 @@
     <div class="success-card">
       <div class="success-icon">✓</div>
       <h2>Assessment Submitted</h2>
-      <p>Your assessment for this IDP has been recorded. HRMS has been notified that the IDP is now fully complete.</p>
+      <p>
+        Your assessment for this IDP has been recorded. HRMS has been notified
+        that the IDP is now fully complete.
+      </p>
       <div class="notif-note">
         <strong>📧 Employee has been notified</strong>
         <span>A confirmation has been sent to the employee's CarSU email.</span>
@@ -410,8 +610,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { ref, reactive, computed, onMounted } from "vue";
+import { useRoute } from "vue-router";
 
 const config = useRuntimeConfig();
 const API = config.public.apiBase;
@@ -424,48 +624,65 @@ const privacyAgreed = ref(false);
 function acceptPrivacy() {
   if (privacyAgreed.value) {
     showPrivacyModal.value = false;
-    screen.value = 'review';
+    screen.value = "review";
   }
 }
 
-const screen = ref('token');   // 'token' | 'review' | 'success'
+const screen = ref("token"); // 'token' | 'review' | 'success'
 const isLoading = ref(false);
-const loadingMsg = ref('Loading…');
+const loadingMsg = ref("Loading…");
 
-const tokenInput = ref('');
-const supervisorEmailPrefix = ref('');
-const tokenError = ref('');
+const tokenInput = ref("");
+const supervisorEmailPrefix = ref("");
+const tokenError = ref("");
 const emailError = ref(false);
 
 const idpData = ref({});
 const competencyRows = computed(() => {
-  try { return JSON.parse(idpData.value.competencyRowsJson || '[]'); } catch { return []; }
+  try {
+    return JSON.parse(idpData.value.competencyRowsJson || "[]");
+  } catch {
+    return [];
+  }
 });
 const agapRows = computed(() => {
-  try { return JSON.parse(idpData.value.agapRowsJson || '[]'); } catch { return []; }
+  try {
+    return JSON.parse(idpData.value.agapRowsJson || "[]");
+  } catch {
+    return [];
+  }
 });
 const proactRows = computed(() => {
-  try { return JSON.parse(idpData.value.proactRowsJson || '[]'); } catch { return []; }
+  try {
+    return JSON.parse(idpData.value.proactRowsJson || "[]");
+  } catch {
+    return [];
+  }
 });
 
 const assessment = reactive({
-  perfGapsYN: '',
-  perfGapsSpec: '',
-  readinessYN: '',
-  readinessRemarks: '',
+  perfGapsYN: "",
+  perfGapsSpec: "",
+  readinessYN: "",
+  readinessRemarks: "",
   interventions: [],
-  interventionOther: '',
-  implementationPeriod: '',
-  implYear: '',
-  additionalComments: '',
+  interventionOther: "",
+  implementationPeriod: "",
+  implYear: "",
+  additionalComments: "",
 });
 
 const interventionOptions = [
-  'Technical Training', 'Soft Skills', 'Leadership Development',
-  'Coaching / Mentoring', 'Academic Advancement', 'Job Rotation / Cross-training', 'Others',
+  "Technical Training",
+  "Soft Skills",
+  "Leadership Development",
+  "Coaching / Mentoring",
+  "Academic Advancement",
+  "Job Rotation / Cross-training",
+  "Others",
 ];
-const periodOptions = ['Q1', 'Q2', 'Q3', 'Q4', 'Within this year', 'Next year'];
-const yearOptions = ['2026', '2027', '2028', '2029'];
+const periodOptions = ["Q1", "Q2", "Q3", "Q4", "Within this year", "Next year"];
+const yearOptions = ["2026", "2027", "2028", "2029"];
 
 // ── On mount: check URL for ref param ─────────────────────────────────────
 onMounted(() => {
@@ -475,44 +692,63 @@ onMounted(() => {
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 function clusterClass(group) {
-  const map = { Core: 'cluster-core', Leadership: 'cluster-leadership', Organizational: 'cluster-org', Technical: 'cluster-tech' };
-  return map[group] || '';
+  const map = {
+    Core: "cluster-core",
+    Leadership: "cluster-leadership",
+    Organizational: "cluster-org",
+    Technical: "cluster-tech",
+  };
+  return map[group] || "";
 }
 
 // ── Load by token ──────────────────────────────────────────────────────────
 async function loadByToken() {
-  tokenError.value = '';
+  tokenError.value = "";
   emailError.value = false;
 
   const token = tokenInput.value.trim();
-  const email = supervisorEmailPrefix.value.trim() + '@carsu.edu.ph';
+  const email = supervisorEmailPrefix.value.trim() + "@carsu.edu.ph";
 
-  if (!token) { tokenError.value = 'Please enter the Reference ID.'; return; }
-  if (!supervisorEmailPrefix.value.trim()) { emailError.value = true; tokenError.value = 'Please enter your CarSU email.'; return; }
+  if (!token) {
+    tokenError.value = "Please enter the Reference ID.";
+    return;
+  }
+  if (!supervisorEmailPrefix.value.trim()) {
+    emailError.value = true;
+    tokenError.value = "Please enter your CarSU email.";
+    return;
+  }
 
   isLoading.value = true;
-  loadingMsg.value = 'Loading IDP submission…';
+  loadingMsg.value = "Loading IDP submission…";
 
   try {
     const res = await fetch(`${API}/api/idp/${token}`);
-    if (!res.ok) { tokenError.value = 'IDP not found. Please check your Reference ID.'; return; }
+    if (!res.ok) {
+      tokenError.value = "IDP not found. Please check your Reference ID.";
+      return;
+    }
 
     const data = await res.json();
 
     // Verify the supervisor email matches
-    if (data.supervisorEmail && data.supervisorEmail.toLowerCase() !== email.toLowerCase()) {
-      tokenError.value = 'Email does not match the supervisor on record for this IDP.';
+    if (
+      data.supervisorEmail &&
+      data.supervisorEmail.toLowerCase() !== email.toLowerCase()
+    ) {
+      tokenError.value =
+        "Email does not match the supervisor on record for this IDP.";
       return;
     }
-    if (data.status === 'COMPLETE') {
-      tokenError.value = 'This IDP has already been reviewed and submitted.';
+    if (data.status === "COMPLETE") {
+      tokenError.value = "This IDP has already been reviewed and submitted.";
       return;
     }
 
     idpData.value = data;
     showPrivacyModal.value = true;
   } catch (err) {
-    tokenError.value = 'Network error: ' + err.message;
+    tokenError.value = "Network error: " + err.message;
   } finally {
     isLoading.value = false;
   }
@@ -520,13 +756,19 @@ async function loadByToken() {
 
 // ── Submit assessment ──────────────────────────────────────────────────────
 async function submitAssessment() {
-  if (!assessment.perfGapsYN) { alert('Please indicate if there are performance gaps.'); return; }
-  if (!assessment.readinessYN) { alert('Please indicate readiness for advancement.'); return; }
+  if (!assessment.perfGapsYN) {
+    alert("Please indicate if there are performance gaps.");
+    return;
+  }
+  if (!assessment.readinessYN) {
+    alert("Please indicate readiness for advancement.");
+    return;
+  }
 
   let interventions = [...assessment.interventions];
-  if (interventions.includes('Others') && assessment.interventionOther.trim()) {
-    interventions = interventions.filter(v => v !== 'Others');
-    interventions.push('Others: ' + assessment.interventionOther.trim());
+  if (interventions.includes("Others") && assessment.interventionOther.trim()) {
+    interventions = interventions.filter((v) => v !== "Others");
+    interventions.push("Others: " + assessment.interventionOther.trim());
   }
 
   const payload = {
@@ -544,22 +786,25 @@ async function submitAssessment() {
   };
 
   isLoading.value = true;
-  loadingMsg.value = 'Submitting your assessment…';
+  loadingMsg.value = "Submitting your assessment…";
 
   try {
-    const res = await fetch(`${API}/api/idp/${idpData.value.refId}/supervisor`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
+    const res = await fetch(
+      `${API}/api/idp/${idpData.value.refId}/supervisor`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      },
+    );
     if (!res.ok) {
       const err = await res.text();
-      alert('Submission failed: ' + err);
+      alert("Submission failed: " + err);
       return;
     }
-    screen.value = 'success';
+    screen.value = "success";
   } catch (err) {
-    alert('Network error: ' + err.message);
+    alert("Network error: " + err.message);
   } finally {
     isLoading.value = false;
   }
@@ -583,7 +828,7 @@ async function submitAssessment() {
   border-radius: 14px;
   max-width: 560px;
   width: 100%;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   overflow: hidden;
 }
 .privacy-header {
@@ -613,12 +858,16 @@ async function submitAssessment() {
   max-height: 55vh;
   overflow-y: auto;
 }
-.privacy-body p { margin: 0 0 12px; }
+.privacy-body p {
+  margin: 0 0 12px;
+}
 .privacy-body ul {
   margin: 0 0 12px;
   padding-left: 20px;
 }
-.privacy-body ul li { margin-bottom: 4px; }
+.privacy-body ul li {
+  margin-bottom: 4px;
+}
 .privacy-checkbox {
   display: flex;
   align-items: flex-start;
@@ -695,23 +944,33 @@ async function submitAssessment() {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,20,0,0.65);
+  background: rgba(0, 20, 0, 0.65);
   z-index: 999;
   align-items: center;
   justify-content: center;
   flex-direction: column;
   gap: 16px;
 }
-.overlay.active { display: flex; }
+.overlay.active {
+  display: flex;
+}
 .spinner {
-  width: 48px; height: 48px;
-  border: 4px solid rgba(255,255,255,0.2);
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(255, 255, 255, 0.2);
   border-top-color: var(--gold);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
-.overlay p { color: #fff; font-size: 15px; }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.overlay p {
+  color: #fff;
+  font-size: 15px;
+}
 
 /* ── Token screen ── */
 .token-wrap {
@@ -728,7 +987,7 @@ async function submitAssessment() {
   padding: 48px 40px;
   max-width: 460px;
   width: 100%;
-  box-shadow: 0 8px 40px rgba(0,51,0,0.12);
+  box-shadow: 0 8px 40px rgba(0, 51, 0, 0.12);
   border: 1px solid var(--border);
 }
 .token-logo {
@@ -736,9 +995,13 @@ async function submitAssessment() {
   justify-content: center;
   margin-bottom: 20px;
 }
-.token-logo img { width: 64px; height: 64px; object-fit: contain; }
+.token-logo img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+}
 .token-card h2 {
-  font-family: 'Playfair Display', serif;
+  font-family: "Playfair Display", serif;
   font-size: 22px;
   color: var(--navy);
   text-align: center;
@@ -769,8 +1032,13 @@ async function submitAssessment() {
   margin-top: 16px;
   transition: background 0.2s;
 }
-.btn-load:hover { background: var(--navy-mid); }
-.btn-load:disabled { background: #aaa; cursor: not-allowed; }
+.btn-load:hover {
+  background: var(--navy-mid);
+}
+.btn-load:disabled {
+  background: #aaa;
+  cursor: not-allowed;
+}
 
 /* ── Page nav ── */
 .page-nav {
@@ -779,27 +1047,41 @@ async function submitAssessment() {
   display: flex;
   align-items: center;
   gap: 0;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 .back-link {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   padding: 10px 0;
-  color: rgba(255,255,255,0.75);
+  color: rgba(255, 255, 255, 0.75);
   text-decoration: none;
   font-size: 12.5px;
   font-weight: 500;
   transition: color 0.2s;
 }
-.back-link:hover { color: #fff; }
-.back-link svg {
-  width: 13px; height: 13px;
-  stroke: currentColor; fill: none;
-  stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+.back-link:hover {
+  color: #fff;
 }
-.nav-sep { color: rgba(255,255,255,0.25); font-size: 13px; margin: 0 10px; }
-.nav-current { font-size: 12.5px; color: var(--gold); font-weight: 600; }
+.back-link svg {
+  width: 13px;
+  height: 13px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.nav-sep {
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 13px;
+  margin: 0 10px;
+}
+.nav-current {
+  font-size: 12.5px;
+  color: var(--gold);
+  font-weight: 600;
+}
 
 /* ── Container ── */
 .container {
@@ -816,12 +1098,15 @@ async function submitAssessment() {
   border-bottom: 3px solid var(--navy);
 }
 .page-title h2 {
-  font-family: 'Playfair Display', serif;
+  font-family: "Playfair Display", serif;
   font-size: 28px;
   color: var(--navy);
   margin-bottom: 6px;
 }
-.page-title p { color: var(--text-light); font-size: 14px; }
+.page-title p {
+  color: var(--text-light);
+  font-size: 14px;
+}
 .ref-badge {
   display: inline-block;
   margin-top: 12px;
@@ -839,15 +1124,21 @@ async function submitAssessment() {
 .section-card {
   background: var(--white);
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,51,0,0.07);
+  box-shadow: 0 2px 8px rgba(0, 51, 0, 0.07);
   margin-bottom: 28px;
   overflow: hidden;
   border: 1px solid var(--border);
   animation: fadeUp 0.4s ease both;
 }
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .section-header {
   background: var(--navy);
@@ -859,32 +1150,60 @@ async function submitAssessment() {
 .section-num {
   background: var(--gold);
   color: var(--navy);
-  width: 28px; height: 28px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 13px; flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
 }
-.section-header h3 { color: #fff; font-size: 15px; font-weight: 600; }
-.section-header p { color: rgba(255,255,255,0.6); font-size: 12px; margin-top: 1px; }
+.section-header h3 {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+}
+.section-header p {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  margin-top: 1px;
+}
 .readonly-badge {
   margin-left: auto;
-  background: rgba(255,204,0,0.2);
+  background: rgba(255, 204, 0, 0.2);
   color: var(--gold-light);
-  font-size: 11px; font-weight: 600;
+  font-size: 11px;
+  font-weight: 600;
   padding: 4px 10px;
   border-radius: 20px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
-.section-body { padding: 36px; }
+.section-body {
+  padding: 36px;
+}
 
 /* ── Read-only grid ── */
-.ro-grid { display: grid; gap: 16px; }
-.ro-grid-2 { grid-template-columns: 1fr 1fr; }
-.ro-field { display: flex; flex-direction: column; gap: 4px; }
-.ro-field.span-2 { grid-column: span 2; }
+.ro-grid {
+  display: grid;
+  gap: 16px;
+}
+.ro-grid-2 {
+  grid-template-columns: 1fr 1fr;
+}
+.ro-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ro-field.span-2 {
+  grid-column: span 2;
+}
 .ro-label {
-  font-size: 11px; font-weight: 600;
+  font-size: 11px;
+  font-weight: 600;
   color: var(--text-light);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -900,7 +1219,10 @@ async function submitAssessment() {
 }
 
 /* ── Tables ── */
-.table-wrapper { overflow-x: auto; margin-top: 8px; }
+.table-wrapper {
+  overflow-x: auto;
+  margin-top: 8px;
+}
 .ro-table {
   width: 100%;
   border-collapse: separate;
@@ -908,27 +1230,47 @@ async function submitAssessment() {
   font-size: 13px;
   min-width: 600px;
 }
-.ro-table thead tr { background: var(--navy-mid, #1a5c1a); }
+.ro-table thead tr {
+  background: var(--navy-mid, #1a5c1a);
+}
 .ro-table thead th {
   padding: 10px 12px;
   color: #fff;
-  font-weight: 600; font-size: 11px;
-  text-transform: uppercase; letter-spacing: 0.05em;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   text-align: left;
-  border-right: 1px solid rgba(255,255,255,0.1);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
 }
-.ro-table thead th:last-child { border-right: none; }
-.ro-table tbody tr { border-bottom: 1px solid var(--border); }
-.ro-table tbody tr:nth-child(even) { background: #f9f8f5; }
+.ro-table thead th:last-child {
+  border-right: none;
+}
+.ro-table tbody tr {
+  border-bottom: 1px solid var(--border);
+}
+.ro-table tbody tr:nth-child(even) {
+  background: #f9f8f5;
+}
 .ro-table tbody td {
   padding: 10px 12px;
   vertical-align: top;
   border-right: 1px solid var(--border);
   font-size: 13px;
 }
-.ro-table tbody td:last-child { border-right: none; }
-.empty-row td { text-align: center; color: var(--text-light); font-style: italic; }
-.tc { text-align: center; font-weight: 600; color: var(--text-light); }
+.ro-table tbody td:last-child {
+  border-right: none;
+}
+.empty-row td {
+  text-align: center;
+  color: var(--text-light);
+  font-style: italic;
+}
+.tc {
+  text-align: center;
+  font-weight: 600;
+  color: var(--text-light);
+}
 
 /* ── Cluster badges ── */
 .cluster-badge {
@@ -940,19 +1282,41 @@ async function submitAssessment() {
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
-.cluster-core { background: #e8f4e8; color: #2d7a2d; }
-.cluster-leadership { background: #e8eef8; color: #1a4080; }
-.cluster-org { background: #f8f0e8; color: #8b5e1a; }
-.cluster-tech { background: #f0e8f8; color: #6b1a8b; }
+.cluster-core {
+  background: #e8f4e8;
+  color: #2d7a2d;
+}
+.cluster-leadership {
+  background: #e8eef8;
+  color: #1a4080;
+}
+.cluster-org {
+  background: #f8f0e8;
+  color: #8b5e1a;
+}
+.cluster-tech {
+  background: #f0e8f8;
+  color: #6b1a8b;
+}
 
 /* ── Section IV form ── */
-.field-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
-.field-label {
-  font-size: 12px; font-weight: 600;
-  color: var(--navy-mid, #1a5c1a);
-  text-transform: uppercase; letter-spacing: 0.05em;
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
 }
-.req { color: var(--error); margin-left: 2px; }
+.field-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--navy-mid, #1a5c1a);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.req {
+  color: var(--error);
+  margin-left: 2px;
+}
 
 /* Token guidance label */
 .token-guidance {
@@ -972,7 +1336,9 @@ async function submitAssessment() {
   overflow: hidden;
   background: var(--input-bg);
 }
-.email-prefix-wrapper.error { border-color: var(--error); }
+.email-prefix-wrapper.error {
+  border-color: var(--error);
+}
 .email-prefix-input {
   flex: 1;
   border: none !important;
@@ -990,29 +1356,46 @@ async function submitAssessment() {
   white-space: nowrap;
 }
 
-input[type="text"], input[type="email"], textarea, select {
+input[type="text"],
+input[type="email"],
+textarea,
+select {
   width: 100%;
   padding: 10px 14px;
   border: 1.5px solid var(--border);
   border-radius: 8px;
   background: var(--input-bg);
-  font-family: 'Source Sans 3', sans-serif;
+  font-family: "Source Sans 3", sans-serif;
   font-size: 14px;
   color: var(--text);
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
   box-sizing: border-box;
 }
-input:focus, textarea:focus, select:focus {
+input:focus,
+textarea:focus,
+select:focus {
   border-color: var(--navy);
-  box-shadow: 0 0 0 3px rgba(0,51,0,0.08);
+  box-shadow: 0 0 0 3px rgba(0, 51, 0, 0.08);
   background: var(--white);
 }
-textarea { resize: vertical; min-height: 80px; }
+textarea {
+  resize: vertical;
+  min-height: 80px;
+}
 
-.checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
 .checkbox-item {
-  display: flex; align-items: center; gap: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   cursor: pointer;
   padding: 8px 14px;
   border: 1.5px solid var(--border);
@@ -1021,47 +1404,89 @@ textarea { resize: vertical; min-height: 80px; }
   transition: all 0.2s;
   font-size: 13px;
 }
-.checkbox-item:hover { border-color: var(--navy); background: var(--white); }
-.checkbox-item.checked { border-color: var(--navy); background: rgba(0,51,0,0.05); }
+.checkbox-item:hover {
+  border-color: var(--navy);
+  background: var(--white);
+}
+.checkbox-item.checked {
+  border-color: var(--navy);
+  background: rgba(0, 51, 0, 0.05);
+}
 .checkbox-item input[type="radio"],
 .checkbox-item input[type="checkbox"] {
-  width: auto; padding: 0; border: none;
-  background: none; accent-color: var(--navy); cursor: pointer;
+  width: auto;
+  padding: 0;
+  border: none;
+  background: none;
+  accent-color: var(--navy);
+  cursor: pointer;
 }
 
 /* Assessment table */
-.assessment-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-.assessment-table th, .assessment-table td {
+.assessment-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+.assessment-table th,
+.assessment-table td {
   border: 1.5px solid var(--border);
   padding: 14px 16px;
   vertical-align: top;
 }
 .assessment-table thead th {
   background: var(--navy);
-  color: #fff; font-size: 12px;
-  text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;
+  color: #fff;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
 }
-.area-label { font-weight: 600; color: #1a5c1a; font-size: 13px; min-width: 160px; }
-.guide-q { color: var(--text-light); font-size: 13px; min-width: 220px; }
-.response-cell { min-width: 260px; }
+.area-label {
+  font-weight: 600;
+  color: #1a5c1a;
+  font-size: 13px;
+  min-width: 160px;
+}
+.guide-q {
+  color: var(--text-light);
+  font-size: 13px;
+  min-width: 220px;
+}
+.response-cell {
+  min-width: 260px;
+}
 
 /* Cert block */
 .cert-block {
-  background: rgba(255,204,0,0.08);
+  background: rgba(255, 204, 0, 0.08);
   border: 1.5px solid var(--gold);
   border-radius: 10px;
   padding: 20px 24px;
   margin-top: 24px;
 }
-.cert-block p { font-size: 13px; color: var(--text-light); font-style: italic; margin-bottom: 16px; }
+.cert-block p {
+  font-size: 13px;
+  color: var(--text-light);
+  font-style: italic;
+  margin-bottom: 16px;
+}
 .sup-name {
-  font-weight: 600; color: var(--navy); font-size: 16px;
+  font-weight: 600;
+  color: var(--navy);
+  font-size: 16px;
   padding: 12px 0;
   border-bottom: 2px solid var(--navy);
-  display: inline-block; min-width: 300px;
-  font-family: 'Playfair Display', serif;
+  display: inline-block;
+  min-width: 300px;
+  font-family: "Playfair Display", serif;
 }
-.cert-block small { font-size: 11px; color: var(--text-light); display: block; margin-top: 4px; }
+.cert-block small {
+  font-size: 11px;
+  color: var(--text-light);
+  display: block;
+  margin-top: 4px;
+}
 
 /* Submit area */
 .submit-area {
@@ -1070,60 +1495,97 @@ textarea { resize: vertical; min-height: 80px; }
   border-radius: 12px;
   padding: 36px;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0,51,0,0.07);
+  box-shadow: 0 2px 8px rgba(0, 51, 0, 0.07);
 }
-.submit-area p { font-size: 13px; color: var(--text-light); margin-bottom: 18px; }
+.submit-area p {
+  font-size: 13px;
+  color: var(--text-light);
+  margin-bottom: 18px;
+}
 .btn-submit {
   padding: 14px 48px;
   background: var(--navy);
   color: #fff;
-  border: none; border-radius: 10px;
-  font-size: 16px; font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-  box-shadow: 0 4px 16px rgba(0,51,0,0.2);
+  transition:
+    background 0.2s,
+    transform 0.15s,
+    box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(0, 51, 0, 0.2);
 }
-.btn-submit:hover { background: #1a5c1a; transform: translateY(-1px); }
-.btn-submit:disabled { background: #aaa; cursor: not-allowed; transform: none; }
+.btn-submit:hover {
+  background: #1a5c1a;
+  transform: translateY(-1px);
+}
+.btn-submit:disabled {
+  background: #aaa;
+  cursor: not-allowed;
+  transform: none;
+}
 
 /* Success */
 .success-wrap {
   min-height: 100vh;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--cream); padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cream);
+  padding: 24px;
 }
 .success-card {
   background: var(--white);
   border-radius: 16px;
   padding: 48px 40px;
-  max-width: 520px; width: 100%;
+  max-width: 520px;
+  width: 100%;
   text-align: center;
-  box-shadow: 0 8px 40px rgba(0,51,0,0.12);
+  box-shadow: 0 8px 40px rgba(0, 51, 0, 0.12);
   border: 1px solid var(--border);
 }
 .success-icon {
-  width: 72px; height: 72px;
-  background: rgba(26,107,60,0.1);
+  width: 72px;
+  height: 72px;
+  background: rgba(26, 107, 60, 0.1);
   border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 36px;
   margin: 0 auto 24px;
 }
 .success-card h2 {
-  font-family: 'Playfair Display', serif;
-  font-size: 24px; color: var(--navy); margin-bottom: 12px;
+  font-family: "Playfair Display", serif;
+  font-size: 24px;
+  color: var(--navy);
+  margin-bottom: 12px;
 }
-.success-card > p { color: var(--text-light); font-size: 14px; margin-bottom: 20px; }
+.success-card > p {
+  color: var(--text-light);
+  font-size: 14px;
+  margin-bottom: 20px;
+}
 .notif-note {
-  background: rgba(0,51,0,0.06);
+  background: rgba(0, 51, 0, 0.06);
   border-left: 4px solid var(--navy);
   border-radius: 8px;
   padding: 14px 18px;
   text-align: left;
-  display: flex; flex-direction: column; gap: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
-.notif-note strong { color: var(--navy); font-size: 14px; }
-.notif-note span { color: var(--text-light); font-size: 13px; }
+.notif-note strong {
+  color: var(--navy);
+  font-size: 14px;
+}
+.notif-note span {
+  color: var(--text-light);
+  font-size: 13px;
+}
 
 .btn-home {
   display: inline-block;
@@ -1135,9 +1597,14 @@ textarea { resize: vertical; min-height: 80px; }
   font-size: 14px;
   font-weight: 600;
   text-decoration: none;
-  transition: background 0.2s, transform 0.15s;
+  transition:
+    background 0.2s,
+    transform 0.15s;
 }
-.btn-home:hover { background: #1a5c1a; transform: translateY(-1px); }
+.btn-home:hover {
+  background: #1a5c1a;
+  transform: translateY(-1px);
+}
 
 /* ── Implementation period step ── */
 .impl-hint {
@@ -1157,10 +1624,20 @@ textarea { resize: vertical; min-height: 80px; }
 }
 
 @media (max-width: 640px) {
-  .container { padding: 24px 16px 60px; }
-  .ro-grid-2 { grid-template-columns: 1fr; }
-  .ro-field.span-2 { grid-column: span 1; }
-  .section-body { padding: 24px 20px; }
-  .token-card { padding: 32px 20px; }
+  .container {
+    padding: 24px 16px 60px;
+  }
+  .ro-grid-2 {
+    grid-template-columns: 1fr;
+  }
+  .ro-field.span-2 {
+    grid-column: span 1;
+  }
+  .section-body {
+    padding: 24px 20px;
+  }
+  .token-card {
+    padding: 32px 20px;
+  }
 }
 </style>
