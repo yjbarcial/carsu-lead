@@ -245,10 +245,6 @@
             <option value="COMPLETE">Completed</option>
             <option value="OVERDUE">Overdue</option>
           </select>
-          <select v-model="idpCampusFilter">
-            <option value="">All Campuses</option>
-            <option v-for="c in idpCampuses" :key="c">{{ c }}</option>
-          </select>
           <select v-model="idpYearFilter">
             <option value="">All Years</option>
             <option v-for="y in idpYears" :key="y">{{ y }}</option>
@@ -522,7 +518,6 @@
                 <td><strong>{{ r.employeeName || '—' }}</strong><br/><span class="sub-text">{{ r.email || '' }}</span></td>
                 <td>{{ r.position || '—' }}</td>
                 <td>{{ r.office || '—' }}</td>
-                <td>{{ r.campus || '—' }}</td>
                 <td>{{ r.yearCovered || '—' }}</td>
                 <td class="date-cell">{{ fmtDate(r.submittedAt) }}</td>
                 <td><span :class="statusBadgeClass(r.status)">{{ statusBadgeLabel(r.status) }}</span></td>
@@ -687,10 +682,6 @@
         <!-- shared filters -->
         <div class="filter-bar">
           <input type="text" v-model="lnaSearch" placeholder="🔍  Search office, head, email..." />
-          <select v-model="lnaCampusFilter">
-            <option value="">All Campuses</option>
-            <option v-for="c in idpCampuses" :key="c">{{ c }}</option>
-          </select>
           <select v-model="lnaYearFilter">
             <option value="">All Years</option>
             <option v-for="y in lnaYears" :key="y">{{ y }}</option>
@@ -1330,10 +1321,8 @@ const hrUsers = ref([]);
 
 const idpSearch       = ref('');
 const idpStatusFilter = ref('');
-const idpCampusFilter = ref('');
 const idpYearFilter   = ref('');
 const lnaSearch       = ref('');
-const lnaCampusFilter = ref('');
 const lnaYearFilter   = ref('');
 
 // ── Advanced filter state ──
@@ -1441,8 +1430,8 @@ const lnaSubTabs = [
   { key: 'sources',    label: 'Section III — Data Sources',   icon: '📊' },
 ];
 
-const idpCols = ['Ref ID','Name','Position','Office','Campus','Year','Submitted','Status'];
-const lnaCols = ['Ref ID','Office / Unit','Head of Office','Campus','Year','Purpose','Personnel','Submitted'];
+const idpCols = ['Ref ID','Name','Position','Office','Year','Submitted','Status'];
+const lnaCols = ['Ref ID','Office / Unit','Head of Office','Year','Purpose','Personnel','Submitted'];
 
 const POSITION_LEVELS = [
   { key: 'first',        label: 'First Level Positions' },
@@ -1460,7 +1449,6 @@ const COMP_CLUSTERS = [
 ];
 
 // ── COMPUTED — FILTERS ─────────────────────────────────────────────────────
-const idpCampuses = computed(() => [...new Set(idps.value.map(r => r.campus).filter(Boolean))].sort());
 const idpYears    = computed(() => [...new Set(idps.value.map(r => r.yearCovered).filter(Boolean))].sort().reverse());
 const lnaYears    = computed(() => [...new Set(lnas.value.map(r => r.yearCovered).filter(Boolean))].sort().reverse());
 
@@ -1469,14 +1457,13 @@ const filteredLNAs = computed(() => {
   const q = lnaSearch.value.toLowerCase();
   let rows = lnas.value.filter(r => {
     const ms = !q || [r.refId, r.office, r.headOfUnit, r.email, r.campus].some(v => (v||'').toLowerCase().includes(q));
-    return ms && (!lnaCampusFilter.value || r.campus === lnaCampusFilter.value)
-              && (!lnaYearFilter.value   || r.yearCovered === lnaYearFilter.value)
+    return ms && (!lnaYearFilter.value   || r.yearCovered === lnaYearFilter.value)
               && (!lnaPurposeFilter.value || r.purpose === lnaPurposeFilter.value)
               && (!lnaOfficeFilter.value  || r.office  === lnaOfficeFilter.value);
   });
   const { col, asc } = sortState.lna;
   if (col >= 0) {
-    const ks = ['refId','office','headOfUnit','campus','yearCovered','purpose','totalPersonnel','submittedAt'];
+    const ks = ['refId','office','headOfUnit','yearCovered','purpose','totalPersonnel','submittedAt'];
     rows = [...rows].sort((a,b) => { const av=(a[ks[col]]||'').toLowerCase(), bv=(b[ks[col]]||'').toLowerCase(); return asc ? av.localeCompare(bv) : bv.localeCompare(av); });
   }
   return rows;
@@ -1493,14 +1480,13 @@ const baseFilteredIDPs = computed(() => {
     const ms = !q || [r.refId, r.employeeName, r.email, r.office, r.campus, r.position].some(v => (v||'').toLowerCase().includes(q));
     return ms
       && (!idpStatusFilter.value   || r.status === idpStatusFilter.value)
-      && (!idpCampusFilter.value   || r.campus === idpCampusFilter.value)
       && (!idpYearFilter.value     || r.yearCovered === idpYearFilter.value)
       && (!idpOfficeFilter.value   || r.office === idpOfficeFilter.value)
       && (!idpPositionFilter.value || r.position === idpPositionFilter.value);
   });
   const { col, asc } = sortState.idp;
   if (col >= 0) {
-    const ks = ['refId','employeeName','position','office','campus','yearCovered','submittedAt','status'];
+    const ks = ['refId','employeeName','position','office','yearCovered','submittedAt','status'];
     rows = [...rows].sort((a,b) => { const av=(a[ks[col]]||'').toLowerCase(), bv=(b[ks[col]]||'').toLowerCase(); return asc ? av.localeCompare(bv) : bv.localeCompare(av); });
   }
   return rows;
