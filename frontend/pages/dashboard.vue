@@ -1937,7 +1937,13 @@ const lnaInsightSourceOptions = computed(() => {
 });
 const lnaInsightPersonnelOptions = computed(() => {
   const freq = {};
-  lnaInsightRows.value.forEach(r => { const v=(r.personnel||'').trim(); if(v) freq[v]=(freq[v]||0)+1; });
+  lnaInsightRows.value.forEach(r => {
+    const raw = r.personnel;
+    const items = Array.isArray(raw)
+      ? raw
+      : (raw || '').split(',').map(s => s.trim()).filter(Boolean);
+    items.forEach(v => { freq[v] = (freq[v] || 0) + 1; });
+  });
   return Object.entries(freq).sort((a,b)=>a[0].localeCompare(b[0])).map(([v,c])=>({v,c}));
 });
 const lnaInsightInterventionOptions = computed(() => {
@@ -1948,7 +1954,13 @@ const lnaInsightInterventionOptions = computed(() => {
 const filteredInsightRows = computed(() =>
   lnaInsightRows.value.filter(r =>
     (!lnaInsightSourceFilter.value         || r.dataSource   === lnaInsightSourceFilter.value)
-    && (!lnaInsightPersonnelFilter.value    || r.personnel === lnaInsightPersonnelFilter.value)
+    && (!lnaInsightPersonnelFilter.value    || (() => {
+          const raw = r.personnel;
+          const items = Array.isArray(raw)
+            ? raw
+            : (raw || '').split(',').map(s => s.trim()).filter(Boolean);
+          return items.includes(lnaInsightPersonnelFilter.value);
+        })())
     && (!lnaInsightInterventionFilter.value || r.intervention === lnaInsightInterventionFilter.value)
   )
 );
