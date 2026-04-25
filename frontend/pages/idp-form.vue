@@ -57,7 +57,7 @@
       Back to Home
     </a>
     <span class="nav-sep">/</span>
-    <span class="nav-current">Individual Development Plan (IDP) 2026-2029</span>
+    <span class="nav-current">Individual Development Plan (IDP) 2026-2031</span>
   </div>
  
   <!-- ═══════════════════════════════════════════════ -->
@@ -147,7 +147,7 @@
   <!-- ═══════════════════════════════════════════════ -->
   <div v-if="stage === 'stage1'" class="container">
     <div class="form-title-block">
-      <h2>Individual Development Plan (IDP) 2026-2029</h2>
+      <h2>Individual Development Plan (IDP) 2026-2031</h2>
       <p>
         Complete all sections carefully. Your supervisor will be notified
         automatically upon submission.
@@ -615,6 +615,8 @@
                     <option>2026-2027</option>
                     <option>2027-2028</option>
                     <option>2028-2029</option>
+                    <option>2029-2030</option>
+                    <option>2030-2031</option>
                   </select>
                 </td>
                 <td>
@@ -704,6 +706,8 @@
                     <option>2027</option>
                     <option>2028</option>
                     <option>2029</option>
+                    <option>2029-2030</option>
+                    <option>2030-2031</option>
                   </select>
                 </td>
                 <td>
@@ -784,6 +788,8 @@
                     <option>2027</option>
                     <option>2028</option>
                     <option>2029</option>
+                    <option>2030</option>
+                    <option>2031</option>
                   </select>
                 </td>
               </tr>

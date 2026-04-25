@@ -135,7 +135,7 @@
     <div class="container">
       <!-- Title -->
       <div class="page-title">
-        <h2>Individual Development Plan (IDP) 2026-2029</h2>
+        <h2>Individual Development Plan (IDP) 2026-2031</h2>
         <p>
           Supervisor's Review — Read-only view of employee submission. Complete
           Section IV below.
@@ -681,8 +681,8 @@ const interventionOptions = [
   "Job Rotation / Cross-training",
   "Others",
 ];
-const periodOptions = ["Q1", "Q2", "Q3", "Q4", "Within this year", "Next year"];
-const yearOptions = ["2026", "2027", "2028", "2029"];
+const periodOptions = ["Q1", "Q2", "Q3", "Q4"];
+const yearOptions = ["2026", "2027", "2028", "2029", "2030", "2031"];
 
 // ── On mount: check URL for ref param ─────────────────────────────────────
 onMounted(() => {
