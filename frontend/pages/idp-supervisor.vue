@@ -809,6 +809,7 @@ async function submitAssessment() {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap');
 /* ── Privacy Modal ── */
 .privacy-overlay {
   position: fixed;
@@ -998,7 +999,7 @@ async function submitAssessment() {
   object-fit: contain;
 }
 .token-card h2 {
-  font-family: "Playfair Display", serif;
+  font-family: "Roboto", sans-serif;
   font-size: 22px;
   color: var(--navy);
   text-align: center;
@@ -1095,7 +1096,7 @@ async function submitAssessment() {
   border-bottom: 3px solid var(--navy);
 }
 .page-title h2 {
-  font-family: "Playfair Display", serif;
+  font-family: "Roboto", sans-serif;
   font-size: 28px;
   color: var(--navy);
   margin-bottom: 6px;
@@ -1362,7 +1363,7 @@ select {
   border: 1.5px solid var(--border);
   border-radius: 8px;
   background: var(--input-bg);
-  font-family: "Source Sans 3", sans-serif;
+  font-family: "Roboto", sans-serif;
   font-size: 14px;
   color: var(--text);
   outline: none;
@@ -1476,7 +1477,7 @@ textarea {
   border-bottom: 2px solid var(--navy);
   display: inline-block;
   min-width: 300px;
-  font-family: "Playfair Display", serif;
+  font-family: "Roboto", sans-serif;
 }
 .cert-block small {
   font-size: 11px;
@@ -1555,7 +1556,7 @@ textarea {
   margin: 0 auto 24px;
 }
 .success-card h2 {
-  font-family: "Playfair Display", serif;
+  font-family: "Roboto", sans-serif;
   font-size: 24px;
   color: var(--navy);
   margin-bottom: 12px;

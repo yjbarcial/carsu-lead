@@ -150,6 +150,7 @@
 </template>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap');
 /* ── TOKENS ──────────────────────────────────────────── */
 :root {
   --gold: #ffcc00;
@@ -176,7 +177,7 @@ a { text-decoration: none; }
 .page {
   min-height: 100vh;
   background: #f9f7f2;
-  font-family: "Source Sans 3", "Segoe UI", sans-serif;
+  font-family: "Roboto", sans-serif;
   color: #333;
 }
 
@@ -271,7 +272,7 @@ a { text-decoration: none; }
   margin-bottom: 24px;
 }
 .hero-title-lead {
-  font-family: "Playfair Display", Georgia, serif;
+  font-family: "Roboto", sans-serif;
   font-size: clamp(72px, 14vw, 108px);
   font-weight: 700;
   color: #ffcc00;
@@ -403,7 +404,7 @@ a { text-decoration: none; }
 .tag-green  { color: #5adc3a; }
 
 .card-title {
-  font-family: "Playfair Display", Georgia, serif;
+  font-family: "Roboto", sans-serif;
   font-size: 20px;
   font-weight: 700;
   color: #003300;
@@ -466,7 +467,7 @@ a { text-decoration: none; }
   color: #b89400;
 }
 .help-title {
-  font-family: "Playfair Display", Georgia, serif;
+  font-family: "Roboto", sans-serif;
   font-size: 20px;
   font-weight: 700;
   color: #003300;

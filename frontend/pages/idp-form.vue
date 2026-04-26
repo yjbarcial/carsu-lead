@@ -850,7 +850,7 @@
     >
       <h2
         style="
-          font-family: 'Playfair Display', serif;
+          font-family: 'Roboto', sans-serif;
           font-size: 28px;
           color: var(--navy);
           margin-bottom: 6px;
@@ -2797,6 +2797,7 @@ async function submitStage2() {
 </script>
  
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap');
 /* ── Privacy Modal ── */
 .privacy-overlay {
   position: fixed;
@@ -2971,7 +2972,7 @@ async function submitStage2() {
   text-decoration: none;
   font-size: 12.5px;
   font-weight: 500;
-  font-family: "Source Sans 3", sans-serif;
+  font-family: "Roboto", sans-serif;
   letter-spacing: 0.02em;
   transition: color 0.2s;
   position: relative;
@@ -3019,7 +3020,7 @@ async function submitStage2() {
   font-size: 12.5px;
   color: var(--gold);
   font-weight: 600;
-  font-family: "Source Sans 3", sans-serif;
+  font-family: "Roboto", sans-serif;
   letter-spacing: 0.03em;
 }
  
@@ -3038,7 +3039,7 @@ async function submitStage2() {
   border-bottom: 2px solid var(--gold);
 }
 .form-title-block h2 {
-  font-family: "Playfair Display", serif;
+  font-family: "Roboto", sans-serif;
   font-size: 28px;
   color: var(--navy);
   margin-bottom: 6px;
@@ -3155,7 +3156,7 @@ textarea {
   border: 1.5px solid var(--border);
   border-radius: 8px;
   background: var(--input-bg);
-  font-family: "Source Sans 3", sans-serif;
+  font-family: "Roboto", sans-serif;
   font-size: 14px;
   color: var(--text);
   transition: border-color 0.2s, box-shadow 0.2s;
@@ -3325,7 +3326,7 @@ textarea {
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
-  font-family: "Source Sans 3", sans-serif;
+  font-family: "Roboto", sans-serif;
 }
 .btn-add-row:hover {
   background: var(--navy-mid);
@@ -3380,7 +3381,7 @@ textarea {
   color: var(--white);
   border: none;
   border-radius: 10px;
-  font-family: "Source Sans 3", sans-serif;
+  font-family: "Roboto", sans-serif;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
@@ -3459,7 +3460,7 @@ textarea {
   margin: 0 auto 24px;
 }
 .success-screen h2 {
-  font-family: "Playfair Display", serif;
+  font-family: "Roboto", sans-serif;
   font-size: 24px;
   color: var(--navy);
   margin-bottom: 12px;
@@ -3490,7 +3491,7 @@ textarea {
   color: var(--navy);
   border: 1.5px solid rgba(26, 77, 46, 0.2);
   border-radius: 9px;
-  font-family: "Source Sans 3", sans-serif;
+  font-family: "Roboto", sans-serif;
   font-size: 14px;
   font-weight: 600;
   text-decoration: none;
@@ -3513,7 +3514,7 @@ textarea {
   border: 1px solid var(--border);
 }
 .token-screen h2 {
-  font-family: "Playfair Display", serif;
+  font-family: "Roboto", sans-serif;
   font-size: 24px;
   color: var(--navy);
   margin-bottom: 10px;
@@ -3530,7 +3531,7 @@ textarea {
   color: var(--white);
   border: none;
   border-radius: 10px;
-  font-family: "Source Sans 3", sans-serif;
+  font-family: "Roboto", sans-serif;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -3689,7 +3690,7 @@ textarea {
   border-bottom: 2px solid var(--navy);
   display: inline-block;
   min-width: 300px;
-  font-family: "Playfair Display", serif;
+  font-family: "Roboto", sans-serif;
 }
 .cert-block small {
   font-size: 11px;
