@@ -79,7 +79,7 @@
           <div class="ov-card" :class="{ active: ovActive === 'idp-all' }" @click="toggleOv('idp-all')">
             <div class="ov-card-top">
               <span class="ov-card-label">Total IDPs</span>
-              <span class="ov-card-num">{{ idps.length }}</span>
+              <span class="ov-card-num">{{ ovFilteredIdps.length }}</span>
             </div>
             <div class="ov-card-sub">All submitted plans</div>
           </div>
@@ -91,15 +91,6 @@
               <span class="ov-card-num">{{ ovCounts.idpPending }}</span>
             </div>
             <div class="ov-card-sub">Awaiting supervisor</div>
-          </div>
-
-          <!-- IDP: With Supervisor -->
-          <div class="ov-card ov-card-blue" :class="{ active: ovActive === 'idp-supervisor' }" @click="toggleOv('idp-supervisor')">
-            <div class="ov-card-top">
-              <span class="ov-card-label">With Supervisor</span>
-              <span class="ov-card-num">{{ ovCounts.idpWithSup }}</span>
-            </div>
-            <div class="ov-card-sub">Notified, not yet reviewed</div>
           </div>
 
           <!-- IDP: Completed -->
@@ -118,27 +109,9 @@
           <div class="ov-card" :class="{ active: ovActive === 'lna-all' }" @click="toggleOv('lna-all')">
             <div class="ov-card-top">
               <span class="ov-card-label">Total LNAs</span>
-              <span class="ov-card-num">{{ lnas.length }}</span>
+              <span class="ov-card-num">{{ ovFilteredLnas.length }}</span>
             </div>
             <div class="ov-card-sub">Office assessments</div>
-          </div>
-
-          <!-- LNA: Offices -->
-          <div class="ov-card ov-card-green" :class="{ active: ovActive === 'lna-offices' }" @click="toggleOv('lna-offices')">
-            <div class="ov-card-top">
-              <span class="ov-card-label">Offices</span>
-              <span class="ov-card-num">{{ ovCounts.lnaOffices }}</span>
-            </div>
-            <div class="ov-card-sub">Unique units submitted</div>
-          </div>
-
-          <!-- LNA: Need Intervention -->
-          <div class="ov-card ov-card-red" :class="{ active: ovActive === 'lna-flagged' }" @click="toggleOv('lna-flagged')">
-            <div class="ov-card-top">
-              <span class="ov-card-label">Need Intervention</span>
-              <span class="ov-card-num">{{ ovCounts.lnaFlagged }}</span>
-            </div>
-            <div class="ov-card-sub">Flagged by cluster summary</div>
           </div>
 
         </div>
@@ -154,10 +127,16 @@
           <template v-if="ovActive.startsWith('idp')">
             <table class="dtbl">
               <thead><tr>
-                <th>Ref ID</th><th>Name</th><th>Position</th><th>Office</th><th>Year</th><th>Status</th><th>Submitted</th><th></th>
+                <th v-for="(col,i) in ovIdpCols" :key="col"
+                  :class="{ 'th-sortable': i > 0, 'th-sorted': sortState.ovIdp.col === i }"
+                  @click="i > 0 && sortTable('ovIdp',i)">
+                  {{ col }}
+                  <span v-if="i > 0" class="sort-ind">{{ sortIndicator('ovIdp',i) }}</span>
+                </th>
+                <th class="th-action"></th>
               </tr></thead>
               <tbody>
-                <tr v-if="!ovDrillRows.length" class="empty-row"><td colspan="8">No records.</td></tr>
+                <tr v-if="!ovDrillRows.length" class="empty-row"><td colspan="9">No records.</td></tr>
                 <tr v-for="r in ovDrillRows" :key="r.refId">
                   <td><code class="ref-code">{{ r.refId }}</code></td>
                   <td><strong>{{ r.employeeName || '—' }}</strong><br/><span class="sub-text">{{ r.email }}</span></td>
@@ -165,7 +144,8 @@
                   <td>{{ r.office || '—' }}</td>
                   <td>{{ r.yearCovered || '—' }}</td>
                   <td><span :class="statusBadgeClass(r.status)">{{ statusBadgeLabel(r.status) }}</span></td>
-                  <td class="date-cell">{{ fmtDate(r.submittedAt) }}</td>
+                  <td class="date-cell">{{ fmtDateTime(r.submittedAt) }}</td>
+                  <td class="date-cell">{{ r.status === 'COMPLETE' ? fmtDateTime(r.supervisorSignedAt) : '—' }}</td>
                   <td><button class="btn-view" @click="viewIDP(r.refId)">View</button></td>
                 </tr>
               </tbody>
@@ -176,7 +156,13 @@
           <template v-if="ovActive.startsWith('lna')">
             <table class="dtbl">
               <thead><tr>
-                <th>Ref ID</th><th>Office / Unit</th><th>Head of Office</th><th>Year</th><th>Purpose</th><th>Personnel</th><th>Submitted</th><th></th>
+                <th v-for="(col,i) in ovLnaCols" :key="col"
+                  :class="{ 'th-sortable': i > 0, 'th-sorted': sortState.ovLna.col === i }"
+                  @click="i > 0 && sortTable('ovLna',i)">
+                  {{ col }}
+                  <span v-if="i > 0" class="sort-ind">{{ sortIndicator('ovLna',i) }}</span>
+                </th>
+                <th class="th-action"></th>
               </tr></thead>
               <tbody>
                 <tr v-if="!ovDrillRows.length" class="empty-row"><td colspan="8">No records.</td></tr>
@@ -199,15 +185,25 @@
         <div v-if="!ovActive" class="chart-card" style="margin-top:0">
           <h4>Recent Submissions <span class="chart-sub" style="font-weight:400;font-size:11px">Latest 10</span></h4>
           <table class="dtbl" style="margin-top:10px">
-            <thead><tr><th>Ref ID</th><th>Type</th><th>Name / Office</th><th>Status</th><th>Submitted</th></tr></thead>
+            <thead><tr>
+              <th>Ref ID</th><th>Type</th><th>Name / Office</th><th>Position</th><th>Office</th>
+              <th>Year</th><th>Status</th><th>Submitted</th><th>Completed</th>
+            </tr></thead>
             <tbody>
-              <tr v-if="!recentActivity.length" class="empty-row"><td colspan="5">No submissions yet.</td></tr>
+              <tr v-if="!recentActivity.length" class="empty-row"><td colspan="9">No submissions yet.</td></tr>
               <tr v-for="r in recentActivity" :key="r.refId">
                 <td><code class="ref-code">{{ r.refId }}</code></td>
                 <td><span :class="r.type==='IDP'?'badge badge-green':'badge badge-gold'">{{ r.type }}</span></td>
                 <td>{{ r.label }}</td>
-                <td><span :class="statusBadgeClass(r.status)">{{ statusBadgeLabel(r.status) }}</span></td>
-                <td class="date-cell">{{ fmtDate(r.submittedAt) }}</td>
+                <td>{{ r.position || '—' }}</td>
+                <td>{{ r.office || '—' }}</td>
+                <td>{{ r.yearCovered || '—' }}</td>
+                <td>
+                  <span v-if="r.type === 'IDP'" :class="statusBadgeClass(r.status)">{{ statusBadgeLabel(r.status) }}</span>
+                  <span v-else class="badge badge-grey">Submitted</span>
+                </td>
+                <td class="date-cell">{{ fmtDateTime(r.submittedAt) }}</td>
+                <td class="date-cell">{{ r.type === 'IDP' && r.status === 'COMPLETE' ? fmtDateTime(r.completedAt) : '—' }}</td>
               </tr>
             </tbody>
           </table>
@@ -243,7 +239,6 @@
             <option value="">All Statuses</option>
             <option value="PENDING">Pending</option>
             <option value="COMPLETE">Completed</option>
-            <option value="OVERDUE">Overdue</option>
           </select>
           <select v-model="idpYearFilter">
             <option value="">All Years</option>
@@ -508,8 +503,13 @@
         <div v-if="idpSubTab === 'list'" class="tbl-wrap">
           <table class="dtbl">
             <thead><tr>
-              <th v-for="(col,i) in idpCols" :key="col" @click="sortTable('idp',i)">{{ col }}<span class="sort-ind">{{ sortIndicator('idp',i) }}</span></th>
-              <th>Action</th>
+              <th v-for="(col,i) in idpCols" :key="col"
+                :class="{ 'th-sortable': i > 0, 'th-sorted': sortState.idp.col === i }"
+                @click="i > 0 && sortTable('idp',i)">
+                {{ col }}
+                <span v-if="i > 0" class="sort-ind">{{ sortIndicator('idp',i) }}</span>
+              </th>
+              <th class="th-action">Action</th>
             </tr></thead>
             <tbody>
               <tr v-if="!filteredIDPs.length" class="empty-row"><td colspan="9">No records found.</td></tr>
@@ -519,8 +519,9 @@
                 <td>{{ r.position || '—' }}</td>
                 <td>{{ r.office || '—' }}</td>
                 <td>{{ r.yearCovered || '—' }}</td>
-                <td class="date-cell">{{ fmtDate(r.submittedAt) }}</td>
+                <td class="date-cell">{{ fmtDateTime(r.submittedAt) }}</td>
                 <td><span :class="statusBadgeClass(r.status)">{{ statusBadgeLabel(r.status) }}</span></td>
+                <td class="date-cell">{{ r.status === 'COMPLETE' ? fmtDateTime(r.supervisorSignedAt) : '—' }}</td>
                 <td><button class="btn-view" @click="viewIDP(r.refId)">View</button></td>
               </tr>
             </tbody>
@@ -898,20 +899,24 @@
         <div v-if="lnaSubTab === 'list'" class="tbl-wrap">
           <table class="dtbl">
             <thead><tr>
-              <th v-for="(col,i) in lnaCols" :key="col" @click="sortTable('lna',i)">{{ col }}<span class="sort-ind">{{ sortIndicator('lna',i) }}</span></th>
-              <th>Action</th>
+              <th v-for="(col,i) in lnaCols" :key="col"
+                :class="{ 'th-sortable': i > 0, 'th-sorted': sortState.lna.col === i }"
+                @click="i > 0 && sortTable('lna',i)">
+                {{ col }}
+                <span v-if="i > 0" class="sort-ind">{{ sortIndicator('lna',i) }}</span>
+              </th>
+              <th class="th-action">Action</th>
             </tr></thead>
             <tbody>
-              <tr v-if="!filteredLNAs.length" class="empty-row"><td colspan="9">No records found.</td></tr>
+              <tr v-if="!filteredLNAs.length" class="empty-row"><td colspan="8">No records found.</td></tr>
               <tr v-for="r in filteredLNAs" :key="r.refId">
                 <td><code class="ref-code">{{ r.refId || '—' }}</code></td>
                 <td><strong>{{ r.office || '—' }}</strong></td>
                 <td>{{ r.headOfUnit || '—' }}<br/><span class="sub-text">{{ r.email || '' }}</span></td>
-                <td>{{ r.campus || '—' }}</td>
                 <td>{{ r.yearCovered || '—' }}</td>
                 <td><span class="badge badge-grey">{{ r.purpose || '—' }}</span></td>
                 <td style="text-align:center">{{ r.totalPersonnel || '—' }}</td>
-                <td class="date-cell">{{ fmtDate(r.submittedAt) }}</td>
+                <td class="date-cell">{{ fmtDateTime(r.submittedAt) }}</td>
                 <td><button class="btn-view" @click="viewLNA(r.refId)">View</button></td>
               </tr>
             </tbody>
@@ -922,18 +927,17 @@
         <div v-if="lnaSubTab === 'workforce'" class="tbl-wrap">
           <table class="dtbl">
             <thead><tr>
-              <th>Ref ID</th><th>Office / Unit</th><th>Campus</th><th>Year</th>
+              <th>Ref ID</th><th>Office / Unit</th><th>Year</th>
               <th>Position Level</th>
               <th>Permanent</th><th>Temporary</th><th>Contractual</th><th>Casual</th>
               <th>Coterminus</th><th>COS</th><th>Job Order</th><th>Others</th>
               <th>Total</th>
             </tr></thead>
             <tbody>
-              <tr v-if="!filteredWorkforceRows.length" class="empty-row"><td colspan="14">No workforce data found.</td></tr>
+              <tr v-if="!filteredWorkforceRows.length" class="empty-row"><td colspan="13">No workforce data found.</td></tr>
               <tr v-for="r in filteredWorkforceRows" :key="r._key">
                 <td><code class="ref-code">{{ r.refId }}</code></td>
                 <td>{{ r.office }}</td>
-                <td>{{ r.campus }}</td>
                 <td>{{ r.year }}</td>
                 <td><strong>{{ r.levelLabel }}</strong></td>
                 <td style="text-align:center">{{ r.permanent || 0 }}</td>
@@ -957,15 +961,14 @@
           <div class="tbl-wrap" style="margin-bottom:20px">
             <table class="dtbl">
               <thead><tr>
-                <th>Ref ID</th><th>Office / Unit</th><th>Campus</th><th>Year</th>
+                <th>Ref ID</th><th>Office / Unit</th><th>Year</th>
                 <th>Cluster</th><th>Strongest Competency</th><th>Weakest Competency</th><th>Intervention Needed?</th>
               </tr></thead>
               <tbody>
-                <tr v-if="!filteredClusterRows.length" class="empty-row"><td colspan="8">No cluster summary data found.</td></tr>
+                <tr v-if="!filteredClusterRows.length" class="empty-row"><td colspan="7">No cluster summary data found.</td></tr>
                 <tr v-for="r in filteredClusterRows" :key="r._key">
                   <td><code class="ref-code">{{ r.refId }}</code></td>
                   <td>{{ r.office }}</td>
-                  <td>{{ r.campus }}</td>
                   <td>{{ r.year }}</td>
                   <td><span class="badge badge-grey">{{ r.cluster }}</span></td>
                   <td>{{ r.strongest || '—' }}</td>
@@ -985,7 +988,7 @@
           <div class="tbl-wrap">
             <table class="dtbl">
               <thead><tr>
-                <th>Ref ID</th><th>Office / Unit</th><th>Campus</th><th>Year</th>
+                <th>Ref ID</th><th>Office / Unit</th><th>Year</th>
                 <th>Cluster</th><th>Competency</th>
                 <th>1st Level CL</th><th>1st Level %</th>
                 <th>2nd (Non-Sup) CL</th><th>2nd (Non-Sup) %</th>
@@ -995,11 +998,10 @@
                 <th>Observations</th>
               </tr></thead>
               <tbody>
-                <tr v-if="!filteredCompRows.length" class="empty-row"><td colspan="17">No competency mapping data found.</td></tr>
+                <tr v-if="!filteredCompRows.length" class="empty-row"><td colspan="16">No competency mapping data found.</td></tr>
                 <tr v-for="r in filteredCompRows" :key="r._key">
                   <td><code class="ref-code">{{ r.refId }}</code></td>
                   <td>{{ r.office }}</td>
-                  <td>{{ r.campus }}</td>
                   <td>{{ r.year }}</td>
                   <td><span class="badge badge-grey">{{ r.cluster }}</span></td>
                   <td><strong>{{ r.competency }}</strong></td>
@@ -1026,14 +1028,13 @@
           <div class="tbl-wrap" style="margin-bottom:20px">
             <table class="dtbl">
               <thead><tr>
-                <th>Ref ID</th><th>Office / Unit</th><th>Campus</th><th>Year</th><th>Data Sources Selected</th>
+                <th>Ref ID</th><th>Office / Unit</th><th>Year</th><th>Data Sources Selected</th>
               </tr></thead>
               <tbody>
-                <tr v-if="!filteredDataSourceRows.length" class="empty-row"><td colspan="5">No records found.</td></tr>
+                <tr v-if="!filteredDataSourceRows.length" class="empty-row"><td colspan="4">No records found.</td></tr>
                 <tr v-for="r in filteredDataSourceRows" :key="r.refId">
                   <td><code class="ref-code">{{ r.refId }}</code></td>
                   <td>{{ r.office || '—' }}</td>
-                  <td>{{ r.campus || '—' }}</td>
                   <td>{{ r.yearCovered || '—' }}</td>
                   <td style="font-size:12px">
                     <span v-for="(src,i) in (r.dataSources || [])" :key="i" class="badge badge-grey" style="margin-right:4px;margin-bottom:4px">{{ src }}</span>
@@ -1048,16 +1049,15 @@
           <div class="tbl-wrap">
             <table class="dtbl">
               <thead><tr>
-                <th>Ref ID</th><th>Office / Unit</th><th>Campus</th><th>Year</th>
+                <th>Ref ID</th><th>Office / Unit</th><th>Year</th>
                 <th>Data Source</th><th>Identified Gap / Issue</th>
                 <th>Relevant Personnel / Function</th><th>Recommended Intervention</th>
               </tr></thead>
               <tbody>
-                <tr v-if="!filteredInsightRows.length" class="empty-row"><td colspan="8">No insight data found.</td></tr>
+                <tr v-if="!filteredInsightRows.length" class="empty-row"><td colspan="7">No insight data found.</td></tr>
                 <tr v-for="r in filteredInsightRows" :key="r._key">
                   <td><code class="ref-code">{{ r.refId }}</code></td>
                   <td>{{ r.office }}</td>
-                  <td>{{ r.campus }}</td>
                   <td>{{ r.year }}</td>
                   <td>{{ r.dataSource || '—' }}</td>
                   <td class="cell-wrap">{{ r.gap || '—' }}</td>
@@ -1394,8 +1394,8 @@ const lnaInsightSourceFilter         = ref('');
 const lnaInsightPersonnelFilter      = ref('');
 const lnaInsightInterventionFilter    = ref('');
 
-const sortState = reactive({ idp: { col: -1, asc: true }, lna: { col: -1, asc: true } });
-const ovActive = ref(null); // null | 'idp-all' | 'idp-pending' | 'idp-supervisor' | 'idp-complete' | 'lna-all' | 'lna-offices' | 'lna-flagged'
+const sortState = reactive({ idp: { col: -1, asc: true }, lna: { col: -1, asc: true }, ovIdp: { col: -1, asc: true }, ovLna: { col: -1, asc: true } });
+const ovActive = ref(null); // null | 'idp-all' | 'idp-pending' | 'idp-complete' | 'lna-all'
 
 const idpModal   = ref(false);
 const lnaModal   = ref(false);
@@ -1430,7 +1430,7 @@ const lnaSubTabs = [
   { key: 'sources',    label: 'Section III — Data Sources',   icon: '📊' },
 ];
 
-const idpCols = ['Ref ID','Name','Position','Office','Year','Submitted','Status'];
+const idpCols = ['Ref ID','Name','Position','Office','Year','Submitted','Status','Completed'];
 const lnaCols = ['Ref ID','Office / Unit','Head of Office','Year','Purpose','Personnel','Submitted'];
 
 const POSITION_LEVELS = [
@@ -1456,15 +1456,31 @@ const lnaYears    = computed(() => [...new Set(lnas.value.map(r => r.yearCovered
 const filteredLNAs = computed(() => {
   const q = lnaSearch.value.toLowerCase();
   let rows = lnas.value.filter(r => {
-    const ms = !q || [r.refId, r.office, r.headOfUnit, r.email, r.campus].some(v => (v||'').toLowerCase().includes(q));
+    const ms = !q || [r.refId, r.office, r.headOfUnit, r.email].some(v => (v||'').toLowerCase().includes(q));
     return ms && (!lnaYearFilter.value   || r.yearCovered === lnaYearFilter.value)
               && (!lnaPurposeFilter.value || r.purpose === lnaPurposeFilter.value)
               && (!lnaOfficeFilter.value  || r.office  === lnaOfficeFilter.value);
   });
   const { col, asc } = sortState.lna;
   if (col >= 0) {
-    const ks = ['refId','office','headOfUnit','yearCovered','purpose','totalPersonnel','submittedAt'];
-    rows = [...rows].sort((a,b) => { const av=(a[ks[col]]||'').toLowerCase(), bv=(b[ks[col]]||'').toLowerCase(); return asc ? av.localeCompare(bv) : bv.localeCompare(av); });
+    // keys align with lnaCols: ['Ref ID','Office / Unit','Head of Office','Year','Purpose','Personnel','Submitted']
+    // index 0 (Ref ID) is not sortable
+    const ks = [null,'office','headOfUnit','yearCovered','purpose','totalPersonnel','submittedAt'];
+    const key = ks[col];
+    if (key) {
+      rows = [...rows].sort((a,b) => {
+        if (key === 'submittedAt') {
+          const ad = a[key] ? new Date(a[key]).getTime() : 0;
+          const bd = b[key] ? new Date(b[key]).getTime() : 0;
+          return asc ? ad - bd : bd - ad;
+        }
+        if (key === 'totalPersonnel') {
+          return asc ? (a[key]||0) - (b[key]||0) : (b[key]||0) - (a[key]||0);
+        }
+        const av = (a[key]||'').toLowerCase(), bv = (b[key]||'').toLowerCase();
+        return asc ? av.localeCompare(bv) : bv.localeCompare(av);
+      });
+    }
   }
   return rows;
 });
@@ -1486,8 +1502,22 @@ const baseFilteredIDPs = computed(() => {
   });
   const { col, asc } = sortState.idp;
   if (col >= 0) {
-    const ks = ['refId','employeeName','position','office','yearCovered','submittedAt','status'];
-    rows = [...rows].sort((a,b) => { const av=(a[ks[col]]||'').toLowerCase(), bv=(b[ks[col]]||'').toLowerCase(); return asc ? av.localeCompare(bv) : bv.localeCompare(av); });
+    // keys align with idpCols: ['Ref ID','Name','Position','Office','Year','Submitted','Status','Completed']
+    // index 0 (Ref ID) is not sortable — null means skip
+    const ks = [null,'employeeName','position','office','yearCovered','submittedAt','status','supervisorSignedAt'];
+    const key = ks[col];
+    if (key) {
+      rows = [...rows].sort((a,b) => {
+        const av = (a[key]||'').toLowerCase(), bv = (b[key]||'').toLowerCase();
+        // For dates, sort nulls/empty to end
+        if (key === 'submittedAt' || key === 'supervisorSignedAt') {
+          const ad = a[key] ? new Date(a[key]).getTime() : 0;
+          const bd = b[key] ? new Date(b[key]).getTime() : 0;
+          return asc ? ad - bd : bd - ad;
+        }
+        return asc ? av.localeCompare(bv) : bv.localeCompare(av);
+      });
+    }
   }
   return rows;
 });
@@ -1967,20 +1997,21 @@ const filteredInsightRows = computed(() =>
 
 
 // ── STATS ──────────────────────────────────────────────────────────────────
+const ovFilteredIdps = computed(() => idps.value);
+const ovFilteredLnas = computed(() => lnas.value);
+
 const stats = computed(() => {
   const total = idps.value.length;
   const done  = idps.value.filter(r => r.status === 'COMPLETE').length;
   const pend  = idps.value.filter(r => r.status === 'PENDING').length;
-  const over  = idps.value.filter(r => r.status === 'OVERDUE').length;
   const lnaCount = lnas.value.length;
   const offices = new Set([...idps.value.map(r => r.office), ...lnas.value.map(r => r.office)].filter(Boolean)).size;
   return [
     { label:'Total IDPs',      value:total,    sub:'Submitted plans',         icon:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>' },
-    { label:'Completed',       value:done,     sub:'Supervisor reviewed',      icon:'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>' },
-    { label:'Pending IDPs',    value:pend,     sub:'Awaiting supervisor',      icon:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>' },
-    { label:'Overdue IDPs',    value:over,     sub:'Past deadline',            icon:'<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>' },
-    { label:'Total LNAs',      value:lnaCount, sub:'Office assessments',       icon:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>' },
-    { label:'Offices Covered', value:offices,  sub:'Unique units submitted',   icon:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>' },
+    { label:'Completed',       value:done,     sub:'Supervisor reviewed',     icon:'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>' },
+    { label:'Pending IDPs',    value:pend,     sub:'Awaiting supervisor',     icon:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>' },
+    { label:'Total LNAs',      value:lnaCount, sub:'Office assessments',      icon:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>' },
+    { label:'Offices Covered', value:offices,  sub:'Unique units submitted',  icon:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>' },
   ];
 });
 
@@ -2015,8 +2046,19 @@ function normalizeIDP(raw) {
   try { agapRows       = JSON.parse(raw.agapRowsJson       || '[]'); } catch {}
   try { proactRows     = JSON.parse(raw.proactRowsJson     || '[]'); } catch {}
   try { assessment     = JSON.parse(raw.supervisorAssessment || 'null'); } catch {}
+  // Derive yearCovered from datePrepared or submittedAt if not stored directly
+  let yearCovered = raw.yearCovered || '';
+  if (!yearCovered && raw.datePrepared) {
+    const yr = new Date(raw.datePrepared).getFullYear();
+    if (!isNaN(yr)) yearCovered = String(yr);
+  }
+  if (!yearCovered && raw.submittedAt) {
+    const yr = new Date(raw.submittedAt).getFullYear();
+    if (!isNaN(yr)) yearCovered = String(yr);
+  }
   return {
     ...raw,
+    yearCovered,
     employeeName: [raw.firstName, raw.lastName].filter(Boolean).join(' ') || raw.nameOfPersonnel || '',
     email:    raw.employeeEmail    || '',
     position: raw.currentPosition  || '',
@@ -2029,8 +2071,14 @@ function normalizeIDP(raw) {
 }
 
 function normalizeLNA(raw) {
+  let yearCovered = raw.yearCovered || '';
+  if (!yearCovered && raw.submittedAt) {
+    const yr = new Date(raw.submittedAt).getFullYear();
+    if (!isNaN(yr)) yearCovered = String(yr);
+  }
   return {
     ...raw,
+    yearCovered,
     office:          raw.office || raw.unitOfficCollege || '',
     _clusterSummary: raw.clusterSummaryRaw || raw.clusterSummary || [],
     _dataSources:    raw.dataSourcesRaw    || raw.dataSources    || [],
@@ -2053,40 +2101,66 @@ const topCompetencyGaps = computed(() => {
 
 // ── OVERVIEW COMPUTED ──────────────────────────────────────────────────────
 const ovCounts = computed(() => ({
-  idpPending:  idps.value.filter(r => r.status === 'PENDING').length,
-  idpWithSup:  idps.value.filter(r => r.status === 'SUPERVISOR_NOTIFIED').length,
-  idpComplete: idps.value.filter(r => r.status === 'COMPLETE').length,
-  lnaOffices:  new Set(lnas.value.map(r => r.office).filter(Boolean)).size,
-  lnaFlagged:  lnas.value.filter(r => (r._clusterSummary || []).some(c => c.interventionNeeded === 'Yes' || c.interventionNeeded === 'Y')).length,
+  idpPending:  ovFilteredIdps.value.filter(r => r.status === 'PENDING').length,
+  idpComplete: ovFilteredIdps.value.filter(r => r.status === 'COMPLETE').length,
+  lnaOffices:  new Set(ovFilteredLnas.value.map(r => r.office).filter(Boolean)).size,
+  lnaFlagged:  ovFilteredLnas.value.filter(r => (r._clusterSummary || []).some(c => c.interventionNeeded === 'Yes' || c.interventionNeeded === 'Y')).length,
 }));
 
 const ovDrillTitle = computed(() => {
   const map = {
-    'idp-all':        `All IDP Submissions (${idps.value.length})`,
-    'idp-pending':    `Pending IDPs — Awaiting Supervisor (${ovCounts.value.idpPending})`,
-    'idp-supervisor': `IDPs With Supervisor — Not Yet Reviewed (${ovCounts.value.idpWithSup})`,
-    'idp-complete':   `Completed IDPs (${ovCounts.value.idpComplete})`,
-    'lna-all':        `All LNA Submissions (${lnas.value.length})`,
-    'lna-offices':    `LNA Submissions by Office`,
-    'lna-flagged':    `LNA Offices Flagging Intervention Needed (${ovCounts.value.lnaFlagged})`,
+    'idp-all':      `All IDP Submissions (${ovFilteredIdps.value.length})`,
+    'idp-pending':  `Pending IDPs — Awaiting Supervisor (${ovCounts.value.idpPending})`,
+    'idp-complete': `Completed IDPs (${ovCounts.value.idpComplete})`,
+    'lna-all':      `All LNA Submissions (${ovFilteredLnas.value.length})`,
   };
   return map[ovActive.value] || '';
 });
 
+// Overview drill column definitions (index 0 = Ref ID, always non-sortable)
+const ovIdpCols = ['Ref ID','Name','Position','Office','Year','Status','Submitted','Completed'];
+const ovLnaCols = ['Ref ID','Office / Unit','Head of Office','Year','Purpose','Personnel','Submitted'];
+
+function sortOvRows(rows, state, keys) {
+  const { col, asc } = state;
+  if (col < 0 || !keys[col]) return rows;
+  const key = keys[col];
+  return [...rows].sort((a, b) => {
+    if (key === 'submittedAt' || key === 'supervisorSignedAt') {
+      const ad = a[key] ? new Date(a[key]).getTime() : 0;
+      const bd = b[key] ? new Date(b[key]).getTime() : 0;
+      return asc ? ad - bd : bd - ad;
+    }
+    if (key === 'totalPersonnel') {
+      return asc ? (a[key]||0) - (b[key]||0) : (b[key]||0) - (a[key]||0);
+    }
+    const av = (a[key]||'').toLowerCase(), bv = (b[key]||'').toLowerCase();
+    return asc ? av.localeCompare(bv) : bv.localeCompare(av);
+  });
+}
+
+const ovIdpKeys = [null,'employeeName','position','office','yearCovered','status','submittedAt','supervisorSignedAt'];
+const ovLnaKeys = [null,'office','headOfUnit','yearCovered','purpose','totalPersonnel','submittedAt'];
+
 const ovDrillRows = computed(() => {
+  let rows = [];
   switch (ovActive.value) {
-    case 'idp-all':        return idps.value;
-    case 'idp-pending':    return idps.value.filter(r => r.status === 'PENDING');
-    case 'idp-supervisor': return idps.value.filter(r => r.status === 'SUPERVISOR_NOTIFIED');
-    case 'idp-complete':   return idps.value.filter(r => r.status === 'COMPLETE');
-    case 'lna-all':        return lnas.value;
-    case 'lna-offices':    return lnas.value;
-    case 'lna-flagged':    return lnas.value.filter(r => (r._clusterSummary || []).some(c => c.interventionNeeded === 'Yes' || c.interventionNeeded === 'Y'));
-    default:               return [];
+    case 'idp-all':      rows = ovFilteredIdps.value; break;
+    case 'idp-pending':  rows = ovFilteredIdps.value.filter(r => r.status === 'PENDING'); break;
+    case 'idp-complete': rows = ovFilteredIdps.value.filter(r => r.status === 'COMPLETE'); break;
+    case 'lna-all':      rows = ovFilteredLnas.value; break;
+    default:             return [];
   }
+  if (ovActive.value.startsWith('idp')) return sortOvRows(rows, sortState.ovIdp, ovIdpKeys);
+  if (ovActive.value.startsWith('lna')) return sortOvRows(rows, sortState.ovLna, ovLnaKeys);
+  return rows;
 });
 
 function toggleOv(key) {
+  if (ovActive.value !== key) {
+    sortState.ovIdp = { col: -1, asc: true };
+    sortState.ovLna = { col: -1, asc: true };
+  }
   ovActive.value = ovActive.value === key ? null : key;
 }
 
@@ -2098,8 +2172,8 @@ const interventionOffices = computed(() =>
 
 const recentActivity = computed(() => {
   const all = [
-    ...idps.value.map(r => ({ refId: r.refId, type: 'IDP', label: r.employeeName || r.refId, status: r.status, submittedAt: r.submittedAt })),
-    ...lnas.value.map(r => ({ refId: r.refId, type: 'LNA', label: r.office || r.refId, status: 'SUBMITTED', submittedAt: r.submittedAt })),
+    ...idps.value.map(r => ({ refId: r.refId, type: 'IDP', label: r.employeeName || r.refId, position: r.position || '—', office: r.office || '—', yearCovered: r.yearCovered || '—', status: r.status, submittedAt: r.submittedAt, completedAt: r.supervisorSignedAt || null })),
+    ...lnas.value.map(r => ({ refId: r.refId, type: 'LNA', label: r.office || r.refId, position: '—', office: r.office || '—', yearCovered: r.yearCovered || '—', status: 'SUBMITTED', submittedAt: r.submittedAt, completedAt: null })),
   ];
   return all.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt)).slice(0, 10);
 });
@@ -2173,14 +2247,18 @@ function sortIndicator(type, col) { const s=sortState[type]; if (s.col!==col) re
 
 // ── HELPERS ─────────────────────────────────────────────────────────────────
 function fmtDate(v) { if(!v) return '—'; const d=new Date(v); return isNaN(d)?v:d.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}); }
-function statusBadgeClass(s) { const c=(s||'').toUpperCase(); if(c==='COMPLETE')return 'badge badge-green'; if(c==='PENDING')return 'badge badge-gold'; if(c==='OVERDUE')return 'badge badge-red'; return 'badge badge-grey'; }
-function statusBadgeLabel(s) { const c=(s||'').toUpperCase(); if(c==='COMPLETE')return 'Completed'; if(c==='PENDING')return 'Pending Review'; if(c==='OVERDUE')return 'Overdue'; return s||'Unknown'; }
+function fmtDateTime(v) { if(!v) return '—'; const d=new Date(v); return isNaN(d)?v:d.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'})+' '+d.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'}); }
+function statusBadgeClass(s) { const c=(s||'').toUpperCase(); if(c==='COMPLETE')return 'badge badge-green'; if(c==='PENDING')return 'badge badge-gold'; return 'badge badge-grey'; }
+function statusBadgeLabel(s) { const c=(s||'').toUpperCase(); if(c==='COMPLETE')return 'Completed'; if(c==='PENDING')return 'Pending'; return s||'—'; }
 function toast(msg,type='') { const id=Date.now(); toasts.value.push({id,msg,type}); setTimeout(()=>{toasts.value=toasts.value.filter(t=>t.id!==id);},3500); }
 
 onMounted(() => {});
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap');
+
+body, * { font-family: 'Roboto', sans-serif; }
 :root { --navy:#1a4d2e; --navy-mid:#2d6a3f; --navy-light:#3d8b50; --gold:#f5c300; --gold-light:#ffd740; --gold-dim:rgba(245,195,0,.12); --cream:#faf8f4; --white:#fff; --text:#1a1a2e; --text-light:#5a6070; --border:#d8d4c8; --error:#c0392b; --success:#1a6b3c; --shadow:0 4px 24px rgba(26,77,46,.1); --shadow-sm:0 2px 8px rgba(26,77,46,.07); --shadow-lg:0 12px 48px rgba(26,77,46,.18); }
 * { box-sizing:border-box; margin:0; padding:0; }
 
@@ -2199,7 +2277,7 @@ onMounted(() => {});
 .login-icon { width:68px; height:68px; background:var(--navy); border-radius:16px; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; box-shadow:0 8px 24px rgba(26,77,46,.25); }
 .login-icon svg { width:32px; height:32px; stroke:var(--gold); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
 .login-eyebrow { font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); background:var(--gold-dim); border:1px solid rgba(245,195,0,.3); border-radius:20px; display:inline-block; padding:4px 14px; margin-bottom:12px; }
-.login-card h2 { font-family:'Playfair Display',serif; font-size:24px; color:var(--navy); margin-bottom:8px; }
+.login-card h2 { font-family:'Roboto',sans-serif; font-size:24px; color:var(--navy); margin-bottom:8px; }
 .login-card > p { font-size:13px; color:var(--text-light); margin-bottom:28px; }
 .login-field { display:flex; flex-direction:column; gap:6px; text-align:left; margin-bottom:16px; }
 .login-field label { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--navy-mid); }
@@ -2213,14 +2291,14 @@ onMounted(() => {});
 .btn-login:disabled { background:#aaa; cursor:not-allowed; transform:none; box-shadow:none; }
 .denied-card { background:var(--white); border:1px solid #f5c6c2; border-radius:20px; padding:48px 40px; max-width:420px; width:100%; text-align:center; box-shadow:var(--shadow); }
 .denied-icon { width:68px; height:68px; background:rgba(192,57,43,.08); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:34px; margin:0 auto 18px; }
-.denied-card h2 { font-family:'Playfair Display',serif; font-size:22px; color:var(--error); margin-bottom:8px; }
+.denied-card h2 { font-family:'Roboto',sans-serif; font-size:22px; color:var(--error); margin-bottom:8px; }
 .denied-card p { font-size:13px; color:var(--text-light); margin-bottom:18px; }
 .btn-try { padding:9px 24px; background:var(--navy); color:#fff; border:none; border-radius:8px; font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; transition:background .2s; }
 .btn-try:hover { background:var(--navy-mid); }
 
 .dash-wrap { max-width:1400px; margin:0 auto; padding:32px 28px 80px; }
 .dash-head { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:28px; flex-wrap:wrap; gap:14px; }
-.dash-head-left h1 { font-family:'Playfair Display',serif; font-size:28px; color:var(--navy); margin-bottom:2px; }
+.dash-head-left h1 { font-family:'Roboto',sans-serif; font-size:28px; color:var(--navy); margin-bottom:2px; }
 .dash-head-left p { font-size:13px; color:var(--text-light); }
 .btn-refresh { display:flex; align-items:center; gap:7px; padding:9px 18px; background:var(--navy); color:#fff; border:none; border-radius:9px; font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; transition:background .2s; }
 .btn-refresh:hover { background:var(--navy-mid); }
@@ -2234,7 +2312,7 @@ onMounted(() => {});
 .stat-icon { position:absolute; top:16px; right:16px; width:32px; height:32px; background:rgba(26,77,46,.07); border-radius:8px; display:flex; align-items:center; justify-content:center; }
 .stat-icon svg { width:16px; height:16px; stroke:var(--navy-mid); fill:none; stroke-width:1.8; stroke-linecap:round; }
 .stat-label { font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-light); margin-bottom:6px; }
-.stat-value { font-family:'Playfair Display',serif; font-size:34px; color:var(--navy); line-height:1; margin-bottom:2px; }
+.stat-value { font-family:'Roboto',sans-serif; font-size:34px; color:var(--navy); line-height:1; margin-bottom:2px; }
 .stat-sub { font-size:11px; color:var(--text-light); }
 
 .tab-bar { display:flex; gap:3px; background:rgba(26,77,46,.07); border-radius:11px; padding:4px; margin-bottom:22px; width:fit-content; flex-wrap:wrap; }
@@ -2270,10 +2348,15 @@ onMounted(() => {});
 .tbl-wrap { overflow-x:auto; border-radius:11px; border:1px solid var(--border); box-shadow:var(--shadow-sm); margin-bottom:8px; }
 .dtbl { width:100%; border-collapse:collapse; font-size:13px; background:var(--white); }
 .dtbl thead tr { background:var(--navy); }
-.dtbl thead th { padding:11px 13px; color:#fff; font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.06em; text-align:left; white-space:nowrap; border-right:1px solid rgba(255,255,255,.07); cursor:pointer; user-select:none; }
-.dtbl thead th:last-child { border-right:none; cursor:default; }
-.dtbl thead th:hover:not(:last-child) { background:var(--navy-mid); }
-.sort-ind { font-size:9px; margin-left:3px; opacity:.55; }
+.dtbl thead th { padding:11px 13px; color:#fff; font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.06em; text-align:left; white-space:nowrap; border-right:1px solid rgba(255,255,255,.07); user-select:none; }
+.dtbl thead th:last-child { border-right:none; }
+.dtbl thead th.th-sortable { cursor:pointer; }
+.dtbl thead th.th-sortable:hover { background:var(--navy-mid); }
+.dtbl thead th.th-sorted { background:var(--navy-mid); }
+.dtbl thead th.th-action { cursor:default; }
+.sort-ind { font-size:9px; margin-left:4px; opacity:0; transition:opacity .15s; }
+.th-sortable:hover .sort-ind { opacity:.6; }
+.th-sorted .sort-ind { opacity:1; }
 .dtbl tbody tr { border-bottom:1px solid var(--border); transition:background .15s; }
 .dtbl tbody tr:last-child { border-bottom:none; }
 .dtbl tbody tr:hover { background:rgba(26,77,46,.03); }
@@ -2295,6 +2378,7 @@ onMounted(() => {});
 .badge-gold  { background:rgba(245,195,0,.15); color:#8a6c00; }
 .badge-red   { background:rgba(192,57,43,.1); color:var(--error); }
 .badge-grey  { background:rgba(90,96,112,.1); color:var(--text-light); }
+.badge-blue  { background:rgba(45,106,159,.1); color:#2d6a9f; }
 
 .reg-actions { display:flex; gap:8px; margin-bottom:14px; }
 .btn-add { display:flex; align-items:center; gap:6px; padding:8px 16px; background:var(--navy); color:#fff; border:none; border-radius:8px; font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; transition:background .2s; }
@@ -2306,7 +2390,7 @@ onMounted(() => {});
 .modal-overlay.active { display:flex; }
 .modal { background:var(--white); border-radius:16px; max-width:960px; width:100%; box-shadow:0 24px 80px rgba(0,0,0,.25); animation:fadeUp .3s ease; margin:auto; }
 .modal-header { display:flex; align-items:center; justify-content:space-between; padding:18px 24px 16px; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--white); z-index:1; border-radius:16px 16px 0 0; }
-.modal-header-left h3 { font-family:'Playfair Display',serif; font-size:18px; color:var(--navy); }
+.modal-header-left h3 { font-family:'Roboto',sans-serif; font-size:18px; color:var(--navy); }
 .modal-header-left p { font-size:12px; color:var(--text-light); margin-top:1px; }
 .modal-header-right { display:flex; gap:8px; align-items:center; }
 .btn-pdf { display:flex; align-items:center; gap:6px; padding:7px 14px; background:var(--navy); color:#fff; border:none; border-radius:7px; font-family:inherit; font-size:12px; font-weight:600; cursor:pointer; transition:background .2s; }
@@ -2395,7 +2479,7 @@ onMounted(() => {});
 .ov-card-red.active    { background: #922b21; border-color: #922b21; }
 .ov-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
 .ov-card-label { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text-light); }
-.ov-card-num { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--navy); line-height: 1; }
+.ov-card-num { font-family: 'Roboto', sans-serif; font-size: 26px; font-weight: 700; color: var(--navy); line-height: 1; }
 .ov-card-sub { font-size: 11px; color: var(--text-light); }
 
 .ov-drill {
@@ -2549,7 +2633,7 @@ onMounted(() => {});
   font-size: 15px;
   font-weight: 700;
   color: var(--navy);
-  font-family: 'Playfair Display', serif;
+  font-family: 'Roboto', sans-serif;
 }
 
 /* slide transition */
