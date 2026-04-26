@@ -169,7 +169,7 @@
             </div>
             <div class="ro-field">
               <div class="ro-label">Name of Personnel</div>
-              <div class="ro-value">{{ idpData.nameOfPersonnel || "—" }}</div>
+              <div class="ro-value">{{ idpData.nameOfPersonnel ? idpData.nameOfPersonnel.toUpperCase() : "—" }}</div>
             </div>
             <div class="ro-field">
               <div class="ro-label">Date Prepared</div>
@@ -313,8 +313,8 @@
               <thead>
                 <tr>
                   <th style="width: 40px">No.</th>
-                  <th>Training / Workshop Title</th>
                   <th>Target Competency / Skill</th>
+                  <th>Training / LeaD Intervention</th>
                   <th>Mode of Activity</th>
                   <th>Trainer / Provider</th>
                   <th>Target Timeline</th>
@@ -326,8 +326,8 @@
                 </tr>
                 <tr v-for="(row, i) in proactRows" :key="i">
                   <td class="tc">{{ i + 1 }}</td>
-                  <td>{{ row.trainingTitle || "—" }}</td>
                   <td>{{ row.targetSkill || "—" }}</td>
+                  <td>{{ row.trainingTitle || "—" }}</td>
                   <td>{{ row.modeOfActivity || "—" }}</td>
                   <td>{{ row.trainerProvider || "—" }}</td>
                   <td>{{ row.targetTimeline || "—" }}</td>
@@ -392,15 +392,12 @@
                       No
                     </label>
                   </div>
-                  <div
-                    v-if="assessment.perfGapsYN === 'Yes'"
-                    style="margin-top: 8px"
-                  >
-                    <label class="field-label">If Yes, specify:</label>
+                  <div style="margin-top: 8px">
+                    <label class="field-label">Remarks (optional if No):</label>
                     <textarea
                       v-model="assessment.perfGapsSpec"
                       rows="3"
-                      placeholder="Describe the performance gaps…"
+                      placeholder="Describe observed performance gaps, or leave blank if none…"
                     ></textarea>
                   </div>
                 </td>
@@ -568,7 +565,7 @@
                 of the office.</em
               >
             </p>
-            <div class="sup-name">{{ idpData.supervisorName || "—" }}</div>
+            <div class="sup-name">{{ idpData.supervisorName ? idpData.supervisorName.toUpperCase() : "—" }}</div>
             <small>Signature over Printed Name of Immediate Supervisor</small>
           </div>
         </div>

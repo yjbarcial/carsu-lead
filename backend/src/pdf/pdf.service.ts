@@ -69,10 +69,11 @@ export class PdfService {
       assessment = JSON.parse(idp.supervisorAssessment || '{}');
     } catch {}
 
-    const employeeName =
+    const employeeName = (
       idp.nameOfPersonnel ||
       [idp.firstName, idp.lastName].filter(Boolean).join(' ') ||
-      '—';
+      '—'
+    ).toUpperCase();
     const completedAt = idp.supervisorSignedAt
       ? new Date(idp.supervisorSignedAt).toLocaleDateString('en-PH', {
           year: 'numeric',
@@ -148,10 +149,11 @@ export class PdfService {
       <div class="ro-field"><div class="ro-label">Name of Personnel</div><div class="ro-value">${this.safe(employeeName)}</div></div>
       <div class="ro-field"><div class="ro-label">Date Prepared</div><div class="ro-value">${this.safe(idp.datePrepared)}</div></div>
       <div class="ro-field span-2"><div class="ro-label">Highest Educational Attainment</div><div class="ro-value">${this.safe(idp.educAttainment)}${idp.educAttainmentSpec ? ' — ' + this.safe(idp.educAttainmentSpec) : ''}</div></div>
-      <div class="ro-field"><div class="ro-label">Current Position / Designation</div><div class="ro-value">${this.safe(idp.currentPosition)}</div></div>
+      <div class="ro-field"><div class="ro-label">Current Position</div><div class="ro-value">${this.safe(idp.currentPosition)}</div></div>
+      <div class="ro-field"><div class="ro-label">Designation</div><div class="ro-value">${this.safe(idp.designation)}</div></div>
       <div class="ro-field"><div class="ro-label">Years in Position</div><div class="ro-value">${this.safe(idp.yearsInPosition)}</div></div>
       <div class="ro-field"><div class="ro-label">Years in CSU</div><div class="ro-value">${this.safe(idp.yearsInCSU)}</div></div>
-      <div class="ro-field"><div class="ro-label">Immediate Supervisor</div><div class="ro-value">${this.safe(idp.supervisorName)}</div></div>
+      <div class="ro-field"><div class="ro-label">Immediate Supervisor</div><div class="ro-value">${this.safe(idp.supervisorName ? String(idp.supervisorName).toUpperCase() : '—')}</div></div>
       <div class="ro-field"><div class="ro-label">Purpose</div><div class="ro-value">${this.safe(idp.headerPurpose)}</div></div>
     </div>
   </div>
@@ -249,11 +251,11 @@ export class PdfService {
     <table>
       <thead><tr>
         <th style="${thStyle}width:30px">No.</th>
-        <th style="${thStyle}">Training / Workshop Title</th>
         <th style="${thStyle}">Target Competency / Skill</th>
+        <th style="${thStyle}">Training / LeaD Intervention</th>
         <th style="${thStyle}">Mode of Activity</th>
         <th style="${thStyle}">Trainer / Provider</th>
-        <th style="${thStyle}">Target Timeline</th>
+        <th style="${thStyle}">Intended Year of Enrollment</th>
       </tr></thead>
       <tbody>
         ${
@@ -262,8 +264,8 @@ export class PdfService {
               (row, i) => `
           <tr style="background:${i % 2 === 0 ? '#fff' : '#f9f8f5'}">
             <td style="${tdStyle}text-align:center;font-weight:600;color:#666;">${i + 1}</td>
+            <td style="${tdStyle}font-weight:600;color:#1a5c1a;">${this.safe(row.targetSkill)}</td>
             <td style="${tdStyle}">${this.safe(row.trainingTitle)}</td>
-            <td style="${tdStyle}">${this.safe(row.targetSkill)}</td>
             <td style="${tdStyle}">${this.safe(row.modeOfActivity)}</td>
             <td style="${tdStyle}">${this.safe(row.trainerProvider)}</td>
             <td style="${tdStyle}">${this.safe(row.targetTimeline)}</td>
@@ -291,7 +293,7 @@ export class PdfService {
       </tr></thead>
       <tbody>
         <tr><td style="${tdStyle}" class="assess-area">1. Observed Performance Gaps</td>
-          <td style="${tdStyle}"><strong>${this.safe(assessment.perfGapsYN)}</strong>${assessment.perfGapsSpec ? '<br><em>' + this.safe(assessment.perfGapsSpec) + '</em>' : ''}</td></tr>
+          <td style="${tdStyle}"><strong>${this.safe(assessment.perfGapsYN)}</strong>${assessment.perfGapsSpec ? '<br><span style="color:#444;font-size:11px;"><em>Remarks:</em> ' + this.safe(assessment.perfGapsSpec) + '</span>' : ''}</td></tr>
         <tr style="background:#f9f8f5"><td style="${tdStyle}" class="assess-area">2. Readiness for Advancement</td>
           <td style="${tdStyle}"><strong>${this.safe(assessment.readinessYN)}</strong>${assessment.readinessRemarks ? '<br><em>' + this.safe(assessment.readinessRemarks) + '</em>' : ''}</td></tr>
         <tr><td style="${tdStyle}" class="assess-area">3. Recommended L&amp;D Interventions</td>
@@ -305,7 +307,7 @@ export class PdfService {
 
     <div class="cert-block">
       <p>I hereby certify that I have reviewed and assessed the Individual Development Plan (IDP) of the concerned personnel and confirm that the proposed goals and interventions are aligned with their role, performance needs, and the strategic direction of the office.</p>
-      <div class="sup-name">${this.safe(idp.supervisorName)}</div>
+      <div class="sup-name">${this.safe(idp.supervisorName ? String(idp.supervisorName).toUpperCase() : '—')}</div>
       <small>Signature over Printed Name of Immediate Supervisor</small>
       <small style="margin-top:6px;">Date signed: ${completedAt}</small>
     </div>

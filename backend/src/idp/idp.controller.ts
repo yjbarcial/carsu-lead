@@ -20,6 +20,18 @@ export class IdpController {
     return this.idpService.findAll();
   }
 
+  // ── Suggestions (HEI / Pro-ACT) — static segments, must come before :refId ──
+
+  @Get('suggestions/:type')
+  getSuggestions(@Param('type') type: string) {
+    return this.idpService.getSuggestions(type);
+  }
+
+  @Post('suggestions/:type')
+  saveSuggestion(@Param('type') type: string, @Body() body: { value: string }) {
+    return this.idpService.saveSuggestion(type, body.value);
+  }
+
   // ── Static-segment routes MUST come before :refId to avoid conflicts ────
 
   @Get('by-token/:token')

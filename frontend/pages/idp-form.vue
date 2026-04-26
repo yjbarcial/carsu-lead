@@ -227,15 +227,15 @@
           <label>Name of Personnel <span class="req">*</span></label>
           <div class="name-grid">
             <div>
-              <input type="text" v-model="form.lastName" :class="{ error: errors.lastName }" placeholder="Last Name" />
+              <input type="text" v-model="form.lastName" :class="{ error: errors.lastName }" placeholder="Last Name" @input="form.lastName = form.lastName.toUpperCase()" />
               <small class="field-hint">Last Name</small>
             </div>
             <div>
-              <input type="text" v-model="form.firstName" :class="{ error: errors.firstName }" placeholder="First Name" />
+              <input type="text" v-model="form.firstName" :class="{ error: errors.firstName }" placeholder="First Name" @input="form.firstName = form.firstName.toUpperCase()" />
               <small class="field-hint">First Name</small>
             </div>
             <div class="mi-col">
-              <input type="text" v-model="form.middleInitial" :class="{ error: errors.middleInitial }" placeholder="M.I." maxlength="3" />
+              <input type="text" v-model="form.middleInitial" :class="{ error: errors.middleInitial }" placeholder="M.I." maxlength="3" @input="form.middleInitial = form.middleInitial.toUpperCase()" />
               <small class="field-hint">M.I.</small>
             </div>
           </div>
@@ -282,72 +282,40 @@
                 type="text"
                 v-model="form.educAttainmentSpec"
                 :class="{ error: errors.educAttainmentSpec }"
-                placeholder="Specify degree / program (e.g. BS Computer Science)"
+                placeholder="Specify degree / program (e.g. BS COMPUTER SCIENCE)"
+                @input="form.educAttainmentSpec = form.educAttainmentSpec.toUpperCase()"
               />
             </div>
           </div>
  
-          <!-- Current Position / Designation -->
+          <!-- Current Position & Designation -->
           <div class="field-group span-2">
-            <label>Current Position / Designation <span class="req">*</span></label>
+            <label>Position &amp; Designation <span class="req">*</span></label>
 
-            <!-- OVPAA: show Personnel Type selector + filtered position dropdown -->
-            <div v-if="form.officeAffiliation === 'OVPAA'" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <!-- OVPAA only: Personnel Type selector (above the 2-col row) -->
+            <div v-if="form.officeAffiliation === 'OVPAA'" style="margin-bottom: 10px;">
+              <small class="field-hint" style="margin-bottom:4px;display:block;">Personnel Type</small>
+              <select v-model="form.personnelType" :class="{ error: errors.personnelType }" @change="form.currentPosition = ''" style="max-width: 260px;">
+                <option value="">Select type…</option>
+                <option value="non-teaching">Non-Teaching</option>
+                <option value="teaching">Teaching</option>
+              </select>
+            </div>
+
+            <!-- Position + Designation side by side for all affiliations -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <!-- Position dropdown -->
               <div>
-                <small class="field-hint" style="margin-bottom:4px;display:block;">Personnel Type</small>
-                <select v-model="form.personnelType" :class="{ error: errors.personnelType }" @change="form.currentPosition = ''">
-                  <option value="">Select type…</option>
-                  <option value="administrative">Administrative Personnel</option>
-                  <option value="faculty">Faculty</option>
-                </select>
-              </div>
-              <div>
-                <small class="field-hint" style="margin-bottom:4px;display:block;">Position / Designation</small>
-                <select v-model="form.currentPosition" :class="{ error: errors.currentPosition }" :disabled="!form.personnelType">
+                <small class="field-hint" style="margin-bottom:4px;display:block;">Position</small>
+                <select
+                  v-model="form.currentPosition"
+                  :class="{ error: errors.currentPosition }"
+                  :disabled="form.officeAffiliation === 'OVPAA' && !form.personnelType"
+                >
                   <option value="">Select position…</option>
-                  <template v-if="form.personnelType === 'administrative'">
-                    <option>Admin Aide I – Utility</option>
-                    <option>Admin Aide I – Clerk</option>
-                    <option>Admin Aide II – Utility</option>
-                    <option>Admin Aide II – Clerk</option>
-                    <option>Admin Aide III – Clerk</option>
-                    <option>Admin Aide IV – Mechanic</option>
-                    <option>Admin Aide IV – Clerk</option>
-                    <option>Admin Aide IV – Driver</option>
-                    <option>Security Guard I</option>
-                    <option>Farm Worker I</option>
-                    <option>Admin Assistant I</option>
-                    <option>Admin Assistant II</option>
-                    <option>Admin Assistant III</option>
-                    <option>Admin Assistant IV</option>
-                    <option>Admin Officer I</option>
-                    <option>Admin Officer II</option>
-                    <option>Admin Officer III</option>
-                    <option>Admin Officer IV</option>
-                    <option>Admin Officer V</option>
-                    <option>Accountant III</option>
-                    <option>College Librarian I</option>
-                    <option>College Librarian III</option>
-                    <option>Nurse I</option>
-                    <option>Nurse II</option>
-                    <option>Registrar III</option>
-                    <option>Chief Administrative Officer (CAO)</option>
-                    <option>Board Secretary V</option>
-                    <option>Guidance Counselor III</option>
-                    <option>Programmer II</option>
-                    <option>Database Administrator</option>
-                    <option>System Analyst</option>
-                    <option>Planning Officer</option>
-                    <option>Attorney II</option>
-                    <option>Attorney III</option>
-                    <option>Physician</option>
-                    <option>Procurement Officer</option>
-                    <option>Director</option>
-                  </template>
-                  <template v-if="form.personnelType === 'faculty'">
-                    <option>Instructor I</option>
-                    <option>Instructor II</option>
-                    <option>Instructor III</option>
+
+                  <!-- OVPAA teaching -->
+                  <template v-if="form.officeAffiliation === 'OVPAA' && form.personnelType === 'teaching'">
                     <option>Assistant Professor I</option>
                     <option>Assistant Professor II</option>
                     <option>Assistant Professor III</option>
@@ -357,7 +325,9 @@
                     <option>Associate Professor III</option>
                     <option>Associate Professor IV</option>
                     <option>Associate Professor V</option>
-                    <option>Associate Professor VI</option>
+                    <option>Instructor I</option>
+                    <option>Instructor II</option>
+                    <option>Instructor III</option>
                     <option>Professor I</option>
                     <option>Professor II</option>
                     <option>Professor III</option>
@@ -366,59 +336,101 @@
                     <option>Professor VI</option>
                     <option>University Professor</option>
                   </template>
+
+                  <!-- Non-teaching: shown for all affiliations (and OVPAA non-teaching) -->
+                  <template v-if="form.officeAffiliation !== 'OVPAA' || form.personnelType === 'non-teaching'">
+                    <option>Accountant I</option>
+                    <option>Accountant II</option>
+                    <option>Accountant III</option>
+                    <option>Administrative Aide I</option>
+                    <option>Administrative Aide II</option>
+                    <option>Administrative Aide III</option>
+                    <option>Administrative Aide IV</option>
+                    <option>Administrative Aide VI</option>
+                    <option>Administrative Assistant I</option>
+                    <option>Administrative Assistant II</option>
+                    <option>Administrative Assistant III</option>
+                    <option>Administrative Assistant IV</option>
+                    <option>Administrative Assistant V</option>
+                    <option>Administrative Officer I</option>
+                    <option>Administrative Officer II</option>
+                    <option>Administrative Officer III</option>
+                    <option>Administrative Officer IV</option>
+                    <option>Administrative Officer V</option>
+                    <option>Attorney IV</option>
+                    <option>Board Secretary I</option>
+                    <option>Board Secretary V</option>
+                    <option>Chief Administrative Officer</option>
+                    <option>College Librarian I</option>
+                    <option>College Librarian III</option>
+                    <option>Cook I</option>
+                    <option>Cook II</option>
+                    <option>Dentist II</option>
+                    <option>Dormitory Manager III</option>
+                    <option>Executive Assistant III</option>
+                    <option>Executive Assistant IV</option>
+                    <option>Farm Worker I</option>
+                    <option>Farm Worker II</option>
+                    <option>Food Service Supervisor II</option>
+                    <option>Guidance Coordinator I</option>
+                    <option>Guidance Counselor I</option>
+                    <option>Guidance Counselor III</option>
+                    <option>Heavy Equipment Operator I</option>
+                    <option>Houseparent II</option>
+                    <option>Information Officer I</option>
+                    <option>Information Officer II</option>
+                    <option>Information Officer III</option>
+                    <option>Information Systems Analyst I</option>
+                    <option>Information Systems Analyst II</option>
+                    <option>Information Technology Officer I</option>
+                    <option>Internal Auditor I</option>
+                    <option>Internal Auditor II</option>
+                    <option>Internal Auditor III</option>
+                    <option>Legal Assistant II</option>
+                    <option>Legal Assistant III</option>
+                    <option>Machinist I</option>
+                    <option>Nurse II</option>
+                    <option>Planning Officer I</option>
+                    <option>Planning Officer II</option>
+                    <option>Planning Officer III</option>
+                    <option>Project Development Officer I</option>
+                    <option>Project Development Officer II</option>
+                    <option>Project Development Officer III</option>
+                    <option>Registrar III</option>
+                    <option>School Farm Demonstrator</option>
+                    <option>School Farming Coordinator I</option>
+                    <option>Security Guard I</option>
+                    <option>Senior Administrative Assistant III</option>
+                    <option>SUC President IV</option>
+                    <option>Supervising Administrative Officer</option>
+                    <option>University Extension Associate I</option>
+                    <option>University Extension Specialist I</option>
+                    <option>University Extension Specialist II</option>
+                    <option>University Extension Specialist III</option>
+                    <option>University Extension Specialist IV</option>
+                    <option>University Extension Specialist V</option>
+                    <option>University Research Associate I</option>
+                    <option>University Research Associate II</option>
+                    <option>University Researcher II</option>
+                    <option>University Researcher IV</option>
+                    <option>University Researcher V</option>
+                    <option>Veterinarian II</option>
+                    <option>Vocational Placement Coordinator I</option>
+                  </template>
                 </select>
               </div>
-            </div>
 
-            <!-- OVPAF / OVPEO / OVPSAS / OVPRDIE: no Personnel Type, just position dropdown -->
-            <div v-else-if="['OVPAF','OVPEO','OVPSAS','OVPRDIE'].includes(form.officeAffiliation)">
-              <select v-model="form.currentPosition" :class="{ error: errors.currentPosition }" style="max-width: 480px; width: 100%;">
-                <option value="">Select position…</option>
-                <option>Admin Aide I – Utility</option>
-                <option>Admin Aide I – Clerk</option>
-                <option>Admin Aide II – Utility</option>
-                <option>Admin Aide II – Clerk</option>
-                <option>Admin Aide III – Clerk</option>
-                <option>Admin Aide IV – Mechanic</option>
-                <option>Admin Aide IV – Clerk</option>
-                <option>Admin Aide IV – Driver</option>
-                <option>Security Guard I</option>
-                <option>Farm Worker I</option>
-                <option>Admin Assistant I</option>
-                <option>Admin Assistant II</option>
-                <option>Admin Assistant III</option>
-                <option>Admin Assistant IV</option>
-                <option>Admin Officer I</option>
-                <option>Admin Officer II</option>
-                <option>Admin Officer III</option>
-                <option>Admin Officer IV</option>
-                <option>Admin Officer V</option>
-                <option>Accountant III</option>
-                <option>College Librarian I</option>
-                <option>College Librarian III</option>
-                <option>Nurse I</option>
-                <option>Nurse II</option>
-                <option>Registrar III</option>
-                <option>Chief Administrative Officer (CAO)</option>
-                <option>Board Secretary V</option>
-                <option>Guidance Counselor III</option>
-                <option>Programmer II</option>
-                <option>Database Administrator</option>
-                <option>System Analyst</option>
-                <option>Planning Officer</option>
-                <option>Attorney II</option>
-                <option>Attorney III</option>
-                <option>Physician</option>
-                <option>Procurement Officer</option>
-                <option>Director</option>
-              </select>
-            </div>
-
-            <!-- No office selected yet -->
-            <div v-else>
-              <select disabled style="max-width: 480px; width: 100%;">
-                <option value="">Select office affiliation first…</option>
-              </select>
+              <!-- Designation input -->
+              <div>
+                <small class="field-hint" style="margin-bottom:4px;display:block;">Designation</small>
+                <input
+                  type="text"
+                  v-model="form.designation"
+                  :class="{ error: errors.designation }"
+                  placeholder="Specify or N/A"
+                />
+                <small class="field-hint">e.g. Officer-in-Charge, Unit Head, or N/A</small>
+              </div>
             </div>
           </div>
  
@@ -437,7 +449,7 @@
           <!-- Supervisor Name -->
           <div class="field-group">
             <label>Immediate Supervisor Name <span class="req">*</span></label>
-            <input type="text" v-model="form.supervisorName" :class="{ error: errors.supervisorName }" placeholder="e.g. Dela Cruz, Juan D." />
+            <input type="text" v-model="form.supervisorName" :class="{ error: errors.supervisorName }" placeholder="e.g. DELA CRUZ, JUAN D." @input="form.supervisorName = form.supervisorName.toUpperCase()" />
             <small class="field-hint">Format: Last name, First name, M.I.</small>
           </div>
  
@@ -685,7 +697,10 @@
                   </select>
                 </td>
                 <td>
-                  <input type="text" v-model="row.targetHEI" placeholder="Full name of School" />
+                  <input type="text" v-model="row.targetHEI" placeholder="Full name of School" list="hei-suggestions" @input="onHeiInput(row.targetHEI)" @blur="saveSuggestion('hei', row.targetHEI)" />
+                  <datalist id="hei-suggestions">
+                    <option v-for="s in heiSuggestions" :key="s" :value="s" />
+                  </datalist>
                 </td>
                 <td>
                   <select v-model="row.modeOfStudy">
@@ -745,11 +760,11 @@
             <thead>
               <tr>
                 <th style="width: 40px">No.</th>
-                <th>Training / Workshop Title</th>
-                <th>Target Competency / Skill</th>
+                <th style="background: var(--navy); opacity: 0.92;">Target Competency / Skill <span style="font-size:10px; font-weight:400; opacity:0.8;">(from Section I)</span></th>
+                <th>Training / LeaD Intervention</th>
                 <th style="width: 130px">Mode of Activity</th>
                 <th>Trainer / Provider</th>
-                <th style="width: 130px">Target Timeline</th>
+                <th style="width: 130px">Intended Year of Enrollment</th>
                 <th style="width: 40px"></th>
               </tr>
             </thead>
@@ -763,11 +778,14 @@
               </template>
               <tr v-for="(competency, idx) in filledCompetencies" :key="competency">
                 <td class="row-num-cell">{{ idx + 1 }}</td>
-                <td>
-                  <input type="text" v-model="proactRows[idx].trainingTitle" placeholder="" />
+                <td style="background: rgba(0,51,0,0.04);">
+                  <div class="proact-skill-label">{{ competency }}</div>
                 </td>
                 <td>
-                  <div class="proact-skill-label">{{ competency }}</div>
+                  <input type="text" v-model="proactRows[idx].trainingTitle" placeholder="Enter training or intervention title" list="proact-suggestions" @input="onProactInput(proactRows[idx].trainingTitle)" @blur="saveSuggestion('proact', proactRows[idx].trainingTitle)" />
+                  <datalist id="proact-suggestions">
+                    <option v-for="s in proactSuggestions" :key="s" :value="s" />
+                  </datalist>
                 </td>
                 <td>
                   <select v-model="proactRows[idx].modeOfActivity">
@@ -1297,7 +1315,7 @@ const form = reactive({
   officeAffiliation: "",
   collegeOfficeUnit: "",
   collegeProgram: "",
-  personnelType: "",  // "administrative" | "faculty"
+  personnelType: "",  // "non-teaching" | "teaching"
   lastName: "",
   firstName: "",
   middleInitial: "",
@@ -1307,6 +1325,7 @@ const form = reactive({
   educAttainmentSpec: "",
   datePrepared: "",
   currentPosition: "",
+  designation: "",
   yearsInPosition: "",
   yearsInCSU: "",
   supervisorName: "",
@@ -1390,23 +1409,30 @@ const officeOptions = [
 // For OVPAA colleges, value is { name, programs: [] }
 const subOfficeMap = {
   OVPAF: [
-    "Human Resource Management Services (HRMS)",
-    "Supply and Property Management Office (SPMO)",
-    "Records Management Office",
-    "Procurement Office",
-    "Engineering & Construction Office",
-    "Office of the Campus Safety & Security",
-    "General Services Office",
-    "DRRM Office",
-    "University Budget Office",
-    "University Accounting Office",
-    "University Cashiering Office",
     "Business & Resource Management Office",
     "Corporate Enterprise Development Office",
+    "Disaster Risk Reduction and Management Office",
+    "Engineering & Construction Office",
+    "General Services Office",
+    "Human Resource Management Services",
+    "Office of the Campus Safety & Security",
+    "Procurement Office",
+    "Records Management Office",
+    "Supply and Property Management Office",
+    "University Accounting Office",
+    "University Budget Office",
+    "University Cashiering Office",
     "University Press",
   ],
   OVPAA: [
-    { name: "Professional Schools", programs: [] },
+    { name: "College of Agricultural and Agri-Industries (CAA)", programs: [
+      "BS in Agriculture",
+    ]},
+    { name: "College of Computing and Information Sciences (CCIS)", programs: [
+      "BS in Computer Science",
+      "BS in Information System",
+      "BS in Information Technology",
+    ]},
     { name: "College of Engineering and Geo-Sciences (CEGS)", programs: [
       "BS in Agricultural and Biosystems Engineering",
       "BS in Civil Engineering",
@@ -1415,10 +1441,15 @@ const subOfficeMap = {
       "BS in Geology",
       "BS in Mining Engineering",
     ]},
-    { name: "College of Computing and Information Sciences (CCIS)", programs: [
-      "BS in Computer Science",
-      "BS in Information System",
-      "BS in Information Technology",
+    { name: "College of Forestry and Environmental Sciences (COFES)", programs: [
+      "BS in Agroforestry",
+      "BS in Environmental Science",
+      "BS in Forestry",
+    ]},
+    { name: "College of Humanities and Social Sciences (CHaSS)", programs: [
+      "Bachelor of Arts in Sociology",
+      "Bachelor of Science in Psychology",
+      "Bachelor of Science in Social Work",
     ]},
     { name: "College of Mathematics and Natural Sciences (CMNS)", programs: [
       "BS in Applied Mathematics",
@@ -1428,49 +1459,37 @@ const subOfficeMap = {
       "BS in Mathematics",
       "BS in Physics",
     ]},
-    { name: "College of Humanities and Social Sciences (CHaSS)", programs: [
-      "Bachelor of Arts in Sociology",
-      "Bachelor of Science in Psychology",
-      "Bachelor of Science in Social Work",
-    ]},
-    { name: "College of Agricultural and Agri-Industries (CAA)", programs: [
-      "BS in Agriculture",
-    ]},
-    { name: "College of Forestry and Environmental Sciences", programs: [
-      "BS in Environmental Science",
-      "BS in Forestry",
-      "BS in Agroforestry",
-    ]},
-    { name: "National Service Training Program", programs: [] },
+    { name: "National Service Training Program (NSTP)", programs: [] },
     { name: "Office of Curriculum & Instruction Development", programs: [] },
     { name: "Office of Student Internship Programs", programs: [] },
-    { name: "Office of the University Registrar", programs: [] },
     { name: "Office of the University Librarian", programs: [] },
+    { name: "Office of the University Registrar", programs: [] },
+    { name: "Professional Schools", programs: [] },
   ],
   OVPEO: [
-    "Project Management Office",
-    "Office of the Planning & Quality Management Services",
-    "Office of Strategic Foresight and Futures Thinking",
-    "Office of Internationalization and Global Engagements",
-    "Management Information System",
-    "Public Information & Communication Office",
     "Alumni Relations Office",
+    "Management Information System",
+    "Office of Internationalization and Global Engagements",
+    "Office of Strategic Foresight and Futures Thinking",
+    "Office of the Planning & Quality Management Services",
+    "Project Management Office",
+    "Public Information & Communication Office",
   ],
   OVPSAS: [
-    "Office of the Student Welfare & Engagements",
-    "Office of the Student Leadership & Development",
-    "Office of the Counselling & Career Services",
     "Office of the Admission & Scholarship",
+    "Office of the Counselling & Career Services",
+    "Office of the Student Leadership & Development",
+    "Office of the Student Welfare & Engagements",
     "University Center for Culture & Arts",
-    "University Center for Sports & Recreation",
     "University Center for Health & Wellness",
+    "University Center for Sports & Recreation",
   ],
   OVPRDIE: [
-    "Research & Development and Innovation (RDI) Services",
-    "Technology Transfer & Licensing Office",
-    "Technology Business Incubator (TBI) Office",
     "Extension Services Office",
     "RDIE Publication Management Office",
+    "Research & Development and Innovation Services",
+    "Technology Business Incubator Office",
+    "Technology Transfer & Licensing Office",
   ],
 };
  
@@ -1495,11 +1514,11 @@ watch(() => form.officeAffiliation, (newOffice) => {
   form.collegeOfficeUnit = "";
   form.collegeProgram = "";
   form.currentPosition = "";
-  // OVPAA: let user pick type. All other offices: always administrative, no type picker shown.
+  // OVPAA: let user pick Teaching or Non-Teaching. All other offices: always non-teaching.
   if (newOffice === "OVPAA") {
     form.personnelType = "";
   } else {
-    form.personnelType = "administrative";
+    form.personnelType = "non-teaching";
   }
 });
  
@@ -1586,14 +1605,14 @@ const implOptions = ["Q1", "Q2", "Q3", "Q4", "Within this year", "Next year"];
 const competencyData = {
   Core: computed(() => {
     const base = ["Integrity","Accountability","Scientific and Technological Excellence","Delivering Service Excellence","Environmental Consciousness","Building Partnership"];
-    if (form.personnelType === "faculty") base.push("Faculty Specializing in Environment");
+    if (form.personnelType === "teaching") base.push("Faculty Specializing in Environment");
     return base;
   }),
   Leadership: ["Developing People","Facilitating Change","Conflict Management","Leading Innovation","Strategic Planning","Leading Others","Decisiveness"],
   Organizational: ["Teamwork","Commitment to Learning","Customer Focus","Adaptability and Flexibility","Critical Thinking","Effective Communication","Valuing Diversity","Self-Awareness and Confidence","Stress Tolerance","Resource Management","Knowledge Management","Initiative","Result Orientation","Community Engagement","Organizational Commitment","Planning and Organizing","Emotional and Psychological Maturity","Safety and Risk Management","Interpersonal Effectiveness"],
   Technical: computed(() => {
     const base = ["Research Engagement","Diagnostic Information Gathering","Attention to Details","Written Communication","Oral Communication","Conceptual and Analytical Thinking","Computer Literacy","Planning and Project Management","Logical Reasoning"];
-    if (form.personnelType === "faculty") {
+    if (form.personnelType === "teaching") {
       base.push("Language Faculty","IT Faculty","Math and Allied Fields Faculty Members");
     }
     return base;
@@ -2460,7 +2479,10 @@ function getRequiredLevel(competency, position) {
 onMounted(() => {
   // Set today's date as default
   form.datePrepared = new Date().toISOString().split("T")[0];
- 
+
+  // Fetch shared suggestions for HEI and Pro-ACT fields
+  fetchSuggestions();
+
   // Check if this is a supervisor link (token in URL)
   const params = new URLSearchParams(window.location.search);
   const token = params.get("token");
@@ -2529,6 +2551,52 @@ function removeRow(arr, idx) {
   arr.splice(idx, 1);
 }
  
+// ── HEI & Pro-ACT suggestions (shared across users via backend) ────────────
+const heiSuggestions = ref([]);
+const proactSuggestions = ref([]);
+
+async function fetchSuggestions() {
+  try {
+    const [heiRes, proactRes] = await Promise.all([
+      fetch(`${API}/api/idp/suggestions/hei`),
+      fetch(`${API}/api/idp/suggestions/proact`),
+    ]);
+    if (heiRes.ok) heiSuggestions.value = await heiRes.json();
+    if (proactRes.ok) proactSuggestions.value = await proactRes.json();
+  } catch {
+    // Suggestions are optional; fail silently
+  }
+}
+
+function onHeiInput(val) {
+  // Persist new suggestion to backend on blur (handled via @change or blur)
+}
+
+function onProactInput(val) {
+  // Persist new suggestion to backend on blur (handled via @change or blur)
+}
+
+async function saveSuggestion(type, value) {
+  if (!value || !value.trim()) return;
+  try {
+    await fetch(`${API}/api/idp/suggestions/${type}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ value: value.trim() }),
+    });
+    if (type === "hei" && !heiSuggestions.value.includes(value.trim())) {
+      heiSuggestions.value.push(value.trim());
+      heiSuggestions.value.sort();
+    }
+    if (type === "proact" && !proactSuggestions.value.includes(value.trim())) {
+      proactSuggestions.value.push(value.trim());
+      proactSuggestions.value.sort();
+    }
+  } catch {
+    // Fail silently
+  }
+}
+
 // ── Stage 1 validation ─────────────────────────────────────────────────────
 function validateStage1() {
   let ok = true;
@@ -2595,6 +2663,7 @@ async function submitStage1() {
     educAttainmentSpec: form.educAttainmentSpec,
     datePrepared: form.datePrepared,
     currentPosition: form.currentPosition,
+    designation: form.designation,
     yearsInPosition: form.yearsInPosition,
     yearsInCSU: form.yearsInCSU,
     supervisorName: form.supervisorName,
@@ -3648,13 +3717,13 @@ textarea {
  
 /* ── Pro-ACT pre-filled skill label ── */
 .proact-skill-label {
-  background: var(--readonly-bg);
-  border: 1.5px solid var(--border);
+  background: rgba(0, 51, 0, 0.07);
+  border: 1.5px solid rgba(0, 51, 0, 0.25);
   border-radius: 6px;
   padding: 8px 10px;
   font-size: 13px;
-  color: var(--text);
-  font-weight: 500;
+  color: var(--navy);
+  font-weight: 600;
   min-width: 160px;
 }
  
