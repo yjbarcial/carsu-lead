@@ -32,6 +32,7 @@ export class Idp {
   @Column({ nullable: true }) educAttainment: string;
   @Column({ nullable: true }) educAttainmentSpec: string;
   @Column({ nullable: true }) currentPosition: string;
+  @Column({ nullable: true }) designation: string;
   @Column({ nullable: true, type: 'float' }) yearsInPosition: number;
   @Column({ nullable: true, type: 'float' }) yearsInCSU: number;
   @Column({ nullable: true }) supervisorName: string;
