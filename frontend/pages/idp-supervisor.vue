@@ -94,14 +94,18 @@
         <span class="token-guidance"
           >Reference ID was sent to your CarSU email</span
         >
-        <input
-          type="text"
-          v-model="tokenInput"
-          placeholder="e.g. IDP-1234567890"
-        />
+        <div class="email-prefix-wrapper" :class="{ error: tokenError }">
+          <span class="email-suffix" style="border-left:none; border-right:1px solid var(--border);">IDP-</span>
+          <input
+            type="text"
+            v-model="tokenInputSuffix"
+            class="email-prefix-input"
+            placeholder="1718000000000"
+          />
+        </div>
       </div>
       <div class="field-group">
-        <label>Your CarSU Email <span class="req">*</span></label>
+        <label>CarSU Email Address <span class="req">*</span></label>
         <div class="email-prefix-wrapper" :class="{ error: emailError }">
           <input
             type="text"
@@ -638,6 +642,7 @@ const isLoading = ref(false);
 const loadingMsg = ref("Loading…");
 
 const tokenInput = ref("");
+const tokenInputSuffix = ref("");
 const supervisorEmailPrefix = ref("");
 const tokenError = ref("");
 const emailError = ref(false);
@@ -692,7 +697,10 @@ const yearOptions = ["2026", "2027", "2028", "2029", "2030", "2031"];
 // ── On mount: check URL for ref param ─────────────────────────────────────
 onMounted(() => {
   const ref = route.query.ref;
-  if (ref) tokenInput.value = ref;
+  if (ref) {
+    tokenInput.value = ref;
+    tokenInputSuffix.value = ref.startsWith('IDP-') ? ref.slice(4) : ref;
+  }
 });
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -711,7 +719,9 @@ async function loadByToken() {
   tokenError.value = "";
   emailError.value = false;
 
-  const token = tokenInput.value.trim();
+  const suffix = tokenInputSuffix.value.trim();
+  tokenInput.value = suffix ? `IDP-${suffix}` : '';
+  const token = tokenInput.value;
   const email = supervisorEmailPrefix.value.trim() + "@carsu.edu.ph";
 
   if (!token) {
@@ -818,6 +828,9 @@ async function submitAssessment() {
 
 <style scoped>
 @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap");
+
+* { font-family: "Roboto", sans-serif; }
+
 /* ── Privacy Modal ── */
 .privacy-overlay {
   position: fixed;
@@ -1312,6 +1325,13 @@ async function submitAssessment() {
   gap: 6px;
   margin-bottom: 16px;
 }
+.field-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--navy-mid, #1a5c1a);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
 .field-label {
   font-size: 12px;
   font-weight: 600;
@@ -1360,6 +1380,39 @@ async function submitAssessment() {
   font-size: 13px;
   border-left: 1px solid var(--border);
   white-space: nowrap;
+}
+
+/* ── Reference ID prefix widget ── */
+.ref-prefix-wrapper {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--input-bg);
+}
+.ref-prefix-wrapper.err { border-color: var(--error); }
+.ref-prefix-wrapper:focus-within { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(0,51,0,0.08); }
+.ref-prefix {
+  padding: 10px 12px;
+  background: #e8ede8;
+  color: var(--navy-mid, #1a5c1a);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  border-right: 1px solid var(--border);
+  user-select: none;
+  letter-spacing: 0.03em;
+}
+.ref-prefix-input {
+  flex: 1;
+  border: none !important;
+  background: transparent !important;
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+  font-family: "Roboto", sans-serif;
+  color: var(--text);
 }
 
 input[type="text"],

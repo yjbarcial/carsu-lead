@@ -11,63 +11,53 @@
     </div>
 
     <!-- ── STAGE 1: IDENTITY LOOKUP ─────────────────────────────────────── -->
-    <div v-if="stage === 'lookup'" class="center-wrap">
-      <div class="lookup-card">
-        <div class="lookup-icon">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path
-              d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
-            />
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-          </svg>
+    <div v-if="stage === 'lookup'" class="token-wrap">
+      <div class="token-card">
+        <div class="token-logo">
+          <img src="/img/csu-logo-square1.png" alt="CarSU" />
         </div>
-        <div class="lookup-eyebrow">Employee Access</div>
         <h2>Edit Your IDP</h2>
         <p>
           Enter your Reference ID and CarSU email to retrieve your submission.
           You can only edit your IDP while your supervisor has not yet completed
           their review.
         </p>
-
-        <div class="lookup-fields">
-          <div class="field-wrap">
-            <label>Reference ID <span class="req">*</span></label>
+        <div class="field-group">
+          <label>Reference ID <span class="req">*</span></label>
+          <span class="token-guidance">Your Reference ID was sent to your CarSU email</span>
+          <div class="email-prefix-wrapper" :class="{ error: lookupError }">
+            <span class="email-suffix" style="border-left:none; border-right:1px solid var(--border);">IDP-</span>
             <input
               type="text"
-              v-model="lookupRefId"
-              placeholder="e.g. IDP-1718000000000"
-              :class="{ err: lookupError }"
+              v-model="lookupRefIdSuffix"
+              class="email-prefix-input"
+              placeholder="1718000000000"
               @keydown.enter="doLookup"
             />
           </div>
-          <div class="field-wrap">
-            <label>CarSU Email Address <span class="req">*</span></label>
-            <input
-              type="email"
-              v-model="lookupEmail"
-              placeholder="yourname@carsu.edu.ph"
-              :class="{ err: lookupError }"
-              @keydown.enter="doLookup"
-            />
-          </div>
-          <p v-if="lookupError" class="error-msg">{{ lookupError }}</p>
         </div>
-
-        <button class="btn-primary" :disabled="lookupLoading" @click="doLookup">
+        <div class="field-group">
+          <label>CarSU Email Address <span class="req">*</span></label>
+          <div class="email-prefix-wrapper" :class="{ error: lookupError }">
+            <input
+              type="text"
+              v-model="lookupEmailPrefix"
+              class="email-prefix-input"
+              placeholder="yourname"
+              @keydown.enter="doLookup"
+            />
+            <span class="email-suffix">@carsu.edu.ph</span>
+          </div>
+        </div>
+        <p v-if="lookupError" class="token-error">{{ lookupError }}</p>
+        <button class="btn-load" :disabled="lookupLoading" @click="doLookup">
           {{ lookupLoading ? "Checking..." : "Retrieve My IDP" }}
         </button>
       </div>
     </div>
 
     <!-- ── STAGE 2: LOCKED ───────────────────────────────────────────────── -->
-    <div v-else-if="stage === 'locked'" class="center-wrap">
+    <div v-else-if="stage === 'locked'" class="token-wrap">
       <div class="locked-card">
         <div class="locked-icon">🔒</div>
         <h2>IDP Locked</h2>
@@ -698,7 +688,7 @@
     </div>
 
     <!-- ── STAGE 3: SUCCESS ──────────────────────────────────────────────── -->
-    <div v-else-if="stage === 'success'" class="center-wrap">
+    <div v-else-if="stage === 'success'" class="token-wrap">
       <div class="success-card">
         <div class="success-icon">✅</div>
         <h2>IDP Updated Successfully</h2>
@@ -732,7 +722,9 @@ const API = config.public.apiBase;
 // ── State ───────────────────────────────────────────────────────────────────
 const stage = ref("lookup"); // 'lookup' | 'form' | 'locked' | 'success'
 const lookupRefId = ref("");
+const lookupRefIdSuffix = ref("");
 const lookupEmail = ref("");
+const lookupEmailPrefix = ref("");
 const lookupError = ref("");
 const lookupLoading = ref(false);
 const submitLoading = ref(false);
@@ -2928,19 +2920,19 @@ competencyModel["Vocational Placement Coordinator I"] = competencyModel["Guidanc
 // ── Lookup ──────────────────────────────────────────────────────────────────
 async function doLookup() {
   lookupError.value = "";
-  const refId = lookupRefId.value.trim().toUpperCase();
-  const email = lookupEmail.value.trim().toLowerCase();
+  const suffix = lookupRefIdSuffix.value.trim().toUpperCase();
+  lookupRefId.value = suffix ? `IDP-${suffix}` : '';
+  const refId = lookupRefId.value;
+  const emailPrefix = lookupEmailPrefix.value.trim().toLowerCase();
+  const email = emailPrefix + "@carsu.edu.ph";
+  lookupEmail.value = email; // keep in sync for PATCH payload
 
   if (!refId) {
     lookupError.value = "Please enter your Reference ID.";
     return;
   }
-  if (!email) {
+  if (!emailPrefix) {
     lookupError.value = "Please enter your CarSU email address.";
-    return;
-  }
-  if (!email.endsWith("@carsu.edu.ph")) {
-    lookupError.value = "Must be a @carsu.edu.ph email address.";
     return;
   }
 
@@ -3132,6 +3124,7 @@ async function doSubmitEdit() {
 
 function cancelEdit() {
   stage.value = "lookup";
+  lookupEmailPrefix.value = "";
   // Clear loaded form data so no stale content lingers behind the lookup card
   Object.assign(form, {
     lastName: "", firstName: "", middleInitial: "",
@@ -3164,22 +3157,22 @@ function resetAndEdit() {
 
 /* ── CSS Variables ── */
 :root {
-  --navy: #1a4d2e;
-  --navy-mid: #2d6a3f;
-  --gold: #f5c300;
+  --navy: #003300;
+  --navy-mid: #1a5c1a;
+  --gold: #ffcc00;
   --gold-light: #ffd740;
-  --cream: #faf8f4;
+  --cream: #f9f8f4;
   --white: #ffffff;
   --text: #1a1a2e;
   --text-light: #5a6070;
   --border: #d8d4c8;
   --error: #c0392b;
   --success: #1a6b3c;
-  --input-bg: #f8f7f4;
+  --input-bg: #ffffff;
   --readonly-bg: #f0ede8;
-  --shadow: 0 4px 24px rgba(26, 77, 46, 0.1);
-  --shadow-sm: 0 2px 8px rgba(26, 77, 46, 0.07);
-  --shadow-lg: 0 12px 48px rgba(26, 77, 46, 0.18);
+  --shadow: 0 4px 24px rgba(0, 51, 0, 0.1);
+  --shadow-sm: 0 2px 8px rgba(0, 51, 0, 0.07);
+  --shadow-lg: 0 8px 40px rgba(0, 51, 0, 0.12);
 }
 * {
   box-sizing: border-box;
@@ -3361,7 +3354,7 @@ select {
 }
 input:focus, select:focus, textarea:focus {
   border-color: var(--navy);
-  box-shadow: 0 0 0 3px rgba(26, 77, 46, 0.08);
+  box-shadow: 0 0 0 3px rgba(0, 51, 0, 0.08);
   background: var(--white);
 }
 input.error, select.error { border-color: var(--error); }
@@ -3425,7 +3418,7 @@ input.error, select.error { border-color: var(--error); }
 }
 .checkbox-item.checked {
   border-color: var(--navy);
-  background: rgba(26, 77, 46, 0.05);
+  background: rgba(0, 51, 0, 0.05);
 }
 
 /* ── Designation toggle ── */
@@ -3570,87 +3563,136 @@ input.error, select.error { border-color: var(--error); }
   cursor: pointer;
   letter-spacing: 0.03em;
   transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-  box-shadow: 0 4px 16px rgba(26, 77, 46, 0.2);
+  box-shadow: 0 4px 16px rgba(0,51,0,0.2);
 }
-.btn-submit:hover { background: var(--navy-mid); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(26,77,46,0.25); }
+.btn-submit:hover { background: var(--navy-mid); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,51,0,0.25); }
 .btn-submit:disabled { background: #aaa; cursor: not-allowed; transform: none; box-shadow: none; }
 
 /* ── Centered cards (lookup, locked, success) ── */
-.center-wrap {
+.token-wrap {
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: calc(100vh - 44px);
-  padding: 40px 20px;
+  background: var(--cream);
+  padding: 24px;
 }
-.lookup-card, .locked-card, .success-card {
+.token-card, .locked-card, .success-card {
   background: var(--white);
-  border-radius: 20px;
-  padding: 48px 44px;
-  max-width: 480px;
-  width: 100%;
-  box-shadow: var(--shadow-lg);
-  text-align: center;
-  animation: fadeUp 0.5s ease;
-}
-.lookup-card, .success-card { border: 1px solid var(--border); }
-.locked-card { border: 1px solid #f5c6c2; }
-.lookup-icon {
-  width: 68px; height: 68px;
-  background: var(--navy);
   border-radius: 16px;
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 20px;
-  box-shadow: 0 8px 24px rgba(26,77,46,0.25);
+  padding: 48px 40px;
+  max-width: 460px;
+  width: 100%;
+  box-shadow: 0 8px 40px rgba(0, 51, 0, 0.12);
+  border: 1px solid var(--border);
 }
-.lookup-icon svg { width: 32px; height: 32px; stroke: var(--gold); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.lookup-eyebrow {
-  font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--gold); background: rgba(245,195,0,0.12); border: 1px solid rgba(245,195,0,0.3);
-  border-radius: 20px; display: inline-block; padding: 4px 14px; margin-bottom: 12px;
+.locked-card { border-color: #f5c6c2; }
+.token-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
 }
-.locked-card h2 { font-family: "Roboto", sans-serif; font-size: 22px; color: var(--error); margin-bottom: 8px; }
-.lookup-card h2, .success-card h2 { font-family: "Roboto", sans-serif; font-size: 24px; color: var(--navy); margin-bottom: 10px; }
-.lookup-card > p, .locked-card > p, .success-card > p { font-size: 13px; color: var(--text-light); line-height: 1.6; margin-bottom: 6px; }
-.lookup-fields { text-align: left; margin: 20px 0; display: flex; flex-direction: column; gap: 14px; }
-.field-wrap { display: flex; flex-direction: column; gap: 5px; }
-.field-wrap label { font-size: 11px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--navy-mid); }
-.field-wrap input {
-  padding: 11px 14px;
+.token-logo img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+}
+.token-card h2 {
+  font-family: "Roboto", sans-serif;
+  font-size: 22px;
+  color: var(--navy);
+  text-align: center;
+  margin-bottom: 8px;
+}
+.token-card > p {
+  color: var(--text-light);
+  font-size: 13px;
+  text-align: center;
+  margin-bottom: 24px;
+}
+.token-error {
+  color: var(--error);
+  font-size: 13px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+.token-guidance {
+  display: block;
+  font-size: 12px;
+  font-style: italic;
+  color: #888;
+  margin-top: -2px;
+}
+.btn-load {
+  width: 100%;
+  padding: 13px;
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 16px;
+  transition: background 0.2s;
+  font-family: "Roboto", sans-serif;
+}
+.btn-load:hover { background: var(--navy-mid); }
+.btn-load:disabled { background: #aaa; cursor: not-allowed; }
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.field-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--navy-mid);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.req { color: var(--error); margin-left: 2px; }
+.email-prefix-wrapper {
+  display: flex;
+  align-items: center;
   border: 1.5px solid var(--border);
-  border-radius: 9px;
-  font-family: inherit; font-size: 14px; color: var(--text);
-  outline: none; transition: border-color 0.2s, box-shadow 0.2s;
-  background: #f8f7f4; width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--input-bg);
 }
-.field-wrap input:focus { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(26,77,46,0.08); background: #fff; }
-.field-wrap input.err { border-color: var(--error); }
-.error-msg { color: var(--error); font-size: 12px; margin-top: -6px; }
+.email-prefix-wrapper.error { border-color: var(--error); }
+.email-prefix-input {
+  flex: 1;
+  border: none !important;
+  background: transparent !important;
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+  font-family: "Roboto", sans-serif;
+  color: var(--text);
+}
+.email-suffix {
+  padding: 10px 14px;
+  background: #e8ede8;
+  color: var(--text-light);
+  font-size: 13px;
+  border-left: 1px solid var(--border);
+  white-space: nowrap;
+}
 .locked-icon { width: 68px; height: 68px; background: rgba(192,57,43,0.08); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 34px; margin: 0 auto 18px; }
-.success-icon { font-size: 48px; margin-bottom: 16px; }
+.locked-card h2 { font-family: "Roboto", sans-serif; font-size: 22px; color: var(--error); margin-bottom: 8px; text-align: center; }
+.locked-card > p { font-size: 13px; color: var(--text-light); line-height: 1.6; text-align: center; margin-bottom: 6px; }
+.success-icon { font-size: 48px; margin-bottom: 16px; text-align: center; }
+.success-card h2 { font-family: "Roboto", sans-serif; font-size: 22px; color: var(--navy); margin-bottom: 8px; text-align: center; }
+.success-card > p { font-size: 13px; color: var(--text-light); line-height: 1.6; text-align: center; margin-bottom: 6px; }
 .ref-box {
   font-family: monospace; font-size: 20px; font-weight: 700; color: var(--navy);
-  background: rgba(26,77,46,0.06); border: 1px solid rgba(26,77,46,0.15);
+  background: rgba(0,51,0,0.06); border: 1px solid rgba(0,51,0,0.15);
   border-radius: 8px; padding: 10px 20px; display: inline-block; margin: 16px 0;
 }
 .success-actions { display: flex; gap: 12px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
 
-/* ── Buttons ── */
-.btn-primary {
-  padding: 13px 28px;
-  background: var(--navy);
-  color: #fff;
-  border: none;
-  border-radius: 9px;
-  font-family: inherit; font-size: 14px; font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.15s;
-  box-shadow: 0 4px 16px rgba(26,77,46,0.2);
-  width: 100%;
-  margin-top: 6px;
-}
-.btn-primary:hover:not(:disabled) { background: var(--navy-mid); transform: translateY(-1px); }
-.btn-primary:disabled { background: #aaa; cursor: not-allowed; transform: none; box-shadow: none; }
 .btn-primary-link {
   padding: 11px 24px; background: var(--navy); color: #fff;
   border-radius: 9px; font-family: inherit; font-size: 13px; font-weight: 600;
@@ -3709,13 +3751,13 @@ input.error, select.error { border-color: var(--error); }
   align-items: center;
   border: 1.5px solid var(--border);
   border-radius: 8px;
-  background: var(--input-bg, #f8f7f4);
+  background: var(--input-bg, #ffffff);
   overflow: hidden;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 .email-prefix-wrapper:focus-within {
   border-color: var(--navy);
-  box-shadow: 0 0 0 3px rgba(26,77,46,0.08);
+  box-shadow: 0 0 0 3px rgba(0,51,0,0.08);
   background: #fff;
 }
 .email-prefix-wrapper.error { border-color: var(--error); }
@@ -3739,10 +3781,10 @@ input.error, select.error { border-color: var(--error); }
 .email-prefix-input:disabled { color: var(--text-light, #5a6070); cursor: not-allowed; }
 .email-suffix {
   padding: 10px 12px;
-  background: rgba(26,77,46,0.07);
-  color: var(--navy-mid, #2d6a3f);
+  background: #e8ede8;
+  color: var(--text-light);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 400;
   white-space: nowrap;
   border-left: 1.5px solid var(--border);
   user-select: none;
@@ -3755,6 +3797,39 @@ input.error, select.error { border-color: var(--error); }
 }
 .email-hint.error { color: var(--error); }
 .email-hint.success { color: var(--success, #1a6b3c); }
+
+/* ── Reference ID prefix widget ── */
+.ref-prefix-wrapper {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--input-bg, #ffffff);
+}
+.ref-prefix-wrapper.err { border-color: var(--error); }
+.ref-prefix-wrapper:focus-within { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(0,51,0,0.08); }
+.ref-prefix {
+  padding: 10px 12px;
+  background: rgba(0,51,0,0.07);
+  color: var(--navy-mid, #2d6a3f);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  border-right: 1.5px solid var(--border);
+  user-select: none;
+  letter-spacing: 0.03em;
+}
+.ref-prefix-input {
+  flex: 1;
+  border: none !important;
+  background: transparent !important;
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+  font-family: inherit;
+  color: var(--text);
+}
 
 /* ── Responsive ── */
 @media (max-width: 900px) {
@@ -3785,7 +3860,7 @@ input.error, select.error { border-color: var(--error); }
   }
 }
 @media (max-width: 480px) {
-  .lookup-card, .locked-card, .success-card { padding: 28px 16px; }
+  .token-card, .locked-card, .success-card { padding: 28px 16px; }
   .name-grid { grid-template-columns: 1fr; }
   .mi-col { max-width: 100%; }
   .checkbox-group { gap: 6px; }
