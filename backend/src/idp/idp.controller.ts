@@ -40,6 +40,8 @@ export class IdpController {
 
   @Post('suggestions/:type')
   saveSuggestion(@Param('type') type: string, @Body() body: { value: string }) {
+    const allowed = ['hei', 'proact'];
+    if (!allowed.includes(type)) return;
     return this.idpService.saveSuggestion(type, body.value);
   }
 
@@ -72,12 +74,6 @@ export class IdpController {
     res.end(buffer);
   }
 
-  /**
-   * Employee edit — identity check.
-   * GET /api/idp/:refId/edit-check?email=xxx
-   * Returns the record if refId + email match and status is not COMPLETE.
-   * Returns 404 if not found, 403 if locked or wrong email.
-   */
   @Get(':refId/edit-check')
   async editCheck(
     @Param('refId') refId: string,
@@ -104,22 +100,15 @@ export class IdpController {
       return;
     }
     if (result === 'locked') {
-      res
-        .status(HttpStatus.FORBIDDEN)
-        .json({
-          message:
-            'This IDP has already been reviewed by your supervisor and can no longer be edited.',
-        });
+      res.status(HttpStatus.FORBIDDEN).json({
+        message:
+          'This IDP has already been reviewed by your supervisor and can no longer be edited.',
+      });
       return;
     }
     res.status(HttpStatus.OK).json(result);
   }
 
-  /**
-   * Employee edit — submit updated form.
-   * PATCH /api/idp/:refId
-   * Body must include { email, ...formFields }
-   */
   @Patch(':refId')
   @HttpCode(HttpStatus.OK)
   async updateByEmployee(
@@ -151,12 +140,10 @@ export class IdpController {
       return;
     }
     if (result === 'locked') {
-      res
-        .status(HttpStatus.FORBIDDEN)
-        .json({
-          message:
-            'This IDP has already been reviewed and can no longer be edited.',
-        });
+      res.status(HttpStatus.FORBIDDEN).json({
+        message:
+          'This IDP has already been reviewed and can no longer be edited.',
+      });
       return;
     }
     res.status(HttpStatus.OK).json(result);

@@ -5,9 +5,10 @@ import { IdpService } from './idp.service';
 import { IdpController } from './idp.controller';
 import { MailModule } from '../mail/mail.module';
 import { PdfModule } from '../pdf/pdf.module';
+import { IdpSuggestion } from './idp-suggestion.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Idp]), MailModule, PdfModule],
+  imports: [TypeOrmModule.forFeature([Idp]), MailModule, PdfModule, IdpSuggestion],
   controllers: [IdpController],
   providers: [IdpService],
 })

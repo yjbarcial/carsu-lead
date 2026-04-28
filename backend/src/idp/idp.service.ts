@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Idp } from './idp.entity';
 import { MailService } from '../mail/mail.service';
 import { PdfService } from '../pdf/pdf.service';
+import { IdpSuggestion } from './idp-suggestion.entity';
 
 type EditCheckResult = Idp | 'not_found' | 'wrong_email' | 'locked';
 
@@ -12,10 +13,41 @@ type EditCheckResult = Idp | 'not_found' | 'wrong_email' | 'locked';
 export class IdpService {
   constructor(
     @InjectRepository(Idp) private repo: Repository<Idp>,
+    @InjectRepository(IdpSuggestion)
+    private suggestionRepo: Repository<IdpSuggestion>,
     private readonly mail: MailService,
     private readonly pdf: PdfService,
     private readonly dataSource: DataSource,
   ) {}
+
+  // ── Shared autocomplete suggestions (HEI & Pro-ACT) ─────────────────────
+
+  async getSuggestions(fieldName: string): Promise<string[]> {
+    const rows = await this.suggestionRepo.find({
+      where: { fieldName },
+      order: { usedCount: 'DESC' },
+      take: 30,
+    });
+    return rows.map((r) => r.value);
+  }
+
+  async saveSuggestion(fieldName: string, value: string): Promise<void> {
+    const trimmed = value.trim();
+    if (!trimmed) return;
+
+    const existing = await this.suggestionRepo.findOne({
+      where: { fieldName, value: trimmed },
+    });
+
+    if (existing) {
+      existing.usedCount += 1;
+      await this.suggestionRepo.save(existing);
+    } else {
+      await this.suggestionRepo.save(
+        this.suggestionRepo.create({ fieldName, value: trimmed }),
+      );
+    }
+  }
 
   // ── Create (initial submission) ─────────────────────────────────────────
 
@@ -111,10 +143,6 @@ export class IdpService {
 
   // ── Employee edit ───────────────────────────────────────────────────────
 
-  /**
-   * Verify identity and return record if editable.
-   * Returns a string sentinel on failure so the controller can map to HTTP codes.
-   */
   async getForEdit(refId: string, email: string): Promise<EditCheckResult> {
     const record = await this.repo.findOne({ where: { refId } });
     if (!record) return 'not_found';
@@ -124,24 +152,19 @@ export class IdpService {
     return record;
   }
 
-  /**
-   * Apply employee-submitted edits.
-   * Re-notifies supervisor so they always review the latest version.
-   */
   async updateByEmployee(
     refId: string,
     email: string,
     data: Record<string, any>,
   ): Promise<EditCheckResult> {
     const check = await this.getForEdit(refId, email);
-    if (typeof check === 'string') return check; // sentinel — not_found / wrong_email / locked
+    if (typeof check === 'string') return check;
 
     const record = check;
 
     await this.repo.update(
       { refId },
       {
-        // All employee-editable header fields
         officeAffiliation: data.officeAffiliation ?? record.officeAffiliation,
         collegeOfficeUnit: data.collegeOfficeUnit ?? record.collegeOfficeUnit,
         collegeProgram: data.collegeProgram ?? record.collegeProgram,
@@ -162,11 +185,9 @@ export class IdpService {
         supervisorEmail: data.supervisorEmail ?? record.supervisorEmail,
         headerPurpose: data.headerPurpose ?? record.headerPurpose,
         competencyPurpose: data.competencyPurpose ?? record.competencyPurpose,
-        // Section rows
         competencyRowsJson: JSON.stringify(data.competencyRows ?? []),
         agapRowsJson: JSON.stringify(data.agapRows ?? []),
         proactRowsJson: JSON.stringify(data.proactRows ?? []),
-        // Stamp edit time
         supervisorNotifiedAt: new Date().toISOString(),
       },
     );
@@ -182,7 +203,6 @@ export class IdpService {
     const frontendBase = process.env.FRONTEND_URL ?? 'http://localhost:3000';
     const reviewUrl = `${frontendBase}/idp-supervisor?token=${updated.supervisorToken}`;
 
-    // 1. Confirm edit to employee
     if (updated.employeeEmail) {
       this.mail.sendEmployeeEditConfirmation({
         to: updated.employeeEmail,
@@ -192,7 +212,6 @@ export class IdpService {
       });
     }
 
-    // 2. Re-notify supervisor with updated content
     if (updated.supervisorEmail) {
       this.mail.sendSupervisorRenotification({
         to: updated.supervisorEmail,
@@ -279,25 +298,5 @@ export class IdpService {
       console.error('PDF generation failed:', err.message);
       return null;
     }
-  }
-
-  // ── Shared autocomplete suggestions (HEI & Pro-ACT) ─────────────────────
-
-  async getSuggestions(type: string): Promise<string[]> {
-    const rows = await this.dataSource.query(
-      `SELECT value FROM idp_suggestions WHERE type = $1 ORDER BY value ASC`,
-      [type],
-    );
-    return rows.map((r: { value: string }) => r.value);
-  }
-
-  async saveSuggestion(type: string, value: string): Promise<void> {
-    if (!value || !value.trim()) return;
-    await this.dataSource.query(
-      `INSERT INTO idp_suggestions (type, value)
-       VALUES ($1, $2)
-       ON CONFLICT (value) DO NOTHING`,
-      [type, value.trim()],
-    );
   }
 }

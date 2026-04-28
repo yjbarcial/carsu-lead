@@ -916,8 +916,6 @@
                       v-model="row.targetHEI"
                       placeholder="Full name of School"
                       list="hei-suggestions"
-                      @input="onHeiInput(row.targetHEI)"
-                      @blur="saveSuggestion('hei', row.targetHEI)"
                     />
                     <datalist id="hei-suggestions">
                       <option v-for="s in heiSuggestions" :key="s" :value="s" />
@@ -1040,10 +1038,6 @@
                       v-model="proactRows[idx].trainingTitle"
                       placeholder="Enter training or intervention title"
                       list="proact-suggestions"
-                      @input="onProactInput(proactRows[idx].trainingTitle)"
-                      @blur="
-                        saveSuggestion('proact', proactRows[idx].trainingTitle)
-                      "
                     />
                     <datalist id="proact-suggestions">
                       <option
@@ -4283,6 +4277,16 @@ async function submitStage1() {
     const data = await res.json();
     if (data.refId) {
       refId.value = data.refId;
+
+      // Save suggestions only on successful submission
+      agapRows.value.forEach((row) => {
+        if (row.targetHEI?.trim()) saveSuggestion("hei", row.targetHEI);
+      });
+      proactRows.value.forEach((row) => {
+        if (row.trainingTitle?.trim())
+          saveSuggestion("proact", row.trainingTitle);
+      });
+
       stage.value = "stage1-success";
     } else {
       alert("Submission failed: " + (data.error || "Unknown error"));
