@@ -13,6 +13,7 @@ export class Lna {
   @Column({ nullable: true }) campus: string;
   @Column({ nullable: true }) officeAffiliation: string;
   @Column({ nullable: true }) office: string;
+  @Column({ nullable: true }) collegeProgram: string;
   @Column({ nullable: true }) headOfUnit: string;
   @Column({ nullable: true }) position: string;
   @Column({ nullable: true }) datePrepared: string;

@@ -17,7 +17,11 @@ export class LnaService {
 
   async create(data: Partial<Lna>): Promise<Lna> {
     const refId = 'LNA-' + Date.now();
-    const record = this.repo.create({ ...data, refId });
+    const record = this.repo.create({
+      ...data,
+      refId,
+      raterName: (data as any).raterFullName ?? (data as any).raterName ?? null,
+    });
     const saved = await this.repo.save(record);
 
     const submittedAt = new Date().toLocaleDateString('en-PH', {

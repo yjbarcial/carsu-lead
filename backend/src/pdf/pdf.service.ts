@@ -587,7 +587,7 @@ export class PdfService {
            <td style="${i % 2 === 0 ? tdStyle : tdAlt}">${s(r.dataSource)}</td>
            <td style="${i % 2 === 0 ? tdStyle : tdAlt}">${s(r.gap)}</td>
            <td style="${i % 2 === 0 ? tdStyle : tdAlt}">${s(r.personnel)}</td>
-           <td style="${i % 2 === 0 ? tdStyle : tdAlt}">${s(r.intervention)}</td></tr>`,
+           <td style="${i % 2 === 0 ? tdStyle : tdAlt}">${s(r.interventions ?? r.intervention)}</td></tr>`,
             )
             .join('')
         : `<tr><td colspan="5" style="${tdStyle}text-align:center;color:#888;font-style:italic;">No insights recorded.</td></tr>`;
