@@ -5,39 +5,60 @@
   <div v-if="showPrivacyModal" class="privacy-overlay">
     <div class="privacy-modal">
       <div class="privacy-header">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        </svg>
         <h2>Data Privacy Notice</h2>
       </div>
       <div class="privacy-body">
         <p>
-          In compliance with the <strong>Data Privacy Act of 2012 (R.A. 10173)</strong>,
-          Caraga State University informs you that the personal information you provide
-          in this <strong>Individual Development Plan (IDP)</strong> form will be collected
-          and processed for the following purposes:
+          In compliance with the
+          <strong>Data Privacy Act of 2012 (R.A. 10173)</strong>, Caraga State
+          University informs you that the personal information you provide in
+          this <strong>Individual Development Plan (IDP)</strong> form will be
+          collected and processed for the following purposes:
         </p>
         <ul>
           <li>Assessment of your learning and development needs</li>
           <li>Planning and delivery of training interventions</li>
           <li>Human resource management and reporting</li>
-          <li>Generation of official IDP documents shared with your supervisor and HR</li>
+          <li>
+            Generation of official IDP documents shared with your supervisor and
+            HR
+          </li>
         </ul>
         <p>
-          Your information will be stored securely and accessed only by authorized
-          Caraga State University, Human Resource and Management Services (Learning and Development) personnel. It will not be disclosed to third parties without
-          your consent, except as required by law.
+          Your information will be stored securely and accessed only by
+          authorized Caraga State University, Human Resource and Management
+          Services (Learning and Development) personnel. It will not be
+          disclosed to third parties without your consent, except as required by
+          law.
         </p>
         <p>
-          You have the right to access, correct, or request deletion of your data.
-          For concerns, contact the Caraga State University HRMS at <strong>yjbarcial@carsu.edu.ph</strong>.
+          You have the right to access, correct, or request deletion of your
+          data. For concerns, contact the Caraga State University HRMS at
+          <strong>yjbarcial@carsu.edu.ph</strong>.
         </p>
         <label class="privacy-checkbox">
           <input type="checkbox" v-model="privacyAgreed" />
-          <span>I have read and understood this notice, and I consent to the collection and processing of my personal data.</span>
+          <span
+            >I have read and understood this notice, and I consent to the
+            collection and processing of my personal data.</span
+          >
         </label>
       </div>
       <div class="privacy-footer">
         <a href="/" class="btn-privacy-decline">Decline</a>
-        <button class="btn-privacy-agree" :disabled="!privacyAgreed" @click="acceptPrivacy">
+        <button
+          class="btn-privacy-agree"
+          :disabled="!privacyAgreed"
+          @click="acceptPrivacy"
+        >
           Agree &amp; Continue
         </button>
       </div>
@@ -49,7 +70,7 @@
     <div class="spinner"></div>
     <p>{{ loadingMsg }}</p>
   </div>
-  
+
   <!-- Page nav breadcrumb -->
   <div class="page-nav">
     <a href="/" class="back-link">
@@ -59,7 +80,7 @@
     <span class="nav-sep">/</span>
     <span class="nav-current">Individual Development Plan (IDP) 2026-2031</span>
   </div>
- 
+
   <!-- ═══════════════════════════════════════════════ -->
   <!-- STAGE 1 SUCCESS SCREEN                          -->
   <!-- ═══════════════════════════════════════════════ -->
@@ -83,7 +104,7 @@
     <br />
     <a href="/" class="btn-return">← Return to Home</a>
   </div>
- 
+
   <!-- ═══════════════════════════════════════════════ -->
   <!-- STAGE 2 TOKEN SCREEN                            -->
   <!-- ═══════════════════════════════════════════════ -->
@@ -108,7 +129,7 @@
     <div class="token-error">{{ tokenError }}</div>
     <button class="btn-load" @click="loadByToken">Verify &amp; Load IDP</button>
   </div>
- 
+
   <!-- ═══════════════════════════════════════════════ -->
   <!-- STAGE 2 SUCCESS SCREEN                          -->
   <!-- ═══════════════════════════════════════════════ -->
@@ -138,10 +159,10 @@
       </p>
     </div>
   </div>
- 
+
   <!-- print area -->
   <div id="printArea" style="display: none"></div>
- 
+
   <!-- ═══════════════════════════════════════════════ -->
   <!-- STAGE 1: EMPLOYEE FORM                          -->
   <!-- ═══════════════════════════════════════════════ -->
@@ -153,7 +174,7 @@
         automatically upon submission.
       </p>
     </div>
- 
+
     <!-- ── HEADER INFO ── -->
     <div class="section-card">
       <div class="section-header">
@@ -164,13 +185,12 @@
         </div>
       </div>
       <div class="section-body">
- 
         <!-- Campus — static display only -->
         <div class="field-group" style="margin-bottom: 20px">
           <label>Campus</label>
           <div class="static-value">CSU Main Campus</div>
         </div>
- 
+
         <!-- Office Affiliation -->
         <div class="field-group" style="margin-bottom: 20px">
           <label>Office Affiliation <span class="req">*</span></label>
@@ -191,7 +211,7 @@
             </label>
           </div>
         </div>
- 
+
         <!-- College / Office / Unit -->
         <div class="field-grid field-grid-2" style="margin-bottom: 18px">
           <div class="field-group span-2">
@@ -202,7 +222,13 @@
               :class="{ error: errors.collegeOfficeUnit }"
             >
               <option value="">Select office / unit…</option>
-              <option v-for="opt in collegeOfficeUnitOptions" :key="opt" :value="opt">{{ opt }}</option>
+              <option
+                v-for="opt in collegeOfficeUnitOptions"
+                :key="opt"
+                :value="opt"
+              >
+                {{ opt }}
+              </option>
             </select>
             <input
               v-else
@@ -213,40 +239,73 @@
             />
           </div>
           <!-- Program selector — only for OVPAA colleges with programs -->
-          <div v-if="isOVPAA && selectedCollegePrograms.length > 0" class="field-group span-2" style="margin-top: 4px">
+          <div
+            v-if="isOVPAA && selectedCollegePrograms.length > 0"
+            class="field-group span-2"
+            style="margin-top: 4px"
+          >
             <label>Program / Department <span class="req">*</span></label>
-            <select v-model="form.collegeProgram" :class="{ error: errors.collegeProgram }">
+            <select
+              v-model="form.collegeProgram"
+              :class="{ error: errors.collegeProgram }"
+            >
               <option value="">Select program…</option>
-              <option v-for="p in selectedCollegePrograms" :key="p" :value="p">{{ p }}</option>
+              <option v-for="p in selectedCollegePrograms" :key="p" :value="p">
+                {{ p }}
+              </option>
             </select>
           </div>
         </div>
- 
+
         <!-- Name of Personnel -->
         <div class="field-group" style="margin-bottom: 18px">
           <label>Name of Personnel <span class="req">*</span></label>
           <div class="name-grid">
             <div>
-              <input type="text" v-model="form.lastName" :class="{ error: errors.lastName }" placeholder="Last Name" @input="form.lastName = form.lastName.toUpperCase()" />
               <small class="field-hint">Last Name</small>
+              <input
+                type="text"
+                v-model="form.lastName"
+                :class="{ error: errors.lastName }"
+                placeholder="DELA CRUZ"
+                @input="form.lastName = form.lastName.toUpperCase()"
+              />
             </div>
             <div>
-              <input type="text" v-model="form.firstName" :class="{ error: errors.firstName }" placeholder="First Name" @input="form.firstName = form.firstName.toUpperCase()" />
               <small class="field-hint">First Name</small>
+              <input
+                type="text"
+                v-model="form.firstName"
+                :class="{ error: errors.firstName }"
+                placeholder="JUAN"
+                @input="form.firstName = form.firstName.toUpperCase()"
+              />
             </div>
             <div class="mi-col">
-              <input type="text" v-model="form.middleInitial" :class="{ error: errors.middleInitial }" placeholder="M.I." maxlength="3" @input="form.middleInitial = form.middleInitial.toUpperCase()" />
               <small class="field-hint">M.I.</small>
+              <input
+                type="text"
+                v-model="form.middleInitial"
+                :class="{ error: errors.middleInitial }"
+                placeholder="A"
+                maxlength="3"
+                @input="form.middleInitial = form.middleInitial.toUpperCase()"
+              />
             </div>
           </div>
         </div>
- 
+
         <div class="field-grid field-grid-2" style="margin-bottom: 18px">
- 
           <!-- Employee Email -->
           <div class="field-group">
             <label>Your CarSU Email Address <span class="req">*</span></label>
-            <div class="email-prefix-wrapper" :class="{ error: emailHints.employee.type === 'error', valid: emailHints.employee.type === 'success' }">
+            <div
+              class="email-prefix-wrapper"
+              :class="{
+                error: emailHints.employee.type === 'error',
+                valid: emailHints.employee.type === 'success',
+              }"
+            >
               <input
                 type="text"
                 v-model="form.employeeEmailPrefix"
@@ -256,20 +315,23 @@
               />
               <span class="email-suffix">@carsu.edu.ph</span>
             </div>
-            <small class="email-hint" :class="emailHints.employee.type">{{ emailHints.employee.msg }}</small>
+            <small class="email-hint" :class="emailHints.employee.type">{{
+              emailHints.employee.msg
+            }}</small>
           </div>
- 
-          <!-- Date Prepared -->
-          <div class="field-group">
-            <label>Date Prepared <span class="req">*</span></label>
-            <input type="date" v-model="form.datePrepared" :class="{ error: errors.datePrepared }" />
-          </div>
- 
+
           <!-- Educational Attainment -->
           <div class="field-group span-2">
-            <label>Highest Educational Attainment <span class="req">*</span></label>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-              <select v-model="form.educAttainment" :class="{ error: errors.educAttainment }">
+            <label
+              >Highest Educational Attainment <span class="req">*</span></label
+            >
+            <div
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px"
+            >
+              <select
+                v-model="form.educAttainment"
+                :class="{ error: errors.educAttainment }"
+              >
                 <option value="">Select…</option>
                 <option>Bachelor's Degree</option>
                 <option>Post-Baccalaureate Certificate</option>
@@ -283,19 +345,34 @@
                 v-model="form.educAttainmentSpec"
                 :class="{ error: errors.educAttainmentSpec }"
                 placeholder="Specify degree / program (e.g. BS COMPUTER SCIENCE)"
-                @input="form.educAttainmentSpec = form.educAttainmentSpec.toUpperCase()"
+                @input="
+                  form.educAttainmentSpec =
+                    form.educAttainmentSpec.toUpperCase()
+                "
               />
             </div>
           </div>
- 
+
           <!-- Current Position & Designation -->
           <div class="field-group span-2">
             <label>Position &amp; Designation <span class="req">*</span></label>
 
             <!-- OVPAA only: Personnel Type selector (above the 2-col row) -->
-            <div v-if="form.officeAffiliation === 'OVPAA'" style="margin-bottom: 10px;">
-              <small class="field-hint" style="margin-bottom:4px;display:block;">Personnel Type</small>
-              <select v-model="form.personnelType" :class="{ error: errors.personnelType }" @change="form.currentPosition = ''" style="max-width: 260px;">
+            <div
+              v-if="form.officeAffiliation === 'OVPAA'"
+              style="margin-bottom: 10px"
+            >
+              <small
+                class="field-hint"
+                style="margin-bottom: 4px; display: block"
+                >Personnel Type</small
+              >
+              <select
+                v-model="form.personnelType"
+                :class="{ error: errors.personnelType }"
+                @change="form.currentPosition = ''"
+                style="max-width: 260px"
+              >
                 <option value="">Select type…</option>
                 <option value="non-teaching">Non-Teaching</option>
                 <option value="teaching">Teaching</option>
@@ -303,19 +380,27 @@
             </div>
 
             <!-- Position + Designation side by side for all affiliations -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px"
+            >
               <!-- Position dropdown -->
               <div>
-                <small class="field-hint" style="margin-bottom:4px;display:block;">Position</small>
                 <select
                   v-model="form.currentPosition"
                   :class="{ error: errors.currentPosition }"
-                  :disabled="form.officeAffiliation === 'OVPAA' && !form.personnelType"
+                  :disabled="
+                    form.officeAffiliation === 'OVPAA' && !form.personnelType
+                  "
                 >
                   <option value="">Select position…</option>
 
                   <!-- OVPAA teaching -->
-                  <template v-if="form.officeAffiliation === 'OVPAA' && form.personnelType === 'teaching'">
+                  <template
+                    v-if="
+                      form.officeAffiliation === 'OVPAA' &&
+                      form.personnelType === 'teaching'
+                    "
+                  >
                     <option>Assistant Professor I</option>
                     <option>Assistant Professor II</option>
                     <option>Assistant Professor III</option>
@@ -338,7 +423,12 @@
                   </template>
 
                   <!-- Non-teaching: shown for all affiliations (and OVPAA non-teaching) -->
-                  <template v-if="form.officeAffiliation !== 'OVPAA' || form.personnelType === 'non-teaching'">
+                  <template
+                    v-if="
+                      form.officeAffiliation !== 'OVPAA' ||
+                      form.personnelType === 'non-teaching'
+                    "
+                  >
                     <option>Accountant I</option>
                     <option>Accountant II</option>
                     <option>Accountant III</option>
@@ -420,43 +510,97 @@
                 </select>
               </div>
 
-              <!-- Designation input -->
-              <div>
-                <small class="field-hint" style="margin-bottom:4px;display:block;">Designation</small>
+              <!-- Designation — N/A or Specify toggle -->
+              <div class="field-group">
+                <label>Designation <span class="req">*</span></label>
+                <div class="designation-toggle">
+                  <label
+                    class="checkbox-item"
+                    :class="{ checked: form.designationMode === 'na' }"
+                  >
+                    <input
+                      type="radio"
+                      name="designationMode"
+                      value="na"
+                      v-model="form.designationMode"
+                      @change="form.designation = 'N/A'"
+                    />
+                    N/A
+                  </label>
+                  <label
+                    class="checkbox-item"
+                    :class="{ checked: form.designationMode === 'specify' }"
+                  >
+                    <input
+                      type="radio"
+                      name="designationMode"
+                      value="specify"
+                      v-model="form.designationMode"
+                      @change="form.designation = ''"
+                    />
+                    Specify
+                  </label>
+                </div>
                 <input
+                  v-if="form.designationMode === 'specify'"
                   type="text"
                   v-model="form.designation"
-                  :class="{ error: errors.designation }"
-                  placeholder="Specify or N/A"
+                  placeholder="e.g. OIC Director, Acting Dean…"
+                  style="margin-top: 6px"
                 />
-                <small class="field-hint">e.g. Officer-in-Charge, Unit Head, or N/A</small>
               </div>
             </div>
           </div>
- 
+
           <!-- Years in Position -->
           <div class="field-group">
             <label>Years in Position <span class="req">*</span></label>
-            <input type="number" v-model="form.yearsInPosition" :class="{ error: errors.yearsInPosition }" min="0" placeholder="0" />
+            <input
+              type="number"
+              v-model="form.yearsInPosition"
+              :class="{ error: errors.yearsInPosition }"
+              min="0"
+              placeholder="0"
+            />
           </div>
- 
+
           <!-- Years in CSU -->
           <div class="field-group">
             <label>Years in CSU <span class="req">*</span></label>
-            <input type="number" v-model="form.yearsInCSU" :class="{ error: errors.yearsInCSU }" min="0" placeholder="0" />
+            <input
+              type="number"
+              v-model="form.yearsInCSU"
+              :class="{ error: errors.yearsInCSU }"
+              min="0"
+              placeholder="0"
+            />
           </div>
- 
+
           <!-- Supervisor Name -->
           <div class="field-group">
             <label>Immediate Supervisor Name <span class="req">*</span></label>
-            <input type="text" v-model="form.supervisorName" :class="{ error: errors.supervisorName }" placeholder="e.g. DELA CRUZ, JUAN D." @input="form.supervisorName = form.supervisorName.toUpperCase()" />
-            <small class="field-hint">Format: Last name, First name, M.I.</small>
+            <input
+              type="text"
+              v-model="form.supervisorName"
+              :class="{ error: errors.supervisorName }"
+              placeholder="e.g. DELA CRUZ, JUAN D."
+              @input="form.supervisorName = form.supervisorName.toUpperCase()"
+            />
+            <small class="field-hint"
+              >Format: Last name, First name, M.I.</small
+            >
           </div>
- 
+
           <!-- Supervisor Email -->
           <div class="field-group">
             <label>Supervisor CarSU Email <span class="req">*</span></label>
-            <div class="email-prefix-wrapper" :class="{ error: emailHints.supervisor.type === 'error', valid: emailHints.supervisor.type === 'success' }">
+            <div
+              class="email-prefix-wrapper"
+              :class="{
+                error: emailHints.supervisor.type === 'error',
+                valid: emailHints.supervisor.type === 'success',
+              }"
+            >
               <input
                 type="text"
                 v-model="form.supervisorEmailPrefix"
@@ -466,9 +610,11 @@
               />
               <span class="email-suffix">@carsu.edu.ph</span>
             </div>
-            <small class="email-hint" :class="emailHints.supervisor.type">{{ emailHints.supervisor.msg }}</small>
+            <small class="email-hint" :class="emailHints.supervisor.type">{{
+              emailHints.supervisor.msg
+            }}</small>
           </div>
- 
+
           <!-- Purpose -->
           <div class="field-group span-2">
             <label>Purpose <span class="req">*</span></label>
@@ -488,15 +634,21 @@
                 {{ option }}
               </label>
             </div>
-            <div class="other-specify" :class="{ visible: form.headerPurpose === 'Other' }">
-              <input type="text" v-model="form.headerPurposeOther" placeholder="Please specify…" />
+            <div
+              class="other-specify"
+              :class="{ visible: form.headerPurpose === 'Other' }"
+            >
+              <input
+                type="text"
+                v-model="form.headerPurposeOther"
+                placeholder="Please specify…"
+              />
             </div>
           </div>
- 
         </div>
       </div>
     </div>
- 
+
     <!-- ── SECTION I: COMPETENCY ASSESSMENT ── -->
     <div class="section-card section-card-collapsible">
       <div class="section-header">
@@ -505,154 +657,194 @@
           <h3>Competency Assessment</h3>
           <p>Identify key competencies to develop</p>
         </div>
-        <div v-if="!form.headerPurpose" class="section-locked-badge">Complete Section H first</div>
+        <div v-if="!form.headerPurpose" class="section-locked-badge">
+          Complete Section H first
+        </div>
       </div>
       <transition name="reveal">
-      <div v-if="form.headerPurpose" class="section-body">
-        <div class="section-desc">
-          Identify key competencies you need to develop based on your current or
-          target role. For detailed descriptions and behavioral indicators,
-          please refer to the
-          <a href="https://tinyurl.com/CompetencyManualandModel" target="_blank"
-            >Competency Manual and Model</a
-          >.
-        </div>
- 
-        <div class="field-group" style="margin-bottom: 20px">
-          <label>Purpose <span class="req">*</span></label>
-          <div class="checkbox-group">
-            <label
-              v-for="option in compPurposeOptions"
-              :key="option.value"
-              class="checkbox-item"
-              :class="{ checked: form.compPurpose === option.value }"
+        <div v-if="form.headerPurpose" class="section-body">
+          <div class="section-desc">
+            Identify key competencies you need to develop based on your current
+            or target role. For detailed descriptions and behavioral indicators,
+            please refer to the
+            <a
+              href="https://tinyurl.com/CompetencyManualandModel"
+              target="_blank"
+              >Competency Manual and Model</a
+            >.
+          </div>
+
+          <div class="field-group" style="margin-bottom: 20px">
+            <label>Purpose <span class="req">*</span></label>
+            <div class="checkbox-group">
+              <label
+                v-for="option in compPurposeOptions"
+                :key="option.value"
+                class="checkbox-item"
+                :class="{ checked: form.compPurpose === option.value }"
+              >
+                <input
+                  type="radio"
+                  name="compPurpose"
+                  :value="option.value"
+                  v-model="form.compPurpose"
+                />
+                {{ option.label }}
+              </label>
+            </div>
+            <div
+              class="other-specify"
+              :class="{ visible: form.compPurpose === 'Others' }"
             >
               <input
-                type="radio"
-                name="compPurpose"
-                :value="option.value"
-                v-model="form.compPurpose"
+                type="text"
+                v-model="form.compPurposeOther"
+                placeholder="Please specify…"
               />
-              {{ option.label }}
-            </label>
+            </div>
           </div>
-          <div
-            class="other-specify"
-            :class="{ visible: form.compPurpose === 'Others' }"
-          >
-            <input
-              type="text"
-              v-model="form.compPurposeOther"
-              placeholder="Please specify…"
-            />
-          </div>
-        </div>
- 
-        <div class="table-wrapper">
-          <table class="dynamic-table">
-            <thead>
-              <tr>
-                <th style="width: 40px">No.</th>
-                <th style="min-width:180px">Target Competency</th>
-                <th style="width: 150px">Current Level</th>
-                <th style="width: 150px">Required Level</th>
-                <th>Suggested LeaD Interventions</th>
-                <th style="width: 120px">Target Timeline</th>
-                <th style="width: 40px"></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(row, idx) in competencyRows" :key="idx">
-                <td class="row-num-cell">{{ idx + 1 }}</td>
-                <td>
-                  <select v-model="row.targetCompetency" @change="row.competencyGroup = getCompetencyCluster(row.targetCompetency); row.requiredLevel = getRequiredLevel(row.targetCompetency, form.currentPosition)">
-                    <option value="">Select…</option>
-                    <template v-for="cluster in availableClusters" :key="cluster">
-                      <optgroup :label="cluster">
-                        <option v-for="c in allCompetencies[cluster]" :key="c" :value="c">{{ c }}</option>
-                      </optgroup>
-                    </template>
-                  </select>
-                </td>
-                <td>
-                  <select v-model="row.currentLevel">
-                    <option value="">Select…</option>
-                    <option value="1 - Basic">1 - Basic</option>
-                    <option value="2 - Intermediate">2 - Intermediate</option>
-                    <option value="3 - Advanced">3 - Advanced</option>
-                    <option value="4 - Expert">4 - Expert</option>
-                  </select>
-                </td>
-                <td>
-                  <template v-if="form.currentPosition === 'Director'">
-                    <select v-model="row.requiredLevel" style="min-width: 130px">
+
+          <div class="table-wrapper">
+            <table class="dynamic-table">
+              <thead>
+                <tr>
+                  <th style="width: 40px">No.</th>
+                  <th style="min-width: 180px">Target Competency</th>
+                  <th style="width: 150px">Current Level</th>
+                  <th style="width: 150px">Required Level</th>
+                  <th>Suggested LeaD Interventions</th>
+                  <th style="width: 120px">Target Timeline</th>
+                  <th style="width: 40px"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, idx) in competencyRows" :key="idx">
+                  <td class="row-num-cell">{{ idx + 1 }}</td>
+                  <td>
+                    <select
+                      v-model="row.targetCompetency"
+                      @change="
+                        row.competencyGroup = getCompetencyCluster(
+                          row.targetCompetency,
+                        );
+                        row.requiredLevel = getRequiredLevel(
+                          row.targetCompetency,
+                          form.currentPosition,
+                        );
+                      "
+                    >
+                      <option value="">Select…</option>
+                      <template
+                        v-for="cluster in availableClusters"
+                        :key="cluster"
+                      >
+                        <optgroup :label="cluster">
+                          <option
+                            v-for="c in allCompetencies[cluster]"
+                            :key="c"
+                            :value="c"
+                          >
+                            {{ c }}
+                          </option>
+                        </optgroup>
+                      </template>
+                    </select>
+                  </td>
+                  <td>
+                    <select v-model="row.currentLevel">
                       <option value="">Select…</option>
                       <option value="1 - Basic">1 - Basic</option>
                       <option value="2 - Intermediate">2 - Intermediate</option>
                       <option value="3 - Advanced">3 - Advanced</option>
                       <option value="4 - Expert">4 - Expert</option>
                     </select>
-                  </template>
-                  <template v-else>
-                    <div v-if="row.requiredLevel" class="required-level-badge">{{ row.requiredLevel }}</div>
-                    <div v-else class="required-level-empty">Auto-set</div>
-                  </template>
-                </td>
-                <td>
-                  <select v-model="row.leadInterventions" style="min-width:200px">
-                    <option value="">Select…</option>
-                    <optgroup label="On-the-Job Learning">
-                      <option>Observation / Demonstration</option>
-                      <option>Delegation</option>
-                      <option>Coaching</option>
-                      <option>Mentoring</option>
-                      <option>Deployment</option>
-                      <option>Job Rotation / Assignment</option>
-                      <option>Detail and Secondment</option>
-                      <option>Reading</option>
-                      <option>Flexible Learning</option>
-                      <option>Brainstorming / Group Discussion</option>
-                      <option>Experiential Learning</option>
-                    </optgroup>
-                    <optgroup label="Off-the-Job Learning">
-                      <option>Special Short Courses and Lectures</option>
-                      <option>Conferences, Training Programs, Conventions, Seminars, and Cum Paper Presentations</option>
-                      <option>Pursue Higher Education</option>
-                    </optgroup>
-                  </select>
-                </td>
-                <td>
-                  <select v-model="row.targetTimeline">
-                    <option value="">Select…</option>
-                    <option>2026-2027</option>
-                    <option>2027-2028</option>
-                    <option>2028-2029</option>
-                    <option>2029-2030</option>
-                    <option>2030-2031</option>
-                  </select>
-                </td>
-                <td>
-                  <button
-                    class="btn-remove-row"
-                    @click="removeRow(competencyRows, idx)"
-                    title="Remove row"
-                  >
-                    ×
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                  </td>
+                  <td>
+                    <template v-if="form.currentPosition === 'Director'">
+                      <select
+                        v-model="row.requiredLevel"
+                        style="min-width: 130px"
+                      >
+                        <option value="">Select…</option>
+                        <option value="1 - Basic">1 - Basic</option>
+                        <option value="2 - Intermediate">
+                          2 - Intermediate
+                        </option>
+                        <option value="3 - Advanced">3 - Advanced</option>
+                        <option value="4 - Expert">4 - Expert</option>
+                      </select>
+                    </template>
+                    <template v-else>
+                      <div
+                        v-if="row.requiredLevel"
+                        class="required-level-badge"
+                      >
+                        {{ row.requiredLevel }}
+                      </div>
+                      <div v-else class="required-level-empty">Auto-set</div>
+                    </template>
+                  </td>
+                  <td>
+                    <select
+                      v-model="row.leadInterventions"
+                      style="min-width: 200px"
+                    >
+                      <option value="">Select…</option>
+                      <optgroup label="On-the-Job Learning">
+                        <option>Observation / Demonstration</option>
+                        <option>Delegation</option>
+                        <option>Coaching</option>
+                        <option>Mentoring</option>
+                        <option>Deployment</option>
+                        <option>Job Rotation / Assignment</option>
+                        <option>Detail and Secondment</option>
+                        <option>Reading</option>
+                        <option>Flexible Learning</option>
+                        <option>Brainstorming / Group Discussion</option>
+                        <option>Experiential Learning</option>
+                      </optgroup>
+                      <optgroup label="Off-the-Job Learning">
+                        <option>Special Short Courses and Lectures</option>
+                        <option>
+                          Conferences, Training Programs, Conventions, Seminars,
+                          and Cum Paper Presentations
+                        </option>
+                        <option>Pursue Higher Education</option>
+                      </optgroup>
+                    </select>
+                  </td>
+                  <td>
+                    <select v-model="row.targetTimeline">
+                      <option value="">Select…</option>
+                      <option>2026-2027</option>
+                      <option>2027-2028</option>
+                      <option>2028-2029</option>
+                      <option>2029-2030</option>
+                      <option>2030-2031</option>
+                    </select>
+                  </td>
+                  <td>
+                    <button
+                      class="btn-remove-row"
+                      @click="removeRow(competencyRows, idx)"
+                      title="Remove row"
+                    >
+                      ×
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-actions">
+            <button class="btn-add-row" @click="addCompetencyRow">
+              + Add Row
+            </button>
+          </div>
         </div>
-        <div class="table-actions">
-          <button class="btn-add-row" @click="addCompetencyRow">
-            + Add Row
-          </button>
-        </div>
-      </div>
       </transition>
     </div>
- 
+
     <!-- ── SECTION II: AGAP ── -->
     <div class="section-card section-card-collapsible">
       <div class="section-header">
@@ -661,166 +853,227 @@
           <h3>Academic Growth and Advancement Program (AGAP)</h3>
           <p>Plans for academic advancement</p>
         </div>
-        <div v-if="!sectionIComplete" class="section-locked-badge">Complete Section I first</div>
+        <div v-if="!sectionIComplete" class="section-locked-badge">
+          Complete Section I first
+        </div>
       </div>
       <transition name="reveal">
-      <div v-if="sectionIComplete" class="section-body">
-        <div class="section-desc">
-          Outline your plans for academic advancement, such as enrolling in
-          graduate or certification programs. Ensure alignment with your role
-          and CSU's academic goals.
+        <div v-if="sectionIComplete" class="section-body">
+          <div class="section-desc">
+            Outline your plans for academic advancement, such as enrolling in
+            graduate or certification programs. Ensure alignment with your role
+            and CSU's academic goals.
+          </div>
+          <div class="table-wrapper">
+            <table class="dynamic-table">
+              <thead>
+                <tr>
+                  <th style="width: 40px">No.</th>
+                  <th>Degree Program</th>
+                  <th style="min-width: 200px">Target HEI</th>
+                  <th style="width: 90px">Mode of Study</th>
+                  <th style="min-width: 180px">Target Scholarship Grant</th>
+                  <th style="width: 130px">Intended Year of Enrollment</th>
+                  <th style="width: 40px"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, idx) in agapRows" :key="idx">
+                  <td class="row-num-cell">{{ idx + 1 }}</td>
+                  <td>
+                    <select v-model="row.degreeProgram">
+                      <option value="">Select…</option>
+                      <option>Post-Baccalaureate Certificate</option>
+                      <option>Master's Degree</option>
+                      <option>Post-Master's Certificate</option>
+                      <option>Doctorate Degree (Ph.D. / Ed.D. / etc.)</option>
+                      <option>Post-Doctoral</option>
+                    </select>
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      v-model="row.targetHEI"
+                      placeholder="Full name of School"
+                      list="hei-suggestions"
+                      @input="onHeiInput(row.targetHEI)"
+                      @blur="saveSuggestion('hei', row.targetHEI)"
+                    />
+                    <datalist id="hei-suggestions">
+                      <option v-for="s in heiSuggestions" :key="s" :value="s" />
+                    </datalist>
+                  </td>
+                  <td>
+                    <select v-model="row.modeOfStudy">
+                      <option value="">Select…</option>
+                      <option>Full-time</option>
+                      <option>Part-time</option>
+                      <option>Online</option>
+                      <option>Blended</option>
+                    </select>
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      v-model="row.scholarshipGrant"
+                      placeholder=""
+                    />
+                  </td>
+                  <td>
+                    <select v-model="row.targetTimeline">
+                      <option value="">Select…</option>
+                      <option>2026</option>
+                      <option>2027</option>
+                      <option>2028</option>
+                      <option>2029</option>
+                      <option>2030</option>
+                      <option>2031</option>
+                    </select>
+                  </td>
+                  <td>
+                    <button
+                      class="btn-remove-row"
+                      @click="removeRow(agapRows, idx)"
+                      title="Remove row"
+                    >
+                      ×
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-actions">
+            <button class="btn-add-row" @click="addAgapRow">+ Add Row</button>
+          </div>
         </div>
-        <div class="table-wrapper">
-          <table class="dynamic-table">
-            <thead>
-              <tr>
-                <th style="width: 40px">No.</th>
-                <th>Degree Program</th>
-                <th style="min-width: 200px">Target HEI</th>
-                <th style="width: 90px">Mode of Study</th>
-                <th style="min-width: 180px">Target Scholarship Grant</th>
-                <th style="width: 130px">Intended Year of Enrollment</th>
-                <th style="width: 40px"></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(row, idx) in agapRows" :key="idx">
-                <td class="row-num-cell">{{ idx + 1 }}</td>
-                <td>
-                  <select v-model="row.degreeProgram">
-                    <option value="">Select…</option>
-                    <option>Post-Baccalaureate Certificate</option>
-                    <option>Master's Degree</option>
-                    <option>Post-Master's Certificate</option>
-                    <option>Doctorate Degree (Ph.D. / Ed.D. / etc.)</option>
-                    <option>Post-Doctoral</option>
-                  </select>
-                </td>
-                <td>
-                  <input type="text" v-model="row.targetHEI" placeholder="Full name of School" list="hei-suggestions" @input="onHeiInput(row.targetHEI)" @blur="saveSuggestion('hei', row.targetHEI)" />
-                  <datalist id="hei-suggestions">
-                    <option v-for="s in heiSuggestions" :key="s" :value="s" />
-                  </datalist>
-                </td>
-                <td>
-                  <select v-model="row.modeOfStudy">
-                    <option value="">Select…</option>
-                    <option>Full-time</option>
-                    <option>Part-time</option>
-                    <option>Online</option>
-                    <option>Blended</option>
-                  </select>
-                </td>
-                <td>
-                  <input type="text" v-model="row.scholarshipGrant" placeholder="" />
-                </td>
-                <td>
-                  <select v-model="row.targetTimeline">
-                    <option value="">Select…</option>
-                    <option>2026</option>
-                    <option>2027</option>
-                    <option>2028</option>
-                    <option>2029</option>
-                    <option>2030</option>
-                    <option>2031</option>
-                  </select>
-                </td>
-                <td>
-                  <button class="btn-remove-row" @click="removeRow(agapRows, idx)" title="Remove row">×</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="table-actions">
-          <button class="btn-add-row" @click="addAgapRow">+ Add Row</button>
-        </div>
-      </div>
       </transition>
     </div>
- 
+
     <!-- ── SECTION III: PRO-ACT ── -->
     <div class="section-card section-card-collapsible">
       <div class="section-header">
         <div class="section-num">III</div>
         <div>
-          <h3>Professional Advancement through Capacity-Building and Trainings (Pro-ACT)</h3>
+          <h3>
+            Professional Advancement through Capacity-Building and Trainings
+            (Pro-ACT)
+          </h3>
           <p>Training and workshop interventions</p>
         </div>
-        <div v-if="!sectionIIComplete" class="section-locked-badge">Complete Section II first</div>
+        <div v-if="!sectionIIComplete" class="section-locked-badge">
+          Complete Section II first
+        </div>
       </div>
       <transition name="reveal">
-      <div v-if="sectionIIComplete" class="section-body">
-        <div class="section-desc">
-          If a training intervention is identified in Part I (Competency
-          Assessment), provide more detailed information here.
-        </div>
-        <div class="table-wrapper">
-          <table class="dynamic-table">
-            <thead>
-              <tr>
-                <th style="width: 40px">No.</th>
-                <th style="background: var(--navy); opacity: 0.92;">Target Competency / Skill <span style="font-size:10px; font-weight:400; opacity:0.8;">(from Section I)</span></th>
-                <th>Training / LeaD Intervention</th>
-                <th style="width: 130px">Mode of Activity</th>
-                <th>Trainer / Provider</th>
-                <th style="width: 130px">Intended Year of Enrollment</th>
-                <th style="width: 40px"></th>
-              </tr>
-            </thead>
-            <tbody>
-              <template v-if="filledCompetencies.length === 0">
+        <div v-if="sectionIIComplete" class="section-body">
+          <div class="section-desc">
+            If a training intervention is identified in Part I (Competency
+            Assessment), provide more detailed information here.
+          </div>
+          <div class="table-wrapper">
+            <table class="dynamic-table">
+              <thead>
                 <tr>
-                  <td colspan="6" style="text-align:center; color: var(--text-light); font-style:italic; padding: 20px;">
-                    Add competencies in Section I to populate this table.
+                  <th style="width: 40px">No.</th>
+                  <th style="background: var(--navy); opacity: 0.92">
+                    Target Competency / Skill
+                    <span
+                      style="font-size: 10px; font-weight: 400; opacity: 0.8"
+                      >(from Section I)</span
+                    >
+                  </th>
+                  <th>Training / LeaD Intervention</th>
+                  <th style="width: 130px">Mode of Activity</th>
+                  <th>Trainer / Provider</th>
+                  <th style="width: 130px">Intended Year of Enrollment</th>
+                  <th style="width: 40px"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <template v-if="filledCompetencies.length === 0">
+                  <tr>
+                    <td
+                      colspan="6"
+                      style="
+                        text-align: center;
+                        color: var(--text-light);
+                        font-style: italic;
+                        padding: 20px;
+                      "
+                    >
+                      Add competencies in Section I to populate this table.
+                    </td>
+                  </tr>
+                </template>
+                <tr
+                  v-for="(competency, idx) in filledCompetencies"
+                  :key="competency"
+                >
+                  <td class="row-num-cell">{{ idx + 1 }}</td>
+                  <td style="background: rgba(0, 51, 0, 0.04)">
+                    <div class="proact-skill-label">{{ competency }}</div>
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      v-model="proactRows[idx].trainingTitle"
+                      placeholder="Enter training or intervention title"
+                      list="proact-suggestions"
+                      @input="onProactInput(proactRows[idx].trainingTitle)"
+                      @blur="
+                        saveSuggestion('proact', proactRows[idx].trainingTitle)
+                      "
+                    />
+                    <datalist id="proact-suggestions">
+                      <option
+                        v-for="s in proactSuggestions"
+                        :key="s"
+                        :value="s"
+                      />
+                    </datalist>
+                  </td>
+                  <td>
+                    <select v-model="proactRows[idx].modeOfActivity">
+                      <option value="">Select…</option>
+                      <option>Face-to-face</option>
+                      <option>Online</option>
+                      <option>Blended</option>
+                      <option>On-the-job</option>
+                    </select>
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      v-model="proactRows[idx].trainerProvider"
+                      placeholder="Optional"
+                    />
+                  </td>
+                  <td>
+                    <select v-model="proactRows[idx].targetTimeline">
+                      <option value="">Select…</option>
+                      <option>2026</option>
+                      <option>2027</option>
+                      <option>2028</option>
+                      <option>2029</option>
+                      <option>2030</option>
+                      <option>2031</option>
+                    </select>
                   </td>
                 </tr>
-              </template>
-              <tr v-for="(competency, idx) in filledCompetencies" :key="competency">
-                <td class="row-num-cell">{{ idx + 1 }}</td>
-                <td style="background: rgba(0,51,0,0.04);">
-                  <div class="proact-skill-label">{{ competency }}</div>
-                </td>
-                <td>
-                  <input type="text" v-model="proactRows[idx].trainingTitle" placeholder="Enter training or intervention title" list="proact-suggestions" @input="onProactInput(proactRows[idx].trainingTitle)" @blur="saveSuggestion('proact', proactRows[idx].trainingTitle)" />
-                  <datalist id="proact-suggestions">
-                    <option v-for="s in proactSuggestions" :key="s" :value="s" />
-                  </datalist>
-                </td>
-                <td>
-                  <select v-model="proactRows[idx].modeOfActivity">
-                    <option value="">Select…</option>
-                    <option>Face-to-face</option>
-                    <option>Online</option>
-                    <option>Blended</option>
-                    <option>On-the-job</option>
-                  </select>
-                </td>
-                <td>
-                  <input type="text" v-model="proactRows[idx].trainerProvider" placeholder="Optional" />
-                </td>
-                <td>
-                  <select v-model="proactRows[idx].targetTimeline">
-                    <option value="">Select…</option>
-                    <option>2026</option>
-                    <option>2027</option>
-                    <option>2028</option>
-                    <option>2029</option>
-                    <option>2030</option>
-                    <option>2031</option>
-                  </select>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
+          <p
+            v-if="filledCompetencies.length > 0"
+            style="font-size: 13px; color: var(--text-light); margin-top: 10px"
+          >
+            Rows are auto-generated based on competencies entered in Section I.
+          </p>
         </div>
-        <p v-if="filledCompetencies.length > 0" style="font-size:13px; color:var(--text-light); margin-top:10px;">
-          Rows are auto-generated based on competencies entered in Section I.
-        </p>
-      </div>
       </transition>
     </div>
- 
+
     <!-- ── SUBMIT STAGE 1 ── -->
     <transition name="reveal">
       <div v-if="sectionIIIComplete" class="submit-area">
@@ -828,13 +1081,17 @@
           By submitting, you confirm that all information provided is accurate.
           Your supervisor will be notified automatically.
         </p>
-        <button class="btn-submit" :disabled="isSubmitting" @click="submitStage1">
+        <button
+          class="btn-submit"
+          :disabled="isSubmitting"
+          @click="submitStage1"
+        >
           {{ isSubmitting ? "Submitting…" : "Submit IDP" }}
         </button>
       </div>
     </transition>
   </div>
- 
+
   <!-- ═══════════════════════════════════════════════ -->
   <!-- STAGE 2: SUPERVISOR REVIEW                      -->
   <!-- ═══════════════════════════════════════════════ -->
@@ -850,7 +1107,7 @@
     >
       <h2
         style="
-          font-family: 'Roboto', sans-serif;
+          font-family: &quot;Roboto&quot;, sans-serif;
           font-size: 28px;
           color: var(--navy);
           margin-bottom: 6px;
@@ -879,7 +1136,7 @@
         {{ idpData.refId }}
       </div>
     </div>
- 
+
     <!-- ── H: PERSONNEL INFO (READ-ONLY) ── -->
     <div class="section-card">
       <div class="section-header">
@@ -908,10 +1165,7 @@
             <div class="ro-label">Name of Personnel</div>
             <div class="ro-value">{{ idpData.nameOfPersonnel || "—" }}</div>
           </div>
-          <div class="ro-field">
-            <div class="ro-label">Date Prepared</div>
-            <div class="ro-value">{{ idpData.datePrepared || "—" }}</div>
-          </div>
+
           <div class="ro-field">
             <div class="ro-label">Current Position / Designation</div>
             <div class="ro-value">{{ idpData.currentPosition || "—" }}</div>
@@ -931,7 +1185,7 @@
         </div>
       </div>
     </div>
- 
+
     <!-- ── I: COMPETENCY (READ-ONLY) ── -->
     <div class="section-card">
       <div class="section-header">
@@ -975,7 +1229,7 @@
         </div>
       </div>
     </div>
- 
+
     <!-- ── II: AGAP (READ-ONLY) ── -->
     <div class="section-card">
       <div class="section-header">
@@ -1015,7 +1269,7 @@
         </div>
       </div>
     </div>
- 
+
     <!-- ── III: PRO-ACT (READ-ONLY) ── -->
     <div class="section-card">
       <div class="section-header">
@@ -1060,7 +1314,7 @@
         </div>
       </div>
     </div>
- 
+
     <!-- ── IV: SUPERVISOR ASSESSMENT (FILLABLE) ── -->
     <div class="section-card">
       <div class="section-header">
@@ -1252,7 +1506,7 @@
             </tr>
           </tbody>
         </table>
- 
+
         <!-- Certification block -->
         <div class="cert-block">
           <p>
@@ -1268,7 +1522,7 @@
         </div>
       </div>
     </div>
- 
+
     <!-- ── SUBMIT STAGE 2 ── -->
     <div class="submit-area">
       <p>
@@ -1281,10 +1535,10 @@
     </div>
   </div>
 </template>
- 
+
 <script setup>
 import { ref, reactive, computed, watch, onMounted } from "vue";
- 
+
 // ── NOTE FOR MIGRATION ──────────────────────────────────────────────────────
 // APPS_SCRIPT_URL below is temporary for the current Google Sheets backend.
 // When NestJS backend is ready, replace this with your API endpoint, e.g.:
@@ -1301,21 +1555,21 @@ const privacyAgreed = ref(false);
 function acceptPrivacy() {
   if (privacyAgreed.value) showPrivacyModal.value = false;
 }
- 
+
 const stage = ref("stage1");
- 
+
 // ── Loading state ──────────────────────────────────────────────────────────
 const isLoading = ref(false);
 const isSubmitting = ref(false);
 const loadingMsg = ref("Submitting your IDP, please wait…");
- 
+
 // ── Stage 1 form data ──────────────────────────────────────────────────────
 const form = reactive({
   campus: "CSU Main Campus",
   officeAffiliation: "",
   collegeOfficeUnit: "",
   collegeProgram: "",
-  personnelType: "",  // "non-teaching" | "teaching"
+  personnelType: "", // "non-teaching" | "teaching"
   lastName: "",
   firstName: "",
   middleInitial: "",
@@ -1323,7 +1577,7 @@ const form = reactive({
   employeeEmail: "",
   educAttainment: "",
   educAttainmentSpec: "",
-  datePrepared: "",
+
   currentPosition: "",
   designation: "",
   yearsInPosition: "",
@@ -1336,17 +1590,17 @@ const form = reactive({
   compPurpose: "",
   compPurposeOther: "",
 });
- 
+
 const errors = reactive({});
 const emailHints = reactive({
   employee: { msg: "", type: "" },
   supervisor: { msg: "", type: "" },
 });
- 
+
 // Dynamic table rows
 const competencyRows = ref([
   {
-    competencyGroup: "",  // auto-set by getCompetencyCluster on selection
+    competencyGroup: "", // auto-set by getCompetencyCluster on selection
     targetCompetency: "",
     currentLevel: "",
     requiredLevel: "",
@@ -1372,10 +1626,10 @@ const proactRows = ref([
     targetTimeline: "",
   },
 ]);
- 
+
 // Stage 1 result
 const refId = ref("");
- 
+
 // ── Stage 2 state ──────────────────────────────────────────────────────────
 const tokenInput = ref("");
 const supervisorEmailInput = ref("");
@@ -1383,7 +1637,7 @@ const tokenError = ref("");
 const currentToken = ref("");
 const supervisorEmail = ref("");
 const idpData = reactive({});
- 
+
 const assessment = reactive({
   perfGapsYN: "",
   perfGapsSpec: "",
@@ -1394,17 +1648,11 @@ const assessment = reactive({
   implementationPeriod: [],
   additionalComments: "",
 });
- 
+
 // ── Static options ─────────────────────────────────────────────────────────
 const campusOptions = ["CSU Main Campus"];
-const officeOptions = [
-  "OVPAF",
-  "OVPAA",
-  "OVPEO",
-  "OVPSAS",
-  "OVPRDIE",
-];
- 
+const officeOptions = ["OVPAF", "OVPAA", "OVPEO", "OVPSAS", "OVPRDIE"];
+
 // Sub-office / college options per office affiliation
 // For OVPAA colleges, value is { name, programs: [] }
 const subOfficeMap = {
@@ -1425,40 +1673,56 @@ const subOfficeMap = {
     "University Press",
   ],
   OVPAA: [
-    { name: "College of Agricultural and Agri-Industries (CAA)", programs: [
-      "BS in Agriculture",
-    ]},
-    { name: "College of Computing and Information Sciences (CCIS)", programs: [
-      "BS in Computer Science",
-      "BS in Information System",
-      "BS in Information Technology",
-    ]},
-    { name: "College of Engineering and Geo-Sciences (CEGS)", programs: [
-      "BS in Agricultural and Biosystems Engineering",
-      "BS in Civil Engineering",
-      "BS in Electronics Engineering",
-      "BS in Geodetic Engineering",
-      "BS in Geology",
-      "BS in Mining Engineering",
-    ]},
-    { name: "College of Forestry and Environmental Sciences (COFES)", programs: [
-      "BS in Agroforestry",
-      "BS in Environmental Science",
-      "BS in Forestry",
-    ]},
-    { name: "College of Humanities and Social Sciences (CHaSS)", programs: [
-      "Bachelor of Arts in Sociology",
-      "Bachelor of Science in Psychology",
-      "Bachelor of Science in Social Work",
-    ]},
-    { name: "College of Mathematics and Natural Sciences (CMNS)", programs: [
-      "BS in Applied Mathematics",
-      "BS in Biology",
-      "BS in Chemistry",
-      "BS in Marine Biology",
-      "BS in Mathematics",
-      "BS in Physics",
-    ]},
+    {
+      name: "College of Agricultural and Agri-Industries (CAA)",
+      programs: ["BS in Agriculture"],
+    },
+    {
+      name: "College of Computing and Information Sciences (CCIS)",
+      programs: [
+        "BS in Computer Science",
+        "BS in Information System",
+        "BS in Information Technology",
+      ],
+    },
+    {
+      name: "College of Engineering and Geo-Sciences (CEGS)",
+      programs: [
+        "BS in Agricultural and Biosystems Engineering",
+        "BS in Civil Engineering",
+        "BS in Electronics Engineering",
+        "BS in Geodetic Engineering",
+        "BS in Geology",
+        "BS in Mining Engineering",
+      ],
+    },
+    {
+      name: "College of Forestry and Environmental Sciences (COFES)",
+      programs: [
+        "BS in Agroforestry",
+        "BS in Environmental Science",
+        "BS in Forestry",
+      ],
+    },
+    {
+      name: "College of Humanities and Social Sciences (CHaSS)",
+      programs: [
+        "Bachelor of Arts in Sociology",
+        "Bachelor of Science in Psychology",
+        "Bachelor of Science in Social Work",
+      ],
+    },
+    {
+      name: "College of Mathematics and Natural Sciences (CMNS)",
+      programs: [
+        "BS in Applied Mathematics",
+        "BS in Biology",
+        "BS in Chemistry",
+        "BS in Marine Biology",
+        "BS in Mathematics",
+        "BS in Physics",
+      ],
+    },
     { name: "National Service Training Program (NSTP)", programs: [] },
     { name: "Office of Curriculum & Instruction Development", programs: [] },
     { name: "Office of Student Internship Programs", programs: [] },
@@ -1492,79 +1756,99 @@ const subOfficeMap = {
     "Technology Transfer & Licensing Office",
   ],
 };
- 
+
 // For OVPAA: colleges with sub-programs
 const isOVPAA = computed(() => form.officeAffiliation === "OVPAA");
- 
+
 const collegeOfficeUnitOptions = computed(() => {
   const list = subOfficeMap[form.officeAffiliation] || [];
-  if (isOVPAA.value) return list.map(c => typeof c === "string" ? c : c.name);
+  if (isOVPAA.value)
+    return list.map((c) => (typeof c === "string" ? c : c.name));
   return list;
 });
- 
+
 const selectedCollegePrograms = computed(() => {
   if (!isOVPAA.value) return [];
   const colleges = subOfficeMap["OVPAA"] || [];
-  const found = colleges.find(c => typeof c === "object" && c.name === form.collegeOfficeUnit);
+  const found = colleges.find(
+    (c) => typeof c === "object" && c.name === form.collegeOfficeUnit,
+  );
   return found ? found.programs : [];
 });
- 
+
 // Reset downstream when affiliation changes
-watch(() => form.officeAffiliation, (newOffice) => {
-  form.collegeOfficeUnit = "";
-  form.collegeProgram = "";
-  form.currentPosition = "";
-  // OVPAA: let user pick Teaching or Non-Teaching. All other offices: always non-teaching.
-  if (newOffice === "OVPAA") {
-    form.personnelType = "";
-  } else {
-    form.personnelType = "non-teaching";
-  }
-});
- 
-watch(() => form.collegeOfficeUnit, () => {
-  form.collegeProgram = "";
-});
- 
-// Re-compute required levels on all existing rows when position changes
-watch(() => form.currentPosition, (newPos) => {
-  competencyRows.value.forEach(row => {
-    if (row.targetCompetency) {
-      row.requiredLevel = getRequiredLevel(row.targetCompetency, newPos);
+watch(
+  () => form.officeAffiliation,
+  (newOffice) => {
+    form.collegeOfficeUnit = "";
+    form.collegeProgram = "";
+    form.currentPosition = "";
+    // OVPAA: let user pick Teaching or Non-Teaching. All other offices: always non-teaching.
+    if (newOffice === "OVPAA") {
+      form.personnelType = "";
+    } else {
+      form.personnelType = "non-teaching";
     }
-  });
-});
- 
+  },
+);
+
+watch(
+  () => form.collegeOfficeUnit,
+  () => {
+    form.collegeProgram = "";
+  },
+);
+
+// Re-compute required levels on all existing rows when position changes
+watch(
+  () => form.currentPosition,
+  (newPos) => {
+    competencyRows.value.forEach((row) => {
+      if (row.targetCompetency) {
+        row.requiredLevel = getRequiredLevel(row.targetCompetency, newPos);
+      }
+    });
+  },
+);
+
 // ── Section completion computed flags ─────────────────────────────────────
 const sectionIComplete = computed(() => {
   // Section I (Competency) is "done" once purpose is chosen — rows are optional
   return !!form.compPurpose;
 });
- 
+
 const sectionIIComplete = computed(() => {
   // Section II (AGAP) always shows once Section I purpose picked — rows optional
   return sectionIComplete.value;
 });
- 
+
 const sectionIIIComplete = computed(() => {
   // Section III (Pro-ACT) always shows once Section II visible — rows optional
   return sectionIIComplete.value;
 });
- 
+
 // Competencies actually entered in Section I — drives Pro-ACT table rows
 const filledCompetencies = computed(() => {
   const list = competencyRows.value
-    .map(r => r.targetCompetency)
-    .filter(c => c && c.trim());
+    .map((r) => r.targetCompetency)
+    .filter((c) => c && c.trim());
   // Keep proactRows in sync — grow or shrink as needed
   while (proactRows.value.length < list.length) {
-    proactRows.value.push({ trainingTitle: "", targetSkill: "", modeOfActivity: "", trainerProvider: "", targetTimeline: "" });
+    proactRows.value.push({
+      trainingTitle: "",
+      targetSkill: "",
+      modeOfActivity: "",
+      trainerProvider: "",
+      targetTimeline: "",
+    });
   }
   // Sync targetSkill on each row
-  list.forEach((c, i) => { proactRows.value[i].targetSkill = c; });
+  list.forEach((c, i) => {
+    proactRows.value[i].targetSkill = c;
+  });
   return list;
 });
- 
+
 const purposeOptions = [
   "Initial Assessment",
   "Mid-Year Review",
@@ -1600,32 +1884,82 @@ const interventionOptions = [
   "Others",
 ];
 const implOptions = ["Q1", "Q2", "Q3", "Q4", "Within this year", "Next year"];
- 
+
 // ── Competency lists ────────────────────────────────────────────────────────
 const competencyData = {
   Core: computed(() => {
-    const base = ["Integrity","Accountability","Scientific and Technological Excellence","Delivering Service Excellence","Environmental Consciousness","Building Partnership"];
-    if (form.personnelType === "teaching") base.push("Faculty Specializing in Environment");
+    const base = [
+      "Integrity",
+      "Accountability",
+      "Scientific and Technological Excellence",
+      "Delivering Service Excellence",
+      "Environmental Consciousness",
+      "Building Partnership",
+    ];
+    if (form.personnelType === "teaching")
+      base.push("Faculty Specializing in Environment");
     return base;
   }),
-  Leadership: ["Developing People","Facilitating Change","Conflict Management","Leading Innovation","Strategic Planning","Leading Others","Decisiveness"],
-  Organizational: ["Teamwork","Commitment to Learning","Customer Focus","Adaptability and Flexibility","Critical Thinking","Effective Communication","Valuing Diversity","Self-Awareness and Confidence","Stress Tolerance","Resource Management","Knowledge Management","Initiative","Result Orientation","Community Engagement","Organizational Commitment","Planning and Organizing","Emotional and Psychological Maturity","Safety and Risk Management","Interpersonal Effectiveness"],
+  Leadership: [
+    "Developing People",
+    "Facilitating Change",
+    "Conflict Management",
+    "Leading Innovation",
+    "Strategic Planning",
+    "Leading Others",
+    "Decisiveness",
+  ],
+  Organizational: [
+    "Teamwork",
+    "Commitment to Learning",
+    "Customer Focus",
+    "Adaptability and Flexibility",
+    "Critical Thinking",
+    "Effective Communication",
+    "Valuing Diversity",
+    "Self-Awareness and Confidence",
+    "Stress Tolerance",
+    "Resource Management",
+    "Knowledge Management",
+    "Initiative",
+    "Result Orientation",
+    "Community Engagement",
+    "Organizational Commitment",
+    "Planning and Organizing",
+    "Emotional and Psychological Maturity",
+    "Safety and Risk Management",
+    "Interpersonal Effectiveness",
+  ],
   Technical: computed(() => {
-    const base = ["Research Engagement","Diagnostic Information Gathering","Attention to Details","Written Communication","Oral Communication","Conceptual and Analytical Thinking","Computer Literacy","Planning and Project Management","Logical Reasoning"];
+    const base = [
+      "Research Engagement",
+      "Diagnostic Information Gathering",
+      "Attention to Details",
+      "Written Communication",
+      "Oral Communication",
+      "Conceptual and Analytical Thinking",
+      "Computer Literacy",
+      "Planning and Project Management",
+      "Logical Reasoning",
+    ];
     if (form.personnelType === "teaching") {
-      base.push("Language Faculty","IT Faculty","Math and Allied Fields Faculty Members");
+      base.push(
+        "Language Faculty",
+        "IT Faculty",
+        "Math and Allied Fields Faculty Members",
+      );
     }
     return base;
   }),
 };
- 
+
 function getCompetencyOptions(group) {
   if (!group) return [];
   const v = competencyData[group];
   if (!v) return [];
   return typeof v.value !== "undefined" ? v.value : v;
 }
- 
+
 // Flat computed lists per cluster (reactive to personnelType)
 const allCompetencies = computed(() => ({
   Core: getCompetencyOptions("Core"),
@@ -1633,7 +1967,7 @@ const allCompetencies = computed(() => ({
   Organizational: getCompetencyOptions("Organizational"),
   Technical: getCompetencyOptions("Technical"),
 }));
- 
+
 // Which clusters are applicable for the currently selected position
 // A cluster is included if ANY competency in it has a non-null required level for that position.
 // If no position selected yet, or position is Director, all 4 clusters are shown.
@@ -1643,9 +1977,9 @@ const availableClusters = computed(() => {
   if (!pos || pos === "Director") return allClusters;
   const posData = competencyModel[pos];
   if (!posData || Object.keys(posData).length === 0) return allClusters;
-  return allClusters.filter(cluster => {
+  return allClusters.filter((cluster) => {
     const list = allCompetencies.value[cluster] || [];
-    return list.some(c => posData[c] !== undefined && posData[c] !== null);
+    return list.some((c) => posData[c] !== undefined && posData[c] !== null);
   });
 });
 
@@ -1657,7 +1991,7 @@ function getCompetencyCluster(competency) {
   }
   return "";
 }
- 
+
 // ── Required Level Lookup ────────────────────────────────────────────────────
 // Source: CSU Competency Model (official document)
 // Levels: 1 = Basic, 2 = Intermediate, 3 = Advanced, 4 = Expert
@@ -1667,9 +2001,14 @@ function getCompetencyCluster(competency) {
 //   AideIII, SecGuard, FarmW, AstI, AstII, AstIII, AstIV,
 //   OffI, OffII, OffIII, OffIV, OffV,
 //   AideI-U, AideI-C, AideII-U, AideII-C, AideIV-M, AideIV-C, AideIV-D
- 
-const LEVEL_LABEL = { 1: "1 - Basic", 2: "2 - Intermediate", 3: "3 - Advanced", 4: "4 - Expert" };
- 
+
+const LEVEL_LABEL = {
+  1: "1 - Basic",
+  2: "2 - Intermediate",
+  3: "3 - Advanced",
+  4: "4 - Expert",
+};
+
 // Per-position, per-competency required level table
 // Keys match exact dropdown option values
 // Source: Official CSU Competency Model Document
@@ -1678,794 +2017,1806 @@ const LEVEL_LABEL = { 1: "1 - Basic", 2: "2 - Intermediate", 3: "3 - Advanced", 
 const competencyModel = {
   // ── ADMIN AIDE I – Utility ──────────────────────────────────────────
   "Admin Aide I – Utility": {
-    "Integrity": 1, "Accountability": 1, "Scientific and Technological Excellence": 1,
-    "Delivering Service Excellence": 1, "Environmental Consciousness": 2, "Building Partnership": 1,
-    "Teamwork": 1, "Commitment to Learning": 1, "Customer Focus": 1,
-    "Adaptability and Flexibility": 1, "Effective Communication": 1, "Valuing Diversity": 1,
-    "Self-Awareness and Confidence": 1, "Stress Tolerance": 1, "Resource Management": 1,
-    "Knowledge Management": 1, "Initiative": 1, "Result Orientation": 1,
-    "Organizational Commitment": 1, "Planning and Organizing": 1,
-    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 2,
-    "Interpersonal Effectiveness": 1, "Oral Communication": 1, "Logical Reasoning": 1,
+    Integrity: 1,
+    Accountability: 1,
+    "Scientific and Technological Excellence": 1,
+    "Delivering Service Excellence": 1,
+    "Environmental Consciousness": 2,
+    "Building Partnership": 1,
+    Teamwork: 1,
+    "Commitment to Learning": 1,
+    "Customer Focus": 1,
+    "Adaptability and Flexibility": 1,
+    "Effective Communication": 1,
+    "Valuing Diversity": 1,
+    "Self-Awareness and Confidence": 1,
+    "Stress Tolerance": 1,
+    "Resource Management": 1,
+    "Knowledge Management": 1,
+    Initiative: 1,
+    "Result Orientation": 1,
+    "Organizational Commitment": 1,
+    "Planning and Organizing": 1,
+    "Emotional and Psychological Maturity": 1,
+    "Safety and Risk Management": 2,
+    "Interpersonal Effectiveness": 1,
+    "Oral Communication": 1,
+    "Logical Reasoning": 1,
   },
   // ── ADMIN AIDE I – Clerk ────────────────────────────────────────────
   "Admin Aide I – Clerk": {
-    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 1,
-    "Delivering Service Excellence": 2, "Environmental Consciousness": 2, "Building Partnership": 2,
-    "Teamwork": 1, "Commitment to Learning": 1, "Customer Focus": 2,
-    "Adaptability and Flexibility": 1, "Effective Communication": 1, "Valuing Diversity": 1,
-    "Self-Awareness and Confidence": 1, "Stress Tolerance": 1, "Resource Management": 1,
-    "Knowledge Management": 1, "Initiative": 1, "Result Orientation": 1,
-    "Organizational Commitment": 1, "Planning and Organizing": 1,
-    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 1,
+    Integrity: 2,
+    Accountability: 2,
+    "Scientific and Technological Excellence": 1,
+    "Delivering Service Excellence": 2,
+    "Environmental Consciousness": 2,
+    "Building Partnership": 2,
+    Teamwork: 1,
+    "Commitment to Learning": 1,
+    "Customer Focus": 2,
+    "Adaptability and Flexibility": 1,
+    "Effective Communication": 1,
+    "Valuing Diversity": 1,
+    "Self-Awareness and Confidence": 1,
+    "Stress Tolerance": 1,
+    "Resource Management": 1,
+    "Knowledge Management": 1,
+    Initiative: 1,
+    "Result Orientation": 1,
+    "Organizational Commitment": 1,
+    "Planning and Organizing": 1,
+    "Emotional and Psychological Maturity": 1,
+    "Safety and Risk Management": 1,
     "Interpersonal Effectiveness": 1,
-    "Attention to Details": 1, "Written Communication": 1,
-    "Oral Communication": 1, "Computer Literacy": 1, "Logical Reasoning": 1,
+    "Attention to Details": 1,
+    "Written Communication": 1,
+    "Oral Communication": 1,
+    "Computer Literacy": 1,
+    "Logical Reasoning": 1,
   },
   // ── ADMIN AIDE II – Utility ─────────────────────────────────────────
   "Admin Aide II – Utility": {
-    "Integrity": 1, "Accountability": 1, "Scientific and Technological Excellence": 1,
-    "Delivering Service Excellence": 1, "Environmental Consciousness": 2, "Building Partnership": 1,
-    "Teamwork": 1, "Commitment to Learning": 1, "Customer Focus": 1,
-    "Adaptability and Flexibility": 1, "Effective Communication": 1, "Valuing Diversity": 1,
-    "Self-Awareness and Confidence": 1, "Stress Tolerance": 1, "Resource Management": 1,
-    "Knowledge Management": 1, "Initiative": 1, "Result Orientation": 1,
-    "Organizational Commitment": 1, "Planning and Organizing": 1,
-    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 2,
-    "Interpersonal Effectiveness": 1, "Oral Communication": 1, "Logical Reasoning": 1,
+    Integrity: 1,
+    Accountability: 1,
+    "Scientific and Technological Excellence": 1,
+    "Delivering Service Excellence": 1,
+    "Environmental Consciousness": 2,
+    "Building Partnership": 1,
+    Teamwork: 1,
+    "Commitment to Learning": 1,
+    "Customer Focus": 1,
+    "Adaptability and Flexibility": 1,
+    "Effective Communication": 1,
+    "Valuing Diversity": 1,
+    "Self-Awareness and Confidence": 1,
+    "Stress Tolerance": 1,
+    "Resource Management": 1,
+    "Knowledge Management": 1,
+    Initiative: 1,
+    "Result Orientation": 1,
+    "Organizational Commitment": 1,
+    "Planning and Organizing": 1,
+    "Emotional and Psychological Maturity": 1,
+    "Safety and Risk Management": 2,
+    "Interpersonal Effectiveness": 1,
+    "Oral Communication": 1,
+    "Logical Reasoning": 1,
   },
   // ── ADMIN AIDE II – Clerk ───────────────────────────────────────────
   "Admin Aide II – Clerk": {
-    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 1,
-    "Delivering Service Excellence": 2, "Environmental Consciousness": 2, "Building Partnership": 2,
-    "Teamwork": 1, "Commitment to Learning": 1, "Customer Focus": 2,
-    "Adaptability and Flexibility": 1, "Effective Communication": 1, "Valuing Diversity": 1,
-    "Self-Awareness and Confidence": 1, "Stress Tolerance": 1, "Resource Management": 1,
-    "Knowledge Management": 1, "Initiative": 1, "Result Orientation": 1,
-    "Organizational Commitment": 1, "Planning and Organizing": 1,
-    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 1,
+    Integrity: 2,
+    Accountability: 2,
+    "Scientific and Technological Excellence": 1,
+    "Delivering Service Excellence": 2,
+    "Environmental Consciousness": 2,
+    "Building Partnership": 2,
+    Teamwork: 1,
+    "Commitment to Learning": 1,
+    "Customer Focus": 2,
+    "Adaptability and Flexibility": 1,
+    "Effective Communication": 1,
+    "Valuing Diversity": 1,
+    "Self-Awareness and Confidence": 1,
+    "Stress Tolerance": 1,
+    "Resource Management": 1,
+    "Knowledge Management": 1,
+    Initiative: 1,
+    "Result Orientation": 1,
+    "Organizational Commitment": 1,
+    "Planning and Organizing": 1,
+    "Emotional and Psychological Maturity": 1,
+    "Safety and Risk Management": 1,
     "Interpersonal Effectiveness": 1,
-    "Attention to Details": 1, "Written Communication": 1,
-    "Oral Communication": 1, "Computer Literacy": 1, "Logical Reasoning": 1,
+    "Attention to Details": 1,
+    "Written Communication": 1,
+    "Oral Communication": 1,
+    "Computer Literacy": 1,
+    "Logical Reasoning": 1,
   },
   // ── ADMIN AIDE III – Clerk ──────────────────────────────────────────
   "Admin Aide III – Clerk": {
-    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 1,
-    "Delivering Service Excellence": 2, "Environmental Consciousness": 2, "Building Partnership": 2,
-    "Teamwork": 1, "Commitment to Learning": 1, "Customer Focus": 2,
-    "Adaptability and Flexibility": 1, "Effective Communication": 1, "Valuing Diversity": 1,
-    "Self-Awareness and Confidence": 1, "Stress Tolerance": 1, "Resource Management": 1,
-    "Knowledge Management": 1, "Initiative": 1, "Result Orientation": 1,
-    "Organizational Commitment": 1, "Planning and Organizing": 1,
-    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 1,
-    "Interpersonal Effectiveness": 1, "Oral Communication": 1, "Logical Reasoning": 1,
+    Integrity: 2,
+    Accountability: 2,
+    "Scientific and Technological Excellence": 1,
+    "Delivering Service Excellence": 2,
+    "Environmental Consciousness": 2,
+    "Building Partnership": 2,
+    Teamwork: 1,
+    "Commitment to Learning": 1,
+    "Customer Focus": 2,
+    "Adaptability and Flexibility": 1,
+    "Effective Communication": 1,
+    "Valuing Diversity": 1,
+    "Self-Awareness and Confidence": 1,
+    "Stress Tolerance": 1,
+    "Resource Management": 1,
+    "Knowledge Management": 1,
+    Initiative: 1,
+    "Result Orientation": 1,
+    "Organizational Commitment": 1,
+    "Planning and Organizing": 1,
+    "Emotional and Psychological Maturity": 1,
+    "Safety and Risk Management": 1,
+    "Interpersonal Effectiveness": 1,
+    "Oral Communication": 1,
+    "Logical Reasoning": 1,
   },
   // ── ADMIN AIDE IV – Mechanic ────────────────────────────────────────
   "Admin Aide IV – Mechanic": {
-    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 1,
-    "Delivering Service Excellence": 2, "Environmental Consciousness": 2, "Building Partnership": 1,
-    "Teamwork": 1, "Commitment to Learning": 1, "Customer Focus": 1,
-    "Adaptability and Flexibility": 1, "Effective Communication": 1, "Valuing Diversity": 1,
-    "Self-Awareness and Confidence": 1, "Stress Tolerance": 1, "Resource Management": 1,
-    "Knowledge Management": 1, "Initiative": 1, "Result Orientation": 1,
-    "Organizational Commitment": 1, "Planning and Organizing": 1,
-    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 2,
-    "Interpersonal Effectiveness": 1, "Oral Communication": 1, "Logical Reasoning": 1,
+    Integrity: 2,
+    Accountability: 2,
+    "Scientific and Technological Excellence": 1,
+    "Delivering Service Excellence": 2,
+    "Environmental Consciousness": 2,
+    "Building Partnership": 1,
+    Teamwork: 1,
+    "Commitment to Learning": 1,
+    "Customer Focus": 1,
+    "Adaptability and Flexibility": 1,
+    "Effective Communication": 1,
+    "Valuing Diversity": 1,
+    "Self-Awareness and Confidence": 1,
+    "Stress Tolerance": 1,
+    "Resource Management": 1,
+    "Knowledge Management": 1,
+    Initiative: 1,
+    "Result Orientation": 1,
+    "Organizational Commitment": 1,
+    "Planning and Organizing": 1,
+    "Emotional and Psychological Maturity": 1,
+    "Safety and Risk Management": 2,
+    "Interpersonal Effectiveness": 1,
+    "Oral Communication": 1,
+    "Logical Reasoning": 1,
   },
   // ── ADMIN AIDE IV – Clerk ───────────────────────────────────────────
   "Admin Aide IV – Clerk": {
-    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 1,
-    "Delivering Service Excellence": 2, "Environmental Consciousness": 2, "Building Partnership": 2,
-    "Teamwork": 1, "Commitment to Learning": 1, "Customer Focus": 2,
-    "Adaptability and Flexibility": 1, "Effective Communication": 1, "Valuing Diversity": 1,
-    "Self-Awareness and Confidence": 1, "Stress Tolerance": 1, "Resource Management": 1,
-    "Knowledge Management": 1, "Initiative": 1, "Result Orientation": 1,
-    "Organizational Commitment": 1, "Planning and Organizing": 1,
-    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 1,
+    Integrity: 2,
+    Accountability: 2,
+    "Scientific and Technological Excellence": 1,
+    "Delivering Service Excellence": 2,
+    "Environmental Consciousness": 2,
+    "Building Partnership": 2,
+    Teamwork: 1,
+    "Commitment to Learning": 1,
+    "Customer Focus": 2,
+    "Adaptability and Flexibility": 1,
+    "Effective Communication": 1,
+    "Valuing Diversity": 1,
+    "Self-Awareness and Confidence": 1,
+    "Stress Tolerance": 1,
+    "Resource Management": 1,
+    "Knowledge Management": 1,
+    Initiative: 1,
+    "Result Orientation": 1,
+    "Organizational Commitment": 1,
+    "Planning and Organizing": 1,
+    "Emotional and Psychological Maturity": 1,
+    "Safety and Risk Management": 1,
     "Interpersonal Effectiveness": 1,
-    "Attention to Details": 1, "Written Communication": 1,
-    "Oral Communication": 1, "Computer Literacy": 1, "Logical Reasoning": 1,
+    "Attention to Details": 1,
+    "Written Communication": 1,
+    "Oral Communication": 1,
+    "Computer Literacy": 1,
+    "Logical Reasoning": 1,
   },
   // ── ADMIN AIDE IV – Driver ──────────────────────────────────────────
   "Admin Aide IV – Driver": {
-    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 1,
-    "Delivering Service Excellence": 2, "Environmental Consciousness": 2, "Building Partnership": 1,
-    "Teamwork": 1, "Commitment to Learning": 1, "Customer Focus": 2,
-    "Adaptability and Flexibility": 1, "Effective Communication": 1, "Valuing Diversity": 1,
-    "Self-Awareness and Confidence": 1, "Stress Tolerance": 3, "Resource Management": 1,
-    "Knowledge Management": 1, "Initiative": 2, "Result Orientation": 1,
-    "Organizational Commitment": 1, "Planning and Organizing": 1,
-    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 3,
-    "Interpersonal Effectiveness": 1, "Oral Communication": 1, "Logical Reasoning": 1,
+    Integrity: 2,
+    Accountability: 2,
+    "Scientific and Technological Excellence": 1,
+    "Delivering Service Excellence": 2,
+    "Environmental Consciousness": 2,
+    "Building Partnership": 1,
+    Teamwork: 1,
+    "Commitment to Learning": 1,
+    "Customer Focus": 2,
+    "Adaptability and Flexibility": 1,
+    "Effective Communication": 1,
+    "Valuing Diversity": 1,
+    "Self-Awareness and Confidence": 1,
+    "Stress Tolerance": 3,
+    "Resource Management": 1,
+    "Knowledge Management": 1,
+    Initiative: 2,
+    "Result Orientation": 1,
+    "Organizational Commitment": 1,
+    "Planning and Organizing": 1,
+    "Emotional and Psychological Maturity": 1,
+    "Safety and Risk Management": 3,
+    "Interpersonal Effectiveness": 1,
+    "Oral Communication": 1,
+    "Logical Reasoning": 1,
   },
   // ── SECURITY GUARD I ────────────────────────────────────────────────
   "Security Guard I": {
-    "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 1,
-    "Delivering Service Excellence": 3, "Environmental Consciousness": 2, "Building Partnership": 1,
-    "Teamwork": 2, "Commitment to Learning": 1, "Customer Focus": 2,
-    "Adaptability and Flexibility": 2, "Effective Communication": 1, "Valuing Diversity": 1,
-    "Self-Awareness and Confidence": 1, "Stress Tolerance": 3, "Resource Management": 1,
-    "Knowledge Management": 1, "Initiative": 2, "Result Orientation": 1,
-    "Organizational Commitment": 1, "Planning and Organizing": 1,
-    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 3,
+    Integrity: 3,
+    Accountability: 3,
+    "Scientific and Technological Excellence": 1,
+    "Delivering Service Excellence": 3,
+    "Environmental Consciousness": 2,
+    "Building Partnership": 1,
+    Teamwork: 2,
+    "Commitment to Learning": 1,
+    "Customer Focus": 2,
+    "Adaptability and Flexibility": 2,
+    "Effective Communication": 1,
+    "Valuing Diversity": 1,
+    "Self-Awareness and Confidence": 1,
+    "Stress Tolerance": 3,
+    "Resource Management": 1,
+    "Knowledge Management": 1,
+    Initiative: 2,
+    "Result Orientation": 1,
+    "Organizational Commitment": 1,
+    "Planning and Organizing": 1,
+    "Emotional and Psychological Maturity": 1,
+    "Safety and Risk Management": 3,
     "Interpersonal Effectiveness": 1,
-    "Oral Communication": 1, "Computer Literacy": 1, "Logical Reasoning": 1,
+    "Oral Communication": 1,
+    "Computer Literacy": 1,
+    "Logical Reasoning": 1,
   },
   // ── FARM WORKER I ───────────────────────────────────────────────────
   "Farm Worker I": {
-    "Integrity": 1, "Accountability": 2, "Scientific and Technological Excellence": 1,
-    "Delivering Service Excellence": 1, "Environmental Consciousness": 2, "Building Partnership": 1,
-    "Teamwork": 1, "Commitment to Learning": 1, "Customer Focus": 1,
-    "Adaptability and Flexibility": 1, "Effective Communication": 1, "Valuing Diversity": 1,
-    "Self-Awareness and Confidence": 1, "Stress Tolerance": 1, "Resource Management": 1,
-    "Knowledge Management": 1, "Initiative": 1, "Result Orientation": 1,
-    "Organizational Commitment": 1, "Planning and Organizing": 1,
-    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 2,
-    "Interpersonal Effectiveness": 1, "Oral Communication": 1, "Logical Reasoning": 1,
+    Integrity: 1,
+    Accountability: 2,
+    "Scientific and Technological Excellence": 1,
+    "Delivering Service Excellence": 1,
+    "Environmental Consciousness": 2,
+    "Building Partnership": 1,
+    Teamwork: 1,
+    "Commitment to Learning": 1,
+    "Customer Focus": 1,
+    "Adaptability and Flexibility": 1,
+    "Effective Communication": 1,
+    "Valuing Diversity": 1,
+    "Self-Awareness and Confidence": 1,
+    "Stress Tolerance": 1,
+    "Resource Management": 1,
+    "Knowledge Management": 1,
+    Initiative: 1,
+    "Result Orientation": 1,
+    "Organizational Commitment": 1,
+    "Planning and Organizing": 1,
+    "Emotional and Psychological Maturity": 1,
+    "Safety and Risk Management": 2,
+    "Interpersonal Effectiveness": 1,
+    "Oral Communication": 1,
+    "Logical Reasoning": 1,
   },
   // ── ADMIN ASSISTANT I ───────────────────────────────────────────────
   "Admin Assistant I": {
-    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 1,
-    "Delivering Service Excellence": 2, "Environmental Consciousness": 2, "Building Partnership": 2,
-    "Teamwork": 2, "Commitment to Learning": 1, "Customer Focus": 2,
-    "Adaptability and Flexibility": 2, "Effective Communication": 1, "Valuing Diversity": 1,
-    "Self-Awareness and Confidence": 1, "Stress Tolerance": 1, "Resource Management": 1,
-    "Knowledge Management": 1, "Initiative": 1, "Result Orientation": 1,
-    "Organizational Commitment": 1, "Planning and Organizing": 2,
-    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 1,
+    Integrity: 2,
+    Accountability: 2,
+    "Scientific and Technological Excellence": 1,
+    "Delivering Service Excellence": 2,
+    "Environmental Consciousness": 2,
+    "Building Partnership": 2,
+    Teamwork: 2,
+    "Commitment to Learning": 1,
+    "Customer Focus": 2,
+    "Adaptability and Flexibility": 2,
+    "Effective Communication": 1,
+    "Valuing Diversity": 1,
+    "Self-Awareness and Confidence": 1,
+    "Stress Tolerance": 1,
+    "Resource Management": 1,
+    "Knowledge Management": 1,
+    Initiative: 1,
+    "Result Orientation": 1,
+    "Organizational Commitment": 1,
+    "Planning and Organizing": 2,
+    "Emotional and Psychological Maturity": 1,
+    "Safety and Risk Management": 1,
     "Interpersonal Effectiveness": 1,
-    "Attention to Details": 1, "Written Communication": 1,
-    "Oral Communication": 1, "Computer Literacy": 1, "Logical Reasoning": 1,
+    "Attention to Details": 1,
+    "Written Communication": 1,
+    "Oral Communication": 1,
+    "Computer Literacy": 1,
+    "Logical Reasoning": 1,
   },
   // ── ADMIN ASSISTANT II ──────────────────────────────────────────────
   "Admin Assistant II": {
-    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 1,
-    "Delivering Service Excellence": 2, "Environmental Consciousness": 2, "Building Partnership": 2,
-    "Teamwork": 2, "Commitment to Learning": 1, "Customer Focus": 2,
-    "Adaptability and Flexibility": 2, "Effective Communication": 1, "Valuing Diversity": 1,
-    "Self-Awareness and Confidence": 1, "Stress Tolerance": 1, "Resource Management": 1,
-    "Knowledge Management": 1, "Initiative": 1, "Result Orientation": 1,
-    "Organizational Commitment": 1, "Planning and Organizing": 2,
-    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 1,
+    Integrity: 2,
+    Accountability: 2,
+    "Scientific and Technological Excellence": 1,
+    "Delivering Service Excellence": 2,
+    "Environmental Consciousness": 2,
+    "Building Partnership": 2,
+    Teamwork: 2,
+    "Commitment to Learning": 1,
+    "Customer Focus": 2,
+    "Adaptability and Flexibility": 2,
+    "Effective Communication": 1,
+    "Valuing Diversity": 1,
+    "Self-Awareness and Confidence": 1,
+    "Stress Tolerance": 1,
+    "Resource Management": 1,
+    "Knowledge Management": 1,
+    Initiative: 1,
+    "Result Orientation": 1,
+    "Organizational Commitment": 1,
+    "Planning and Organizing": 2,
+    "Emotional and Psychological Maturity": 1,
+    "Safety and Risk Management": 1,
     "Interpersonal Effectiveness": 1,
-    "Attention to Details": 1, "Written Communication": 1,
-    "Oral Communication": 1, "Computer Literacy": 1, "Logical Reasoning": 1,
+    "Attention to Details": 1,
+    "Written Communication": 1,
+    "Oral Communication": 1,
+    "Computer Literacy": 1,
+    "Logical Reasoning": 1,
   },
   // ── ADMIN ASSISTANT III ─────────────────────────────────────────────
   "Admin Assistant III": {
-    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 1,
-    "Delivering Service Excellence": 2, "Environmental Consciousness": 2, "Building Partnership": 2,
-    "Teamwork": 2, "Commitment to Learning": 1, "Customer Focus": 2,
-    "Adaptability and Flexibility": 2, "Effective Communication": 1, "Valuing Diversity": 1,
-    "Self-Awareness and Confidence": 1, "Stress Tolerance": 1, "Resource Management": 1,
-    "Knowledge Management": 1, "Initiative": 1, "Result Orientation": 1,
-    "Organizational Commitment": 1, "Planning and Organizing": 2,
-    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 1,
+    Integrity: 2,
+    Accountability: 2,
+    "Scientific and Technological Excellence": 1,
+    "Delivering Service Excellence": 2,
+    "Environmental Consciousness": 2,
+    "Building Partnership": 2,
+    Teamwork: 2,
+    "Commitment to Learning": 1,
+    "Customer Focus": 2,
+    "Adaptability and Flexibility": 2,
+    "Effective Communication": 1,
+    "Valuing Diversity": 1,
+    "Self-Awareness and Confidence": 1,
+    "Stress Tolerance": 1,
+    "Resource Management": 1,
+    "Knowledge Management": 1,
+    Initiative: 1,
+    "Result Orientation": 1,
+    "Organizational Commitment": 1,
+    "Planning and Organizing": 2,
+    "Emotional and Psychological Maturity": 1,
+    "Safety and Risk Management": 1,
     "Interpersonal Effectiveness": 1,
-    "Attention to Details": 1, "Written Communication": 1,
-    "Oral Communication": 1, "Computer Literacy": 1, "Logical Reasoning": 1,
+    "Attention to Details": 1,
+    "Written Communication": 1,
+    "Oral Communication": 1,
+    "Computer Literacy": 1,
+    "Logical Reasoning": 1,
   },
   // ── ADMIN ASSISTANT IV ──────────────────────────────────────────────
   "Admin Assistant IV": {
-    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 1,
-    "Delivering Service Excellence": 2, "Environmental Consciousness": 2, "Building Partnership": 2,
-    "Teamwork": 2, "Commitment to Learning": 1, "Customer Focus": 2,
-    "Adaptability and Flexibility": 2, "Effective Communication": 1, "Valuing Diversity": 1,
-    "Self-Awareness and Confidence": 1, "Stress Tolerance": 1, "Resource Management": 1,
-    "Knowledge Management": 1, "Initiative": 1, "Result Orientation": 1,
-    "Organizational Commitment": 1, "Planning and Organizing": 2,
-    "Emotional and Psychological Maturity": 1, "Safety and Risk Management": 1,
+    Integrity: 2,
+    Accountability: 2,
+    "Scientific and Technological Excellence": 1,
+    "Delivering Service Excellence": 2,
+    "Environmental Consciousness": 2,
+    "Building Partnership": 2,
+    Teamwork: 2,
+    "Commitment to Learning": 1,
+    "Customer Focus": 2,
+    "Adaptability and Flexibility": 2,
+    "Effective Communication": 1,
+    "Valuing Diversity": 1,
+    "Self-Awareness and Confidence": 1,
+    "Stress Tolerance": 1,
+    "Resource Management": 1,
+    "Knowledge Management": 1,
+    Initiative: 1,
+    "Result Orientation": 1,
+    "Organizational Commitment": 1,
+    "Planning and Organizing": 2,
+    "Emotional and Psychological Maturity": 1,
+    "Safety and Risk Management": 1,
     "Interpersonal Effectiveness": 1,
-    "Attention to Details": 1, "Written Communication": 1,
-    "Oral Communication": 1, "Computer Literacy": 1, "Logical Reasoning": 1,
+    "Attention to Details": 1,
+    "Written Communication": 1,
+    "Oral Communication": 1,
+    "Computer Literacy": 1,
+    "Logical Reasoning": 1,
   },
   // ── ADMIN OFFICER I ─────────────────────────────────────────────────
   "Admin Officer I": {
-    "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 3, "Environmental Consciousness": 3, "Building Partnership": 3,
-    "Teamwork": 3, "Commitment to Learning": 2, "Customer Focus": 3,
-    "Adaptability and Flexibility": 3, "Effective Communication": 2, "Valuing Diversity": 2,
-    "Self-Awareness and Confidence": 2, "Stress Tolerance": 2, "Resource Management": 2,
-    "Knowledge Management": 2, "Initiative": 2, "Result Orientation": 2,
-    "Organizational Commitment": 2, "Planning and Organizing": 2,
-    "Emotional and Psychological Maturity": 2, "Safety and Risk Management": 2,
+    Integrity: 3,
+    Accountability: 3,
+    "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 3,
+    "Environmental Consciousness": 3,
+    "Building Partnership": 3,
+    Teamwork: 3,
+    "Commitment to Learning": 2,
+    "Customer Focus": 3,
+    "Adaptability and Flexibility": 3,
+    "Effective Communication": 2,
+    "Valuing Diversity": 2,
+    "Self-Awareness and Confidence": 2,
+    "Stress Tolerance": 2,
+    "Resource Management": 2,
+    "Knowledge Management": 2,
+    Initiative: 2,
+    "Result Orientation": 2,
+    "Organizational Commitment": 2,
+    "Planning and Organizing": 2,
+    "Emotional and Psychological Maturity": 2,
+    "Safety and Risk Management": 2,
     "Interpersonal Effectiveness": 2,
-    "Attention to Details": 2, "Written Communication": 2,
-    "Oral Communication": 2, "Computer Literacy": 2, "Logical Reasoning": 2,
+    "Attention to Details": 2,
+    "Written Communication": 2,
+    "Oral Communication": 2,
+    "Computer Literacy": 2,
+    "Logical Reasoning": 2,
   },
   // ── ADMIN OFFICER II ────────────────────────────────────────────────
   "Admin Officer II": {
-    "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 3, "Environmental Consciousness": 3, "Building Partnership": 3,
-    "Teamwork": 3, "Commitment to Learning": 2, "Customer Focus": 3,
-    "Adaptability and Flexibility": 3, "Effective Communication": 2, "Valuing Diversity": 2,
-    "Self-Awareness and Confidence": 2, "Stress Tolerance": 2, "Resource Management": 2,
-    "Knowledge Management": 2, "Initiative": 2, "Result Orientation": 2,
-    "Organizational Commitment": 2, "Planning and Organizing": 2,
-    "Emotional and Psychological Maturity": 2, "Safety and Risk Management": 2,
+    Integrity: 3,
+    Accountability: 3,
+    "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 3,
+    "Environmental Consciousness": 3,
+    "Building Partnership": 3,
+    Teamwork: 3,
+    "Commitment to Learning": 2,
+    "Customer Focus": 3,
+    "Adaptability and Flexibility": 3,
+    "Effective Communication": 2,
+    "Valuing Diversity": 2,
+    "Self-Awareness and Confidence": 2,
+    "Stress Tolerance": 2,
+    "Resource Management": 2,
+    "Knowledge Management": 2,
+    Initiative: 2,
+    "Result Orientation": 2,
+    "Organizational Commitment": 2,
+    "Planning and Organizing": 2,
+    "Emotional and Psychological Maturity": 2,
+    "Safety and Risk Management": 2,
     "Interpersonal Effectiveness": 2,
-    "Attention to Details": 2, "Written Communication": 2,
-    "Oral Communication": 2, "Computer Literacy": 2, "Logical Reasoning": 2,
+    "Attention to Details": 2,
+    "Written Communication": 2,
+    "Oral Communication": 2,
+    "Computer Literacy": 2,
+    "Logical Reasoning": 2,
   },
   // ── ADMIN OFFICER III ───────────────────────────────────────────────
   "Admin Officer III": {
-    "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 3, "Environmental Consciousness": 3, "Building Partnership": 3,
-    "Teamwork": 3, "Commitment to Learning": 3, "Customer Focus": 3,
-    "Adaptability and Flexibility": 3, "Effective Communication": 2, "Valuing Diversity": 2,
-    "Self-Awareness and Confidence": 2, "Stress Tolerance": 2, "Resource Management": 2,
-    "Knowledge Management": 2, "Initiative": 2, "Result Orientation": 2,
-    "Organizational Commitment": 2, "Planning and Organizing": 2,
-    "Emotional and Psychological Maturity": 2, "Safety and Risk Management": 2,
+    Integrity: 3,
+    Accountability: 3,
+    "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 3,
+    "Environmental Consciousness": 3,
+    "Building Partnership": 3,
+    Teamwork: 3,
+    "Commitment to Learning": 3,
+    "Customer Focus": 3,
+    "Adaptability and Flexibility": 3,
+    "Effective Communication": 2,
+    "Valuing Diversity": 2,
+    "Self-Awareness and Confidence": 2,
+    "Stress Tolerance": 2,
+    "Resource Management": 2,
+    "Knowledge Management": 2,
+    Initiative: 2,
+    "Result Orientation": 2,
+    "Organizational Commitment": 2,
+    "Planning and Organizing": 2,
+    "Emotional and Psychological Maturity": 2,
+    "Safety and Risk Management": 2,
     "Interpersonal Effectiveness": 2,
-    "Attention to Details": 2, "Written Communication": 2,
-    "Oral Communication": 2, "Computer Literacy": 2, "Logical Reasoning": 2,
+    "Attention to Details": 2,
+    "Written Communication": 2,
+    "Oral Communication": 2,
+    "Computer Literacy": 2,
+    "Logical Reasoning": 2,
   },
   // ── ADMIN OFFICER IV ────────────────────────────────────────────────
   "Admin Officer IV": {
-    "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 3, "Environmental Consciousness": 3, "Building Partnership": 3,
-    "Teamwork": 3, "Commitment to Learning": 3, "Customer Focus": 3,
-    "Adaptability and Flexibility": 3, "Effective Communication": 3, "Valuing Diversity": 3,
-    "Self-Awareness and Confidence": 3, "Stress Tolerance": 3, "Resource Management": 3,
-    "Knowledge Management": 3, "Initiative": 3, "Result Orientation": 3,
-    "Organizational Commitment": 3, "Planning and Organizing": 3,
-    "Emotional and Psychological Maturity": 3, "Safety and Risk Management": 3,
+    Integrity: 3,
+    Accountability: 3,
+    "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 3,
+    "Environmental Consciousness": 3,
+    "Building Partnership": 3,
+    Teamwork: 3,
+    "Commitment to Learning": 3,
+    "Customer Focus": 3,
+    "Adaptability and Flexibility": 3,
+    "Effective Communication": 3,
+    "Valuing Diversity": 3,
+    "Self-Awareness and Confidence": 3,
+    "Stress Tolerance": 3,
+    "Resource Management": 3,
+    "Knowledge Management": 3,
+    Initiative: 3,
+    "Result Orientation": 3,
+    "Organizational Commitment": 3,
+    "Planning and Organizing": 3,
+    "Emotional and Psychological Maturity": 3,
+    "Safety and Risk Management": 3,
     "Interpersonal Effectiveness": 3,
-    "Attention to Details": 3, "Written Communication": 3,
-    "Oral Communication": 3, "Computer Literacy": 2, "Logical Reasoning": 3,
+    "Attention to Details": 3,
+    "Written Communication": 3,
+    "Oral Communication": 3,
+    "Computer Literacy": 2,
+    "Logical Reasoning": 3,
   },
   // ── ADMIN OFFICER V ─────────────────────────────────────────────────
   "Admin Officer V": {
-    "Integrity": 4, "Accountability": 4, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 4, "Environmental Consciousness": 4, "Building Partnership": 4,
-    "Developing People": 4, "Facilitating Change": 4, "Conflict Management": 4,
-    "Leading Innovation": 3, "Strategic Planning": 3, "Leading Others": 4, "Decisiveness": 4,
+    Integrity: 4,
+    Accountability: 4,
+    "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 4,
+    "Environmental Consciousness": 4,
+    "Building Partnership": 4,
+    "Developing People": 4,
+    "Facilitating Change": 4,
+    "Conflict Management": 4,
+    "Leading Innovation": 3,
+    "Strategic Planning": 3,
+    "Leading Others": 4,
+    Decisiveness: 4,
     "Critical Thinking": 4,
-    "Teamwork": 4, "Commitment to Learning": 4, "Customer Focus": 4,
-    "Adaptability and Flexibility": 4, "Effective Communication": 4, "Valuing Diversity": 4,
-    "Self-Awareness and Confidence": 4, "Stress Tolerance": 4, "Resource Management": 4,
-    "Knowledge Management": 4, "Initiative": 4, "Result Orientation": 4,
-    "Organizational Commitment": 4, "Planning and Organizing": 4,
-    "Emotional and Psychological Maturity": 4, "Safety and Risk Management": 4,
+    Teamwork: 4,
+    "Commitment to Learning": 4,
+    "Customer Focus": 4,
+    "Adaptability and Flexibility": 4,
+    "Effective Communication": 4,
+    "Valuing Diversity": 4,
+    "Self-Awareness and Confidence": 4,
+    "Stress Tolerance": 4,
+    "Resource Management": 4,
+    "Knowledge Management": 4,
+    Initiative: 4,
+    "Result Orientation": 4,
+    "Organizational Commitment": 4,
+    "Planning and Organizing": 4,
+    "Emotional and Psychological Maturity": 4,
+    "Safety and Risk Management": 4,
     "Interpersonal Effectiveness": 4,
-    "Attention to Details": 4, "Written Communication": 4,
-    "Oral Communication": 4, "Computer Literacy": 2, "Logical Reasoning": 4,
+    "Attention to Details": 4,
+    "Written Communication": 4,
+    "Oral Communication": 4,
+    "Computer Literacy": 2,
+    "Logical Reasoning": 4,
   },
 
   // ════════════════════════════════════════════════════════════════════
   // PROFESSIONAL / SPECIALIZED ADMIN
   // ════════════════════════════════════════════════════════════════════
   "Accountant III": {
-    "Integrity": 4, "Accountability": 4, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 4, "Environmental Consciousness": 2, "Building Partnership": 3,
-    "Developing People": 2, "Facilitating Change": 2, "Conflict Management": 2,
-    "Leading Innovation": 1, "Strategic Planning": 1, "Leading Others": 2, "Decisiveness": 2,
+    Integrity: 4,
+    Accountability: 4,
+    "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 4,
+    "Environmental Consciousness": 2,
+    "Building Partnership": 3,
+    "Developing People": 2,
+    "Facilitating Change": 2,
+    "Conflict Management": 2,
+    "Leading Innovation": 1,
+    "Strategic Planning": 1,
+    "Leading Others": 2,
+    Decisiveness: 2,
     "Critical Thinking": 3,
-    "Teamwork": 4, "Commitment to Learning": 3, "Customer Focus": 3,
-    "Adaptability and Flexibility": 3, "Effective Communication": 4, "Valuing Diversity": 4,
-    "Self-Awareness and Confidence": 4, "Stress Tolerance": 4, "Resource Management": 4,
-    "Knowledge Management": 4, "Initiative": 4, "Result Orientation": 4,
-    "Organizational Commitment": 4, "Planning and Organizing": 4,
-    "Emotional and Psychological Maturity": 4, "Safety and Risk Management": 4,
+    Teamwork: 4,
+    "Commitment to Learning": 3,
+    "Customer Focus": 3,
+    "Adaptability and Flexibility": 3,
+    "Effective Communication": 4,
+    "Valuing Diversity": 4,
+    "Self-Awareness and Confidence": 4,
+    "Stress Tolerance": 4,
+    "Resource Management": 4,
+    "Knowledge Management": 4,
+    Initiative: 4,
+    "Result Orientation": 4,
+    "Organizational Commitment": 4,
+    "Planning and Organizing": 4,
+    "Emotional and Psychological Maturity": 4,
+    "Safety and Risk Management": 4,
     "Interpersonal Effectiveness": 4,
-    "Attention to Details": 4, "Written Communication": 4,
-    "Oral Communication": 4, "Computer Literacy": 2, "Logical Reasoning": 4,
+    "Attention to Details": 4,
+    "Written Communication": 4,
+    "Oral Communication": 4,
+    "Computer Literacy": 2,
+    "Logical Reasoning": 4,
   },
   "College Librarian I": {
-    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 3, "Environmental Consciousness": 2, "Building Partnership": 2,
+    Integrity: 2,
+    Accountability: 2,
+    "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 3,
+    "Environmental Consciousness": 2,
+    "Building Partnership": 2,
     "Critical Thinking": 3,
-    "Teamwork": 2, "Commitment to Learning": 2, "Customer Focus": 3,
-    "Adaptability and Flexibility": 3, "Effective Communication": 3, "Valuing Diversity": 3,
-    "Self-Awareness and Confidence": 3, "Stress Tolerance": 3, "Resource Management": 3,
-    "Knowledge Management": 3, "Initiative": 3, "Result Orientation": 3,
-    "Organizational Commitment": 3, "Planning and Organizing": 3,
-    "Emotional and Psychological Maturity": 3, "Safety and Risk Management": 3,
+    Teamwork: 2,
+    "Commitment to Learning": 2,
+    "Customer Focus": 3,
+    "Adaptability and Flexibility": 3,
+    "Effective Communication": 3,
+    "Valuing Diversity": 3,
+    "Self-Awareness and Confidence": 3,
+    "Stress Tolerance": 3,
+    "Resource Management": 3,
+    "Knowledge Management": 3,
+    Initiative: 3,
+    "Result Orientation": 3,
+    "Organizational Commitment": 3,
+    "Planning and Organizing": 3,
+    "Emotional and Psychological Maturity": 3,
+    "Safety and Risk Management": 3,
     "Interpersonal Effectiveness": 3,
-    "Attention to Details": 3, "Written Communication": 3,
-    "Oral Communication": 3, "Computer Literacy": 2, "Logical Reasoning": 3,
+    "Attention to Details": 3,
+    "Written Communication": 3,
+    "Oral Communication": 3,
+    "Computer Literacy": 2,
+    "Logical Reasoning": 3,
   },
   "College Librarian III": {
-    "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 4, "Environmental Consciousness": 2, "Building Partnership": 3,
-    "Developing People": 2, "Facilitating Change": 2, "Conflict Management": 2,
-    "Leading Innovation": 2, "Strategic Planning": 2, "Leading Others": 2, "Decisiveness": 2,
+    Integrity: 3,
+    Accountability: 3,
+    "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 4,
+    "Environmental Consciousness": 2,
+    "Building Partnership": 3,
+    "Developing People": 2,
+    "Facilitating Change": 2,
+    "Conflict Management": 2,
+    "Leading Innovation": 2,
+    "Strategic Planning": 2,
+    "Leading Others": 2,
+    Decisiveness: 2,
     "Critical Thinking": 3,
-    "Teamwork": 3, "Commitment to Learning": 3, "Customer Focus": 3,
-    "Adaptability and Flexibility": 3, "Effective Communication": 4, "Valuing Diversity": 4,
-    "Self-Awareness and Confidence": 4, "Stress Tolerance": 4, "Resource Management": 4,
-    "Knowledge Management": 4, "Initiative": 4, "Result Orientation": 4,
-    "Organizational Commitment": 4, "Planning and Organizing": 4,
-    "Emotional and Psychological Maturity": 4, "Safety and Risk Management": 4,
+    Teamwork: 3,
+    "Commitment to Learning": 3,
+    "Customer Focus": 3,
+    "Adaptability and Flexibility": 3,
+    "Effective Communication": 4,
+    "Valuing Diversity": 4,
+    "Self-Awareness and Confidence": 4,
+    "Stress Tolerance": 4,
+    "Resource Management": 4,
+    "Knowledge Management": 4,
+    Initiative: 4,
+    "Result Orientation": 4,
+    "Organizational Commitment": 4,
+    "Planning and Organizing": 4,
+    "Emotional and Psychological Maturity": 4,
+    "Safety and Risk Management": 4,
     "Interpersonal Effectiveness": 4,
-    "Attention to Details": 4, "Written Communication": 4,
-    "Oral Communication": 4, "Computer Literacy": 2, "Logical Reasoning": 4,
+    "Attention to Details": 4,
+    "Written Communication": 4,
+    "Oral Communication": 4,
+    "Computer Literacy": 2,
+    "Logical Reasoning": 4,
   },
   "Nurse I": {
-    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 3, "Environmental Consciousness": 2, "Building Partnership": 2,
+    Integrity: 2,
+    Accountability: 2,
+    "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 3,
+    "Environmental Consciousness": 2,
+    "Building Partnership": 2,
     "Critical Thinking": 2,
-    "Teamwork": 1, "Commitment to Learning": 1, "Customer Focus": 3,
-    "Adaptability and Flexibility": 2, "Effective Communication": 2, "Valuing Diversity": 2,
-    "Self-Awareness and Confidence": 2, "Stress Tolerance": 3, "Resource Management": 2,
-    "Knowledge Management": 2, "Initiative": 2, "Result Orientation": 2,
-    "Organizational Commitment": 2, "Planning and Organizing": 2,
-    "Emotional and Psychological Maturity": 2, "Safety and Risk Management": 2,
+    Teamwork: 1,
+    "Commitment to Learning": 1,
+    "Customer Focus": 3,
+    "Adaptability and Flexibility": 2,
+    "Effective Communication": 2,
+    "Valuing Diversity": 2,
+    "Self-Awareness and Confidence": 2,
+    "Stress Tolerance": 3,
+    "Resource Management": 2,
+    "Knowledge Management": 2,
+    Initiative: 2,
+    "Result Orientation": 2,
+    "Organizational Commitment": 2,
+    "Planning and Organizing": 2,
+    "Emotional and Psychological Maturity": 2,
+    "Safety and Risk Management": 2,
     "Interpersonal Effectiveness": 2,
-    "Attention to Details": 2, "Written Communication": 2,
-    "Oral Communication": 2, "Computer Literacy": 2, "Logical Reasoning": 2,
+    "Attention to Details": 2,
+    "Written Communication": 2,
+    "Oral Communication": 2,
+    "Computer Literacy": 2,
+    "Logical Reasoning": 2,
   },
   "Nurse II": {
-    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 3, "Environmental Consciousness": 2, "Building Partnership": 2,
+    Integrity: 2,
+    Accountability: 2,
+    "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 3,
+    "Environmental Consciousness": 2,
+    "Building Partnership": 2,
     "Critical Thinking": 2,
-    "Teamwork": 2, "Commitment to Learning": 1, "Customer Focus": 3,
-    "Adaptability and Flexibility": 2, "Effective Communication": 2, "Valuing Diversity": 2,
-    "Self-Awareness and Confidence": 2, "Stress Tolerance": 3, "Resource Management": 2,
-    "Knowledge Management": 2, "Initiative": 2, "Result Orientation": 2,
-    "Organizational Commitment": 2, "Planning and Organizing": 2,
-    "Emotional and Psychological Maturity": 2, "Safety and Risk Management": 2,
+    Teamwork: 2,
+    "Commitment to Learning": 1,
+    "Customer Focus": 3,
+    "Adaptability and Flexibility": 2,
+    "Effective Communication": 2,
+    "Valuing Diversity": 2,
+    "Self-Awareness and Confidence": 2,
+    "Stress Tolerance": 3,
+    "Resource Management": 2,
+    "Knowledge Management": 2,
+    Initiative: 2,
+    "Result Orientation": 2,
+    "Organizational Commitment": 2,
+    "Planning and Organizing": 2,
+    "Emotional and Psychological Maturity": 2,
+    "Safety and Risk Management": 2,
     "Interpersonal Effectiveness": 2,
-    "Attention to Details": 2, "Written Communication": 2,
-    "Oral Communication": 2, "Computer Literacy": 2, "Logical Reasoning": 2,
+    "Attention to Details": 2,
+    "Written Communication": 2,
+    "Oral Communication": 2,
+    "Computer Literacy": 2,
+    "Logical Reasoning": 2,
   },
   "Chief Administrative Officer (CAO)": {
-    "Integrity": 4, "Accountability": 4, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 4, "Environmental Consciousness": 4, "Building Partnership": 4,
-    "Developing People": 4, "Facilitating Change": 4, "Conflict Management": 4,
-    "Leading Innovation": 4, "Strategic Planning": 4, "Leading Others": 4, "Decisiveness": 4,
+    Integrity: 4,
+    Accountability: 4,
+    "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 4,
+    "Environmental Consciousness": 4,
+    "Building Partnership": 4,
+    "Developing People": 4,
+    "Facilitating Change": 4,
+    "Conflict Management": 4,
+    "Leading Innovation": 4,
+    "Strategic Planning": 4,
+    "Leading Others": 4,
+    Decisiveness: 4,
     "Critical Thinking": 4,
-    "Teamwork": 4, "Commitment to Learning": 4, "Customer Focus": 4,
-    "Adaptability and Flexibility": 4, "Effective Communication": 4, "Valuing Diversity": 4,
-    "Self-Awareness and Confidence": 4, "Stress Tolerance": 4, "Resource Management": 4,
-    "Knowledge Management": 4, "Initiative": 4, "Result Orientation": 4,
-    "Organizational Commitment": 4, "Planning and Organizing": 4,
-    "Emotional and Psychological Maturity": 4, "Safety and Risk Management": 4,
+    Teamwork: 4,
+    "Commitment to Learning": 4,
+    "Customer Focus": 4,
+    "Adaptability and Flexibility": 4,
+    "Effective Communication": 4,
+    "Valuing Diversity": 4,
+    "Self-Awareness and Confidence": 4,
+    "Stress Tolerance": 4,
+    "Resource Management": 4,
+    "Knowledge Management": 4,
+    Initiative: 4,
+    "Result Orientation": 4,
+    "Organizational Commitment": 4,
+    "Planning and Organizing": 4,
+    "Emotional and Psychological Maturity": 4,
+    "Safety and Risk Management": 4,
     "Interpersonal Effectiveness": 4,
-    "Attention to Details": 4, "Written Communication": 4,
-    "Oral Communication": 4, "Computer Literacy": 2, "Logical Reasoning": 4,
+    "Attention to Details": 4,
+    "Written Communication": 4,
+    "Oral Communication": 4,
+    "Computer Literacy": 2,
+    "Logical Reasoning": 4,
   },
   "Board Secretary V": {
-    "Integrity": 4, "Accountability": 4, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 4, "Environmental Consciousness": 3, "Building Partnership": 3,
-    "Developing People": 2, "Facilitating Change": 2, "Conflict Management": 2,
-    "Leading Innovation": 2, "Strategic Planning": 2, "Leading Others": 2, "Decisiveness": 2,
+    Integrity: 4,
+    Accountability: 4,
+    "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 4,
+    "Environmental Consciousness": 3,
+    "Building Partnership": 3,
+    "Developing People": 2,
+    "Facilitating Change": 2,
+    "Conflict Management": 2,
+    "Leading Innovation": 2,
+    "Strategic Planning": 2,
+    "Leading Others": 2,
+    Decisiveness: 2,
     "Critical Thinking": 4,
-    "Teamwork": 4, "Commitment to Learning": 3, "Customer Focus": 4,
-    "Adaptability and Flexibility": 3, "Effective Communication": 4, "Valuing Diversity": 4,
-    "Self-Awareness and Confidence": 4, "Stress Tolerance": 4, "Resource Management": 4,
-    "Knowledge Management": 4, "Initiative": 4, "Result Orientation": 4,
-    "Organizational Commitment": 4, "Planning and Organizing": 4,
-    "Emotional and Psychological Maturity": 4, "Safety and Risk Management": 4,
+    Teamwork: 4,
+    "Commitment to Learning": 3,
+    "Customer Focus": 4,
+    "Adaptability and Flexibility": 3,
+    "Effective Communication": 4,
+    "Valuing Diversity": 4,
+    "Self-Awareness and Confidence": 4,
+    "Stress Tolerance": 4,
+    "Resource Management": 4,
+    "Knowledge Management": 4,
+    Initiative: 4,
+    "Result Orientation": 4,
+    "Organizational Commitment": 4,
+    "Planning and Organizing": 4,
+    "Emotional and Psychological Maturity": 4,
+    "Safety and Risk Management": 4,
     "Interpersonal Effectiveness": 4,
-    "Attention to Details": 4, "Written Communication": 4,
-    "Oral Communication": 4, "Computer Literacy": 2, "Logical Reasoning": 4,
+    "Attention to Details": 4,
+    "Written Communication": 4,
+    "Oral Communication": 4,
+    "Computer Literacy": 2,
+    "Logical Reasoning": 4,
   },
   "Guidance Counselor III": {
-    "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 4, "Environmental Consciousness": 2, "Building Partnership": 3,
-    "Developing People": 2, "Facilitating Change": 2, "Conflict Management": 2,
-    "Leading Innovation": 2, "Strategic Planning": 2, "Leading Others": 2, "Decisiveness": 2,
+    Integrity: 3,
+    Accountability: 3,
+    "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 4,
+    "Environmental Consciousness": 2,
+    "Building Partnership": 3,
+    "Developing People": 2,
+    "Facilitating Change": 2,
+    "Conflict Management": 2,
+    "Leading Innovation": 2,
+    "Strategic Planning": 2,
+    "Leading Others": 2,
+    Decisiveness: 2,
     "Critical Thinking": 4,
-    "Teamwork": 4, "Commitment to Learning": 3, "Customer Focus": 4,
-    "Adaptability and Flexibility": 3, "Effective Communication": 4, "Valuing Diversity": 4,
-    "Self-Awareness and Confidence": 4, "Stress Tolerance": 4, "Resource Management": 4,
-    "Knowledge Management": 4, "Initiative": 4, "Result Orientation": 4,
-    "Organizational Commitment": 4, "Planning and Organizing": 4,
-    "Emotional and Psychological Maturity": 4, "Safety and Risk Management": 4,
+    Teamwork: 4,
+    "Commitment to Learning": 3,
+    "Customer Focus": 4,
+    "Adaptability and Flexibility": 3,
+    "Effective Communication": 4,
+    "Valuing Diversity": 4,
+    "Self-Awareness and Confidence": 4,
+    "Stress Tolerance": 4,
+    "Resource Management": 4,
+    "Knowledge Management": 4,
+    Initiative: 4,
+    "Result Orientation": 4,
+    "Organizational Commitment": 4,
+    "Planning and Organizing": 4,
+    "Emotional and Psychological Maturity": 4,
+    "Safety and Risk Management": 4,
     "Interpersonal Effectiveness": 4,
-    "Attention to Details": 4, "Written Communication": 4,
-    "Oral Communication": 4, "Computer Literacy": 2, "Logical Reasoning": 4,
+    "Attention to Details": 4,
+    "Written Communication": 4,
+    "Oral Communication": 4,
+    "Computer Literacy": 2,
+    "Logical Reasoning": 4,
   },
   "Programmer II": {
-    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 3, "Environmental Consciousness": 2, "Building Partnership": 2,
+    Integrity: 2,
+    Accountability: 2,
+    "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 3,
+    "Environmental Consciousness": 2,
+    "Building Partnership": 2,
     "Critical Thinking": 2,
-    "Teamwork": 2, "Commitment to Learning": 1, "Customer Focus": 2,
-    "Adaptability and Flexibility": 3, "Effective Communication": 2, "Valuing Diversity": 2,
-    "Self-Awareness and Confidence": 2, "Stress Tolerance": 3, "Resource Management": 2,
-    "Knowledge Management": 2, "Initiative": 2, "Result Orientation": 2,
-    "Organizational Commitment": 2, "Planning and Organizing": 2,
-    "Emotional and Psychological Maturity": 2, "Safety and Risk Management": 2,
+    Teamwork: 2,
+    "Commitment to Learning": 1,
+    "Customer Focus": 2,
+    "Adaptability and Flexibility": 3,
+    "Effective Communication": 2,
+    "Valuing Diversity": 2,
+    "Self-Awareness and Confidence": 2,
+    "Stress Tolerance": 3,
+    "Resource Management": 2,
+    "Knowledge Management": 2,
+    Initiative: 2,
+    "Result Orientation": 2,
+    "Organizational Commitment": 2,
+    "Planning and Organizing": 2,
+    "Emotional and Psychological Maturity": 2,
+    "Safety and Risk Management": 2,
     "Interpersonal Effectiveness": 2,
-    "Attention to Details": 2, "Written Communication": 2,
-    "Oral Communication": 2, "Computer Literacy": 4, "Logical Reasoning": 2,
+    "Attention to Details": 2,
+    "Written Communication": 2,
+    "Oral Communication": 2,
+    "Computer Literacy": 4,
+    "Logical Reasoning": 2,
   },
   "Database Administrator": {
-    "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 3, "Environmental Consciousness": 2, "Building Partnership": 2,
+    Integrity: 3,
+    Accountability: 3,
+    "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 3,
+    "Environmental Consciousness": 2,
+    "Building Partnership": 2,
     "Critical Thinking": 2,
-    "Teamwork": 2, "Commitment to Learning": 2, "Customer Focus": 2,
-    "Adaptability and Flexibility": 3, "Effective Communication": 2, "Valuing Diversity": 2,
-    "Self-Awareness and Confidence": 2, "Stress Tolerance": 3, "Resource Management": 2,
-    "Knowledge Management": 2, "Initiative": 2, "Result Orientation": 2,
-    "Organizational Commitment": 2, "Planning and Organizing": 2,
-    "Emotional and Psychological Maturity": 2, "Safety and Risk Management": 2,
+    Teamwork: 2,
+    "Commitment to Learning": 2,
+    "Customer Focus": 2,
+    "Adaptability and Flexibility": 3,
+    "Effective Communication": 2,
+    "Valuing Diversity": 2,
+    "Self-Awareness and Confidence": 2,
+    "Stress Tolerance": 3,
+    "Resource Management": 2,
+    "Knowledge Management": 2,
+    Initiative: 2,
+    "Result Orientation": 2,
+    "Organizational Commitment": 2,
+    "Planning and Organizing": 2,
+    "Emotional and Psychological Maturity": 2,
+    "Safety and Risk Management": 2,
     "Interpersonal Effectiveness": 2,
-    "Attention to Details": 2, "Written Communication": 2,
-    "Oral Communication": 2, "Computer Literacy": 4, "Logical Reasoning": 2,
+    "Attention to Details": 2,
+    "Written Communication": 2,
+    "Oral Communication": 2,
+    "Computer Literacy": 4,
+    "Logical Reasoning": 2,
   },
   "System Analyst": {
-    "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 3, "Environmental Consciousness": 2, "Building Partnership": 2,
+    Integrity: 3,
+    Accountability: 3,
+    "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 3,
+    "Environmental Consciousness": 2,
+    "Building Partnership": 2,
     "Critical Thinking": 2,
-    "Teamwork": 2, "Commitment to Learning": 2, "Customer Focus": 3,
-    "Adaptability and Flexibility": 3, "Effective Communication": 2, "Valuing Diversity": 2,
-    "Self-Awareness and Confidence": 2, "Stress Tolerance": 3, "Resource Management": 2,
-    "Knowledge Management": 2, "Initiative": 2, "Result Orientation": 2,
-    "Organizational Commitment": 2, "Planning and Organizing": 2,
-    "Emotional and Psychological Maturity": 2, "Safety and Risk Management": 2,
+    Teamwork: 2,
+    "Commitment to Learning": 2,
+    "Customer Focus": 3,
+    "Adaptability and Flexibility": 3,
+    "Effective Communication": 2,
+    "Valuing Diversity": 2,
+    "Self-Awareness and Confidence": 2,
+    "Stress Tolerance": 3,
+    "Resource Management": 2,
+    "Knowledge Management": 2,
+    Initiative: 2,
+    "Result Orientation": 2,
+    "Organizational Commitment": 2,
+    "Planning and Organizing": 2,
+    "Emotional and Psychological Maturity": 2,
+    "Safety and Risk Management": 2,
     "Interpersonal Effectiveness": 2,
-    "Attention to Details": 2, "Written Communication": 2,
-    "Oral Communication": 2, "Computer Literacy": 4, "Logical Reasoning": 2,
+    "Attention to Details": 2,
+    "Written Communication": 2,
+    "Oral Communication": 2,
+    "Computer Literacy": 4,
+    "Logical Reasoning": 2,
   },
   "Planning Officer": {
-    "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 4, "Environmental Consciousness": 3, "Building Partnership": 3,
-    "Developing People": 2, "Facilitating Change": 2, "Conflict Management": 2,
-    "Leading Innovation": 3, "Strategic Planning": 3, "Leading Others": 2, "Decisiveness": 2,
+    Integrity: 3,
+    Accountability: 3,
+    "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 4,
+    "Environmental Consciousness": 3,
+    "Building Partnership": 3,
+    "Developing People": 2,
+    "Facilitating Change": 2,
+    "Conflict Management": 2,
+    "Leading Innovation": 3,
+    "Strategic Planning": 3,
+    "Leading Others": 2,
+    Decisiveness: 2,
     "Critical Thinking": 4,
-    "Teamwork": 4, "Commitment to Learning": 4, "Customer Focus": 4,
-    "Adaptability and Flexibility": 4, "Effective Communication": 4, "Valuing Diversity": 4,
-    "Self-Awareness and Confidence": 4, "Stress Tolerance": 4, "Resource Management": 4,
-    "Knowledge Management": 4, "Initiative": 4, "Result Orientation": 4,
-    "Organizational Commitment": 4, "Planning and Organizing": 4,
-    "Emotional and Psychological Maturity": 4, "Safety and Risk Management": 4,
+    Teamwork: 4,
+    "Commitment to Learning": 4,
+    "Customer Focus": 4,
+    "Adaptability and Flexibility": 4,
+    "Effective Communication": 4,
+    "Valuing Diversity": 4,
+    "Self-Awareness and Confidence": 4,
+    "Stress Tolerance": 4,
+    "Resource Management": 4,
+    "Knowledge Management": 4,
+    Initiative: 4,
+    "Result Orientation": 4,
+    "Organizational Commitment": 4,
+    "Planning and Organizing": 4,
+    "Emotional and Psychological Maturity": 4,
+    "Safety and Risk Management": 4,
     "Interpersonal Effectiveness": 4,
-    "Attention to Details": 4, "Written Communication": 4,
-    "Oral Communication": 4, "Computer Literacy": 2, "Logical Reasoning": 4,
+    "Attention to Details": 4,
+    "Written Communication": 4,
+    "Oral Communication": 4,
+    "Computer Literacy": 2,
+    "Logical Reasoning": 4,
   },
   "Registrar III": {
-    "Integrity": 4, "Accountability": 4, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 4, "Environmental Consciousness": 2, "Building Partnership": 3,
-    "Developing People": 2, "Facilitating Change": 2, "Conflict Management": 2,
-    "Leading Innovation": 2, "Strategic Planning": 2, "Leading Others": 2, "Decisiveness": 2,
+    Integrity: 4,
+    Accountability: 4,
+    "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 4,
+    "Environmental Consciousness": 2,
+    "Building Partnership": 3,
+    "Developing People": 2,
+    "Facilitating Change": 2,
+    "Conflict Management": 2,
+    "Leading Innovation": 2,
+    "Strategic Planning": 2,
+    "Leading Others": 2,
+    Decisiveness: 2,
     "Critical Thinking": 3,
-    "Teamwork": 4, "Commitment to Learning": 3, "Customer Focus": 4,
-    "Adaptability and Flexibility": 3, "Effective Communication": 4, "Valuing Diversity": 4,
-    "Self-Awareness and Confidence": 4, "Stress Tolerance": 4, "Resource Management": 4,
-    "Knowledge Management": 4, "Initiative": 4, "Result Orientation": 4,
-    "Organizational Commitment": 4, "Planning and Organizing": 4,
-    "Emotional and Psychological Maturity": 4, "Safety and Risk Management": 4,
+    Teamwork: 4,
+    "Commitment to Learning": 3,
+    "Customer Focus": 4,
+    "Adaptability and Flexibility": 3,
+    "Effective Communication": 4,
+    "Valuing Diversity": 4,
+    "Self-Awareness and Confidence": 4,
+    "Stress Tolerance": 4,
+    "Resource Management": 4,
+    "Knowledge Management": 4,
+    Initiative: 4,
+    "Result Orientation": 4,
+    "Organizational Commitment": 4,
+    "Planning and Organizing": 4,
+    "Emotional and Psychological Maturity": 4,
+    "Safety and Risk Management": 4,
     "Interpersonal Effectiveness": 4,
-    "Attention to Details": 4, "Written Communication": 4,
-    "Oral Communication": 4, "Computer Literacy": 2, "Logical Reasoning": 4,
+    "Attention to Details": 4,
+    "Written Communication": 4,
+    "Oral Communication": 4,
+    "Computer Literacy": 2,
+    "Logical Reasoning": 4,
   },
   "Attorney II": {
-    "Integrity": 4, "Accountability": 4, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 3, "Environmental Consciousness": 2, "Building Partnership": 3,
-    "Facilitating Change": 4, "Conflict Management": 4, "Strategic Planning": 4, "Decisiveness": 4,
+    Integrity: 4,
+    Accountability: 4,
+    "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 3,
+    "Environmental Consciousness": 2,
+    "Building Partnership": 3,
+    "Facilitating Change": 4,
+    "Conflict Management": 4,
+    "Strategic Planning": 4,
+    Decisiveness: 4,
     "Critical Thinking": 4,
-    "Teamwork": 2, "Commitment to Learning": 2, "Customer Focus": 3,
-    "Adaptability and Flexibility": 3, "Effective Communication": 4, "Valuing Diversity": 4,
-    "Self-Awareness and Confidence": 4, "Stress Tolerance": 4, "Resource Management": 4,
-    "Knowledge Management": 4, "Initiative": 4, "Result Orientation": 4,
-    "Organizational Commitment": 4, "Planning and Organizing": 4,
-    "Emotional and Psychological Maturity": 4, "Safety and Risk Management": 4,
+    Teamwork: 2,
+    "Commitment to Learning": 2,
+    "Customer Focus": 3,
+    "Adaptability and Flexibility": 3,
+    "Effective Communication": 4,
+    "Valuing Diversity": 4,
+    "Self-Awareness and Confidence": 4,
+    "Stress Tolerance": 4,
+    "Resource Management": 4,
+    "Knowledge Management": 4,
+    Initiative: 4,
+    "Result Orientation": 4,
+    "Organizational Commitment": 4,
+    "Planning and Organizing": 4,
+    "Emotional and Psychological Maturity": 4,
+    "Safety and Risk Management": 4,
     "Interpersonal Effectiveness": 4,
-    "Attention to Details": 4, "Written Communication": 4,
-    "Oral Communication": 4, "Computer Literacy": 2, "Logical Reasoning": 4,
+    "Attention to Details": 4,
+    "Written Communication": 4,
+    "Oral Communication": 4,
+    "Computer Literacy": 2,
+    "Logical Reasoning": 4,
   },
   "Attorney III": {
-    "Integrity": 4, "Accountability": 4, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 3, "Environmental Consciousness": 2, "Building Partnership": 3,
-    "Facilitating Change": 4, "Conflict Management": 4, "Strategic Planning": 4, "Decisiveness": 4,
+    Integrity: 4,
+    Accountability: 4,
+    "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 3,
+    "Environmental Consciousness": 2,
+    "Building Partnership": 3,
+    "Facilitating Change": 4,
+    "Conflict Management": 4,
+    "Strategic Planning": 4,
+    Decisiveness: 4,
     "Critical Thinking": 4,
-    "Teamwork": 3, "Commitment to Learning": 3, "Customer Focus": 3,
-    "Adaptability and Flexibility": 3, "Effective Communication": 4, "Valuing Diversity": 4,
-    "Self-Awareness and Confidence": 4, "Stress Tolerance": 4, "Resource Management": 4,
-    "Knowledge Management": 4, "Initiative": 4, "Result Orientation": 4,
-    "Organizational Commitment": 4, "Planning and Organizing": 4,
-    "Emotional and Psychological Maturity": 4, "Safety and Risk Management": 4,
+    Teamwork: 3,
+    "Commitment to Learning": 3,
+    "Customer Focus": 3,
+    "Adaptability and Flexibility": 3,
+    "Effective Communication": 4,
+    "Valuing Diversity": 4,
+    "Self-Awareness and Confidence": 4,
+    "Stress Tolerance": 4,
+    "Resource Management": 4,
+    "Knowledge Management": 4,
+    Initiative: 4,
+    "Result Orientation": 4,
+    "Organizational Commitment": 4,
+    "Planning and Organizing": 4,
+    "Emotional and Psychological Maturity": 4,
+    "Safety and Risk Management": 4,
     "Interpersonal Effectiveness": 4,
-    "Attention to Details": 4, "Written Communication": 4,
-    "Oral Communication": 4, "Computer Literacy": 2, "Logical Reasoning": 4,
+    "Attention to Details": 4,
+    "Written Communication": 4,
+    "Oral Communication": 4,
+    "Computer Literacy": 2,
+    "Logical Reasoning": 4,
   },
-  "Physician": {
-    "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 4, "Environmental Consciousness": 2, "Building Partnership": 2,
-    "Developing People": 4, "Facilitating Change": 4, "Conflict Management": 4,
-    "Leading Innovation": 4, "Strategic Planning": 4, "Decisiveness": 4,
+  Physician: {
+    Integrity: 3,
+    Accountability: 3,
+    "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 4,
+    "Environmental Consciousness": 2,
+    "Building Partnership": 2,
+    "Developing People": 4,
+    "Facilitating Change": 4,
+    "Conflict Management": 4,
+    "Leading Innovation": 4,
+    "Strategic Planning": 4,
+    Decisiveness: 4,
     "Critical Thinking": 4,
-    "Teamwork": 2, "Commitment to Learning": 3, "Customer Focus": 4,
-    "Adaptability and Flexibility": 2, "Effective Communication": 4, "Valuing Diversity": 4,
-    "Self-Awareness and Confidence": 4, "Stress Tolerance": 4, "Resource Management": 4,
-    "Knowledge Management": 4, "Initiative": 4, "Result Orientation": 4,
-    "Organizational Commitment": 4, "Planning and Organizing": 4,
-    "Emotional and Psychological Maturity": 4, "Safety and Risk Management": 4,
+    Teamwork: 2,
+    "Commitment to Learning": 3,
+    "Customer Focus": 4,
+    "Adaptability and Flexibility": 2,
+    "Effective Communication": 4,
+    "Valuing Diversity": 4,
+    "Self-Awareness and Confidence": 4,
+    "Stress Tolerance": 4,
+    "Resource Management": 4,
+    "Knowledge Management": 4,
+    Initiative: 4,
+    "Result Orientation": 4,
+    "Organizational Commitment": 4,
+    "Planning and Organizing": 4,
+    "Emotional and Psychological Maturity": 4,
+    "Safety and Risk Management": 4,
     "Interpersonal Effectiveness": 4,
-    "Attention to Details": 4, "Written Communication": 4,
-    "Oral Communication": 4, "Computer Literacy": 2, "Logical Reasoning": 4,
+    "Attention to Details": 4,
+    "Written Communication": 4,
+    "Oral Communication": 4,
+    "Computer Literacy": 2,
+    "Logical Reasoning": 4,
   },
   "Procurement Officer": {
-    "Integrity": 4, "Accountability": 4, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 4, "Environmental Consciousness": 2, "Building Partnership": 2,
-    "Teamwork": 4, "Commitment to Learning": 3, "Customer Focus": 4,
-    "Adaptability and Flexibility": 4, "Effective Communication": 2, "Valuing Diversity": 2,
-    "Self-Awareness and Confidence": 2, "Stress Tolerance": 3, "Resource Management": 2,
-    "Knowledge Management": 2, "Initiative": 2, "Result Orientation": 2,
-    "Organizational Commitment": 2, "Planning and Organizing": 2,
-    "Emotional and Psychological Maturity": 2, "Safety and Risk Management": 2,
+    Integrity: 4,
+    Accountability: 4,
+    "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 4,
+    "Environmental Consciousness": 2,
+    "Building Partnership": 2,
+    Teamwork: 4,
+    "Commitment to Learning": 3,
+    "Customer Focus": 4,
+    "Adaptability and Flexibility": 4,
+    "Effective Communication": 2,
+    "Valuing Diversity": 2,
+    "Self-Awareness and Confidence": 2,
+    "Stress Tolerance": 3,
+    "Resource Management": 2,
+    "Knowledge Management": 2,
+    Initiative: 2,
+    "Result Orientation": 2,
+    "Organizational Commitment": 2,
+    "Planning and Organizing": 2,
+    "Emotional and Psychological Maturity": 2,
+    "Safety and Risk Management": 2,
     "Interpersonal Effectiveness": 2,
-    "Attention to Details": 2, "Written Communication": 2,
-    "Oral Communication": 2, "Computer Literacy": 2, "Logical Reasoning": 2,
+    "Attention to Details": 2,
+    "Written Communication": 2,
+    "Oral Communication": 2,
+    "Computer Literacy": 2,
+    "Logical Reasoning": 2,
   },
   // ── DIRECTOR ────────────────────────────────────────────────────────
   // No preset required levels — Director can input their own required level.
   // All 4 clusters are available (empty model = availableClusters shows all).
-  "Director": {},
- 
+  Director: {},
+
   // ════════════════════════════════════════════════════════════════════
   // FACULTY (Pages 5-8)
   // ════════════════════════════════════════════════════════════════════
   "Instructor I": {
-    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 2, "Environmental Consciousness": 2,
-    "Faculty Specializing in Environment": 3, "Building Partnership": 2,
-    "Facilitating Change": 2, "Conflict Management": 1, "Leading Innovation": 1,
-    "Strategic Planning": 2, "Leading Others": 1, "Decisiveness": 2,
-    "Teamwork": 2, "Commitment to Learning": 2, "Customer Focus": 2,
-    "Adaptability and Flexibility": 3, "Critical Thinking": 2, "Effective Communication": 3,
-    "Valuing Diversity": 3, "Self-Awareness and Confidence": 3, "Stress Tolerance": 3,
-    "Resource Management": 2, "Knowledge Management": 3, "Initiative": 2,
-    "Result Orientation": 2, "Community Engagement": 1, "Organizational Commitment": 2,
-    "Planning and Organizing": 3, "Emotional and Psychological Maturity": 3,
-    "Safety and Risk Management": 2, "Interpersonal Effectiveness": 2,
-    "Research Engagement": 1, "Diagnostic Information Gathering": 2, "Attention to Details": 2,
-    "Written Communication": 2, "Oral Communication": 2,
-    "Language Faculty": 3, "Conceptual and Analytical Thinking": 2,
-    "Computer Literacy": 2, "IT Faculty": 3,
-    "Planning and Project Management": null, "Logical Reasoning": 2, "Math and Allied Fields Faculty Members": 3,
+    Integrity: 2,
+    Accountability: 2,
+    "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 2,
+    "Environmental Consciousness": 2,
+    "Faculty Specializing in Environment": 3,
+    "Building Partnership": 2,
+    "Facilitating Change": 2,
+    "Conflict Management": 1,
+    "Leading Innovation": 1,
+    "Strategic Planning": 2,
+    "Leading Others": 1,
+    Decisiveness: 2,
+    Teamwork: 2,
+    "Commitment to Learning": 2,
+    "Customer Focus": 2,
+    "Adaptability and Flexibility": 3,
+    "Critical Thinking": 2,
+    "Effective Communication": 3,
+    "Valuing Diversity": 3,
+    "Self-Awareness and Confidence": 3,
+    "Stress Tolerance": 3,
+    "Resource Management": 2,
+    "Knowledge Management": 3,
+    Initiative: 2,
+    "Result Orientation": 2,
+    "Community Engagement": 1,
+    "Organizational Commitment": 2,
+    "Planning and Organizing": 3,
+    "Emotional and Psychological Maturity": 3,
+    "Safety and Risk Management": 2,
+    "Interpersonal Effectiveness": 2,
+    "Research Engagement": 1,
+    "Diagnostic Information Gathering": 2,
+    "Attention to Details": 2,
+    "Written Communication": 2,
+    "Oral Communication": 2,
+    "Language Faculty": 3,
+    "Conceptual and Analytical Thinking": 2,
+    "Computer Literacy": 2,
+    "IT Faculty": 3,
+    "Planning and Project Management": null,
+    "Logical Reasoning": 2,
+    "Math and Allied Fields Faculty Members": 3,
   },
   "Instructor II": {
-    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 2, "Environmental Consciousness": 2,
-    "Faculty Specializing in Environment": 3, "Building Partnership": 2,
-    "Facilitating Change": 2, "Conflict Management": 1, "Leading Innovation": 1,
-    "Strategic Planning": 2, "Leading Others": 1, "Decisiveness": 2,
-    "Teamwork": 2, "Commitment to Learning": 2, "Customer Focus": 2,
-    "Adaptability and Flexibility": 3, "Critical Thinking": 2, "Effective Communication": 3,
-    "Valuing Diversity": 3, "Self-Awareness and Confidence": 3, "Stress Tolerance": 3,
-    "Resource Management": 2, "Knowledge Management": 3, "Initiative": 2,
-    "Result Orientation": 2, "Community Engagement": 1, "Organizational Commitment": 2,
-    "Planning and Organizing": 3, "Emotional and Psychological Maturity": 3,
-    "Safety and Risk Management": 2, "Interpersonal Effectiveness": 2,
-    "Research Engagement": 1, "Diagnostic Information Gathering": 2, "Attention to Details": 2,
-    "Written Communication": 2, "Oral Communication": 2,
-    "Language Faculty": 3, "Conceptual and Analytical Thinking": 2,
-    "Computer Literacy": 2, "IT Faculty": 3,
-    "Planning and Project Management": null, "Logical Reasoning": 2, "Math and Allied Fields Faculty Members": 3,
+    Integrity: 2,
+    Accountability: 2,
+    "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 2,
+    "Environmental Consciousness": 2,
+    "Faculty Specializing in Environment": 3,
+    "Building Partnership": 2,
+    "Facilitating Change": 2,
+    "Conflict Management": 1,
+    "Leading Innovation": 1,
+    "Strategic Planning": 2,
+    "Leading Others": 1,
+    Decisiveness: 2,
+    Teamwork: 2,
+    "Commitment to Learning": 2,
+    "Customer Focus": 2,
+    "Adaptability and Flexibility": 3,
+    "Critical Thinking": 2,
+    "Effective Communication": 3,
+    "Valuing Diversity": 3,
+    "Self-Awareness and Confidence": 3,
+    "Stress Tolerance": 3,
+    "Resource Management": 2,
+    "Knowledge Management": 3,
+    Initiative: 2,
+    "Result Orientation": 2,
+    "Community Engagement": 1,
+    "Organizational Commitment": 2,
+    "Planning and Organizing": 3,
+    "Emotional and Psychological Maturity": 3,
+    "Safety and Risk Management": 2,
+    "Interpersonal Effectiveness": 2,
+    "Research Engagement": 1,
+    "Diagnostic Information Gathering": 2,
+    "Attention to Details": 2,
+    "Written Communication": 2,
+    "Oral Communication": 2,
+    "Language Faculty": 3,
+    "Conceptual and Analytical Thinking": 2,
+    "Computer Literacy": 2,
+    "IT Faculty": 3,
+    "Planning and Project Management": null,
+    "Logical Reasoning": 2,
+    "Math and Allied Fields Faculty Members": 3,
   },
   "Instructor III": {
-    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 2, "Environmental Consciousness": 2,
-    "Faculty Specializing in Environment": 3, "Building Partnership": 2,
-    "Facilitating Change": 2, "Conflict Management": 1, "Leading Innovation": 1,
-    "Strategic Planning": 2, "Leading Others": 1, "Decisiveness": 2,
-    "Teamwork": 2, "Commitment to Learning": 2, "Customer Focus": 2,
-    "Adaptability and Flexibility": 3, "Critical Thinking": 2, "Effective Communication": 3,
-    "Valuing Diversity": 3, "Self-Awareness and Confidence": 3, "Stress Tolerance": 3,
-    "Resource Management": 2, "Knowledge Management": 3, "Initiative": 2,
-    "Result Orientation": 2, "Community Engagement": 1, "Organizational Commitment": 2,
-    "Planning and Organizing": 3, "Emotional and Psychological Maturity": 3,
-    "Safety and Risk Management": 2, "Interpersonal Effectiveness": 2,
-    "Research Engagement": 1, "Diagnostic Information Gathering": 2, "Attention to Details": 2,
-    "Written Communication": 2, "Oral Communication": 2,
-    "Language Faculty": 3, "Conceptual and Analytical Thinking": 2,
-    "Computer Literacy": 2, "IT Faculty": 3,
-    "Planning and Project Management": null, "Logical Reasoning": 2, "Math and Allied Fields Faculty Members": 3,
+    Integrity: 2,
+    Accountability: 2,
+    "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 2,
+    "Environmental Consciousness": 2,
+    "Faculty Specializing in Environment": 3,
+    "Building Partnership": 2,
+    "Facilitating Change": 2,
+    "Conflict Management": 1,
+    "Leading Innovation": 1,
+    "Strategic Planning": 2,
+    "Leading Others": 1,
+    Decisiveness: 2,
+    Teamwork: 2,
+    "Commitment to Learning": 2,
+    "Customer Focus": 2,
+    "Adaptability and Flexibility": 3,
+    "Critical Thinking": 2,
+    "Effective Communication": 3,
+    "Valuing Diversity": 3,
+    "Self-Awareness and Confidence": 3,
+    "Stress Tolerance": 3,
+    "Resource Management": 2,
+    "Knowledge Management": 3,
+    Initiative: 2,
+    "Result Orientation": 2,
+    "Community Engagement": 1,
+    "Organizational Commitment": 2,
+    "Planning and Organizing": 3,
+    "Emotional and Psychological Maturity": 3,
+    "Safety and Risk Management": 2,
+    "Interpersonal Effectiveness": 2,
+    "Research Engagement": 1,
+    "Diagnostic Information Gathering": 2,
+    "Attention to Details": 2,
+    "Written Communication": 2,
+    "Oral Communication": 2,
+    "Language Faculty": 3,
+    "Conceptual and Analytical Thinking": 2,
+    "Computer Literacy": 2,
+    "IT Faculty": 3,
+    "Planning and Project Management": null,
+    "Logical Reasoning": 2,
+    "Math and Allied Fields Faculty Members": 3,
   },
   "Assistant Professor I": {
-    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 2, "Environmental Consciousness": 2,
-    "Faculty Specializing in Environment": 3, "Building Partnership": 2,
-    "Facilitating Change": 2, "Conflict Management": 2, "Leading Innovation": 2,
-    "Strategic Planning": 2, "Leading Others": 2, "Decisiveness": 2,
-    "Teamwork": 2, "Commitment to Learning": 2, "Customer Focus": 2,
-    "Adaptability and Flexibility": 3, "Critical Thinking": 2, "Effective Communication": 3,
-    "Valuing Diversity": 3, "Self-Awareness and Confidence": 3, "Stress Tolerance": 3,
-    "Resource Management": 2, "Knowledge Management": 3, "Initiative": 2,
-    "Result Orientation": 2, "Community Engagement": 1, "Organizational Commitment": 2,
-    "Planning and Organizing": 3, "Emotional and Psychological Maturity": 3,
-    "Safety and Risk Management": 2, "Interpersonal Effectiveness": 2,
-    "Research Engagement": 2, "Diagnostic Information Gathering": 2, "Attention to Details": 2,
-    "Written Communication": 3, "Oral Communication": 3,
-    "Language Faculty": 4, "Conceptual and Analytical Thinking": 2,
-    "Computer Literacy": 2, "IT Faculty": 4,
-    "Planning and Project Management": 1, "Logical Reasoning": 3, "Math and Allied Fields Faculty Members": 4,
+    Integrity: 2,
+    Accountability: 2,
+    "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 2,
+    "Environmental Consciousness": 2,
+    "Faculty Specializing in Environment": 3,
+    "Building Partnership": 2,
+    "Facilitating Change": 2,
+    "Conflict Management": 2,
+    "Leading Innovation": 2,
+    "Strategic Planning": 2,
+    "Leading Others": 2,
+    Decisiveness: 2,
+    Teamwork: 2,
+    "Commitment to Learning": 2,
+    "Customer Focus": 2,
+    "Adaptability and Flexibility": 3,
+    "Critical Thinking": 2,
+    "Effective Communication": 3,
+    "Valuing Diversity": 3,
+    "Self-Awareness and Confidence": 3,
+    "Stress Tolerance": 3,
+    "Resource Management": 2,
+    "Knowledge Management": 3,
+    Initiative: 2,
+    "Result Orientation": 2,
+    "Community Engagement": 1,
+    "Organizational Commitment": 2,
+    "Planning and Organizing": 3,
+    "Emotional and Psychological Maturity": 3,
+    "Safety and Risk Management": 2,
+    "Interpersonal Effectiveness": 2,
+    "Research Engagement": 2,
+    "Diagnostic Information Gathering": 2,
+    "Attention to Details": 2,
+    "Written Communication": 3,
+    "Oral Communication": 3,
+    "Language Faculty": 4,
+    "Conceptual and Analytical Thinking": 2,
+    "Computer Literacy": 2,
+    "IT Faculty": 4,
+    "Planning and Project Management": 1,
+    "Logical Reasoning": 3,
+    "Math and Allied Fields Faculty Members": 4,
   },
   "Assistant Professor II": {
-    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 2, "Environmental Consciousness": 2,
-    "Faculty Specializing in Environment": 3, "Building Partnership": 2,
-    "Facilitating Change": 2, "Conflict Management": 2, "Leading Innovation": 2,
-    "Strategic Planning": 2, "Leading Others": 2, "Decisiveness": 2,
-    "Teamwork": 2, "Commitment to Learning": 2, "Customer Focus": 2,
-    "Adaptability and Flexibility": 3, "Critical Thinking": 2, "Effective Communication": 3,
-    "Valuing Diversity": 3, "Self-Awareness and Confidence": 3, "Stress Tolerance": 3,
-    "Resource Management": 2, "Knowledge Management": 3, "Initiative": 2,
-    "Result Orientation": 2, "Community Engagement": 1, "Organizational Commitment": 2,
-    "Planning and Organizing": 3, "Emotional and Psychological Maturity": 3,
-    "Safety and Risk Management": 2, "Interpersonal Effectiveness": 2,
-    "Research Engagement": 2, "Diagnostic Information Gathering": 2, "Attention to Details": 2,
-    "Written Communication": 3, "Oral Communication": 3,
-    "Language Faculty": 4, "Conceptual and Analytical Thinking": 2,
-    "Computer Literacy": 2, "IT Faculty": 4,
-    "Planning and Project Management": 1, "Logical Reasoning": 3, "Math and Allied Fields Faculty Members": 4,
+    Integrity: 2,
+    Accountability: 2,
+    "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 2,
+    "Environmental Consciousness": 2,
+    "Faculty Specializing in Environment": 3,
+    "Building Partnership": 2,
+    "Facilitating Change": 2,
+    "Conflict Management": 2,
+    "Leading Innovation": 2,
+    "Strategic Planning": 2,
+    "Leading Others": 2,
+    Decisiveness: 2,
+    Teamwork: 2,
+    "Commitment to Learning": 2,
+    "Customer Focus": 2,
+    "Adaptability and Flexibility": 3,
+    "Critical Thinking": 2,
+    "Effective Communication": 3,
+    "Valuing Diversity": 3,
+    "Self-Awareness and Confidence": 3,
+    "Stress Tolerance": 3,
+    "Resource Management": 2,
+    "Knowledge Management": 3,
+    Initiative: 2,
+    "Result Orientation": 2,
+    "Community Engagement": 1,
+    "Organizational Commitment": 2,
+    "Planning and Organizing": 3,
+    "Emotional and Psychological Maturity": 3,
+    "Safety and Risk Management": 2,
+    "Interpersonal Effectiveness": 2,
+    "Research Engagement": 2,
+    "Diagnostic Information Gathering": 2,
+    "Attention to Details": 2,
+    "Written Communication": 3,
+    "Oral Communication": 3,
+    "Language Faculty": 4,
+    "Conceptual and Analytical Thinking": 2,
+    "Computer Literacy": 2,
+    "IT Faculty": 4,
+    "Planning and Project Management": 1,
+    "Logical Reasoning": 3,
+    "Math and Allied Fields Faculty Members": 4,
   },
   "Assistant Professor III": {
-    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 2, "Environmental Consciousness": 2,
-    "Faculty Specializing in Environment": 3, "Building Partnership": 2,
-    "Facilitating Change": 2, "Conflict Management": 2, "Leading Innovation": 2,
-    "Strategic Planning": 2, "Leading Others": 2, "Decisiveness": 2,
-    "Teamwork": 2, "Commitment to Learning": 2, "Customer Focus": 2,
-    "Adaptability and Flexibility": 3, "Critical Thinking": 2, "Effective Communication": 3,
-    "Valuing Diversity": 3, "Self-Awareness and Confidence": 3, "Stress Tolerance": 3,
-    "Resource Management": 2, "Knowledge Management": 3, "Initiative": 2,
-    "Result Orientation": 2, "Community Engagement": 1, "Organizational Commitment": 2,
-    "Planning and Organizing": 3, "Emotional and Psychological Maturity": 3,
-    "Safety and Risk Management": 3, "Interpersonal Effectiveness": 2,
-    "Research Engagement": 2, "Diagnostic Information Gathering": 2, "Attention to Details": 2,
-    "Written Communication": 3, "Oral Communication": 3,
-    "Language Faculty": 4, "Conceptual and Analytical Thinking": 2,
-    "Computer Literacy": 2, "IT Faculty": 4,
-    "Planning and Project Management": 2, "Logical Reasoning": 3, "Math and Allied Fields Faculty Members": 4,
+    Integrity: 2,
+    Accountability: 2,
+    "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 2,
+    "Environmental Consciousness": 2,
+    "Faculty Specializing in Environment": 3,
+    "Building Partnership": 2,
+    "Facilitating Change": 2,
+    "Conflict Management": 2,
+    "Leading Innovation": 2,
+    "Strategic Planning": 2,
+    "Leading Others": 2,
+    Decisiveness: 2,
+    Teamwork: 2,
+    "Commitment to Learning": 2,
+    "Customer Focus": 2,
+    "Adaptability and Flexibility": 3,
+    "Critical Thinking": 2,
+    "Effective Communication": 3,
+    "Valuing Diversity": 3,
+    "Self-Awareness and Confidence": 3,
+    "Stress Tolerance": 3,
+    "Resource Management": 2,
+    "Knowledge Management": 3,
+    Initiative: 2,
+    "Result Orientation": 2,
+    "Community Engagement": 1,
+    "Organizational Commitment": 2,
+    "Planning and Organizing": 3,
+    "Emotional and Psychological Maturity": 3,
+    "Safety and Risk Management": 3,
+    "Interpersonal Effectiveness": 2,
+    "Research Engagement": 2,
+    "Diagnostic Information Gathering": 2,
+    "Attention to Details": 2,
+    "Written Communication": 3,
+    "Oral Communication": 3,
+    "Language Faculty": 4,
+    "Conceptual and Analytical Thinking": 2,
+    "Computer Literacy": 2,
+    "IT Faculty": 4,
+    "Planning and Project Management": 2,
+    "Logical Reasoning": 3,
+    "Math and Allied Fields Faculty Members": 4,
   },
   "Assistant Professor IV": {
-    "Integrity": 2, "Accountability": 2, "Scientific and Technological Excellence": 2,
-    "Delivering Service Excellence": 2, "Environmental Consciousness": 2,
-    "Faculty Specializing in Environment": 3, "Building Partnership": 2,
-    "Facilitating Change": 2, "Conflict Management": 2, "Leading Innovation": 2,
-    "Strategic Planning": 2, "Leading Others": 2, "Decisiveness": 2,
-    "Teamwork": 2, "Commitment to Learning": 2, "Customer Focus": 2,
-    "Adaptability and Flexibility": 3, "Critical Thinking": 2, "Effective Communication": 3,
-    "Valuing Diversity": 3, "Self-Awareness and Confidence": 3, "Stress Tolerance": 3,
-    "Resource Management": 2, "Knowledge Management": 3, "Initiative": 2,
-    "Result Orientation": 2, "Community Engagement": 1, "Organizational Commitment": 2,
-    "Planning and Organizing": 3, "Emotional and Psychological Maturity": 3,
-    "Safety and Risk Management": 3, "Interpersonal Effectiveness": 2,
-    "Research Engagement": 2, "Diagnostic Information Gathering": 2, "Attention to Details": 2,
-    "Written Communication": 3, "Oral Communication": 3,
-    "Language Faculty": 4, "Conceptual and Analytical Thinking": 2,
-    "Computer Literacy": 2, "IT Faculty": 4,
-    "Planning and Project Management": 2, "Logical Reasoning": 3, "Math and Allied Fields Faculty Members": 4,
+    Integrity: 2,
+    Accountability: 2,
+    "Scientific and Technological Excellence": 2,
+    "Delivering Service Excellence": 2,
+    "Environmental Consciousness": 2,
+    "Faculty Specializing in Environment": 3,
+    "Building Partnership": 2,
+    "Facilitating Change": 2,
+    "Conflict Management": 2,
+    "Leading Innovation": 2,
+    "Strategic Planning": 2,
+    "Leading Others": 2,
+    Decisiveness: 2,
+    Teamwork: 2,
+    "Commitment to Learning": 2,
+    "Customer Focus": 2,
+    "Adaptability and Flexibility": 3,
+    "Critical Thinking": 2,
+    "Effective Communication": 3,
+    "Valuing Diversity": 3,
+    "Self-Awareness and Confidence": 3,
+    "Stress Tolerance": 3,
+    "Resource Management": 2,
+    "Knowledge Management": 3,
+    Initiative: 2,
+    "Result Orientation": 2,
+    "Community Engagement": 1,
+    "Organizational Commitment": 2,
+    "Planning and Organizing": 3,
+    "Emotional and Psychological Maturity": 3,
+    "Safety and Risk Management": 3,
+    "Interpersonal Effectiveness": 2,
+    "Research Engagement": 2,
+    "Diagnostic Information Gathering": 2,
+    "Attention to Details": 2,
+    "Written Communication": 3,
+    "Oral Communication": 3,
+    "Language Faculty": 4,
+    "Conceptual and Analytical Thinking": 2,
+    "Computer Literacy": 2,
+    "IT Faculty": 4,
+    "Planning and Project Management": 2,
+    "Logical Reasoning": 3,
+    "Math and Allied Fields Faculty Members": 4,
   },
   "Associate Professor I": {
-    "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 3,
-    "Delivering Service Excellence": 3, "Environmental Consciousness": 3,
-    "Faculty Specializing in Environment": 4, "Building Partnership": 3,
-    "Facilitating Change": 3, "Conflict Management": 3, "Leading Innovation": 3,
-    "Strategic Planning": 3, "Leading Others": 3, "Decisiveness": 3,
-    "Teamwork": 3, "Commitment to Learning": 3, "Customer Focus": 3,
-    "Adaptability and Flexibility": 4, "Critical Thinking": 3, "Effective Communication": 4,
-    "Valuing Diversity": 4, "Self-Awareness and Confidence": 4, "Stress Tolerance": 4,
-    "Resource Management": 3, "Knowledge Management": 4, "Initiative": 3,
-    "Result Orientation": 3, "Community Engagement": 3, "Organizational Commitment": 3,
-    "Planning and Organizing": 4, "Emotional and Psychological Maturity": 4,
-    "Safety and Risk Management": 3, "Interpersonal Effectiveness": 3,
-    "Research Engagement": 3, "Diagnostic Information Gathering": 3, "Attention to Details": 3,
-    "Written Communication": 4, "Oral Communication": 4,
-    "Language Faculty": 4, "Conceptual and Analytical Thinking": 3,
-    "Computer Literacy": 2, "IT Faculty": 4,
-    "Planning and Project Management": 3, "Logical Reasoning": 3, "Math and Allied Fields Faculty Members": 4,
+    Integrity: 3,
+    Accountability: 3,
+    "Scientific and Technological Excellence": 3,
+    "Delivering Service Excellence": 3,
+    "Environmental Consciousness": 3,
+    "Faculty Specializing in Environment": 4,
+    "Building Partnership": 3,
+    "Facilitating Change": 3,
+    "Conflict Management": 3,
+    "Leading Innovation": 3,
+    "Strategic Planning": 3,
+    "Leading Others": 3,
+    Decisiveness: 3,
+    Teamwork: 3,
+    "Commitment to Learning": 3,
+    "Customer Focus": 3,
+    "Adaptability and Flexibility": 4,
+    "Critical Thinking": 3,
+    "Effective Communication": 4,
+    "Valuing Diversity": 4,
+    "Self-Awareness and Confidence": 4,
+    "Stress Tolerance": 4,
+    "Resource Management": 3,
+    "Knowledge Management": 4,
+    Initiative: 3,
+    "Result Orientation": 3,
+    "Community Engagement": 3,
+    "Organizational Commitment": 3,
+    "Planning and Organizing": 4,
+    "Emotional and Psychological Maturity": 4,
+    "Safety and Risk Management": 3,
+    "Interpersonal Effectiveness": 3,
+    "Research Engagement": 3,
+    "Diagnostic Information Gathering": 3,
+    "Attention to Details": 3,
+    "Written Communication": 4,
+    "Oral Communication": 4,
+    "Language Faculty": 4,
+    "Conceptual and Analytical Thinking": 3,
+    "Computer Literacy": 2,
+    "IT Faculty": 4,
+    "Planning and Project Management": 3,
+    "Logical Reasoning": 3,
+    "Math and Allied Fields Faculty Members": 4,
   },
   "Associate Professor II": {
-    "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 3,
-    "Delivering Service Excellence": 3, "Environmental Consciousness": 3,
-    "Faculty Specializing in Environment": 4, "Building Partnership": 3,
-    "Facilitating Change": 3, "Conflict Management": 3, "Leading Innovation": 3,
-    "Strategic Planning": 3, "Leading Others": 3, "Decisiveness": 3,
-    "Teamwork": 3, "Commitment to Learning": 3, "Customer Focus": 3,
-    "Adaptability and Flexibility": 4, "Critical Thinking": 3, "Effective Communication": 4,
-    "Valuing Diversity": 4, "Self-Awareness and Confidence": 4, "Stress Tolerance": 4,
-    "Resource Management": 3, "Knowledge Management": 4, "Initiative": 3,
-    "Result Orientation": 3, "Community Engagement": 3, "Organizational Commitment": 3,
-    "Planning and Organizing": 4, "Emotional and Psychological Maturity": 4,
-    "Safety and Risk Management": 3, "Interpersonal Effectiveness": 3,
-    "Research Engagement": 3, "Diagnostic Information Gathering": 3, "Attention to Details": 3,
-    "Written Communication": 4, "Oral Communication": 4,
-    "Language Faculty": 4, "Conceptual and Analytical Thinking": 3,
-    "Computer Literacy": 2, "IT Faculty": 4,
-    "Planning and Project Management": 3, "Logical Reasoning": 3, "Math and Allied Fields Faculty Members": 4,
+    Integrity: 3,
+    Accountability: 3,
+    "Scientific and Technological Excellence": 3,
+    "Delivering Service Excellence": 3,
+    "Environmental Consciousness": 3,
+    "Faculty Specializing in Environment": 4,
+    "Building Partnership": 3,
+    "Facilitating Change": 3,
+    "Conflict Management": 3,
+    "Leading Innovation": 3,
+    "Strategic Planning": 3,
+    "Leading Others": 3,
+    Decisiveness: 3,
+    Teamwork: 3,
+    "Commitment to Learning": 3,
+    "Customer Focus": 3,
+    "Adaptability and Flexibility": 4,
+    "Critical Thinking": 3,
+    "Effective Communication": 4,
+    "Valuing Diversity": 4,
+    "Self-Awareness and Confidence": 4,
+    "Stress Tolerance": 4,
+    "Resource Management": 3,
+    "Knowledge Management": 4,
+    Initiative: 3,
+    "Result Orientation": 3,
+    "Community Engagement": 3,
+    "Organizational Commitment": 3,
+    "Planning and Organizing": 4,
+    "Emotional and Psychological Maturity": 4,
+    "Safety and Risk Management": 3,
+    "Interpersonal Effectiveness": 3,
+    "Research Engagement": 3,
+    "Diagnostic Information Gathering": 3,
+    "Attention to Details": 3,
+    "Written Communication": 4,
+    "Oral Communication": 4,
+    "Language Faculty": 4,
+    "Conceptual and Analytical Thinking": 3,
+    "Computer Literacy": 2,
+    "IT Faculty": 4,
+    "Planning and Project Management": 3,
+    "Logical Reasoning": 3,
+    "Math and Allied Fields Faculty Members": 4,
   },
   "Associate Professor III": {
-    "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 3,
-    "Delivering Service Excellence": 3, "Environmental Consciousness": 3,
-    "Faculty Specializing in Environment": 4, "Building Partnership": 3,
-    "Developing People": 3, "Facilitating Change": 3, "Conflict Management": 3,
-    "Leading Innovation": 3, "Strategic Planning": 3, "Leading Others": 3, "Decisiveness": 3,
-    "Teamwork": 3, "Commitment to Learning": 3, "Customer Focus": 3,
-    "Adaptability and Flexibility": 4, "Critical Thinking": 3, "Effective Communication": 4,
-    "Valuing Diversity": 4, "Self-Awareness and Confidence": 4, "Stress Tolerance": 4,
-    "Resource Management": 3, "Knowledge Management": 4, "Initiative": 3,
-    "Result Orientation": 3, "Community Engagement": 3, "Organizational Commitment": 3,
-    "Planning and Organizing": 4, "Emotional and Psychological Maturity": 4,
-    "Safety and Risk Management": 3, "Interpersonal Effectiveness": 3,
-    "Research Engagement": 3, "Diagnostic Information Gathering": 3, "Attention to Details": 3,
-    "Written Communication": 4, "Oral Communication": 4,
-    "Language Faculty": 4, "Conceptual and Analytical Thinking": 3,
-    "Computer Literacy": 2, "IT Faculty": 4,
-    "Planning and Project Management": 3, "Logical Reasoning": 3, "Math and Allied Fields Faculty Members": 4,
+    Integrity: 3,
+    Accountability: 3,
+    "Scientific and Technological Excellence": 3,
+    "Delivering Service Excellence": 3,
+    "Environmental Consciousness": 3,
+    "Faculty Specializing in Environment": 4,
+    "Building Partnership": 3,
+    "Developing People": 3,
+    "Facilitating Change": 3,
+    "Conflict Management": 3,
+    "Leading Innovation": 3,
+    "Strategic Planning": 3,
+    "Leading Others": 3,
+    Decisiveness: 3,
+    Teamwork: 3,
+    "Commitment to Learning": 3,
+    "Customer Focus": 3,
+    "Adaptability and Flexibility": 4,
+    "Critical Thinking": 3,
+    "Effective Communication": 4,
+    "Valuing Diversity": 4,
+    "Self-Awareness and Confidence": 4,
+    "Stress Tolerance": 4,
+    "Resource Management": 3,
+    "Knowledge Management": 4,
+    Initiative: 3,
+    "Result Orientation": 3,
+    "Community Engagement": 3,
+    "Organizational Commitment": 3,
+    "Planning and Organizing": 4,
+    "Emotional and Psychological Maturity": 4,
+    "Safety and Risk Management": 3,
+    "Interpersonal Effectiveness": 3,
+    "Research Engagement": 3,
+    "Diagnostic Information Gathering": 3,
+    "Attention to Details": 3,
+    "Written Communication": 4,
+    "Oral Communication": 4,
+    "Language Faculty": 4,
+    "Conceptual and Analytical Thinking": 3,
+    "Computer Literacy": 2,
+    "IT Faculty": 4,
+    "Planning and Project Management": 3,
+    "Logical Reasoning": 3,
+    "Math and Allied Fields Faculty Members": 4,
   },
   "Associate Professor IV": {
-    "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 3,
-    "Delivering Service Excellence": 3, "Environmental Consciousness": 3,
-    "Faculty Specializing in Environment": 4, "Building Partnership": 3,
-    "Facilitating Change": 3, "Conflict Management": 3,
-    "Leading Innovation": 3, "Strategic Planning": 3, "Leading Others": 3, "Decisiveness": 3,
-    "Teamwork": 3, "Commitment to Learning": 3, "Customer Focus": 3,
-    "Adaptability and Flexibility": 4, "Critical Thinking": 3, "Effective Communication": 4,
-    "Valuing Diversity": 4, "Self-Awareness and Confidence": 4, "Stress Tolerance": 4,
-    "Resource Management": 3, "Knowledge Management": 4, "Initiative": 3,
-    "Result Orientation": 3, "Community Engagement": 3, "Organizational Commitment": 3,
-    "Planning and Organizing": 4, "Emotional and Psychological Maturity": 4,
-    "Safety and Risk Management": 3, "Interpersonal Effectiveness": 3,
-    "Research Engagement": 3, "Diagnostic Information Gathering": 3, "Attention to Details": 3,
-    "Written Communication": 4, "Oral Communication": 4,
-    "Language Faculty": 4, "Conceptual and Analytical Thinking": 3,
-    "Computer Literacy": 2, "IT Faculty": 4,
-    "Planning and Project Management": 3, "Logical Reasoning": 3, "Math and Allied Fields Faculty Members": 4,
+    Integrity: 3,
+    Accountability: 3,
+    "Scientific and Technological Excellence": 3,
+    "Delivering Service Excellence": 3,
+    "Environmental Consciousness": 3,
+    "Faculty Specializing in Environment": 4,
+    "Building Partnership": 3,
+    "Facilitating Change": 3,
+    "Conflict Management": 3,
+    "Leading Innovation": 3,
+    "Strategic Planning": 3,
+    "Leading Others": 3,
+    Decisiveness: 3,
+    Teamwork: 3,
+    "Commitment to Learning": 3,
+    "Customer Focus": 3,
+    "Adaptability and Flexibility": 4,
+    "Critical Thinking": 3,
+    "Effective Communication": 4,
+    "Valuing Diversity": 4,
+    "Self-Awareness and Confidence": 4,
+    "Stress Tolerance": 4,
+    "Resource Management": 3,
+    "Knowledge Management": 4,
+    Initiative: 3,
+    "Result Orientation": 3,
+    "Community Engagement": 3,
+    "Organizational Commitment": 3,
+    "Planning and Organizing": 4,
+    "Emotional and Psychological Maturity": 4,
+    "Safety and Risk Management": 3,
+    "Interpersonal Effectiveness": 3,
+    "Research Engagement": 3,
+    "Diagnostic Information Gathering": 3,
+    "Attention to Details": 3,
+    "Written Communication": 4,
+    "Oral Communication": 4,
+    "Language Faculty": 4,
+    "Conceptual and Analytical Thinking": 3,
+    "Computer Literacy": 2,
+    "IT Faculty": 4,
+    "Planning and Project Management": 3,
+    "Logical Reasoning": 3,
+    "Math and Allied Fields Faculty Members": 4,
   },
   "Associate Professor V": {
-    "Integrity": 3, "Accountability": 3, "Scientific and Technological Excellence": 3,
-    "Delivering Service Excellence": 3, "Environmental Consciousness": 3,
-    "Faculty Specializing in Environment": 4, "Building Partnership": 3,
-    "Facilitating Change": 3, "Conflict Management": 3,
-    "Leading Innovation": 3, "Strategic Planning": 3, "Leading Others": 3, "Decisiveness": 3,
-    "Teamwork": 3, "Commitment to Learning": 3, "Customer Focus": 3,
-    "Adaptability and Flexibility": 4, "Critical Thinking": 3, "Effective Communication": 4,
-    "Valuing Diversity": 4, "Self-Awareness and Confidence": 4, "Stress Tolerance": 4,
-    "Resource Management": 3, "Knowledge Management": 4, "Initiative": 3,
-    "Result Orientation": 3, "Community Engagement": 3, "Organizational Commitment": 3,
-    "Planning and Organizing": 4, "Emotional and Psychological Maturity": 4,
-    "Safety and Risk Management": 3, "Interpersonal Effectiveness": 3,
-    "Research Engagement": 3, "Diagnostic Information Gathering": 3, "Attention to Details": 3,
-    "Written Communication": 4, "Oral Communication": 4,
-    "Language Faculty": 4, "Conceptual and Analytical Thinking": 3,
-    "Computer Literacy": 2, "IT Faculty": 4,
-    "Planning and Project Management": 3, "Logical Reasoning": 3, "Math and Allied Fields Faculty Members": 4,
+    Integrity: 3,
+    Accountability: 3,
+    "Scientific and Technological Excellence": 3,
+    "Delivering Service Excellence": 3,
+    "Environmental Consciousness": 3,
+    "Faculty Specializing in Environment": 4,
+    "Building Partnership": 3,
+    "Facilitating Change": 3,
+    "Conflict Management": 3,
+    "Leading Innovation": 3,
+    "Strategic Planning": 3,
+    "Leading Others": 3,
+    Decisiveness: 3,
+    Teamwork: 3,
+    "Commitment to Learning": 3,
+    "Customer Focus": 3,
+    "Adaptability and Flexibility": 4,
+    "Critical Thinking": 3,
+    "Effective Communication": 4,
+    "Valuing Diversity": 4,
+    "Self-Awareness and Confidence": 4,
+    "Stress Tolerance": 4,
+    "Resource Management": 3,
+    "Knowledge Management": 4,
+    Initiative: 3,
+    "Result Orientation": 3,
+    "Community Engagement": 3,
+    "Organizational Commitment": 3,
+    "Planning and Organizing": 4,
+    "Emotional and Psychological Maturity": 4,
+    "Safety and Risk Management": 3,
+    "Interpersonal Effectiveness": 3,
+    "Research Engagement": 3,
+    "Diagnostic Information Gathering": 3,
+    "Attention to Details": 3,
+    "Written Communication": 4,
+    "Oral Communication": 4,
+    "Language Faculty": 4,
+    "Conceptual and Analytical Thinking": 3,
+    "Computer Literacy": 2,
+    "IT Faculty": 4,
+    "Planning and Project Management": 3,
+    "Logical Reasoning": 3,
+    "Math and Allied Fields Faculty Members": 4,
   },
   // Associate Professor VI: document lists "NONE" — no required competency levels defined
   "Associate Professor VI": {},
 };
- 
+
 // Professor I-VI and University Professor all share the same base values
 // except: Professors I-III have Developing People=3, Professors IV-VI and UP have Developing People=4
 const professorTemplate = {
-  "Integrity": 4, "Accountability": 4, "Scientific and Technological Excellence": 4,
-  "Delivering Service Excellence": 4, "Environmental Consciousness": 4,
-  "Faculty Specializing in Environment": 4, "Building Partnership": 4,
-  "Developing People": 4, "Facilitating Change": 4, "Conflict Management": 4,
-  "Leading Innovation": 4, "Strategic Planning": 4, "Leading Others": 4, "Decisiveness": 4,
-  "Teamwork": 4, "Commitment to Learning": 4, "Customer Focus": 4,
-  "Adaptability and Flexibility": 4, "Critical Thinking": 4, "Effective Communication": 4,
-  "Valuing Diversity": 4, "Self-Awareness and Confidence": 4, "Stress Tolerance": 4,
-  "Resource Management": 4, "Knowledge Management": 4, "Initiative": 4,
-  "Result Orientation": 4, "Community Engagement": 4, "Organizational Commitment": 4,
-  "Planning and Organizing": 4, "Emotional and Psychological Maturity": 4,
-  "Safety and Risk Management": 4, "Interpersonal Effectiveness": 4,
-  "Research Engagement": 4, "Diagnostic Information Gathering": 4, "Attention to Details": 4,
-  "Written Communication": 4, "Oral Communication": 4,
-  "Language Faculty": 4, "Conceptual and Analytical Thinking": 4,
-  "Computer Literacy": 2, "IT Faculty": 4,
-  "Planning and Project Management": 4, "Logical Reasoning": 3, "Math and Allied Fields Faculty Members": 4,
+  Integrity: 4,
+  Accountability: 4,
+  "Scientific and Technological Excellence": 4,
+  "Delivering Service Excellence": 4,
+  "Environmental Consciousness": 4,
+  "Faculty Specializing in Environment": 4,
+  "Building Partnership": 4,
+  "Developing People": 4,
+  "Facilitating Change": 4,
+  "Conflict Management": 4,
+  "Leading Innovation": 4,
+  "Strategic Planning": 4,
+  "Leading Others": 4,
+  Decisiveness: 4,
+  Teamwork: 4,
+  "Commitment to Learning": 4,
+  "Customer Focus": 4,
+  "Adaptability and Flexibility": 4,
+  "Critical Thinking": 4,
+  "Effective Communication": 4,
+  "Valuing Diversity": 4,
+  "Self-Awareness and Confidence": 4,
+  "Stress Tolerance": 4,
+  "Resource Management": 4,
+  "Knowledge Management": 4,
+  Initiative: 4,
+  "Result Orientation": 4,
+  "Community Engagement": 4,
+  "Organizational Commitment": 4,
+  "Planning and Organizing": 4,
+  "Emotional and Psychological Maturity": 4,
+  "Safety and Risk Management": 4,
+  "Interpersonal Effectiveness": 4,
+  "Research Engagement": 4,
+  "Diagnostic Information Gathering": 4,
+  "Attention to Details": 4,
+  "Written Communication": 4,
+  "Oral Communication": 4,
+  "Language Faculty": 4,
+  "Conceptual and Analytical Thinking": 4,
+  "Computer Literacy": 2,
+  "IT Faculty": 4,
+  "Planning and Project Management": 4,
+  "Logical Reasoning": 3,
+  "Math and Allied Fields Faculty Members": 4,
 };
 // Professors I–III: Developing People = 3 (Advanced)
-["Professor I","Professor II","Professor III"]
-  .forEach(pos => { competencyModel[pos] = { ...professorTemplate, "Developing People": 3 }; });
+["Professor I", "Professor II", "Professor III"].forEach((pos) => {
+  competencyModel[pos] = { ...professorTemplate, "Developing People": 3 };
+});
 // Professors IV–VI and University Professor: Developing People = 4 (Expert)
-["Professor IV","Professor V","Professor VI","University Professor"]
-  .forEach(pos => { competencyModel[pos] = { ...professorTemplate }; });
- 
+["Professor IV", "Professor V", "Professor VI", "University Professor"].forEach(
+  (pos) => {
+    competencyModel[pos] = { ...professorTemplate };
+  },
+);
+
 // Also alias Registrar III (same data as Accountant III pattern in pages 3-4, col 5):
 // Integrity=4, Accountability=4, Sci=2, Deliver=4, Environ=2, Build=3
 // Leadership: Dev=2, Facil=2, Conflict=2, Innov=2, Strategic=2, Leading=2, Decisive=2
 // Organizational: all 4 except Teamwork=4,CommitLearn=3,CustFocus=4,Adapt=3,CommEngage=null
 // Technical: same as pattern
 // Note: Registrar III is not in the dropdown! So we skip it.
- 
+
 function getRequiredLevel(competency, position) {
   if (!competency || !position) return "";
   const posData = competencyModel[position];
@@ -2474,12 +3825,9 @@ function getRequiredLevel(competency, position) {
   if (lvl === null || lvl === undefined) return "";
   return LEVEL_LABEL[lvl] || "";
 }
- 
+
 // ── Lifecycle ──────────────────────────────────────────────────────────────
 onMounted(() => {
-  // Set today's date as default
-  form.datePrepared = new Date().toISOString().split("T")[0];
-
   // Fetch shared suggestions for HEI and Pro-ACT fields
   fetchSuggestions();
 
@@ -2492,17 +3840,20 @@ onMounted(() => {
     stage.value = "token";
   }
 });
- 
+
 // ── Helpers ────────────────────────────────────────────────────────────────
 function validateEmail(who) {
   if (who === "employee") {
-    form.employeeEmail = (form.employeeEmailPrefix || "").trim() + "@carsu.edu.ph";
+    form.employeeEmail =
+      (form.employeeEmailPrefix || "").trim() + "@carsu.edu.ph";
   } else {
-    form.supervisorEmail = (form.supervisorEmailPrefix || "").trim() + "@carsu.edu.ph";
+    form.supervisorEmail =
+      (form.supervisorEmailPrefix || "").trim() + "@carsu.edu.ph";
   }
   const val = who === "employee" ? form.employeeEmail : form.supervisorEmail;
   const hint = emailHints[who];
-  const prefix = who === "employee" ? form.employeeEmailPrefix : form.supervisorEmailPrefix;
+  const prefix =
+    who === "employee" ? form.employeeEmailPrefix : form.supervisorEmailPrefix;
   if (!prefix || !prefix.trim()) {
     hint.msg = "";
     hint.type = "";
@@ -2517,7 +3868,7 @@ function validateEmail(who) {
   hint.type = "success";
   return true;
 }
- 
+
 function addCompetencyRow() {
   competencyRows.value.push({
     competencyGroup: "",
@@ -2550,7 +3901,7 @@ function removeRow(arr, idx) {
   if (arr.length <= 1) return;
   arr.splice(idx, 1);
 }
- 
+
 // ── HEI & Pro-ACT suggestions (shared across users via backend) ────────────
 const heiSuggestions = ref([]);
 const proactSuggestions = ref([]);
@@ -2603,7 +3954,6 @@ function validateStage1() {
   const required = [
     "lastName",
     "firstName",
-    "datePrepared",
     "currentPosition",
     "yearsInPosition",
     "yearsInCSU",
@@ -2619,8 +3969,10 @@ function validateStage1() {
     } else delete errors[field];
   });
   // Build full emails from prefixes before validating
-  form.employeeEmail = (form.employeeEmailPrefix || "").trim() + "@carsu.edu.ph";
-  form.supervisorEmail = (form.supervisorEmailPrefix || "").trim() + "@carsu.edu.ph";
+  form.employeeEmail =
+    (form.employeeEmailPrefix || "").trim() + "@carsu.edu.ph";
+  form.supervisorEmail =
+    (form.supervisorEmailPrefix || "").trim() + "@carsu.edu.ph";
   if (!validateEmail("employee")) ok = false;
   if (!validateEmail("supervisor")) ok = false;
   if (!form.officeAffiliation) {
@@ -2637,31 +3989,32 @@ function validateStage1() {
   }
   return ok;
 }
- 
+
 // ── Stage 1 submit ─────────────────────────────────────────────────────────
 async function submitStage1() {
   if (!validateStage1()) return;
- 
+
   let headerPurpose = form.headerPurpose;
   if (headerPurpose === "Other")
     headerPurpose = form.headerPurposeOther || "Other";
- 
+
   let compPurpose = form.compPurpose;
   if (compPurpose === "Others") compPurpose = form.compPurposeOther || "Others";
- 
+
   const payload = {
     action: "submitStage1",
     employeeEmail: form.employeeEmail,
     campus: "CSU Main Campus",
     officeAffiliation: form.officeAffiliation,
     collegeOfficeUnit: form.collegeOfficeUnit,
-    nameOfPersonnel: [form.lastName, form.firstName, form.middleInitial].filter(Boolean).join(", "),
+    nameOfPersonnel: [form.lastName, form.firstName, form.middleInitial]
+      .filter(Boolean)
+      .join(", "),
     lastName: form.lastName,
     firstName: form.firstName,
     middleInitial: form.middleInitial,
     educAttainment: form.educAttainment,
     educAttainmentSpec: form.educAttainmentSpec,
-    datePrepared: form.datePrepared,
     currentPosition: form.currentPosition,
     designation: form.designation,
     yearsInPosition: form.yearsInPosition,
@@ -2677,11 +4030,11 @@ async function submitStage1() {
     agapRows: agapRows.value.map((r, i) => ({ priority: i + 1, ...r })),
     proactRows: proactRows.value.map((r, i) => ({ priority: i + 1, ...r })),
   };
- 
+
   isLoading.value = true;
   loadingMsg.value = "Submitting your IDP, please wait…";
   isSubmitting.value = true;
- 
+
   try {
     const res = await fetch(`${API}/api/idp`, {
       method: "POST",
@@ -2702,13 +4055,18 @@ async function submitStage1() {
     }
   } catch (err) {
     console.error("Submit error:", err);
-    alert("Network error: " + err.message + "\n\nMake sure the backend is running on " + API);
+    alert(
+      "Network error: " +
+        err.message +
+        "\n\nMake sure the backend is running on " +
+        API,
+    );
   } finally {
     isLoading.value = false;
     isSubmitting.value = false;
   }
 }
- 
+
 // ── Stage 2: load by token ─────────────────────────────────────────────────
 function loadByToken() {
   if (!tokenInput.value.trim()) {
@@ -2724,7 +4082,7 @@ function loadByToken() {
   tokenError.value = "";
   loadSubmission(currentToken.value);
 }
- 
+
 async function loadSubmission(token) {
   if (!supervisorEmail.value) {
     tokenError.value = "Please enter your CarSU email address to continue.";
@@ -2733,7 +4091,7 @@ async function loadSubmission(token) {
   }
   isLoading.value = true;
   loadingMsg.value = "Loading IDP submission…";
- 
+
   try {
     // Token verification: new API endpoint
     const res = await fetch(`${API}/api/idp/${token}`);
@@ -2751,7 +4109,7 @@ async function loadSubmission(token) {
     isLoading.value = false;
   }
 }
- 
+
 // ── Stage 2 submit ─────────────────────────────────────────────────────────
 async function submitStage2() {
   if (!assessment.perfGapsYN) {
@@ -2762,25 +4120,28 @@ async function submitStage2() {
     alert("Please indicate readiness for advancement.");
     return;
   }
- 
+
   let interventions = [...assessment.interventions];
   if (interventions.includes("Others")) {
     interventions = interventions.filter((v) => v !== "Others");
     if (assessment.interventionOther.trim())
       interventions.push("Others: " + assessment.interventionOther.trim());
   }
- 
+
   isLoading.value = true;
   loadingMsg.value = "Submitting your assessment…";
   isSubmitting.value = true;
- 
+
   try {
     // Supervisor submit: new API endpoint
-    const res = await fetch(`${API}/api/idp/${idpData.value.refId}/supervisor`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(assessment)
-    });
+    const res = await fetch(
+      `${API}/api/idp/${idpData.value.refId}/supervisor`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(assessment),
+      },
+    );
     const data = await res.json();
     if (data.success) {
       stage.value = "stage2-success";
@@ -2795,9 +4156,9 @@ async function submitStage2() {
   }
 }
 </script>
- 
+
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap");
 /* ── Privacy Modal ── */
 .privacy-overlay {
   position: fixed;
@@ -2814,7 +4175,7 @@ async function submitStage2() {
   border-radius: 14px;
   max-width: 560px;
   width: 100%;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   overflow: hidden;
 }
 .privacy-header {
@@ -2844,12 +4205,16 @@ async function submitStage2() {
   max-height: 55vh;
   overflow-y: auto;
 }
-.privacy-body p { margin: 0 0 12px; }
+.privacy-body p {
+  margin: 0 0 12px;
+}
 .privacy-body ul {
   margin: 0 0 12px;
   padding-left: 20px;
 }
-.privacy-body ul li { margin-bottom: 4px; }
+.privacy-body ul li {
+  margin-bottom: 4px;
+}
 .privacy-checkbox {
   display: flex;
   align-items: flex-start;
@@ -2923,14 +4288,14 @@ async function submitStage2() {
   --shadow: 0 4px 24px rgba(26, 77, 46, 0.1);
   --shadow-sm: 0 2px 8px rgba(26, 77, 46, 0.07);
 }
- 
+
 /* ── Base ── */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
- 
+
 /* ── Header ── */
 .site-header {
   background: #fff;
@@ -2954,7 +4319,7 @@ async function submitStage2() {
   display: block;
   object-fit: contain;
 }
- 
+
 /* ── Page Nav ── */
 .page-nav {
   background: var(--navy);
@@ -3004,7 +4369,9 @@ async function submitStage2() {
   stroke-linecap: round;
   stroke-linejoin: round;
   opacity: 0.8;
-  transition: transform 0.2s, opacity 0.2s;
+  transition:
+    transform 0.2s,
+    opacity 0.2s;
 }
 .page-nav a.back-link:hover svg {
   transform: translateX(-3px);
@@ -3023,14 +4390,14 @@ async function submitStage2() {
   font-family: "Roboto", sans-serif;
   letter-spacing: 0.03em;
 }
- 
+
 /* ── Container ── */
 .container {
   max-width: 1140px;
   margin: 0 auto;
   padding: 48px 40px 80px;
 }
- 
+
 /* ── Form title ── */
 .form-title-block {
   text-align: center;
@@ -3048,7 +4415,7 @@ async function submitStage2() {
   color: var(--text-light);
   font-size: 14px;
 }
- 
+
 /* ── Section card ── */
 .section-card {
   background: var(--white);
@@ -3114,7 +4481,7 @@ async function submitStage2() {
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
- 
+
 /* ── Form fields ── */
 .field-grid {
   display: grid;
@@ -3159,7 +4526,9 @@ textarea {
   font-family: "Roboto", sans-serif;
   font-size: 14px;
   color: var(--text);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
   outline: none;
 }
 select {
@@ -3188,7 +4557,7 @@ textarea {
   resize: vertical;
   min-height: 80px;
 }
- 
+
 /* ── Email hint ── */
 .email-hint {
   font-size: 12px;
@@ -3202,7 +4571,7 @@ textarea {
 .email-hint.success {
   color: var(--success);
 }
- 
+
 /* ── Checkbox groups ── */
 .checkbox-group {
   display: flex;
@@ -3239,7 +4608,7 @@ textarea {
   border-color: var(--navy);
   background: rgba(26, 77, 46, 0.05);
 }
- 
+
 /* ── Other specify ── */
 .other-specify {
   margin-top: 10px;
@@ -3248,7 +4617,7 @@ textarea {
 .other-specify.visible {
   display: block;
 }
- 
+
 /* ── Dynamic tables ── */
 .table-wrapper {
   overflow-x: auto;
@@ -3345,7 +4714,7 @@ textarea {
 .btn-remove-row:hover {
   background: rgba(192, 57, 43, 0.08);
 }
- 
+
 /* ── Section desc ── */
 .section-desc {
   background: rgba(245, 195, 0, 0.1);
@@ -3360,7 +4729,7 @@ textarea {
 .section-desc a {
   color: var(--navy);
 }
- 
+
 /* ── Submit area ── */
 .submit-area {
   background: var(--white);
@@ -3386,7 +4755,10 @@ textarea {
   font-weight: 600;
   cursor: pointer;
   letter-spacing: 0.03em;
-  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  transition:
+    background 0.2s,
+    transform 0.15s,
+    box-shadow 0.2s;
   box-shadow: 0 4px 16px rgba(26, 77, 46, 0.2);
 }
 .btn-submit:hover {
@@ -3403,7 +4775,7 @@ textarea {
   transform: none;
   box-shadow: none;
 }
- 
+
 /* ── Loading overlay ── */
 .overlay {
   display: none;
@@ -3436,7 +4808,7 @@ textarea {
   color: var(--white);
   font-size: 15px;
 }
- 
+
 /* ── Success screen ── */
 .success-screen {
   max-width: 560px;
@@ -3501,7 +4873,7 @@ textarea {
   background: var(--navy);
   color: #fff;
 }
- 
+
 /* ── Token screen ── */
 .token-screen {
   max-width: 480px;
@@ -3545,7 +4917,7 @@ textarea {
   font-size: 13px;
   margin-top: 10px;
 }
- 
+
 /* ── Read-only fields (Stage 2) ── */
 .ro-grid {
   display: grid;
@@ -3625,7 +4997,7 @@ textarea {
   color: var(--text-light);
   font-style: italic;
 }
- 
+
 /* ── Assessment table (Stage 2) ── */
 .assessment-table {
   width: 100%;
@@ -3667,7 +5039,7 @@ textarea {
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
- 
+
 /* ── Certification block ── */
 .cert-block {
   background: rgba(245, 195, 0, 0.08);
@@ -3698,7 +5070,7 @@ textarea {
   display: block;
   margin-top: 4px;
 }
- 
+
 /* ── Section locked badge ── */
 .section-card-collapsible .section-header {
   flex-wrap: wrap;
@@ -3715,7 +5087,7 @@ textarea {
   border: 1px solid var(--border);
   white-space: nowrap;
 }
- 
+
 /* ── Pro-ACT pre-filled skill label ── */
 .proact-skill-label {
   background: rgba(0, 51, 0, 0.07);
@@ -3727,7 +5099,7 @@ textarea {
   font-weight: 600;
   min-width: 160px;
 }
- 
+
 /* ── Row number cell ── */
 .row-num-cell {
   text-align: center;
@@ -3736,7 +5108,7 @@ textarea {
   color: var(--text-light);
   vertical-align: middle;
 }
- 
+
 /* ── Required level badge ── */
 .required-level-badge {
   background: var(--navy);
@@ -3754,7 +5126,7 @@ textarea {
   font-style: italic;
   text-align: center;
 }
- 
+
 /* ── Static value display ── */
 .static-value {
   background: var(--readonly-bg);
@@ -3765,16 +5137,21 @@ textarea {
   color: var(--text);
   font-weight: 600;
 }
- 
+
 /* ── Reveal transition ── */
 .reveal-enter-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
 }
 .reveal-enter-from {
   opacity: 0;
   transform: translateY(-8px);
 }
- 
+
+/* ── Designation toggle ── */
+.designation-toggle { display: flex; gap: 10px; flex-wrap: wrap; }
+
 /* ── Name grid ── */
 .name-grid {
   display: grid;
@@ -3793,7 +5170,7 @@ textarea {
   font-weight: 500;
   letter-spacing: 0.03em;
 }
- 
+
 /* ── Email prefix widget ── */
 .email-prefix-wrapper {
   display: flex;
@@ -3808,8 +5185,12 @@ textarea {
   border-color: var(--navy);
   background: var(--white);
 }
-.email-prefix-wrapper.error { border-color: var(--error); }
-.email-prefix-wrapper.valid { border-color: var(--success); }
+.email-prefix-wrapper.error {
+  border-color: var(--error);
+}
+.email-prefix-wrapper.valid {
+  border-color: var(--success);
+}
 .email-prefix-input {
   flex: 1;
   border: none !important;
@@ -3831,7 +5212,7 @@ textarea {
   border-left: 1.5px solid var(--border);
   padding-left: 10px;
 }
- 
+
 /* ── Responsive ── */
 @media (max-width: 640px) {
   .container {

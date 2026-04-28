@@ -203,7 +203,7 @@
                   <input
                     type="text"
                     v-model="form.headMiddleInitial"
-                    placeholder="A."
+                    placeholder="A"
                     maxlength="3"
                     @input="autoCapitalize('headMiddleInitial', $event)"
                   />
