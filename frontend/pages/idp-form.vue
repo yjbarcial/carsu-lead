@@ -17,31 +17,51 @@
       </div>
       <div class="privacy-body">
         <p>
-          In compliance with the
+          In accordance with the
           <strong>Data Privacy Act of 2012 (R.A. 10173)</strong>, Caraga State
-          University informs you that the personal information you provide in
-          this <strong>Individual Development Plan (IDP)</strong> form will be
-          collected and processed for the following purposes:
+          University informs you that the personal information collected through
+          the <strong>Individual Development Plan (IDP)</strong> form will be
+          processed for authorized and official human resource management and
+          development purposes.
         </p>
+        <p>
+          The <strong>Individual Development Plan (IDP)</strong> is the
+          University's official tool for guiding employees in mapping out their
+          personal and professional growth. It facilitates self-assessment, goal
+          setting, and alignment of individual development needs with the
+          University's strategic directions. The IDP supports evidence-based
+          planning of learning interventions, including competency development,
+          academic advancement, and participation in training programs.
+        </p>
+        <p>Specifically, the information you provide will be used for:</p>
         <ul>
-          <li>Assessment of your learning and development needs</li>
-          <li>Planning and delivery of training interventions</li>
-          <li>Human resource management and reporting</li>
+          <li>Assessing individual learning and development needs</li>
           <li>
-            Generation of official IDP documents shared with your supervisor and
-            HR
+            Planning and recommending appropriate training and development
+            interventions
+          </li>
+          <li>
+            Supporting performance development and career progression
+            initiatives
+          </li>
+          <li>
+            Contributing to office-level and institutional Learning and
+            Development (LeaD) planning
           </li>
         </ul>
         <p>
-          Your information will be stored securely and accessed only by
-          authorized Caraga State University, Human Resource and Management
-          Services (Learning and Development) personnel. It will not be
-          disclosed to third parties without your consent, except as required by
-          law.
+          All personal data will be stored securely and accessed only by
+          authorized personnel from the
+          <strong
+            >Human Resource Management Services (Learning and
+            Development)</strong
+          >. Your information will not be disclosed to third parties without
+          your consent, except when required by law or applicable regulations.
         </p>
         <p>
-          You have the right to access, correct, or request deletion of your
-          data. For concerns, contact the Caraga State University HRMS at
+          You have the right to access, correct, or request the deletion of your
+          personal data. For any inquiries or concerns, you may contact the
+          Human Resource Management Services at
           <strong>yjbarcial@carsu.edu.ph</strong>.
         </p>
         <label class="privacy-checkbox">
@@ -3818,39 +3838,57 @@ const professorTemplate = {
 // ── Administrative Aide ──────────────────────────────────────────────────────
 // Dropdown shows base name only; model splits Utility vs. Clerk variants.
 // Aliased to the Clerk variant as the more common administrative role.
-competencyModel["Administrative Aide I"]   = competencyModel["Admin Aide I – Clerk"];
-competencyModel["Administrative Aide II"]  = competencyModel["Admin Aide II – Clerk"];
-competencyModel["Administrative Aide III"] = competencyModel["Admin Aide III – Clerk"];
-competencyModel["Administrative Aide IV"]  = competencyModel["Admin Aide IV – Clerk"];
+competencyModel["Administrative Aide I"] =
+  competencyModel["Admin Aide I – Clerk"];
+competencyModel["Administrative Aide II"] =
+  competencyModel["Admin Aide II – Clerk"];
+competencyModel["Administrative Aide III"] =
+  competencyModel["Admin Aide III – Clerk"];
+competencyModel["Administrative Aide IV"] =
+  competencyModel["Admin Aide IV – Clerk"];
 // Aide VI: no document entry — same family as Aide IV (Clerk)
-competencyModel["Administrative Aide VI"]  = competencyModel["Admin Aide IV – Clerk"];
+competencyModel["Administrative Aide VI"] =
+  competencyModel["Admin Aide IV – Clerk"];
 
 // ── Administrative Assistant ─────────────────────────────────────────────────
-competencyModel["Administrative Assistant I"]   = competencyModel["Admin Assistant I"];
-competencyModel["Administrative Assistant II"]  = competencyModel["Admin Assistant II"];
-competencyModel["Administrative Assistant III"] = competencyModel["Admin Assistant III"];
-competencyModel["Administrative Assistant IV"]  = competencyModel["Admin Assistant IV"];
+competencyModel["Administrative Assistant I"] =
+  competencyModel["Admin Assistant I"];
+competencyModel["Administrative Assistant II"] =
+  competencyModel["Admin Assistant II"];
+competencyModel["Administrative Assistant III"] =
+  competencyModel["Admin Assistant III"];
+competencyModel["Administrative Assistant IV"] =
+  competencyModel["Admin Assistant IV"];
 // Assistant V: no document entry — same family as Assistant IV
-competencyModel["Administrative Assistant V"]   = competencyModel["Admin Assistant IV"];
+competencyModel["Administrative Assistant V"] =
+  competencyModel["Admin Assistant IV"];
 // Senior Administrative Assistant III: same family as Admin Assistant III
-competencyModel["Senior Administrative Assistant III"] = competencyModel["Admin Assistant III"];
+competencyModel["Senior Administrative Assistant III"] =
+  competencyModel["Admin Assistant III"];
 
 // ── Administrative Officer ───────────────────────────────────────────────────
-competencyModel["Administrative Officer I"]   = competencyModel["Admin Officer I"];
-competencyModel["Administrative Officer II"]  = competencyModel["Admin Officer II"];
-competencyModel["Administrative Officer III"] = competencyModel["Admin Officer III"];
-competencyModel["Administrative Officer IV"]  = competencyModel["Admin Officer IV"];
-competencyModel["Administrative Officer V"]   = competencyModel["Admin Officer V"];
+competencyModel["Administrative Officer I"] =
+  competencyModel["Admin Officer I"];
+competencyModel["Administrative Officer II"] =
+  competencyModel["Admin Officer II"];
+competencyModel["Administrative Officer III"] =
+  competencyModel["Admin Officer III"];
+competencyModel["Administrative Officer IV"] =
+  competencyModel["Admin Officer IV"];
+competencyModel["Administrative Officer V"] =
+  competencyModel["Admin Officer V"];
 // Supervising Administrative Officer: senior individual contributor — same as Admin Officer V
-competencyModel["Supervising Administrative Officer"] = competencyModel["Admin Officer V"];
+competencyModel["Supervising Administrative Officer"] =
+  competencyModel["Admin Officer V"];
 
 // ── Chief Administrative Officer ─────────────────────────────────────────────
 // Dropdown uses short label; model uses (CAO) suffix
-competencyModel["Chief Administrative Officer"] = competencyModel["Chief Administrative Officer (CAO)"];
+competencyModel["Chief Administrative Officer"] =
+  competencyModel["Chief Administrative Officer (CAO)"];
 
 // ── Accountant ───────────────────────────────────────────────────────────────
 // Only Accountant III is in the document; I and II share the same job family
-competencyModel["Accountant I"]  = competencyModel["Accountant III"];
+competencyModel["Accountant I"] = competencyModel["Accountant III"];
 competencyModel["Accountant II"] = competencyModel["Accountant III"];
 
 // ── Attorney ─────────────────────────────────────────────────────────────────
@@ -3867,7 +3905,7 @@ competencyModel["Board Secretary I"] = competencyModel["Board Secretary V"];
 
 // ── Cook ─────────────────────────────────────────────────────────────────────
 // No document entry; similar manual/utility role profile — alias to Admin Aide IV Mechanic
-competencyModel["Cook I"]  = competencyModel["Admin Aide IV – Mechanic"];
+competencyModel["Cook I"] = competencyModel["Admin Aide IV – Mechanic"];
 competencyModel["Cook II"] = competencyModel["Admin Aide IV – Mechanic"];
 
 // ── Dentist II ───────────────────────────────────────────────────────────────
@@ -3880,8 +3918,10 @@ competencyModel["Dormitory Manager III"] = competencyModel["Admin Officer III"];
 
 // ── Executive Assistant ──────────────────────────────────────────────────────
 // Senior support role — alias to Admin Assistant IV
-competencyModel["Executive Assistant III"] = competencyModel["Admin Assistant IV"];
-competencyModel["Executive Assistant IV"]  = competencyModel["Admin Assistant IV"];
+competencyModel["Executive Assistant III"] =
+  competencyModel["Admin Assistant IV"];
+competencyModel["Executive Assistant IV"] =
+  competencyModel["Admin Assistant IV"];
 
 // ── Farm Worker ──────────────────────────────────────────────────────────────
 // Model has Farm Worker I; II is the next level — alias to Farm Worker I
@@ -3889,17 +3929,21 @@ competencyModel["Farm Worker II"] = competencyModel["Farm Worker I"];
 
 // ── Food Service Supervisor II ───────────────────────────────────────────────
 // Supervisory service role — alias to Admin Officer I
-competencyModel["Food Service Supervisor II"] = competencyModel["Admin Officer I"];
+competencyModel["Food Service Supervisor II"] =
+  competencyModel["Admin Officer I"];
 
 // ── Guidance ─────────────────────────────────────────────────────────────────
 // Guidance Coordinator I: entry-level guidance role — alias to Guidance Counselor III
-competencyModel["Guidance Coordinator I"]  = competencyModel["Guidance Counselor III"];
+competencyModel["Guidance Coordinator I"] =
+  competencyModel["Guidance Counselor III"];
 // Guidance Counselor I: junior counselor — alias to Guidance Counselor III
-competencyModel["Guidance Counselor I"]    = competencyModel["Guidance Counselor III"];
+competencyModel["Guidance Counselor I"] =
+  competencyModel["Guidance Counselor III"];
 
 // ── Heavy Equipment Operator I ───────────────────────────────────────────────
 // Manual/technical operator — alias to Admin Aide IV Mechanic
-competencyModel["Heavy Equipment Operator I"] = competencyModel["Admin Aide IV – Mechanic"];
+competencyModel["Heavy Equipment Operator I"] =
+  competencyModel["Admin Aide IV – Mechanic"];
 
 // ── Houseparent II ───────────────────────────────────────────────────────────
 // Residential care/service role — alias to Admin Officer I
@@ -3907,28 +3951,32 @@ competencyModel["Houseparent II"] = competencyModel["Admin Officer I"];
 
 // ── Information Officer ──────────────────────────────────────────────────────
 // Communication/information professional — alias to Admin Officer I/III/V by level
-competencyModel["Information Officer I"]   = competencyModel["Admin Officer I"];
-competencyModel["Information Officer II"]  = competencyModel["Admin Officer II"];
-competencyModel["Information Officer III"] = competencyModel["Admin Officer III"];
+competencyModel["Information Officer I"] = competencyModel["Admin Officer I"];
+competencyModel["Information Officer II"] = competencyModel["Admin Officer II"];
+competencyModel["Information Officer III"] =
+  competencyModel["Admin Officer III"];
 
 // ── Information Systems Analyst ──────────────────────────────────────────────
 // IT analyst role — alias to System Analyst
-competencyModel["Information Systems Analyst I"]  = competencyModel["System Analyst"];
-competencyModel["Information Systems Analyst II"] = competencyModel["System Analyst"];
+competencyModel["Information Systems Analyst I"] =
+  competencyModel["System Analyst"];
+competencyModel["Information Systems Analyst II"] =
+  competencyModel["System Analyst"];
 
 // ── Information Technology Officer I ─────────────────────────────────────────
 // IT officer — alias to System Analyst
-competencyModel["Information Technology Officer I"] = competencyModel["System Analyst"];
+competencyModel["Information Technology Officer I"] =
+  competencyModel["System Analyst"];
 
 // ── Internal Auditor ─────────────────────────────────────────────────────────
 // Audit professional — alias to Accountant III (same financial/audit cluster)
-competencyModel["Internal Auditor I"]   = competencyModel["Accountant III"];
-competencyModel["Internal Auditor II"]  = competencyModel["Accountant III"];
+competencyModel["Internal Auditor I"] = competencyModel["Accountant III"];
+competencyModel["Internal Auditor II"] = competencyModel["Accountant III"];
 competencyModel["Internal Auditor III"] = competencyModel["Accountant III"];
 
 // ── Legal Assistant ──────────────────────────────────────────────────────────
 // Legal support role — alias to Attorney II (same legal cluster, support level)
-competencyModel["Legal Assistant II"]  = competencyModel["Attorney II"];
+competencyModel["Legal Assistant II"] = competencyModel["Attorney II"];
 competencyModel["Legal Assistant III"] = competencyModel["Attorney II"];
 
 // ── Machinist I ──────────────────────────────────────────────────────────────
@@ -3940,44 +3988,59 @@ competencyModel["Machinist I"] = competencyModel["Admin Aide IV – Mechanic"];
 
 // ── Planning Officer ─────────────────────────────────────────────────────────
 // Model has generic "Planning Officer"; I/II/III map to it
-competencyModel["Planning Officer I"]   = competencyModel["Planning Officer"];
-competencyModel["Planning Officer II"]  = competencyModel["Planning Officer"];
+competencyModel["Planning Officer I"] = competencyModel["Planning Officer"];
+competencyModel["Planning Officer II"] = competencyModel["Planning Officer"];
 competencyModel["Planning Officer III"] = competencyModel["Planning Officer"];
 
 // ── Project Development Officer ──────────────────────────────────────────────
 // Development/planning professional — alias to Planning Officer
-competencyModel["Project Development Officer I"]   = competencyModel["Planning Officer"];
-competencyModel["Project Development Officer II"]  = competencyModel["Planning Officer"];
-competencyModel["Project Development Officer III"] = competencyModel["Planning Officer"];
+competencyModel["Project Development Officer I"] =
+  competencyModel["Planning Officer"];
+competencyModel["Project Development Officer II"] =
+  competencyModel["Planning Officer"];
+competencyModel["Project Development Officer III"] =
+  competencyModel["Planning Officer"];
 
 // ── Registrar III ─────────────────────────────────────────────────────────────
 // Already in model — no alias needed (matches dropdown name exactly)
 
 // ── School Farm / Farming ────────────────────────────────────────────────────
 // Agriculture-related roles — alias to Farm Worker I
-competencyModel["School Farm Demonstrator"]    = competencyModel["Farm Worker I"];
-competencyModel["School Farming Coordinator I"] = competencyModel["Farm Worker I"];
+competencyModel["School Farm Demonstrator"] = competencyModel["Farm Worker I"];
+competencyModel["School Farming Coordinator I"] =
+  competencyModel["Farm Worker I"];
 
 // ── SUC President IV ─────────────────────────────────────────────────────────
 // Top executive — alias to Chief Administrative Officer (CAO)
-competencyModel["SUC President IV"] = competencyModel["Chief Administrative Officer (CAO)"];
+competencyModel["SUC President IV"] =
+  competencyModel["Chief Administrative Officer (CAO)"];
 
 // ── University Extension ─────────────────────────────────────────────────────
 // Extension work — alias to Admin Officer / Planning Officer by level
-competencyModel["University Extension Associate I"]    = competencyModel["Admin Officer I"];
-competencyModel["University Extension Specialist I"]   = competencyModel["Admin Officer I"];
-competencyModel["University Extension Specialist II"]  = competencyModel["Admin Officer II"];
-competencyModel["University Extension Specialist III"] = competencyModel["Admin Officer III"];
-competencyModel["University Extension Specialist IV"]  = competencyModel["Admin Officer IV"];
-competencyModel["University Extension Specialist V"]   = competencyModel["Admin Officer V"];
+competencyModel["University Extension Associate I"] =
+  competencyModel["Admin Officer I"];
+competencyModel["University Extension Specialist I"] =
+  competencyModel["Admin Officer I"];
+competencyModel["University Extension Specialist II"] =
+  competencyModel["Admin Officer II"];
+competencyModel["University Extension Specialist III"] =
+  competencyModel["Admin Officer III"];
+competencyModel["University Extension Specialist IV"] =
+  competencyModel["Admin Officer IV"];
+competencyModel["University Extension Specialist V"] =
+  competencyModel["Admin Officer V"];
 
 // ── University Research ──────────────────────────────────────────────────────
 // Research roles — alias to Accountant III / Planning Officer by level
-competencyModel["University Research Associate I"]  = competencyModel["Admin Officer I"];
-competencyModel["University Research Associate II"] = competencyModel["Admin Officer II"];
-competencyModel["University Researcher II"]         = competencyModel["Admin Officer II"];
-competencyModel["University Researcher IV"]         = competencyModel["Admin Officer IV"];
-competencyModel["University Researcher V"]          = competencyModel["Admin Officer V"];
+competencyModel["University Research Associate I"] =
+  competencyModel["Admin Officer I"];
+competencyModel["University Research Associate II"] =
+  competencyModel["Admin Officer II"];
+competencyModel["University Researcher II"] =
+  competencyModel["Admin Officer II"];
+competencyModel["University Researcher IV"] =
+  competencyModel["Admin Officer IV"];
+competencyModel["University Researcher V"] = competencyModel["Admin Officer V"];
 
 // ── Veterinarian II ──────────────────────────────────────────────────────────
 // Health/science professional — alias to Physician
@@ -3985,7 +4048,8 @@ competencyModel["Veterinarian II"] = competencyModel["Physician"];
 
 // ── Vocational Placement Coordinator I ───────────────────────────────────────
 // Guidance/placement role — alias to Guidance Counselor III
-competencyModel["Vocational Placement Coordinator I"] = competencyModel["Guidance Counselor III"];
+competencyModel["Vocational Placement Coordinator I"] =
+  competencyModel["Guidance Counselor III"];
 
 function getRequiredLevel(competency, position) {
   if (!competency || !position) return "";
@@ -5320,7 +5384,11 @@ textarea {
 }
 
 /* ── Designation toggle ── */
-.designation-toggle { display: flex; gap: 10px; flex-wrap: wrap; }
+.designation-toggle {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
 
 /* ── Name grid ── */
 .name-grid {
