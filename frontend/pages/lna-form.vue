@@ -185,7 +185,7 @@
                   <input
                     type="text"
                     v-model="form.headLastName"
-                    placeholder="Dela Cruz"
+                    placeholder="DELA CRUZ"
                     @input="autoCapitalize('headLastName', $event)"
                   />
                 </div>
@@ -194,7 +194,7 @@
                   <input
                     type="text"
                     v-model="form.headFirstName"
-                    placeholder="Juan"
+                    placeholder="JUAN"
                     @input="autoCapitalize('headFirstName', $event)"
                   />
                 </div>
