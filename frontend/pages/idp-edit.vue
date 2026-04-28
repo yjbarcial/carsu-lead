@@ -67,7 +67,7 @@
     </div>
 
     <!-- ── STAGE 2: LOCKED ───────────────────────────────────────────────── -->
-    <div v-if="stage === 'locked'" class="center-wrap">
+    <div v-else-if="stage === 'locked'" class="center-wrap">
       <div class="locked-card">
         <div class="locked-icon">🔒</div>
         <h2>IDP Locked</h2>
@@ -85,7 +85,7 @@
     </div>
 
     <!-- ── STAGE 2: EDIT FORM ────────────────────────────────────────────── -->
-    <div v-if="stage === 'form'" class="container">
+    <div v-else-if="stage === 'form'" class="container">
 
       <!-- Title block -->
       <div class="form-title-block">
@@ -105,7 +105,7 @@
             <h3>Personnel Information</h3>
             <p>Basic details and submission purpose</p>
           </div>
-          <button class="btn-cancel-edit" @click="stage = 'lookup'">Cancel Edit</button>
+          <button class="btn-cancel-edit" @click="cancelEdit">Cancel Edit</button>
         </div>
         <div class="section-body">
 
@@ -149,7 +149,6 @@
                 <option v-for="p in selectedCollegePrograms" :key="p" :value="p">{{ p }}</option>
               </select>
             </div>
-            </div>
           </div>
 
           <!-- Name of Personnel -->
@@ -172,10 +171,18 @@
           </div>
 
           <div class="field-grid field-grid-2" style="margin-bottom: 18px">
-            <!-- CarSU Email (read-only) -->
+            <!-- CarSU Email (read-only, displayed as prefix widget) -->
             <div class="field-group span-2">
               <label>CarSU Email</label>
-              <input type="email" :value="form.employeeEmail" disabled class="input-disabled" />
+              <div class="email-prefix-wrapper disabled">
+                <input
+                  type="text"
+                  :value="form.employeeEmailPrefix"
+                  class="email-prefix-input"
+                  disabled
+                />
+                <span class="email-suffix">@carsu.edu.ph</span>
+              </div>
               <small class="field-hint">Email cannot be changed</small>
             </div>
 
@@ -354,12 +361,28 @@
             <!-- Supervisor Email -->
             <div class="field-group">
               <label>Supervisor CarSU Email <span class="req">*</span></label>
-              <input type="email" v-model="form.supervisorEmail" :class="{ error: errors.supervisorEmail }" placeholder="supervisor@carsu.edu.ph" />
+              <div
+                class="email-prefix-wrapper"
+                :class="{
+                  error: emailHints.supervisor.type === 'error',
+                  valid: emailHints.supervisor.type === 'success',
+                }"
+              >
+                <input
+                  type="text"
+                  v-model="form.supervisorEmailPrefix"
+                  class="email-prefix-input"
+                  placeholder="supervisor"
+                  @blur="validateEditEmail('supervisor')"
+                />
+                <span class="email-suffix">@carsu.edu.ph</span>
+              </div>
+              <small class="email-hint" :class="emailHints.supervisor.type">{{ emailHints.supervisor.msg }}</small>
             </div>
 
             <!-- Purpose -->
             <div class="field-group span-2">
-              <label>Purpose <span class="req">*</span></label>
+              <label>IDP Purpose <span class="req">*</span></label>
               <div class="checkbox-group">
                 <label v-for="opt in purposeOptions" :key="opt" class="checkbox-item" :class="{ checked: form.headerPurpose === opt }">
                   <input type="radio" name="headerPurposeEdit" :value="opt" v-model="form.headerPurpose" />
@@ -390,14 +413,14 @@
 
           <!-- Competency Purpose -->
           <div class="field-group" style="margin-bottom: 20px">
-            <label>Purpose <span class="req">*</span></label>
+            <label>Competency Assessment Purpose <span class="req">*</span></label>
             <div class="checkbox-group">
-              <label v-for="opt in compPurposeOptions" :key="opt.value" class="checkbox-item" :class="{ checked: form.competencyPurpose === opt.value }">
-                <input type="radio" name="compPurposeEdit" :value="opt.value" v-model="form.competencyPurpose" />
+              <label v-for="opt in compPurposeOptions" :key="opt.value" class="checkbox-item" :class="{ checked: form.compPurpose === opt.value }">
+                <input type="radio" name="compPurposeEdit" :value="opt.value" v-model="form.compPurpose" />
                 {{ opt.label }}
               </label>
             </div>
-            <div class="other-specify" :class="{ visible: form.competencyPurpose === 'Others' }">
+            <div class="other-specify" :class="{ visible: form.compPurpose === 'Others' }">
               <input type="text" v-model="form.compPurposeOther" placeholder="Please specify…" />
             </div>
           </div>
@@ -666,7 +689,7 @@
       <div class="submit-area">
         <p>By saving, you confirm all information is accurate. Your supervisor will be re-notified automatically.</p>
         <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap">
-          <button class="btn-secondary" @click="stage = 'lookup'">Cancel</button>
+          <button class="btn-secondary" @click="cancelEdit">Cancel</button>
           <button class="btn-submit" :disabled="submitLoading" @click="doSubmitEdit">
             {{ submitLoading ? 'Saving…' : 'Save Changes' }}
           </button>
@@ -675,7 +698,7 @@
     </div>
 
     <!-- ── STAGE 3: SUCCESS ──────────────────────────────────────────────── -->
-    <div v-if="stage === 'success'" class="center-wrap">
+    <div v-else-if="stage === 'success'" class="center-wrap">
       <div class="success-card">
         <div class="success-icon">✅</div>
         <h2>IDP Updated Successfully</h2>
@@ -695,6 +718,7 @@
           <NuxtLink to="/" class="btn-primary-link">Back to Home</NuxtLink>
         </div>
       </div>
+    </div>
     </div>
 </template>
 
@@ -721,7 +745,8 @@ const form = reactive({
   lastName: "",
   firstName: "",
   middleInitial: "",
-  employeeEmail: "",
+  employeeEmailPrefix: "", // editable prefix portion
+  employeeEmail: "",       // full email (assembled)
   datePrepared: "", // kept for populateForm compatibility, not shown in UI
   officeAffiliation: "",
   collegeOfficeUnit: "",
@@ -734,10 +759,11 @@ const form = reactive({
   yearsInPosition: "",
   yearsInCSU: "",
   supervisorName: "",
-  supervisorEmail: "",
+  supervisorEmailPrefix: "", // editable prefix portion
+  supervisorEmail: "",       // full email (assembled)
   headerPurpose: "",
   headerPurposeOther: "",
-  competencyPurpose: "",
+  compPurpose: "",           // matches idp-form.vue field name
   compPurposeOther: "",
   designationMode: "na",
   // Sections
@@ -746,31 +772,34 @@ const form = reactive({
   proactRows: [],
 });
 
+const emailHints = reactive({
+  employee: { msg: "", type: "" },
+  supervisor: { msg: "", type: "" },
+});
+
 const errors = reactive({});
 
 // ── Options (matching idp-form.vue) ────────────────────────────────────────
 const officeOptions = [
-  "OVPAA",
   "OVPAF",
+  "OVPAA",
   "OVPEO",
   "OVPSAS",
   "OVPRDIE",
 ];
 
 const purposeOptions = [
-  "Promotion",
-  "Performance Improvement",
-  "Career Development",
-  "Succession Planning",
-  "New Employee Orientation",
+  "Initial Assessment",
+  "Mid-Year Review",
+  "Annual Review",
   "Other",
 ];
 
 const compPurposeOptions = [
-  { value: "Promotion", label: "Promotion" },
-  { value: "Performance Improvement", label: "Performance Improvement" },
-  { value: "Career Development", label: "Career Development" },
-  { value: "Succession Planning", label: "Succession Planning" },
+  { value: "To meet the competencies of my current position.", label: "Meet competencies of current position" },
+  { value: "To increase the level of competencies of the current position.", label: "Increase level of current competencies" },
+  { value: "To meet the competencies of the next higher position.", label: "Meet competencies of next higher position" },
+  { value: "To acquire new competencies across different functions/positions.", label: "Acquire new competencies across functions" },
   { value: "Others", label: "Others" },
 ];
 
@@ -793,20 +822,52 @@ const subOfficeMap = {
     "University Press",
   ],
   OVPAA: [
-    { name: "College of Agricultural and Agri-Industries (CAA)", programs: [] },
+    { name: "College of Agricultural and Agri-Industries (CAA)", programs: ["BS in Agriculture"] },
     {
       name: "College of Computing and Information Sciences (CCIS)",
-      programs: [],
+      programs: [
+        "BS in Computer Science",
+        "BS in Information System",
+        "BS in Information Technology",
+      ],
     },
-    { name: "College of Engineering and Geo-Sciences (CEGS)", programs: [] },
+    {
+      name: "College of Engineering and Geo-Sciences (CEGS)",
+      programs: [
+        "BS in Agricultural and Biosystems Engineering",
+        "BS in Civil Engineering",
+        "BS in Electronics Engineering",
+        "BS in Geodetic Engineering",
+        "BS in Geology",
+        "BS in Mining Engineering",
+      ],
+    },
     {
       name: "College of Forestry and Environmental Sciences (COFES)",
-      programs: [],
+      programs: [
+        "BS in Agroforestry",
+        "BS in Environmental Science",
+        "BS in Forestry",
+      ],
     },
-    { name: "College of Humanities and Social Sciences (CHaSS)", programs: [] },
+    {
+      name: "College of Humanities and Social Sciences (CHaSS)",
+      programs: [
+        "Bachelor of Arts in Sociology",
+        "Bachelor of Science in Psychology",
+        "Bachelor of Science in Social Work",
+      ],
+    },
     {
       name: "College of Mathematics and Natural Sciences (CMNS)",
-      programs: [],
+      programs: [
+        "BS in Applied Mathematics",
+        "BS in Biology",
+        "BS in Chemistry",
+        "BS in Marine Biology",
+        "BS in Mathematics",
+        "BS in Physics",
+      ],
     },
     { name: "National Service Training Program (NSTP)", programs: [] },
     { name: "Office of Curriculum & Instruction Development", programs: [] },
@@ -2735,6 +2796,135 @@ function getRequiredLevel(competency, position) {
   return LEVEL_LABEL[lvl] || "";
 }
 
+// ── Competency Model Aliases ────────────────────────────────────────────────
+// Administrative Aide — map dropdown names to keyed model entries
+competencyModel["Administrative Aide I"]   = competencyModel["Admin Aide I – Clerk"];
+competencyModel["Administrative Aide II"]  = competencyModel["Admin Aide II – Clerk"];
+competencyModel["Administrative Aide III"] = competencyModel["Admin Aide III – Clerk"];
+competencyModel["Administrative Aide IV"]  = competencyModel["Admin Aide IV – Clerk"];
+competencyModel["Administrative Aide VI"]  = competencyModel["Admin Aide IV – Clerk"];
+
+// Administrative Assistant
+competencyModel["Administrative Assistant I"]   = competencyModel["Admin Assistant I"];
+competencyModel["Administrative Assistant II"]  = competencyModel["Admin Assistant II"];
+competencyModel["Administrative Assistant III"] = competencyModel["Admin Assistant III"];
+competencyModel["Administrative Assistant IV"]  = competencyModel["Admin Assistant IV"];
+competencyModel["Administrative Assistant V"]   = competencyModel["Admin Assistant IV"];
+competencyModel["Senior Administrative Assistant III"] = competencyModel["Admin Assistant III"];
+
+// Administrative Officer
+competencyModel["Administrative Officer I"]   = competencyModel["Admin Officer I"];
+competencyModel["Administrative Officer II"]  = competencyModel["Admin Officer II"];
+competencyModel["Administrative Officer III"] = competencyModel["Admin Officer III"];
+competencyModel["Administrative Officer IV"]  = competencyModel["Admin Officer IV"];
+competencyModel["Administrative Officer V"]   = competencyModel["Admin Officer V"];
+competencyModel["Supervising Administrative Officer"] = competencyModel["Admin Officer V"];
+
+// Chief Administrative Officer
+competencyModel["Chief Administrative Officer"] = competencyModel["Chief Administrative Officer (CAO)"];
+
+// Accountant — I and II share the same competency profile as Accountant III
+competencyModel["Accountant I"]  = competencyModel["Accountant III"];
+competencyModel["Accountant II"] = competencyModel["Accountant III"];
+
+// Attorney
+competencyModel["Attorney IV"] = competencyModel["Attorney III"];
+
+// Board Secretary
+competencyModel["Board Secretary I"] = competencyModel["Board Secretary V"];
+
+// Cook
+competencyModel["Cook I"]  = competencyModel["Admin Aide IV – Mechanic"];
+competencyModel["Cook II"] = competencyModel["Admin Aide IV – Mechanic"];
+
+// Dentist
+competencyModel["Dentist II"] = competencyModel["Nurse II"];
+
+// Dormitory Manager
+competencyModel["Dormitory Manager III"] = competencyModel["Admin Officer III"];
+
+// Executive Assistant
+competencyModel["Executive Assistant III"] = competencyModel["Admin Assistant IV"];
+competencyModel["Executive Assistant IV"]  = competencyModel["Admin Assistant IV"];
+
+// Farm Worker
+competencyModel["Farm Worker II"] = competencyModel["Farm Worker I"];
+
+// Food Service Supervisor
+competencyModel["Food Service Supervisor II"] = competencyModel["Admin Officer I"];
+
+// Guidance
+competencyModel["Guidance Coordinator I"] = competencyModel["Guidance Counselor III"];
+competencyModel["Guidance Counselor I"]   = competencyModel["Guidance Counselor III"];
+
+// Heavy Equipment Operator
+competencyModel["Heavy Equipment Operator I"] = competencyModel["Admin Aide IV – Mechanic"];
+
+// Houseparent
+competencyModel["Houseparent II"] = competencyModel["Admin Officer I"];
+
+// Information Officer
+competencyModel["Information Officer I"]   = competencyModel["Admin Officer I"];
+competencyModel["Information Officer II"]  = competencyModel["Admin Officer II"];
+competencyModel["Information Officer III"] = competencyModel["Admin Officer III"];
+
+// Information Systems Analyst
+competencyModel["Information Systems Analyst I"]  = competencyModel["System Analyst"];
+competencyModel["Information Systems Analyst II"] = competencyModel["System Analyst"];
+
+// Information Technology Officer
+competencyModel["Information Technology Officer I"] = competencyModel["System Analyst"];
+
+// Internal Auditor — same financial/audit cluster as Accountant III
+competencyModel["Internal Auditor I"]   = competencyModel["Accountant III"];
+competencyModel["Internal Auditor II"]  = competencyModel["Accountant III"];
+competencyModel["Internal Auditor III"] = competencyModel["Accountant III"];
+
+// Legal Assistant
+competencyModel["Legal Assistant II"]  = competencyModel["Attorney II"];
+competencyModel["Legal Assistant III"] = competencyModel["Attorney II"];
+
+// Machinist
+competencyModel["Machinist I"] = competencyModel["Admin Aide IV – Mechanic"];
+
+// Planning Officer
+competencyModel["Planning Officer I"]   = competencyModel["Planning Officer"];
+competencyModel["Planning Officer II"]  = competencyModel["Planning Officer"];
+competencyModel["Planning Officer III"] = competencyModel["Planning Officer"];
+
+// Project Development Officer
+competencyModel["Project Development Officer I"]   = competencyModel["Planning Officer"];
+competencyModel["Project Development Officer II"]  = competencyModel["Planning Officer"];
+competencyModel["Project Development Officer III"] = competencyModel["Planning Officer"];
+
+// School Farm / Farming
+competencyModel["School Farm Demonstrator"]     = competencyModel["Farm Worker I"];
+competencyModel["School Farming Coordinator I"] = competencyModel["Farm Worker I"];
+
+// SUC President IV — alias to Chief Administrative Officer (CAO)
+competencyModel["SUC President IV"] = competencyModel["Chief Administrative Officer (CAO)"];
+
+// University Extension
+competencyModel["University Extension Associate I"]    = competencyModel["Admin Officer I"];
+competencyModel["University Extension Specialist I"]   = competencyModel["Admin Officer I"];
+competencyModel["University Extension Specialist II"]  = competencyModel["Admin Officer II"];
+competencyModel["University Extension Specialist III"] = competencyModel["Admin Officer III"];
+competencyModel["University Extension Specialist IV"]  = competencyModel["Admin Officer IV"];
+competencyModel["University Extension Specialist V"]   = competencyModel["Admin Officer V"];
+
+// University Research
+competencyModel["University Research Associate I"]  = competencyModel["Admin Officer I"];
+competencyModel["University Research Associate II"] = competencyModel["Admin Officer II"];
+competencyModel["University Researcher II"]         = competencyModel["Admin Officer II"];
+competencyModel["University Researcher IV"]         = competencyModel["Admin Officer IV"];
+competencyModel["University Researcher V"]          = competencyModel["Admin Officer V"];
+
+// Veterinarian
+competencyModel["Veterinarian II"] = competencyModel["Physician"];
+
+// Vocational Placement Coordinator
+competencyModel["Vocational Placement Coordinator I"] = competencyModel["Guidance Counselor III"];
+
 // ── Lookup ──────────────────────────────────────────────────────────────────
 async function doLookup() {
   lookupError.value = "";
@@ -2799,7 +2989,9 @@ function populateForm(record) {
   form.lastName = record.lastName || "";
   form.firstName = record.firstName || "";
   form.middleInitial = record.middleInitial || "";
+  // Populate full email and extract prefix for the UI widget
   form.employeeEmail = record.employeeEmail || "";
+  form.employeeEmailPrefix = (record.employeeEmail || "").replace(/@carsu\.edu\.ph$/i, "");
   form.datePrepared = record.datePrepared || "";
   form.officeAffiliation = record.officeAffiliation || "";
   form.collegeOfficeUnit = record.collegeOfficeUnit || "";
@@ -2813,11 +3005,17 @@ function populateForm(record) {
   form.yearsInCSU = record.yearsInCSU ?? "";
   form.supervisorName = record.supervisorName || "";
   form.supervisorEmail = record.supervisorEmail || "";
+  form.supervisorEmailPrefix = (record.supervisorEmail || "").replace(/@carsu\.edu\.ph$/i, "");
   form.headerPurpose = record.headerPurpose || "";
   form.headerPurposeOther = record.headerPurposeOther || "";
-  form.competencyPurpose = record.competencyPurpose || "";
+  // Support both field names from backend (competencyPurpose or compPurpose)
+  form.compPurpose = record.compPurpose || record.competencyPurpose || "";
   form.compPurposeOther = record.compPurposeOther || "";
   form.designationMode = record.designation === "N/A" || !record.designation ? "na" : "specify";
+
+  // Set email hint states
+  if (form.employeeEmailPrefix) emailHints.employee = { msg: "✓ Valid CarSU email", type: "success" };
+  if (form.supervisorEmailPrefix) emailHints.supervisor = { msg: "✓ Valid CarSU email", type: "success" };
 
   try {
     form.competencyRows = JSON.parse(record.competencyRowsJson || "[]");
@@ -2850,14 +3048,52 @@ async function fetchSuggestions() {
   }
 }
 
+// ── Email validation helper (edit form) ──────────────────────────────────────
+function validateEditEmail(who) {
+  const prefix = who === "employee" ? form.employeeEmailPrefix : form.supervisorEmailPrefix;
+  const hint = emailHints[who];
+  if (who === "employee") {
+    form.employeeEmail = (prefix || "").trim() + "@carsu.edu.ph";
+  } else {
+    form.supervisorEmail = (prefix || "").trim() + "@carsu.edu.ph";
+  }
+  if (!prefix || !prefix.trim()) {
+    hint.msg = "";
+    hint.type = "";
+    return false;
+  }
+  if (!/^[a-zA-Z0-9._%+\-]+$/.test(prefix.trim())) {
+    hint.msg = "Invalid characters in email prefix.";
+    hint.type = "error";
+    return false;
+  }
+  hint.msg = "✓ Valid CarSU email";
+  hint.type = "success";
+  return true;
+}
+
 // ── Submit edit ──────────────────────────────────────────────────────────────
 async function doSubmitEdit() {
+  // Assemble full emails from prefixes before submitting
+  form.employeeEmail = (form.employeeEmailPrefix || "").trim() + "@carsu.edu.ph";
+  form.supervisorEmail = (form.supervisorEmailPrefix || "").trim() + "@carsu.edu.ph";
   submitLoading.value = true;
   try {
+    // Compose the full name string the supervisor view reads directly
+    const nameOfPersonnel = [form.lastName, form.firstName, form.middleInitial]
+      .filter(Boolean)
+      .join(", ");
+
     const payload = {
       email: lookupEmail.value.trim().toLowerCase(),
       ...form,
-      // Pass parsed arrays — backend will re-stringify
+      // Composed / static fields the supervisor page reads directly
+      nameOfPersonnel,
+      campus: "CSU Main Campus",
+      // Send competencyPurpose under both names the backend may use
+      compPurpose: form.compPurpose,
+      competencyPurpose: form.compPurpose,
+      // Pass parsed arrays — backend will re-stringify as *RowsJson
       competencyRows: form.competencyRows,
       agapRows: form.agapRows,
       proactRows: form.proactRows,
@@ -2892,6 +3128,28 @@ async function doSubmitEdit() {
   } finally {
     submitLoading.value = false;
   }
+}
+
+function cancelEdit() {
+  stage.value = "lookup";
+  // Clear loaded form data so no stale content lingers behind the lookup card
+  Object.assign(form, {
+    lastName: "", firstName: "", middleInitial: "",
+    employeeEmailPrefix: "", employeeEmail: "",
+    datePrepared: "", officeAffiliation: "", collegeOfficeUnit: "",
+    collegeProgram: "", personnelType: "", currentPosition: "",
+    designation: "", educAttainment: "", educAttainmentSpec: "",
+    yearsInPosition: "", yearsInCSU: "", supervisorName: "",
+    supervisorEmailPrefix: "", supervisorEmail: "",
+    headerPurpose: "", headerPurposeOther: "",
+    compPurpose: "", compPurposeOther: "",
+    designationMode: "na",
+    competencyRows: [], agapRows: [], proactRows: [],
+  });
+  Object.assign(emailHints, {
+    employee: { msg: "", type: "" },
+    supervisor: { msg: "", type: "" },
+  });
 }
 
 function resetAndEdit() {
@@ -2977,9 +3235,9 @@ function resetAndEdit() {
 
 /* ── Container ── */
 .container {
-  max-width: 1140px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 48px 40px 80px;
+  padding: 40px 32px 80px;
 }
 
 /* ── Form title block ── */
@@ -3051,7 +3309,7 @@ function resetAndEdit() {
 }
 .section-header h3 { color: var(--white); font-size: 15px; font-weight: 600; letter-spacing: 0.03em; }
 .section-header p { color: rgba(255,255,255,0.6); font-size: 12px; margin-top: 1px; }
-.section-body { padding: 36px; }
+.section-body { padding: 28px 32px; }
 
 /* ── Section desc ── */
 .section-desc {
@@ -3421,15 +3679,118 @@ input.error, select.error { border-color: var(--error); }
 }
 .btn-cancel-edit:hover { border-color: var(--error); color: #ffaaaa; background: rgba(192,57,43,0.1); }
 
+/* ── Other specify ── */
+.other-specify {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.25s ease, opacity 0.2s;
+  opacity: 0;
+  margin-top: 0;
+}
+.other-specify.visible {
+  max-height: 80px;
+  opacity: 1;
+  margin-top: 8px;
+}
+.other-specify input {
+  width: 100%;
+}
+
+/* ── Disabled input ── */
+.input-disabled {
+  background: var(--readonly-bg, #f0ede8) !important;
+  color: var(--text-light) !important;
+  cursor: not-allowed;
+}
+
+/* ── Email prefix widget ── */
+.email-prefix-wrapper {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--input-bg, #f8f7f4);
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.email-prefix-wrapper:focus-within {
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px rgba(26,77,46,0.08);
+  background: #fff;
+}
+.email-prefix-wrapper.error { border-color: var(--error); }
+.email-prefix-wrapper.valid { border-color: var(--success, #1a6b3c); }
+.email-prefix-wrapper.disabled {
+  background: var(--readonly-bg, #f0ede8);
+  opacity: 0.8;
+}
+.email-prefix-input {
+  flex: 1;
+  border: none !important;
+  background: transparent !important;
+  padding: 10px 12px !important;
+  outline: none !important;
+  box-shadow: none !important;
+  font-size: 14px;
+  color: var(--text);
+  font-family: "Roboto", sans-serif;
+  min-width: 0;
+}
+.email-prefix-input:disabled { color: var(--text-light, #5a6070); cursor: not-allowed; }
+.email-suffix {
+  padding: 10px 12px;
+  background: rgba(26,77,46,0.07);
+  color: var(--navy-mid, #2d6a3f);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  border-left: 1.5px solid var(--border);
+  user-select: none;
+}
+.email-hint {
+  font-size: 12px;
+  margin-top: 2px;
+  min-height: 16px;
+  display: block;
+}
+.email-hint.error { color: var(--error); }
+.email-hint.success { color: var(--success, #1a6b3c); }
+
 /* ── Responsive ── */
-@media (max-width: 640px) {
-  .container { padding: 24px 16px 60px; }
+@media (max-width: 900px) {
+  .container { padding: 28px 20px 60px; }
+  .section-body { padding: 20px 18px; }
   .field-grid-2 { grid-template-columns: 1fr; }
   .field-group.span-2 { grid-column: span 1; }
-  .section-body { padding: 24px 16px; }
-  .page-nav { padding: 0 16px; }
+}
+@media (max-width: 768px) {
+  .container { padding: 20px 14px 60px; }
+  .section-body { padding: 16px 14px; }
+  .field-grid-2 { grid-template-columns: 1fr; }
+  .field-group.span-2 { grid-column: span 1; }
+  .page-nav { padding: 0 14px; }
   .page-nav .nav-current, .page-nav .nav-sep { display: none; }
   .name-grid { grid-template-columns: 1fr 1fr; }
   .mi-col { max-width: 100%; }
+  .section-header { flex-wrap: wrap; gap: 8px; padding: 12px 14px; }
+  .btn-cancel-edit { margin-left: 0; width: 100%; text-align: center; }
+  .form-title-block { padding-bottom: 16px; margin-bottom: 20px; }
+  .form-title-block h2 { font-size: 19px; }
+  .edit-ref-badge { font-size: 11px; }
+  .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .dynamic-table { min-width: 600px; }
+  .submit-area { padding: 20px 14px; }
+  div[style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+@media (max-width: 480px) {
+  .lookup-card, .locked-card, .success-card { padding: 28px 16px; }
+  .name-grid { grid-template-columns: 1fr; }
+  .mi-col { max-width: 100%; }
+  .checkbox-group { gap: 6px; }
+  .checkbox-item { font-size: 12px; padding: 6px 10px; }
+  .section-header { padding: 10px 12px; }
+  .section-body { padding: 14px 12px; }
 }
 </style>

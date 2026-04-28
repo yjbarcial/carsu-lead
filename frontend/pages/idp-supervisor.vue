@@ -169,11 +169,13 @@
             </div>
             <div class="ro-field">
               <div class="ro-label">Name of Personnel</div>
-              <div class="ro-value">{{ idpData.nameOfPersonnel ? idpData.nameOfPersonnel.toUpperCase() : "—" }}</div>
-            </div>
-            <div class="ro-field">
-              <div class="ro-label">Date Prepared</div>
-              <div class="ro-value">{{ idpData.datePrepared || "—" }}</div>
+              <div class="ro-value">
+                {{
+                  idpData.nameOfPersonnel
+                    ? idpData.nameOfPersonnel.toUpperCase()
+                    : "—"
+                }}
+              </div>
             </div>
             <div class="ro-field">
               <div class="ro-label">Highest Educational Attainment</div>
@@ -393,7 +395,7 @@
                     </label>
                   </div>
                   <div style="margin-top: 8px">
-                    <label class="field-label">Remarks (optional if No):</label>
+                    <label class="field-label">Remarks:</label>
                     <textarea
                       v-model="assessment.perfGapsSpec"
                       rows="3"
@@ -565,7 +567,13 @@
                 of the office.</em
               >
             </p>
-            <div class="sup-name">{{ idpData.supervisorName ? idpData.supervisorName.toUpperCase() : "—" }}</div>
+            <div class="sup-name">
+              {{
+                idpData.supervisorName
+                  ? idpData.supervisorName.toUpperCase()
+                  : "—"
+              }}
+            </div>
             <small>Signature over Printed Name of Immediate Supervisor</small>
           </div>
         </div>
@@ -809,7 +817,7 @@ async function submitAssessment() {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap");
 /* ── Privacy Modal ── */
 .privacy-overlay {
   position: fixed;

@@ -147,7 +147,6 @@ export class PdfService {
       <div class="ro-field"><div class="ro-label">Office Affiliation</div><div class="ro-value">${this.safe(idp.officeAffiliation)}</div></div>
       <div class="ro-field span-2"><div class="ro-label">College / Office / Unit</div><div class="ro-value">${this.safe(idp.collegeOfficeUnit)}${idp.collegeProgram ? ' — ' + this.safe(idp.collegeProgram) : ''}</div></div>
       <div class="ro-field"><div class="ro-label">Name of Personnel</div><div class="ro-value">${this.safe(employeeName)}</div></div>
-      <div class="ro-field"><div class="ro-label">Date Prepared</div><div class="ro-value">${this.safe(idp.datePrepared)}</div></div>
       <div class="ro-field span-2"><div class="ro-label">Highest Educational Attainment</div><div class="ro-value">${this.safe(idp.educAttainment)}${idp.educAttainmentSpec ? ' — ' + this.safe(idp.educAttainmentSpec) : ''}</div></div>
       <div class="ro-field"><div class="ro-label">Current Position</div><div class="ro-value">${this.safe(idp.currentPosition)}</div></div>
       <div class="ro-field"><div class="ro-label">Designation</div><div class="ro-value">${this.safe(idp.designation)}</div></div>
@@ -652,7 +651,6 @@ export class PdfService {
       <div class="info-field span-2"><div class="info-label">Office / Unit / College</div><div class="info-value">${s(officeName)}</div></div>
       <div class="info-field"><div class="info-label">Head of Unit</div><div class="info-value">${s(lna.headOfUnit)}</div></div>
       <div class="info-field"><div class="info-label">Position / Designation</div><div class="info-value">${s(lna.position)}</div></div>
-      <div class="info-field"><div class="info-label">Date Prepared</div><div class="info-value">${s(lna.datePrepared)}</div></div>
       <div class="info-field"><div class="info-label">Year Covered</div><div class="info-value">${s(lna.yearCovered)}</div></div>
       <div class="info-field"><div class="info-label">Total Personnel in Your Office</div><div class="info-value">${s(lna.totalPersonnel)}</div></div>
       <div class="info-field span-2"><div class="info-label">Purpose</div><div class="info-value">${s(lna.purpose)}</div></div>
