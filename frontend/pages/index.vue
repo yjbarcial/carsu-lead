@@ -25,6 +25,7 @@
         </p>
         <div class="hero-pills">
           <span class="pill">IDP</span>
+          <span class="pill pill-teal">Edit IDP</span>
           <span class="pill">LNA / USWAG</span>
           <span class="pill pill-orange">HR Dashboard</span>
         </div>
@@ -61,6 +62,29 @@
           <div class="card-foot">
             <span class="card-meta">2-stage submission</span>
             <span class="card-cta cta-gold">Open Form <span class="arr">→</span></span>
+          </div>
+        </NuxtLink>
+
+        <!-- Edit IDP -->
+        <NuxtLink to="/idp-edit" class="card">
+          <div class="card-bar bar-teal"></div>
+          <div class="card-icon icon-teal">
+            <svg viewBox="0 0 40 40" fill="none">
+              <rect x="6" y="4" width="28" height="34" rx="3" stroke="currentColor" stroke-width="2.2"/>
+              <path d="M13 13h14M13 19h14M13 25h9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+              <path d="M24 30l4-4 3 3-4 4-3-3z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M28 26l2-2 2 2-2 2-2-2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="card-tag tag-teal">For Employees</div>
+          <h2 class="card-title">Edit Your IDP</h2>
+          <p class="card-desc">
+            Already submitted your IDP? Retrieve it using your Reference ID and
+            CarSU email to make changes before your supervisor completes their review.
+          </p>
+          <div class="card-foot">
+            <span class="card-meta">Requires Reference ID</span>
+            <span class="card-cta cta-teal">Edit IDP <span class="arr">→</span></span>
           </div>
         </NuxtLink>
 
@@ -312,6 +336,11 @@ a { text-decoration: none; }
   letter-spacing: 0.06em;
   background: rgba(255, 204, 0, 0.06);
 }
+.pill-teal {
+  border-color: rgba(0, 160, 160, 0.45);
+  color: rgba(0, 200, 200, 0.9);
+  background: rgba(0, 160, 160, 0.07);
+}
 .pill-orange {
   border-color: rgba(255, 153, 0, 0.45);
   color: rgba(255, 153, 0, 0.85);
@@ -381,6 +410,7 @@ a { text-decoration: none; }
   height: 4px;
   border-radius: 16px 16px 0 0;
 }
+.bar-teal   { background: linear-gradient(90deg, #009999, #00cccc); }
 .bar-gold   { background: linear-gradient(90deg, #ffcc00, #ffdd44); }
 .bar-orange { background: linear-gradient(90deg, #ff9900, #ffbb44); }
 .bar-green  { background: linear-gradient(90deg, #137300, #1ea300); }
@@ -394,11 +424,13 @@ a { text-decoration: none; }
   flex-shrink: 0;
 }
 .card-icon svg { width: 26px; height: 26px; }
+.icon-teal  { background: #e6fafa; border: 1.5px solid #99dddd; color: #007a7a; }
 .icon-gold   { background: #fffbea; border: 1.5px solid #ffe566; color: #b89400; }
 .icon-orange { background: #fff5e6; border: 1.5px solid #ffd088; color: #cc7700; }
 .icon-green  { background: rgba(19, 115, 0, 0.18); border: 1.5px solid rgba(19, 115, 0, 0.35); color: #5adc3a; }
 
 .card-tag { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.tag-teal   { color: #007a7a; }
 .tag-gold   { color: #b89400; }
 .tag-orange { color: #cc7700; }
 .tag-green  { color: #5adc3a; }
@@ -436,6 +468,7 @@ a { text-decoration: none; }
   gap: 4px;
   transition: gap 0.2s ease;
 }
+.cta-teal   { color: #007a7a; }
 .cta-gold   { color: #b89400; }
 .cta-orange { color: #cc7700; }
 .cta-green  { color: #5adc3a; }

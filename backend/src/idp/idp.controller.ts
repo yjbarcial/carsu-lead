@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Param, Res } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Body,
+  Param,
+  Query,
+  Res,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import type { Response } from 'express';
 import { IdpService } from './idp.service';
 
@@ -20,7 +31,7 @@ export class IdpController {
     return this.idpService.findAll();
   }
 
-  // ── Suggestions (HEI / Pro-ACT) — static segments, must come before :refId ──
+  // ── Suggestions (HEI / Pro-ACT) — static segments before :refId ────────
 
   @Get('suggestions/:type')
   getSuggestions(@Param('type') type: string) {
@@ -32,7 +43,7 @@ export class IdpController {
     return this.idpService.saveSuggestion(type, body.value);
   }
 
-  // ── Static-segment routes MUST come before :refId to avoid conflicts ────
+  // ── Supervisor token routes — static segments before :refId ────────────
 
   @Get('by-token/:token')
   findByToken(@Param('token') token: string) {
@@ -59,6 +70,96 @@ export class IdpController {
       'Content-Length': buffer.length,
     });
     res.end(buffer);
+  }
+
+  /**
+   * Employee edit — identity check.
+   * GET /api/idp/:refId/edit-check?email=xxx
+   * Returns the record if refId + email match and status is not COMPLETE.
+   * Returns 404 if not found, 403 if locked or wrong email.
+   */
+  @Get(':refId/edit-check')
+  async editCheck(
+    @Param('refId') refId: string,
+    @Query('email') email: string,
+    @Res() res: Response,
+  ) {
+    if (!email) {
+      res
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ message: 'Email is required.' });
+      return;
+    }
+    const result = await this.idpService.getForEdit(refId, email);
+    if (result === 'not_found') {
+      res
+        .status(HttpStatus.NOT_FOUND)
+        .json({ message: 'No IDP found with that Reference ID.' });
+      return;
+    }
+    if (result === 'wrong_email') {
+      res
+        .status(HttpStatus.FORBIDDEN)
+        .json({ message: 'Email does not match this IDP record.' });
+      return;
+    }
+    if (result === 'locked') {
+      res
+        .status(HttpStatus.FORBIDDEN)
+        .json({
+          message:
+            'This IDP has already been reviewed by your supervisor and can no longer be edited.',
+        });
+      return;
+    }
+    res.status(HttpStatus.OK).json(result);
+  }
+
+  /**
+   * Employee edit — submit updated form.
+   * PATCH /api/idp/:refId
+   * Body must include { email, ...formFields }
+   */
+  @Patch(':refId')
+  @HttpCode(HttpStatus.OK)
+  async updateByEmployee(
+    @Param('refId') refId: string,
+    @Body() body: any,
+    @Res() res: Response,
+  ) {
+    if (!body.email) {
+      res
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ message: 'Email is required.' });
+      return;
+    }
+    const result = await this.idpService.updateByEmployee(
+      refId,
+      body.email,
+      body,
+    );
+    if (result === 'not_found') {
+      res
+        .status(HttpStatus.NOT_FOUND)
+        .json({ message: 'No IDP found with that Reference ID.' });
+      return;
+    }
+    if (result === 'wrong_email') {
+      res
+        .status(HttpStatus.FORBIDDEN)
+        .json({ message: 'Email does not match this IDP record.' });
+      return;
+    }
+    if (result === 'locked') {
+      res
+        .status(HttpStatus.FORBIDDEN)
+        .json({
+          message:
+            'This IDP has already been reviewed and can no longer be edited.',
+        });
+      return;
+    }
+    res.status(HttpStatus.OK).json(result);
   }
 
   @Get(':refId')

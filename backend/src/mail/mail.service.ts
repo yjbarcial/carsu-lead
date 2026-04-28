@@ -230,6 +230,123 @@ export class MailService {
     }
   }
 
+  // ── Sent to the employee after they edit/resubmit their IDP ─────────────
+  async sendEmployeeEditConfirmation(opts: {
+    to: string;
+    name: string;
+    refId: string;
+    supervisorName: string;
+  }) {
+    try {
+      await this.mailer.sendMail({
+        to: opts.to,
+        subject: `[CarSU LeaD] IDP Updated — Reference ID: ${opts.refId}`,
+        html: `
+          <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;border:1px solid #ddd;border-radius:8px;overflow:hidden;">
+            <div style="background:#003300;padding:24px 32px;">
+              <h2 style="color:#ffcc00;margin:0;">CarSU LeaD System</h2>
+              <p style="color:#cce6cc;margin:4px 0 0;">Learning &amp; Development — IDP Updated</p>
+            </div>
+            <div style="padding:28px 32px;">
+              <p>Dear <strong>${opts.name}</strong>,</p>
+              <p>Your Individual Development Plan (IDP) has been successfully updated and resubmitted for review by your supervisor.</p>
+
+              <div style="background:#f5f5f5;border-left:4px solid #003300;padding:16px 20px;border-radius:4px;margin:20px 0;">
+                <p style="margin:0 0 8px;font-size:13px;color:#666;">REFERENCE ID</p>
+                <p style="margin:0;font-size:22px;font-weight:bold;letter-spacing:2px;color:#003300;">${opts.refId}</p>
+              </div>
+
+              <p>Your supervisor (<strong>${opts.supervisorName}</strong>) has been notified of the update and will receive a separate email to re-review your submission.</p>
+              <p>Please keep your Reference ID for your records.</p>
+
+              <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
+              <p style="font-size:12px;color:#999;">This is an automated message from the CarSU HRMS LeaD System. Please do not reply to this email.</p>
+              <p style="font-size:12px;color:#999;">Caraga State University — Office of Human Resource Management Services</p>
+            </div>
+          </div>
+        `,
+      });
+      this.logger.log(`Edit confirmation email sent to ${opts.to}`);
+    } catch (err) {
+      this.logger.error(
+        `Failed to send edit confirmation to ${opts.to}: ${err.message}`,
+      );
+    }
+  }
+
+  // ── Sent to the supervisor when an IDP is edited and resubmitted ──────────
+  async sendSupervisorRenotification(opts: {
+    to: string;
+    supervisorName: string;
+    employeeName: string;
+    refId: string;
+    position: string;
+    officeUnit: string;
+    reviewUrl: string;
+  }) {
+    try {
+      await this.mailer.sendMail({
+        to: opts.to,
+        subject: `[CarSU LeaD] IDP Updated — Re-review Required for ${opts.employeeName}`,
+        html: `
+          <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;border:1px solid #ddd;border-radius:8px;overflow:hidden;">
+            <div style="background:#003300;padding:24px 32px;">
+              <h2 style="color:#ffcc00;margin:0;">CarSU LeaD System</h2>
+              <p style="color:#cce6cc;margin:4px 0 0;">Learning &amp; Development — Supervisor Re-review Required</p>
+            </div>
+            <div style="padding:28px 32px;">
+              <p>Dear <strong>${opts.supervisorName}</strong>,</p>
+              <p>An Individual Development Plan (IDP) you previously reviewed has been updated and requires your re-review.</p>
+
+              <div style="background:#f5f5f5;border-radius:6px;padding:16px 20px;margin:20px 0;">
+                <table style="width:100%;font-size:14px;border-collapse:collapse;">
+                  <tr>
+                    <td style="padding:6px 0;color:#666;width:40%;">Employee</td>
+                    <td style="padding:6px 0;font-weight:bold;">${opts.employeeName}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:6px 0;color:#666;">Position</td>
+                    <td style="padding:6px 0;">${opts.position}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:6px 0;color:#666;">Office / Unit</td>
+                    <td style="padding:6px 0;">${opts.officeUnit}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:6px 0;color:#666;">Reference ID</td>
+                    <td style="padding:6px 0;font-weight:bold;letter-spacing:1px;">${opts.refId}</td>
+                  </tr>
+                </table>
+              </div>
+
+              <p>Please use the reference ID or visit the link below to re-review the updated IDP:</p>
+
+              <div style="text-align:center;margin:24px 0;">
+                <a href="${opts.reviewUrl}"
+                   style="background:#003300;color:#ffcc00;padding:12px 32px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:15px;display:inline-block;">
+                  Review Updated IDP
+                </a>
+              </div>
+
+              <p style="font-size:13px;color:#666;">Or copy this link into your browser:<br>
+                <a href="${opts.reviewUrl}" style="color:#003300;">${opts.reviewUrl}</a>
+              </p>
+
+              <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
+              <p style="font-size:12px;color:#999;">This is an automated message from the CarSU HRMS LeaD System. Please do not reply to this email.</p>
+              <p style="font-size:12px;color:#999;">Caraga State University — Office of Human Resource Management Services</p>
+            </div>
+          </div>
+        `,
+      });
+      this.logger.log(`Supervisor re-notification sent to ${opts.to}`);
+    } catch (err) {
+      this.logger.error(
+        `Failed to send supervisor re-notification to ${opts.to}: ${err.message}`,
+      );
+    }
+  }
+
   // ── Sent to HR after LNA submission (with PDF attachment) ────────────────
   async sendLnaHrNotification(opts: {
     refId: string;
