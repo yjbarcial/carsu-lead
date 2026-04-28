@@ -8,7 +8,11 @@ import { PdfModule } from '../pdf/pdf.module';
 import { IdpSuggestion } from './idp-suggestion.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Idp]), MailModule, PdfModule, IdpSuggestion],
+  imports: [
+    TypeOrmModule.forFeature([Idp, IdpSuggestion]),
+    MailModule,
+    PdfModule,
+  ],
   controllers: [IdpController],
   providers: [IdpService],
 })
