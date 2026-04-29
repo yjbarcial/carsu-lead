@@ -249,6 +249,7 @@
               >
                 {{ opt }}
               </option>
+              <option value="__others__">Others / Specify</option>
             </select>
             <input
               v-else
@@ -256,6 +257,15 @@
               v-model="form.collegeOfficeUnit"
               :class="{ error: errors.collegeOfficeUnit }"
               placeholder="Type your college / office / unit"
+            />
+            <input
+              v-if="form.collegeOfficeUnit === '__others__'"
+              type="text"
+              v-model="form.collegeOfficeUnitOther"
+              :class="{ error: errors.collegeOfficeUnit }"
+              placeholder="Please specify your office / unit…"
+              style="margin-top: 8px"
+              @input="form.collegeOfficeUnitOther = form.collegeOfficeUnitOther.toUpperCase()"
             />
           </div>
           <!-- Program selector — only for OVPAA colleges with programs -->
@@ -308,7 +318,7 @@
                 v-model="form.middleInitial"
                 :class="{ error: errors.middleInitial }"
                 placeholder="A"
-                maxlength="3"
+                maxlength="1"
                 @input="form.middleInitial = form.middleInitial.toUpperCase()"
               />
             </div>
@@ -730,10 +740,10 @@
                 <tr>
                   <th style="width: 40px">No.</th>
                   <th style="min-width: 180px">Target Competency</th>
-                  <th style="width: 150px">Current Level</th>
-                  <th style="width: 150px">Required Level</th>
+                  <th style="width: 90px">Current Level</th>
+                  <th style="width: 90px">Required Level</th>
                   <th>Suggested LeaD Interventions</th>
-                  <th style="width: 120px">Target Timeline</th>
+                  <th style="width: 90px">Target Timeline</th>
                   <th style="width: 40px"></th>
                 </tr>
               </thead>
@@ -783,7 +793,6 @@
                     <template v-if="form.currentPosition === 'Director'">
                       <select
                         v-model="row.requiredLevel"
-                        style="min-width: 130px"
                       >
                         <option value="">Select…</option>
                         <option value="1 - Basic">1 - Basic</option>
@@ -891,9 +900,9 @@
                   <th style="width: 40px">No.</th>
                   <th>Degree Program</th>
                   <th style="min-width: 200px">Target HEI</th>
-                  <th style="width: 90px">Mode of Study</th>
+                  <th style="width: 80px">Mode of Study</th>
                   <th style="min-width: 180px">Target Scholarship Grant</th>
-                  <th style="width: 130px">Intended Year of Enrollment</th>
+                  <th style="width: 80px">Intended Year of Enrollment</th>
                   <th style="width: 40px"></th>
                 </tr>
               </thead>
@@ -920,6 +929,9 @@
                     <datalist id="hei-suggestions">
                       <option v-for="s in heiSuggestions" :key="s" :value="s" />
                     </datalist>
+                    <small class="field-hint" style="color: #c0392b; font-style: italic; margin-top: 3px;">
+  ⚠ Do not abbreviate.
+</small>
                   </td>
                   <td>
                     <select v-model="row.modeOfStudy">
@@ -1002,9 +1014,9 @@
                     >
                   </th>
                   <th>Training / LeaD Intervention</th>
-                  <th style="width: 130px">Mode of Activity</th>
+                  <th style="width: 80px">Mode of Activity</th>
                   <th>Trainer / Provider</th>
-                  <th style="width: 130px">Intended Year of Enrollment</th>
+                  <th style="width: 80px">Intended Year of Enrollment</th>
                   <th style="width: 40px"></th>
                 </tr>
               </thead>
@@ -1033,19 +1045,35 @@
                     <div class="proact-skill-label">{{ competency }}</div>
                   </td>
                   <td>
+                    <select v-model="proactRows[idx].trainingTitle">
+                      <option value="">Select…</option>
+                      <optgroup label="On-the-Job Learning">
+                        <option>Observation / Demonstration</option>
+                        <option>Delegation</option>
+                        <option>Coaching</option>
+                        <option>Mentoring</option>
+                        <option>Deployment</option>
+                        <option>Job Rotation / Assignment</option>
+                        <option>Detail and Secondment</option>
+                        <option>Reading</option>
+                        <option>Flexible Learning</option>
+                        <option>Brainstorming / Group Discussion</option>
+                        <option>Experiential Learning</option>
+                      </optgroup>
+                      <optgroup label="Off-the-Job Learning">
+                        <option>Special Short Courses and Lectures</option>
+                        <option>Conferences, Training Programs, Conventions, Seminars, and Cum Paper Presentations</option>
+                        <option>Pursue Higher Education</option>
+                      </optgroup>
+                      <option value="__others__">Others / Specify</option>
+                    </select>
                     <input
+                      v-if="proactRows[idx].trainingTitle === '__others__'"
                       type="text"
-                      v-model="proactRows[idx].trainingTitle"
-                      placeholder="Enter training or intervention title"
-                      list="proact-suggestions"
+                      v-model="proactRows[idx].trainingTitleOther"
+                      placeholder="Please specify…"
+                      style="margin-top: 6px"
                     />
-                    <datalist id="proact-suggestions">
-                      <option
-                        v-for="s in proactSuggestions"
-                        :key="s"
-                        :value="s"
-                      />
-                    </datalist>
                   </td>
                   <td>
                     <select v-model="proactRows[idx].modeOfActivity">
@@ -1222,7 +1250,7 @@
                 <th>Required Level</th>
                 <th>Suggested LeaD Interventions</th>
                 <th>Resource / Support Needed</th>
-                <th>Target Timeline</th>
+                <th>Target Year of Enrollment</th>
               </tr>
             </thead>
             <tbody>
@@ -1262,7 +1290,7 @@
                 <th>Mode of Study</th>
                 <th>Source of Funding</th>
                 <th>Target Scholarship Grant</th>
-                <th>Target Timeline</th>
+                <th>Intended Year of Enrollment</th>
               </tr>
             </thead>
             <tbody>
@@ -1582,6 +1610,7 @@ const form = reactive({
   campus: "CSU Main Campus",
   officeAffiliation: "",
   collegeOfficeUnit: "",
+  collegeOfficeUnitOther: "",
   collegeProgram: "",
   personnelType: "", // "non-teaching" | "teaching"
   lastName: "",
@@ -1634,6 +1663,7 @@ const agapRows = ref([
 const proactRows = ref([
   {
     trainingTitle: "",
+    trainingTitleOther: "",
     targetSkill: "",
     modeOfActivity: "",
     trainerProvider: "",
@@ -1795,6 +1825,7 @@ watch(
   () => form.officeAffiliation,
   (newOffice) => {
     form.collegeOfficeUnit = "";
+    form.collegeOfficeUnitOther = "";
     form.collegeProgram = "";
     form.currentPosition = "";
     // OVPAA: let user pick Teaching or Non-Teaching. All other offices: always non-teaching.
@@ -1850,6 +1881,7 @@ const filledCompetencies = computed(() => {
   while (proactRows.value.length < list.length) {
     proactRows.value.push({
       trainingTitle: "",
+      trainingTitleOther: "",
       targetSkill: "",
       modeOfActivity: "",
       trainerProvider: "",
@@ -4207,6 +4239,14 @@ function validateStage1() {
     alert("Please select an Office Affiliation.");
     ok = false;
   }
+  // If "Others / Specify" chosen for College/Office/Unit, require the text input
+  if (
+    form.collegeOfficeUnit === "__others__" &&
+    !form.collegeOfficeUnitOther?.trim()
+  ) {
+    errors["collegeOfficeUnit"] = true;
+    ok = false;
+  }
   if (!form.headerPurpose) {
     alert("Please select a Purpose.");
     ok = false;
@@ -4234,7 +4274,10 @@ async function submitStage1() {
     employeeEmail: form.employeeEmail,
     campus: "CSU Main Campus",
     officeAffiliation: form.officeAffiliation,
-    collegeOfficeUnit: form.collegeOfficeUnit,
+    collegeOfficeUnit:
+      form.collegeOfficeUnit === "__others__"
+        ? form.collegeOfficeUnitOther || "Others"
+        : form.collegeOfficeUnit,
     nameOfPersonnel: [form.lastName, form.firstName, form.middleInitial]
       .filter(Boolean)
       .join(", "),
@@ -4256,7 +4299,14 @@ async function submitStage1() {
       ...r,
     })),
     agapRows: agapRows.value.map((r, i) => ({ priority: i + 1, ...r })),
-    proactRows: proactRows.value.map((r, i) => ({ priority: i + 1, ...r })),
+    proactRows: proactRows.value.map((r, i) => ({
+      priority: i + 1,
+      ...r,
+      trainingTitle:
+        r.trainingTitle === "__others__"
+          ? r.trainingTitleOther || "Others"
+          : r.trainingTitle,
+    })),
   };
 
   isLoading.value = true;

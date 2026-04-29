@@ -246,7 +246,7 @@ a { text-decoration: none; }
 .hero {
   position: relative;
   background: #003300;
-  padding: 80px 32px 88px;
+  padding: 20px 32px 48px;
   text-align: center;
   overflow: hidden;
 }
@@ -351,7 +351,7 @@ a { text-decoration: none; }
 .main {
   max-width: 1140px;
   margin: 0 auto;
-  padding: 64px 24px 88px;
+  padding: 40px 24px 88px;
 }
 
 /* ── SECTION HEAD ────────────────────────────────────── */
@@ -547,7 +547,7 @@ a { text-decoration: none; }
 @media (max-width: 640px) {
   .header { padding: 12px 16px; }
   .header-label-bot { font-size: 13px; }
-  .hero { padding: 56px 20px 64px; }
+  .hero { padding: 16px 20px 40px; }
   .main { padding: 40px 16px 60px; }
   .card, .help-card { padding: 24px 18px 18px; }
   .grid { grid-template-columns: 1fr; }

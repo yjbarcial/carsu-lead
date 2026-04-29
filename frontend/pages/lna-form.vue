@@ -217,12 +217,21 @@
                 >
                   {{ opt }}
                 </option>
+                <option value="__others__">Others / Specify</option>
               </select>
               <input
                 v-else
                 type="text"
                 v-model="form.unitOfficeCollege"
                 placeholder="e.g. College of Engineering"
+              />
+              <input
+                v-if="form.unitOfficeCollege === '__others__'"
+                type="text"
+                v-model="form.unitOfficeCollegeOther"
+                placeholder="Please specify your office / unit…"
+                style="margin-top: 8px"
+                @input="autoCapitalize('unitOfficeCollegeOther', $event)"
               />
             </div>
 
@@ -275,7 +284,7 @@
                     type="text"
                     v-model="form.headMiddleInitial"
                     placeholder="A"
-                    maxlength="3"
+                    maxlength="1"
                     @input="autoCapitalize('headMiddleInitial', $event)"
                   />
                 </div>
@@ -285,7 +294,48 @@
             <!-- Position / Designation -->
             <div class="field-group">
               <label>Position <span class="req">*</span></label>
+              <!-- Campus Director: free-text input, auto-capitalized -->
+              <input
+                v-if="form.officeAffiliation === 'Campus Director'"
+                type="text"
+                v-model="form.position"
+                placeholder="Enter your position…"
+                @input="autoCapitalize('position', $event)"
+              />
+              <!-- OVPAF / OVPEO / OVPRDIE / OVPSAS: dropdown + Others/Specify -->
+              <template
+                v-else-if="
+                  ['OVPAF', 'OVPEO', 'OVPRDIE', 'OVPSAS'].includes(
+                    form.officeAffiliation,
+                  )
+                "
+              >
+                <select
+                  v-model="form.position"
+                  :disabled="!form.officeAffiliation"
+                >
+                  <option value="">Select position…</option>
+                  <option
+                    v-for="opt in positionOptions"
+                    :key="opt"
+                    :value="opt"
+                  >
+                    {{ opt }}
+                  </option>
+                  <option value="__others__">Others / Specify</option>
+                </select>
+                <input
+                  v-if="form.position === '__others__'"
+                  type="text"
+                  v-model="form.positionOther"
+                  placeholder="Please specify your position…"
+                  style="margin-top: 8px"
+                  @input="autoCapitalize('positionOther', $event)"
+                />
+              </template>
+              <!-- OVPAA: plain dropdown (Dean, Chairperson, Director) -->
               <select
+                v-else
                 v-model="form.position"
                 :disabled="
                   !form.officeAffiliation ||
@@ -445,25 +495,13 @@
                 <tbody>
                   <tr v-for="level in visiblePositionLevels" :key="level.key">
                     <td class="row-label">
-                      <div class="level-tooltip-wrap">
+                      <div
+                        class="level-tooltip-wrap"
+                        @mouseenter="showTooltip($event, level.key)"
+                        @mouseleave="hideTooltip"
+                      >
                         {{ level.label }}
                         <span class="level-tooltip-icon">?</span>
-                        <div class="level-tooltip-box">
-                          <div class="tooltip-desc">
-                            {{ positionLevelInfo[level.key].description }}
-                          </div>
-                          <div class="tooltip-samples-label">
-                            Sample Positions:
-                          </div>
-                          <ul class="tooltip-samples">
-                            <li
-                              v-for="s in positionLevelInfo[level.key].samples"
-                              :key="s"
-                            >
-                              {{ s }}
-                            </li>
-                          </ul>
-                        </div>
                       </div>
                     </td>
                     <td v-for="t in employmentTypeKeys" :key="t">
@@ -971,17 +1009,12 @@
                       </div>
                     </td>
 
-                    <!-- ══ UPDATED: INTERVENTION TAG DROPDOWN ══ -->
+                    <!-- ══ UPDATED: INTERVENTION TAG DROPDOWN (portal) ══ -->
                     <td>
-                      <div
-                        class="intervention-dropdown"
-                        :class="{ open: row._interventionOpen }"
-                      >
+                      <div class="intervention-dropdown">
                         <!-- Tags displayed ABOVE the trigger -->
                         <div
-                          v-if="
-                            row.interventions && row.interventions.length > 0
-                          "
+                          v-if="row.interventions && row.interventions.length > 0"
                           class="intervention-tags"
                         >
                           <span
@@ -1007,10 +1040,9 @@
 
                         <!-- Trigger button -->
                         <div
-                          class="intervention-trigger"
-                          @click="
-                            row._interventionOpen = !row._interventionOpen
-                          "
+                          class="intervention-trigger intervention-trigger-portal"
+                          :class="{ open: interventionPortal.visible && interventionPortal.rowIndex === idx }"
+                          @click.stop="openInterventionPortal($event, idx)"
                         >
                           <span class="intervention-placeholder">
                             {{
@@ -1022,68 +1054,10 @@
                           <svg
                             viewBox="0 0 24 24"
                             class="intervention-chevron"
-                            :class="{ rotated: row._interventionOpen }"
+                            :class="{ rotated: interventionPortal.visible && interventionPortal.rowIndex === idx }"
                           >
                             <polyline points="6 9 12 15 18 9" />
                           </svg>
-                        </div>
-
-                        <!-- Full panel — no scroll, all options visible at once -->
-                        <div
-                          v-if="row._interventionOpen"
-                          class="intervention-menu"
-                        >
-                          <div class="intervention-group-label">
-                            On-the-Job Learning
-                          </div>
-                          <label
-                            v-for="opt in interventionOptionsOJT"
-                            :key="opt"
-                            class="intervention-option"
-                            :class="{
-                              checked:
-                                row.interventions &&
-                                row.interventions.includes(opt),
-                            }"
-                            @click.stop
-                          >
-                            <input
-                              type="checkbox"
-                              :value="opt"
-                              v-model="row.interventions"
-                            />
-                            {{ opt }}
-                          </label>
-                          <div class="intervention-group-label">
-                            Off-the-Job Learning
-                          </div>
-                          <label
-                            v-for="opt in interventionOptionsOffJT"
-                            :key="opt"
-                            class="intervention-option"
-                            :class="{
-                              checked:
-                                row.interventions &&
-                                row.interventions.includes(opt),
-                            }"
-                            @click.stop
-                          >
-                            <input
-                              type="checkbox"
-                              :value="opt"
-                              v-model="row.interventions"
-                            />
-                            {{ opt }}
-                          </label>
-                          <div class="intervention-close-row">
-                            <button
-                              type="button"
-                              class="intervention-done-btn"
-                              @click="row._interventionOpen = false"
-                            >
-                              Done
-                            </button>
-                          </div>
                         </div>
                       </div>
                     </td>
@@ -1117,16 +1091,16 @@
                 data, and evidence gathered from the office.
               </p>
               <div class="field-group">
-                <label
-                  >Full Name of Rater / Head of Office
-                  <span class="req">*</span></label
+                <label>Full Name of Rater / Head of Office</label>
+                <div
+                  class="static-value"
+                  style="max-width: 400px; font-size: 15px; font-weight: 700; letter-spacing: 0.02em;"
                 >
-                <input
-                  type="text"
-                  v-model="form.raterFullName"
-                  placeholder="Enter full name"
-                  style="max-width: 400px"
-                />
+                  {{ form.raterFullName || '—' }}
+                </div>
+                <small class="field-hint" style="margin-top: 6px;">
+                  Auto-filled from Head of Unit/Office/College in Office Information. Update the name fields above to change this.
+                </small>
               </div>
               <small
                 style="
@@ -1147,20 +1121,348 @@
       <transition name="reveal">
         <div v-if="sectionDone.certification" class="submit-area">
           <p>
-            By submitting, you confirm that all information is accurate and
-            based on actual office data. HRMS will be notified immediately upon
-            submission.
+            Please review your submission before finalizing. You can go back and
+            edit any section if needed.
           </p>
           <button
             class="btn-submit"
+            :class="{ 'btn-clicked': clickedButtons['review-submit'] }"
             :disabled="isSubmitting"
-            @click="submitForm"
+            @click="openReview"
           >
-            Submit LNA
+            Review &amp; Submit
           </button>
         </div>
       </transition>
     </div>
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- REVIEW & CONFIRM SCREEN                         -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div v-if="screen === 'review'" class="container review-container">
+      <div class="review-header-block">
+        <div class="review-eyebrow">USWAG PLAN — Learning Needs Assessment</div>
+        <h2 class="review-title">Review Your Submission</h2>
+        <p class="review-subtitle">
+          Please verify all information below before submitting. Use the
+          <strong>Edit</strong> buttons to go back and make changes.
+        </p>
+      </div>
+
+      <!-- H: Office Information -->
+      <div class="review-card">
+        <div class="review-card-header">
+          <span class="review-card-num">H</span>
+          <span class="review-card-title">Office Information</span>
+          <button class="btn-review-edit" @click="backToForm()">Edit</button>
+        </div>
+        <div class="review-card-body">
+          <div class="review-grid">
+            <div class="review-field">
+              <span class="review-label">Email</span>
+              <span class="review-value">{{ form.submitterEmailPrefix }}@carsu.edu.ph</span>
+            </div>
+            <div class="review-field">
+              <span class="review-label">Campus</span>
+              <span class="review-value">CSU Main Campus</span>
+            </div>
+            <div class="review-field">
+              <span class="review-label">Office Affiliation</span>
+              <span class="review-value">{{ form.officeAffiliation }}</span>
+            </div>
+            <div class="review-field">
+              <span class="review-label">Unit / Office / College</span>
+              <span class="review-value">{{ reviewOfficeDisplay }}</span>
+            </div>
+            <div v-if="form.collegeProgram" class="review-field">
+              <span class="review-label">Program / Department</span>
+              <span class="review-value">{{ form.collegeProgram }}</span>
+            </div>
+            <div class="review-field">
+              <span class="review-label">Head of Unit / Office / College</span>
+              <span class="review-value">{{ form.raterFullName || '—' }}</span>
+            </div>
+            <div class="review-field">
+              <span class="review-label">Position</span>
+              <span class="review-value">{{ reviewPositionDisplay }}</span>
+            </div>
+            <div class="review-field">
+              <span class="review-label">Designation</span>
+              <span class="review-value">{{ form.designation || 'N/A' }}</span>
+            </div>
+            <div class="review-field">
+              <span class="review-label">Year Covered</span>
+              <span class="review-value">{{ form.yearCovered }}</span>
+            </div>
+            <div class="review-field">
+              <span class="review-label">Total Personnel</span>
+              <span class="review-value">{{ form.totalPersonnel }}</span>
+            </div>
+            <div class="review-field">
+              <span class="review-label">Purpose</span>
+              <span class="review-value">{{ form.purpose === 'Other' ? form.purposeOther : form.purpose }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- I: Workforce Profile -->
+      <div class="review-card">
+        <div class="review-card-header">
+          <span class="review-card-num">I</span>
+          <span class="review-card-title">Workforce Profile by Employment Classification and Position Level</span>
+          <button class="btn-review-edit" @click="backToForm()">Edit</button>
+        </div>
+        <div class="review-card-body">
+          <div class="review-table-wrap">
+            <table class="review-table">
+              <thead>
+                <tr>
+                  <th>Position Level</th>
+                  <th v-for="t in employmentTypes" :key="t">{{ t }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="lv in visiblePositionLevels" :key="lv.key">
+                  <td class="review-row-label">{{ lv.label }}</td>
+                  <td v-for="t in employmentTypeKeys" :key="t" style="text-align:center;">
+                    {{ workforce[lv.key][t] || 0 }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- II: Competency Summary -->
+      <div class="review-card">
+        <div class="review-card-header">
+          <span class="review-card-num">II</span>
+          <span class="review-card-title">Competency Mapping — Cluster Summary</span>
+          <button class="btn-review-edit" @click="backToForm()">Edit</button>
+        </div>
+        <div class="review-card-body">
+          <div
+            v-for="lvSummary in activeClusterSummary"
+            :key="lvSummary.levelKey"
+            style="margin-bottom: 24px;"
+          >
+            <div class="review-level-label">{{ lvSummary.levelLabel }}</div>
+            <div class="review-table-wrap">
+              <table class="review-table">
+                <thead>
+                  <tr>
+                    <th>Competency Cluster</th>
+                    <th>Strongest Competency</th>
+                    <th>Weakest Competency</th>
+                    <th>Intervention Needed?</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="c in lvSummary.rows" :key="c.cluster">
+                    <td class="review-row-label">{{ c.cluster }}</td>
+                    <td>{{ c.strongest || '—' }}</td>
+                    <td>{{ c.weakest || '—' }}</td>
+                    <td style="text-align:center;">
+                      <span :class="c.interventionNeeded === 'Yes' ? 'review-badge-yes' : 'review-badge-no'">
+                        {{ c.interventionNeeded || '—' }}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- III: Data Sources & Key Insights -->
+      <div class="review-card">
+        <div class="review-card-header">
+          <span class="review-card-num">III</span>
+          <span class="review-card-title">Data Sources &amp; Key Insights</span>
+          <button class="btn-review-edit" @click="backToForm()">Edit</button>
+        </div>
+        <div class="review-card-body">
+          <div class="review-field" style="margin-bottom: 16px;">
+            <span class="review-label">Selected Data Sources</span>
+            <div class="review-tags-row">
+              <span
+                v-for="src in form.selectedSources"
+                :key="src"
+                class="review-source-tag"
+              >{{ src === 'Others' ? (form.othersSourceText ? 'Others: ' + form.othersSourceText : 'Others') : src }}</span>
+            </div>
+          </div>
+          <div v-if="insightRows.length > 0" class="review-table-wrap">
+            <table class="review-table">
+              <thead>
+                <tr>
+                  <th style="width:36px">No.</th>
+                  <th>Data Source</th>
+                  <th>Identified Gap / Issue</th>
+                  <th>Relevant Personnel</th>
+                  <th>Recommended Interventions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, idx) in insightRows" :key="row.dataSource">
+                  <td style="text-align:center; color:var(--text-light); font-weight:600;">{{ idx + 1 }}</td>
+                  <td class="review-row-label" style="white-space:normal; font-size:12px;">{{ row.dataSource }}</td>
+                  <td style="white-space:pre-wrap; font-size:12px;">{{ row.gap || '—' }}</td>
+                  <td style="font-size:12px;">
+                    <div v-if="row.personnel && row.personnel.length">
+                      <span v-for="p in row.personnel" :key="p" class="review-personnel-tag">{{ p }}</span>
+                    </div>
+                    <span v-else style="color:var(--text-light)">—</span>
+                  </td>
+                  <td style="font-size:12px;">
+                    <div v-if="row.interventions && row.interventions.length">
+                      <span v-for="iv in row.interventions" :key="iv" class="review-intervention-tag">{{ iv }}</span>
+                    </div>
+                    <span v-else style="color:var(--text-light)">—</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- IV: Certification -->
+      <div class="review-card">
+        <div class="review-card-header">
+          <span class="review-card-num">IV</span>
+          <span class="review-card-title">Certification</span>
+          <button class="btn-review-edit" @click="backToForm()">Edit</button>
+        </div>
+        <div class="review-card-body">
+          <div class="review-cert-box">
+            <p class="review-cert-text">
+              I hereby certify that the information provided in this Learning
+              Needs Assessment is accurate and based on actual observation,
+              data, and evidence gathered from the office.
+            </p>
+            <div class="review-cert-name">{{ form.raterFullName || '—' }}</div>
+            <div class="review-cert-sublabel">Signature over Printed Name of Rater / Head of Office</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Final Submission Action -->
+      <div class="review-submit-area">
+        <div class="review-submit-notice">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="review-notice-icon">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <p>
+            By clicking <strong>Confirm &amp; Submit</strong>, you certify that all
+            information is accurate and based on actual office data. This action cannot
+            be undone. HRMS will be notified immediately upon submission.
+          </p>
+        </div>
+        <div class="review-submit-actions">
+          <button
+            class="btn-review-back"
+            :class="{ 'btn-clicked': clickedButtons['back-edit'] }"
+            @click="markClicked('back-edit'); backToForm()"
+          >
+            ← Go Back &amp; Edit
+          </button>
+          <button
+            class="btn-submit"
+            :class="{ 'btn-clicked': clickedButtons['confirm-submit'] }"
+            :disabled="isSubmitting"
+            @click="markClicked('confirm-submit'); submitForm()"
+          >
+            <span v-if="isSubmitting">Submitting…</span>
+            <span v-else>Confirm &amp; Submit LNA</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ LEVEL TOOLTIP PORTAL (fixed, outside scroll) ══ -->
+    <Teleport to="body">
+      <div
+        v-if="tooltipPortal.visible && tooltipPortal.levelKey"
+        class="level-tooltip-portal"
+        :style="{ left: tooltipPortal.x + 'px', top: tooltipPortal.y + 'px' }"
+      >
+        <div class="tooltip-desc">
+          {{ positionLevelInfo[tooltipPortal.levelKey].description }}
+        </div>
+        <div class="tooltip-samples-label">Sample Positions:</div>
+        <ul class="tooltip-samples">
+          <li
+            v-for="s in positionLevelInfo[tooltipPortal.levelKey].samples"
+            :key="s"
+          >
+            {{ s }}
+          </li>
+        </ul>
+      </div>
+    </Teleport>
+
+    <!-- ══ INTERVENTION DROPDOWN PORTAL (fixed, outside scroll) ══ -->
+    <Teleport to="body">
+      <div
+        v-if="interventionPortal.visible && interventionPortal.rowIndex !== null"
+        id="intervention-portal"
+        class="intervention-menu-portal"
+        :style="{
+          left: interventionPortal.x + 'px',
+          top: interventionPortal.y + 'px',
+        }"
+        @click.stop
+      >
+        <div class="intervention-group-label">On-the-Job Learning</div>
+        <label
+          v-for="opt in interventionOptionsOJT"
+          :key="opt"
+          class="intervention-option"
+          :class="{
+            checked:
+              insightRows[interventionPortal.rowIndex]?.interventions?.includes(opt),
+          }"
+          @click.stop
+        >
+          <input
+            type="checkbox"
+            :value="opt"
+            v-model="insightRows[interventionPortal.rowIndex].interventions"
+          />
+          {{ opt }}
+        </label>
+        <div class="intervention-group-label">Off-the-Job Learning</div>
+        <label
+          v-for="opt in interventionOptionsOffJT"
+          :key="opt"
+          class="intervention-option"
+          :class="{
+            checked:
+              insightRows[interventionPortal.rowIndex]?.interventions?.includes(opt),
+          }"
+          @click.stop
+        >
+          <input
+            type="checkbox"
+            :value="opt"
+            v-model="insightRows[interventionPortal.rowIndex].interventions"
+          />
+          {{ opt }}
+        </label>
+        <div class="intervention-close-row">
+          <button
+            type="button"
+            class="intervention-done-btn"
+            @click="closeInterventionPortal"
+          >
+            Done
+          </button>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -1644,11 +1946,13 @@ const form = reactive({
   submitterEmail: "",
   officeAffiliation: "",
   unitOfficeCollege: "",
+  unitOfficeCollegeOther: "",
   collegeProgram: "",
   headLastName: "",
   headFirstName: "",
   headMiddleInitial: "",
   position: "",
+  positionOther: "",
   designation: "",
   designationMode: "",
   yearCovered: "",
@@ -1678,8 +1982,18 @@ const headOfUnitFull = computed(() => {
   const first = form.headFirstName.trim();
   const mi = form.headMiddleInitial.trim();
   const last = form.headLastName.trim();
+  // Format: First Name, Middle Initial., Last Name
   return [first, mi ? mi + "." : "", last].filter(Boolean).join(" ");
 });
+
+// Auto-sync raterFullName whenever head of unit name fields change
+watch(
+  headOfUnitFull,
+  (val) => {
+    form.raterFullName = val;
+  },
+  { immediate: true },
+);
 
 const positionOptions = computed(() => {
   if (form.officeAffiliation === "OVPAA") {
@@ -2076,6 +2390,37 @@ function validate() {
   return true;
 }
 
+// ── REVIEW SCREEN ──
+const reviewOfficeDisplay = computed(() => {
+  if (form.unitOfficeCollege === "__others__") return form.unitOfficeCollegeOther || "—";
+  return form.unitOfficeCollege || "—";
+});
+
+const reviewPositionDisplay = computed(() => {
+  if (form.position === "__others__") return form.positionOther || "—";
+  return form.position || "—";
+});
+
+// Tracks which buttons have been clicked (for persistent pale-yellow state)
+const clickedButtons = reactive({});
+
+function markClicked(id) {
+  clickedButtons[id] = true;
+}
+
+function openReview() {
+  if (!validate()) return;
+  markClicked("review-submit");
+  screen.value = "review";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function backToForm() {
+  delete clickedButtons["review-submit"];
+  screen.value = "form";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
 async function submitForm() {
   if (!validate()) return;
   isSubmitting.value = true;
@@ -2093,10 +2438,14 @@ async function submitForm() {
     submitterEmail: form.submitterEmail,
     campus: "CSU Main Campus",
     officeAffiliation: form.officeAffiliation,
-    office: form.unitOfficeCollege.trim(),
+    office: form.unitOfficeCollege === "__others__"
+      ? (form.unitOfficeCollegeOther || "Others").trim()
+      : form.unitOfficeCollege.trim(),
     collegeProgram: form.collegeProgram.trim(),
     headOfUnit: headOfUnitFull.value,
-    position: form.position.trim(),
+    position: form.position === "__others__"
+      ? (form.positionOther || "Others").trim()
+      : form.position.trim(),
     designation: form.designation.trim(),
     yearCovered: form.yearCovered.trim(),
     totalPersonnel: form.totalPersonnel,
@@ -2142,7 +2491,123 @@ async function submitForm() {
   }
 }
 
-onMounted(() => {});
+// ── LEVEL TOOLTIP PORTAL ──
+const tooltipPortal = reactive({
+  visible: false,
+  x: 0,
+  y: 0,
+  levelKey: null,
+});
+
+function showTooltip(event, levelKey) {
+  const rect = event.currentTarget.getBoundingClientRect();
+  tooltipPortal.visible = true;
+  tooltipPortal.levelKey = levelKey;
+
+  const TOOLTIP_WIDTH = 360;
+  const TOOLTIP_EST_HEIGHT = 320; // generous estimate so it never clips
+  const GAP = 8;
+  const VIEWPORT_W = window.innerWidth;
+  const VIEWPORT_H = window.innerHeight;
+
+  // Horizontal: prefer left-aligned to trigger, clamp so it never overflows right edge
+  let x = rect.left;
+  if (x + TOOLTIP_WIDTH > VIEWPORT_W - 12) {
+    x = VIEWPORT_W - TOOLTIP_WIDTH - 12;
+  }
+  if (x < 8) x = 8;
+
+  // Vertical: open below if there's room, otherwise flip above
+  let y;
+  const spaceBelow = VIEWPORT_H - rect.bottom - GAP;
+  const spaceAbove = rect.top - GAP;
+  if (spaceBelow >= TOOLTIP_EST_HEIGHT || spaceBelow >= spaceAbove) {
+    // enough room below — or more room below than above
+    y = rect.bottom + GAP;
+  } else {
+    // flip above: anchor bottom of tooltip to top of trigger
+    y = rect.top - GAP - TOOLTIP_EST_HEIGHT;
+    if (y < 8) y = 8;
+  }
+
+  tooltipPortal.x = x;
+  tooltipPortal.y = y;
+}
+
+function hideTooltip() {
+  tooltipPortal.visible = false;
+  tooltipPortal.levelKey = null;
+}
+
+// ── INTERVENTION PORTAL ──
+const interventionPortal = reactive({
+  visible: false,
+  x: 0,
+  y: 0,
+  rowIndex: null,
+});
+
+function openInterventionPortal(event, idx) {
+  const rect = event.currentTarget.getBoundingClientRect();
+  insightRows.forEach((r) => (r._interventionOpen = false));
+  if (interventionPortal.visible && interventionPortal.rowIndex === idx) {
+    closeInterventionPortal();
+    return;
+  }
+
+  const MENU_WIDTH = 340;
+  const MENU_EST_HEIGHT = 520; // covers all OJT + OffJT options with no scroll
+  const GAP = 6;
+  const VIEWPORT_W = window.innerWidth;
+  const VIEWPORT_H = window.innerHeight;
+
+  // Horizontal: align to trigger left, clamp to viewport
+  let x = rect.left;
+  if (x + MENU_WIDTH > VIEWPORT_W - 12) {
+    x = VIEWPORT_W - MENU_WIDTH - 12;
+  }
+  if (x < 8) x = 8;
+
+  // Vertical: prefer opening upward (above the trigger) since table rows are near bottom
+  const spaceAbove = rect.top - GAP;
+  const spaceBelow = VIEWPORT_H - rect.bottom - GAP;
+
+  let y;
+  if (spaceAbove >= MENU_EST_HEIGHT) {
+    // open above — bottom of menu sits at top of trigger
+    y = rect.top - MENU_EST_HEIGHT - GAP;
+  } else if (spaceBelow >= MENU_EST_HEIGHT) {
+    // open below only if there's genuinely enough space
+    y = rect.bottom + GAP;
+  } else {
+    // not enough space either way — anchor to top of viewport with a small margin
+    y = Math.max(8, rect.top - MENU_EST_HEIGHT - GAP);
+  }
+
+  interventionPortal.visible = true;
+  interventionPortal.rowIndex = idx;
+  interventionPortal.x = x;
+  interventionPortal.y = y;
+}
+
+function closeInterventionPortal() {
+  interventionPortal.visible = false;
+  interventionPortal.rowIndex = null;
+}
+
+onMounted(() => {
+  document.addEventListener("click", (e) => {
+    if (interventionPortal.visible) {
+      const portal = document.getElementById("intervention-portal");
+      const triggers = document.querySelectorAll(".intervention-trigger-portal");
+      let clickedInside = portal && portal.contains(e.target);
+      triggers.forEach((t) => {
+        if (t.contains(e.target)) clickedInside = true;
+      });
+      if (!clickedInside) closeInterventionPortal();
+    }
+  });
+});
 </script>
 
 <style scoped>
@@ -2243,6 +2708,17 @@ onMounted(() => {});
   text-decoration: none;
   display: flex;
   align-items: center;
+  cursor: pointer;
+  transition: background 0.18s, border-color 0.18s, color 0.18s;
+}
+.btn-privacy-decline:hover {
+  background: #f5f5f0;
+  border-color: #aaa;
+  color: #444;
+}
+.btn-privacy-decline:active {
+  background: #fdf9e3;
+  border-color: #e0c84a;
 }
 .btn-privacy-agree {
   padding: 10px 24px;
@@ -2253,7 +2729,16 @@ onMounted(() => {});
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: background 0.18s, transform 0.1s;
+}
+.btn-privacy-agree:not(:disabled):hover {
+  background: #2d6a3f;
+  transform: translateY(-1px);
+}
+.btn-privacy-agree:not(:disabled):active {
+  background: #fdf9e3;
+  color: #1a4d2e;
+  transform: none;
 }
 .btn-privacy-agree:disabled {
   opacity: 0.4;
@@ -2594,7 +3079,7 @@ textarea {
   border: 1.5px solid var(--border);
   border-radius: 8px;
   background: var(--input-bg);
-  transition: all 0.2s;
+  transition: all 0.18s;
   font-size: 13px;
   text-transform: none;
   letter-spacing: 0;
@@ -2605,6 +3090,10 @@ textarea {
   border-color: var(--navy);
   background: var(--white);
 }
+.checkbox-item:active {
+  background: #fdf9e3;
+  border-color: #e0c84a;
+}
 .checkbox-item input {
   width: auto;
   padding: 0;
@@ -2614,8 +3103,8 @@ textarea {
   cursor: pointer;
 }
 .checkbox-item.checked {
-  border-color: var(--navy);
-  background: rgba(26, 77, 46, 0.05);
+  border-color: #c8a800;
+  background: #fffbe6;
 }
 
 .other-specify {
@@ -2825,7 +3314,7 @@ textarea {
   background: var(--input-bg);
   font-size: 13px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.18s;
   text-transform: none;
   letter-spacing: 0;
   font-weight: 400;
@@ -2834,6 +3323,10 @@ textarea {
 .source-item:hover {
   border-color: var(--navy);
   background: var(--white);
+}
+.source-item:active {
+  background: #fdf9e3;
+  border-color: #e0c84a;
 }
 .source-item input {
   accent-color: var(--navy);
@@ -2845,8 +3338,8 @@ textarea {
   background: none;
 }
 .source-item.checked {
-  border-color: var(--navy);
-  background: rgba(26, 77, 46, 0.04);
+  border-color: #c8a800;
+  background: #fffbe6;
 }
 
 .certification-box {
@@ -2888,15 +3381,22 @@ textarea {
   cursor: pointer;
   letter-spacing: 0.03em;
   transition:
-    background 0.2s,
+    background 0.18s,
     transform 0.15s,
-    box-shadow 0.2s;
+    box-shadow 0.18s,
+    color 0.18s;
   box-shadow: 0 4px 16px rgba(26, 77, 46, 0.2);
 }
-.btn-submit:hover {
+.btn-submit:hover:not(:disabled) {
   background: var(--navy-mid);
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(26, 77, 46, 0.25);
+}
+.btn-submit:active:not(:disabled) {
+  background: #fdf9e3;
+  color: #1a4d2e;
+  transform: none;
+  box-shadow: 0 2px 8px rgba(26, 77, 46, 0.15);
 }
 .btn-submit:disabled {
   background: #aaa;
@@ -3058,13 +3558,18 @@ textarea {
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.18s;
   letter-spacing: 0.02em;
 }
 .comp-tab:hover {
   border-color: var(--navy);
   color: var(--navy);
   background: var(--white);
+}
+.comp-tab:active {
+  background: #fdf9e3;
+  border-color: #e0c84a;
+  color: #1a4d2e;
 }
 .comp-tab.active {
   background: var(--navy);
@@ -3090,10 +3595,14 @@ textarea {
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.18s, color 0.18s;
 }
 .btn-tab-nav:hover:not(:disabled) {
   background: var(--navy-mid);
+}
+.btn-tab-nav:active:not(:disabled) {
+  background: #fdf9e3;
+  color: #1a4d2e;
 }
 .btn-tab-nav:disabled {
   background: #ccc;
@@ -3231,9 +3740,13 @@ textarea {
   border-color: var(--navy, #1a4d2e);
   background: var(--white, #fff);
 }
+.personnel-check-item:active {
+  background: #fdf9e3;
+  border-color: #e0c84a;
+}
 .personnel-check-item.checked {
-  border-color: var(--navy, #1a4d2e);
-  background: rgba(26, 77, 46, 0.05);
+  border-color: #c8a800;
+  background: #fffbe6;
 }
 .personnel-check-item input[type="checkbox"] {
   width: auto;
@@ -3498,12 +4011,503 @@ textarea {
   cursor: pointer;
   letter-spacing: 0.03em;
   transition:
-    background 0.2s,
-    transform 0.1s;
+    background 0.18s,
+    transform 0.1s,
+    color 0.18s;
 }
 
 .intervention-done-btn:hover {
   background: var(--navy-mid);
   transform: translateY(-1px);
+}
+
+.intervention-done-btn:active {
+  background: #fdf9e3;
+  color: #1a4d2e;
+  transform: none;
+}
+
+/* ── Tooltip portal (fixed, outside any scroll) ── */
+.level-tooltip-portal {
+  position: fixed;
+  z-index: 9999;
+  width: 340px;
+  background: #fff;
+  border: 1.5px solid var(--border, #d8d4c8);
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(26, 77, 46, 0.15);
+  padding: 14px 16px;
+  font-weight: 400;
+  color: var(--text, #333);
+  pointer-events: none;
+}
+
+/* ── Intervention menu portal (fixed, outside scroll) ── */
+.intervention-menu-portal {
+  position: fixed;
+  z-index: 9999;
+  background: var(--white, #fff);
+  border: 1.5px solid var(--navy, #1a4d2e);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(26, 77, 46, 0.18);
+  min-width: 300px;
+}
+</style>
+
+<!-- Global styles for Teleport portals (must be non-scoped to apply outside component root) -->
+<style>
+/* ── Level tooltip portal ── */
+.level-tooltip-portal {
+  position: fixed;
+  z-index: 9999;
+  width: 360px;
+  background: #fff;
+  border: 1.5px solid #d8d4c8;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(26, 77, 46, 0.18);
+  padding: 14px 16px;
+  font-weight: 400;
+  color: #1a1a2e;
+  pointer-events: none;
+  font-family: "Roboto", sans-serif;
+  font-size: 13px;
+}
+.level-tooltip-portal .tooltip-desc {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #5a6070;
+  margin-bottom: 10px;
+}
+.level-tooltip-portal .tooltip-samples-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #1a4d2e;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+.level-tooltip-portal .tooltip-samples {
+  padding-left: 16px;
+  margin: 0;
+}
+.level-tooltip-portal .tooltip-samples li {
+  font-size: 12px;
+  color: #1a1a2e;
+  line-height: 1.7;
+}
+
+/* ── Persistent pale-yellow after click ── */
+.btn-clicked,
+.btn-clicked:hover,
+.btn-clicked:focus {
+  background: #fdf9e3 !important;
+  color: #1a4d2e !important;
+  border-color: #e0c84a !important;
+  box-shadow: 0 2px 8px rgba(224, 200, 74, 0.3) !important;
+  transform: none !important;
+}
+
+/* ── Intervention portal option active state ── */
+.intervention-option:active {
+  background: #fdf9e3 !important;
+}
+
+/* ══════════════════════════════════════════════════
+   REVIEW SCREEN
+   ══════════════════════════════════════════════════ */
+.review-container {
+  padding-top: 40px;
+  padding-bottom: 80px;
+}
+.review-header-block {
+  text-align: center;
+  margin-bottom: 36px;
+  padding-bottom: 28px;
+  border-bottom: 3px solid var(--navy);
+}
+.review-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 8px;
+}
+.review-title {
+  font-family: "Roboto", sans-serif;
+  font-size: 26px;
+  color: var(--navy);
+  margin-bottom: 8px;
+}
+.review-subtitle {
+  font-size: 14px;
+  color: var(--text-light);
+}
+.review-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+.review-card-header {
+  background: var(--navy);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.review-card-num {
+  background: var(--gold);
+  color: var(--navy);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.review-card-title {
+  color: var(--white);
+  font-size: 14px;
+  font-weight: 600;
+  flex: 1;
+}
+.btn-review-edit {
+  margin-left: auto;
+  padding: 5px 16px;
+  background: transparent;
+  border: 1.5px solid rgba(255,255,255,0.5);
+  border-radius: 7px;
+  color: var(--white);
+  font-family: "Roboto", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: background 0.18s, border-color 0.18s, color 0.18s;
+  flex-shrink: 0;
+}
+.btn-review-edit:hover {
+  background: rgba(255,255,255,0.15);
+  border-color: rgba(255,255,255,0.85);
+}
+.btn-review-edit:active {
+  background: #fdf9e3;
+  border-color: #e0c84a;
+  color: #1a4d2e;
+}
+.review-card-body {
+  padding: 24px 28px;
+}
+.review-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+.review-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.review-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.review-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+.review-table-wrap {
+  overflow-x: auto;
+  margin-top: 4px;
+}
+.review-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.review-table thead tr {
+  background: var(--navy-mid);
+}
+.review-table thead th {
+  padding: 9px 12px;
+  color: var(--white);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: left;
+  border-right: 1px solid rgba(255,255,255,0.1);
+  white-space: nowrap;
+}
+.review-table thead th:last-child { border-right: none; }
+.review-table tbody tr {
+  border-bottom: 1px solid var(--border);
+}
+.review-table tbody tr:nth-child(even) { background: #faf9f6; }
+.review-table tbody td {
+  padding: 8px 12px;
+  vertical-align: middle;
+  border-right: 1px solid var(--border);
+}
+.review-table tbody td:last-child { border-right: none; }
+.review-row-label {
+  font-weight: 600;
+  color: var(--navy-mid);
+  background: rgba(26,77,46,0.03) !important;
+  white-space: nowrap;
+}
+.review-level-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--navy);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+  padding: 5px 10px;
+  background: rgba(26,77,46,0.07);
+  border-left: 3px solid var(--navy);
+  border-radius: 0 4px 4px 0;
+}
+.review-badge-yes {
+  background: rgba(26,107,60,0.12);
+  color: #1a6b3c;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  display: inline-block;
+}
+.review-badge-no {
+  background: rgba(192,57,43,0.1);
+  color: #c0392b;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  display: inline-block;
+}
+.review-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+.review-source-tag {
+  background: rgba(26,77,46,0.08);
+  border: 1px solid rgba(26,77,46,0.2);
+  color: var(--navy);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+.review-personnel-tag {
+  display: inline-block;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  color: #3730a3;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin: 2px 3px 2px 0;
+}
+.review-intervention-tag {
+  display: inline-block;
+  background: rgba(26,77,46,0.08);
+  border: 1px solid rgba(26,77,46,0.2);
+  color: var(--navy);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin: 2px 3px 2px 0;
+}
+.review-cert-box {
+  background: rgba(201,168,76,0.08);
+  border: 1.5px solid var(--gold);
+  border-radius: 10px;
+  padding: 20px 24px;
+}
+.review-cert-text {
+  font-size: 13px;
+  color: var(--text-light);
+  font-style: italic;
+  margin-bottom: 14px;
+  line-height: 1.6;
+}
+.review-cert-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: 0.03em;
+  border-bottom: 2px solid var(--navy);
+  display: inline-block;
+  padding-bottom: 2px;
+  margin-bottom: 4px;
+}
+.review-cert-sublabel {
+  font-size: 11px;
+  color: var(--text-light);
+}
+.review-submit-area {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px 36px;
+  box-shadow: var(--shadow-sm);
+  margin-top: 8px;
+}
+.review-submit-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: rgba(245,195,0,0.1);
+  border: 1px solid rgba(245,195,0,0.4);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 24px;
+}
+.review-notice-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: #c89b00;
+  margin-top: 2px;
+}
+.review-submit-notice p {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.6;
+}
+.review-submit-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.btn-review-back {
+  padding: 12px 28px;
+  background: transparent;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-light);
+  font-family: "Roboto", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s, border-color 0.18s, color 0.18s;
+}
+.btn-review-back:hover {
+  background: #f5f3ee;
+  border-color: var(--navy);
+  color: var(--navy);
+}
+.btn-review-back:active {
+  background: #fdf9e3;
+  border-color: #e0c84a;
+  color: #1a4d2e;
+}
+
+.intervention-menu-portal {
+  position: fixed;
+  z-index: 9999;
+  background: #ffffff;
+  border: 1.5px solid #1a4d2e;
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(26, 77, 46, 0.18);
+  min-width: 340px;
+  max-height: none;
+  overflow: visible;
+  font-family: "Roboto", sans-serif;
+}
+.intervention-menu-portal .intervention-group-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: #ffd740;
+  background: #1a4d2e;
+  padding: 7px 14px;
+}
+.intervention-menu-portal .intervention-group-label:first-child {
+  border-radius: 10px 10px 0 0;
+}
+.intervention-menu-portal .intervention-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 7px 14px;
+  font-size: 12.5px;
+  font-weight: 400;
+  color: #1a1a2e;
+  cursor: pointer;
+  transition: background 0.13s;
+  line-height: 1.45;
+  border-bottom: 1px solid rgba(216, 212, 200, 0.4);
+}
+.intervention-menu-portal .intervention-option:hover {
+  background: rgba(26, 77, 46, 0.06);
+}
+.intervention-menu-portal .intervention-option.checked {
+  background: #fffbe6;
+  color: #7a6000;
+  font-weight: 600;
+}
+.intervention-menu-portal .intervention-option input[type="checkbox"] {
+  width: auto;
+  padding: 0;
+  border: none;
+  background: none;
+  accent-color: #1a4d2e;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.intervention-menu-portal .intervention-close-row {
+  padding: 9px 14px 10px;
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid #d8d4c8;
+  background: #faf9f6;
+  border-radius: 0 0 10px 10px;
+}
+.intervention-menu-portal .intervention-done-btn {
+  padding: 6px 20px;
+  background: #1a4d2e;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-family: "Roboto", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: background 0.18s, transform 0.1s, color 0.18s;
+}
+.intervention-menu-portal .intervention-done-btn:hover {
+  background: #2d6a3f;
+  transform: translateY(-1px);
+}
+.intervention-menu-portal .intervention-done-btn:active {
+  background: #fdf9e3;
+  color: #1a4d2e;
+  transform: none;
 }
 </style>

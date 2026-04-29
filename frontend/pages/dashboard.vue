@@ -74,158 +74,6 @@
         </button>
       </div>
 
-      <!-- ── OVERVIEW ── -->
-      <div v-if="activeTab === 'overview'" class="tab-panel">
-
-        <!-- ── STAT CARDS ── -->
-        <div class="ov-cards">
-
-          <!-- IDP: Total -->
-          <div class="ov-card" :class="{ active: ovActive === 'idp-all' }" @click="toggleOv('idp-all')">
-            <div class="ov-card-top">
-              <span class="ov-card-label">Total IDPs</span>
-              <span class="ov-card-num">{{ ovFilteredIdps.length }}</span>
-            </div>
-            <div class="ov-card-sub">All submitted plans</div>
-          </div>
-
-          <!-- IDP: Pending -->
-          <div class="ov-card ov-card-amber" :class="{ active: ovActive === 'idp-pending' }" @click="toggleOv('idp-pending')">
-            <div class="ov-card-top">
-              <span class="ov-card-label">Pending</span>
-              <span class="ov-card-num">{{ ovCounts.idpPending }}</span>
-            </div>
-            <div class="ov-card-sub">Awaiting supervisor</div>
-          </div>
-
-          <!-- IDP: Completed -->
-          <div class="ov-card ov-card-green" :class="{ active: ovActive === 'idp-complete' }" @click="toggleOv('idp-complete')">
-            <div class="ov-card-top">
-              <span class="ov-card-label">Completed IDPs</span>
-              <span class="ov-card-num">{{ ovCounts.idpComplete }}</span>
-            </div>
-            <div class="ov-card-sub">Supervisor reviewed</div>
-          </div>
-
-          <!-- Divider -->
-          <div class="ov-card-divider"></div>
-
-          <!-- LNA: Total -->
-          <div class="ov-card" :class="{ active: ovActive === 'lna-all' }" @click="toggleOv('lna-all')">
-            <div class="ov-card-top">
-              <span class="ov-card-label">Total LNAs</span>
-              <span class="ov-card-num">{{ ovFilteredLnas.length }}</span>
-            </div>
-            <div class="ov-card-sub">Office assessments</div>
-          </div>
-
-        </div>
-
-        <!-- ── DRILL-DOWN LIST ── -->
-        <div v-if="ovActive" class="ov-drill">
-          <div class="ov-drill-header">
-            <span class="ov-drill-title">{{ ovDrillTitle }}</span>
-            <button class="btn-ov-close" @click="ovActive = null">✕</button>
-          </div>
-
-          <!-- IDP lists -->
-          <template v-if="ovActive.startsWith('idp')">
-            <table class="dtbl">
-              <thead><tr>
-                <th v-for="(col,i) in ovIdpCols" :key="col"
-                  :class="{ 'th-sortable': i > 0, 'th-sorted': sortState.ovIdp.col === i }"
-                  @click="i > 0 && sortTable('ovIdp',i)">
-                  {{ col }}
-                  <span v-if="i > 0" class="sort-ind">{{ sortIndicator('ovIdp',i) }}</span>
-                </th>
-                <th class="th-action"></th>
-              </tr></thead>
-              <tbody>
-                <tr v-if="!ovDrillRows.length" class="empty-row"><td colspan="9">No records.</td></tr>
-                <tr v-for="r in ovDrillRows" :key="r.refId">
-                  <td><code class="ref-code">{{ r.refId }}</code></td>
-                  <td><strong>{{ r.employeeName || '—' }}</strong><br/><span class="sub-text">{{ r.email }}</span></td>
-                  <td>{{ r.position || '—' }}</td>
-                  <td>{{ r.office || '—' }}</td>
-                  <td>{{ r.yearCovered || '—' }}</td>
-                  <td><span :class="statusBadgeClass(r.status)">{{ statusBadgeLabel(r.status) }}</span></td>
-                  <td class="date-cell">{{ fmtDateTime(r.submittedAt) }}</td>
-                  <td class="date-cell">{{ r.status === 'COMPLETE' ? fmtDateTime(r.supervisorSignedAt) : '—' }}</td>
-                  <td><button class="btn-view" @click="viewIDP(r.refId)">View</button></td>
-                </tr>
-              </tbody>
-            </table>
-          </template>
-
-          <!-- LNA lists -->
-          <template v-if="ovActive.startsWith('lna')">
-            <table class="dtbl">
-              <thead><tr>
-                <th v-for="(col,i) in ovLnaCols" :key="col"
-                  :class="{ 'th-sortable': i > 0, 'th-sorted': sortState.ovLna.col === i }"
-                  @click="i > 0 && sortTable('ovLna',i)">
-                  {{ col }}
-                  <span v-if="i > 0" class="sort-ind">{{ sortIndicator('ovLna',i) }}</span>
-                </th>
-                <th class="th-action"></th>
-              </tr></thead>
-              <tbody>
-                <tr v-if="!ovDrillRows.length" class="empty-row"><td colspan="8">No records.</td></tr>
-                <tr v-for="r in ovDrillRows" :key="r.refId">
-                  <td><code class="ref-code">{{ r.refId }}</code></td>
-                  <td><strong>{{ r.office || '—' }}</strong></td>
-                  <td>{{ r.headOfUnit || '—' }}</td>
-                  <td>{{ r.yearCovered || '—' }}</td>
-                  <td><span class="badge badge-grey">{{ r.purpose || '—' }}</span></td>
-                  <td style="text-align:center">{{ r.totalPersonnel || '—' }}</td>
-                  <td class="date-cell">{{ fmtDate(r.submittedAt) }}</td>
-                  <td><button class="btn-view" @click="viewLNA(r.refId)">View</button></td>
-                </tr>
-              </tbody>
-            </table>
-          </template>
-        </div>
-
-        <!-- ── RECENT ACTIVITY (shown when no drill active) ── -->
-        <div v-if="!ovActive" class="chart-card" style="margin-top:0">
-          <h4>Recent Submissions <span class="chart-sub" style="font-weight:400;font-size:11px">Latest 10</span></h4>
-          <table class="dtbl" style="margin-top:10px">
-            <thead><tr>
-              <th>Ref ID</th><th>Type</th><th>Name / Office</th><th>Position</th><th>Office</th>
-              <th>Year</th><th>Status</th><th>Submitted</th><th>Completed</th>
-            </tr></thead>
-            <tbody>
-              <tr v-if="!recentActivity.length" class="empty-row"><td colspan="9">No submissions yet.</td></tr>
-              <tr v-for="r in recentActivity" :key="r.refId">
-                <td><code class="ref-code">{{ r.refId }}</code></td>
-                <td><span :class="r.type==='IDP'?'badge badge-green':'badge badge-gold'">{{ r.type }}</span></td>
-                <td>{{ r.label }}</td>
-                <td>{{ r.position || '—' }}</td>
-                <td>{{ r.office || '—' }}</td>
-                <td>{{ r.yearCovered || '—' }}</td>
-                <td>
-                  <span v-if="r.type === 'IDP'" :class="statusBadgeClass(r.status)">{{ statusBadgeLabel(r.status) }}</span>
-                  <span v-else class="badge badge-grey">Submitted</span>
-                </td>
-                <td class="date-cell">{{ fmtDateTime(r.submittedAt) }}</td>
-                <td class="date-cell">{{ r.type === 'IDP' && r.status === 'COMPLETE' ? fmtDateTime(r.completedAt) : '—' }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- ── LNA Intervention Flags ── -->
-        <div v-if="!ovActive && interventionOffices.length" class="chart-card" style="margin-top:14px">
-          <h4>LNA Offices Flagging Intervention Needed</h4>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">
-            <span v-for="o in interventionOffices" :key="o"
-              style="padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;background:rgba(192,57,43,.08);color:#c0392b;border:1px solid rgba(192,57,43,.18)">
-              {{ o }}
-            </span>
-          </div>
-        </div>
-
-      </div>
 
       <!-- ── IDP SUBMISSIONS ── -->
       <div v-if="activeTab === 'idp'" class="tab-panel">
@@ -1317,7 +1165,7 @@ const loginLoading  = ref(false);
 const deniedMsg   = ref('');
 const dataLoading = ref(false);
 const lastUpdated = ref('Loading data...');
-const activeTab   = ref('overview');
+const activeTab   = ref('idp');
 const idpSubTab   = ref('list');
 const lnaSubTab   = ref('list');
 
@@ -1415,7 +1263,6 @@ const toasts = ref([]);
 
 // ── STATIC CONFIG ──────────────────────────────────────────────────────────
 const tabs = [
-  { key: 'overview', label: 'Overview',       icon: '📊' },
   { key: 'idp',      label: 'IDP Submissions', icon: '📋' },
   { key: 'lna',      label: 'LNA Submissions', icon: '📝' },
   { key: 'registry', label: 'HR Registry',     icon: '👥' },
