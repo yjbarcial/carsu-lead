@@ -1016,7 +1016,7 @@
                   <th>Training / LeaD Intervention</th>
                   <th style="width: 80px">Mode of Activity</th>
                   <th>Trainer / Provider</th>
-                  <th style="width: 80px">Intended Year of Enrollment</th>
+                  <th style="width: 80px">Target Timeline</th>
                   <th style="width: 40px"></th>
                 </tr>
               </thead>
@@ -1232,7 +1232,6 @@
                 <th>Current Level</th>
                 <th>Required Level</th>
                 <th>LeaD Interventions</th>
-                <th>Resource / Support</th>
                 <th>Target Year</th>
               </tr>
             </thead>
@@ -1244,7 +1243,6 @@
                 <td>{{ row.currentLevel || '—' }}</td>
                 <td>{{ row.requiredLevel || '—' }}</td>
                 <td>{{ row.leadInterventions || '—' }}</td>
-                <td>{{ row.resourceSupport || '—' }}</td>
                 <td>{{ row.targetTimeline || '—' }}</td>
               </tr>
             </tbody>
@@ -1268,9 +1266,8 @@
                 <th>Degree Program</th>
                 <th>Target HEI</th>
                 <th>Mode of Study</th>
-                <th>Source of Funding</th>
-                <th>Scholarship Grant</th>
-                <th>Target Year</th>
+                <th>Target Scholarship Grant</th>
+                <th>Intended Year of Enrollment</th>
               </tr>
             </thead>
             <tbody>
@@ -1280,7 +1277,6 @@
                 <td>{{ row.degreeProgram || '—' }}</td>
                 <td>{{ row.targetHEI || '—' }}</td>
                 <td>{{ row.modeOfStudy || '—' }}</td>
-                <td>{{ row.sourceOfFunding || '—' }}</td>
                 <td>{{ row.scholarshipGrant || '—' }}</td>
                 <td>{{ row.targetTimeline || '—' }}</td>
               </tr>
@@ -1302,10 +1298,9 @@
             <thead>
               <tr>
                 <th style="width:40px">No.</th>
-                <th>Training / Workshop Title</th>
                 <th>Target Competency / Skill</th>
+                <th>Training / LeaD Intervention</th>
                 <th>Mode of Activity</th>
-                <th>Source of Funding</th>
                 <th>Trainer / Provider</th>
                 <th>Target Timeline</th>
               </tr>
@@ -1317,7 +1312,6 @@
                 <td>{{ row.trainingTitle === '__others__' ? row.trainingTitleOther : row.trainingTitle || '—' }}</td>
                 <td>{{ row.targetSkill || '—' }}</td>
                 <td>{{ row.modeOfActivity || '—' }}</td>
-                <td>{{ row.sourceOfFunding || '—' }}</td>
                 <td>{{ row.trainerProvider || '—' }}</td>
                 <td>{{ row.targetTimeline || '—' }}</td>
               </tr>
@@ -1514,7 +1508,6 @@
                 <th>Degree Program</th>
                 <th>Target HEI</th>
                 <th>Mode of Study</th>
-                <th>Source of Funding</th>
                 <th>Target Scholarship Grant</th>
                 <th>Intended Year of Enrollment</th>
               </tr>
@@ -1559,7 +1552,6 @@
                 <th>Training / Workshop Title</th>
                 <th>Target Competency / Skill</th>
                 <th>Mode of Activity</th>
-                <th>Source of Funding</th>
                 <th>Trainer / Provider</th>
                 <th>Target Timeline</th>
               </tr>
@@ -5533,7 +5525,7 @@ textarea {
 }
 .ref-id-box {
   background: var(--navy);
-  color: var(--gold-light);
+  color: #ffd740;
   font-family: monospace;
   font-size: 22px;
   font-weight: 700;
