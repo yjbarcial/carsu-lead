@@ -265,7 +265,10 @@
               :class="{ error: errors.collegeOfficeUnit }"
               placeholder="Please specify your office / unit…"
               style="margin-top: 8px"
-              @input="form.collegeOfficeUnitOther = form.collegeOfficeUnitOther.toUpperCase()"
+              @input="
+                form.collegeOfficeUnitOther =
+                  form.collegeOfficeUnitOther.toUpperCase()
+              "
             />
           </div>
           <!-- Program selector — only for OVPAA colleges with programs -->
@@ -791,9 +794,7 @@
                   </td>
                   <td>
                     <template v-if="form.currentPosition === 'Director'">
-                      <select
-                        v-model="row.requiredLevel"
-                      >
+                      <select v-model="row.requiredLevel">
                         <option value="">Select…</option>
                         <option value="1 - Basic">1 - Basic</option>
                         <option value="2 - Intermediate">
@@ -929,9 +930,16 @@
                     <datalist id="hei-suggestions">
                       <option v-for="s in heiSuggestions" :key="s" :value="s" />
                     </datalist>
-                    <small class="field-hint" style="color: #c0392b; font-style: italic; margin-top: 3px;">
-  ⚠ Do not abbreviate.
-</small>
+                    <small
+                      class="field-hint"
+                      style="
+                        color: #c0392b;
+                        font-style: italic;
+                        margin-top: 3px;
+                      "
+                    >
+                      ⚠ Do not abbreviate.
+                    </small>
                   </td>
                   <td>
                     <select v-model="row.modeOfStudy">
@@ -1062,7 +1070,10 @@
                       </optgroup>
                       <optgroup label="Off-the-Job Learning">
                         <option>Special Short Courses and Lectures</option>
-                        <option>Conferences, Training Programs, Conventions, Seminars, and Cum Paper Presentations</option>
+                        <option>
+                          Conferences, Training Programs, Conventions, Seminars,
+                          and Cum Paper Presentations
+                        </option>
                         <option>Pursue Higher Education</option>
                       </optgroup>
                       <option value="__others__">Others / Specify</option>
@@ -1140,7 +1151,9 @@
   <!-- ═══════════════════════════════════════════════ -->
   <div v-if="stage === 'review1'" class="container review-container">
     <div class="review-header-block">
-      <div class="review-eyebrow">Individual Development Plan (IDP) 2026–2031</div>
+      <div class="review-eyebrow">
+        Individual Development Plan (IDP) 2026–2031
+      </div>
       <h2 class="review-title">Review Your Submission</h2>
       <p class="review-subtitle">
         Please verify all information below before submitting. Use
@@ -1162,51 +1175,74 @@
           </div>
           <div class="review-field">
             <span class="review-label">Employee Email</span>
-            <span class="review-value">{{ form.employeeEmailPrefix }}@carsu.edu.ph</span>
+            <span class="review-value"
+              >{{ form.employeeEmailPrefix }}@carsu.edu.ph</span
+            >
           </div>
           <div class="review-field">
             <span class="review-label">Office Affiliation</span>
-            <span class="review-value">{{ form.officeAffiliation || '—' }}</span>
+            <span class="review-value">{{
+              form.officeAffiliation || "—"
+            }}</span>
           </div>
           <div class="review-field">
             <span class="review-label">College / Office / Unit</span>
-            <span class="review-value">{{ form.collegeOfficeUnit === '__others__' ? form.collegeOfficeUnitOther : form.collegeOfficeUnit || '—' }}</span>
+            <span class="review-value">{{
+              form.collegeOfficeUnit === "__others__"
+                ? form.collegeOfficeUnitOther
+                : form.collegeOfficeUnit || "—"
+            }}</span>
           </div>
           <div class="review-field">
             <span class="review-label">Name of Personnel</span>
-            <span class="review-value">{{ [form.lastName, form.firstName, form.middleInitial].filter(Boolean).join(', ') || '—' }}</span>
+            <span class="review-value">{{
+              [form.lastName, form.firstName, form.middleInitial]
+                .filter(Boolean)
+                .join(", ") || "—"
+            }}</span>
           </div>
           <div class="review-field">
             <span class="review-label">Current Position</span>
-            <span class="review-value">{{ form.currentPosition || '—' }}</span>
+            <span class="review-value">{{ form.currentPosition || "—" }}</span>
           </div>
           <div class="review-field">
             <span class="review-label">Designation</span>
-            <span class="review-value">{{ form.designation || '—' }}</span>
+            <span class="review-value">{{ form.designation || "—" }}</span>
           </div>
           <div class="review-field">
             <span class="review-label">Educational Attainment</span>
-            <span class="review-value">{{ form.educAttainment || '—' }}{{ form.educAttainmentSpec ? ' — ' + form.educAttainmentSpec : '' }}</span>
+            <span class="review-value"
+              >{{ form.educAttainment || "—"
+              }}{{
+                form.educAttainmentSpec ? " — " + form.educAttainmentSpec : ""
+              }}</span
+            >
           </div>
           <div class="review-field">
             <span class="review-label">Years in Position</span>
-            <span class="review-value">{{ form.yearsInPosition || '—' }}</span>
+            <span class="review-value">{{ form.yearsInPosition || "—" }}</span>
           </div>
           <div class="review-field">
             <span class="review-label">Years in CSU</span>
-            <span class="review-value">{{ form.yearsInCSU || '—' }}</span>
+            <span class="review-value">{{ form.yearsInCSU || "—" }}</span>
           </div>
           <div class="review-field">
             <span class="review-label">Supervisor Name</span>
-            <span class="review-value">{{ form.supervisorName || '—' }}</span>
+            <span class="review-value">{{ form.supervisorName || "—" }}</span>
           </div>
           <div class="review-field">
             <span class="review-label">Supervisor Email</span>
-            <span class="review-value">{{ form.supervisorEmailPrefix }}@carsu.edu.ph</span>
+            <span class="review-value"
+              >{{ form.supervisorEmailPrefix }}@carsu.edu.ph</span
+            >
           </div>
           <div class="review-field">
             <span class="review-label">Purpose</span>
-            <span class="review-value">{{ form.headerPurpose === 'Other' ? form.headerPurposeOther : form.headerPurpose || '—' }}</span>
+            <span class="review-value">{{
+              form.headerPurpose === "Other"
+                ? form.headerPurposeOther
+                : form.headerPurpose || "—"
+            }}</span>
           </div>
         </div>
       </div>
@@ -1219,15 +1255,19 @@
         <span class="review-card-title">Competency Assessment</span>
       </div>
       <div class="review-card-body">
-        <div class="review-field" style="margin-bottom:14px">
+        <div class="review-field" style="margin-bottom: 14px">
           <span class="review-label">Competency Purpose</span>
-          <span class="review-value">{{ form.compPurpose === 'Others' ? form.compPurposeOther : form.compPurpose || '—' }}</span>
+          <span class="review-value">{{
+            form.compPurpose === "Others"
+              ? form.compPurposeOther
+              : form.compPurpose || "—"
+          }}</span>
         </div>
         <div class="review-table-wrap">
           <table class="review-table">
             <thead>
               <tr>
-                <th style="width:40px">No.</th>
+                <th style="width: 40px">No.</th>
                 <th>Target Competency</th>
                 <th>Current Level</th>
                 <th>Required Level</th>
@@ -1236,14 +1276,34 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-if="!competencyRows.length"><td colspan="7" style="text-align:center;color:var(--text-light);padding:16px;font-style:italic;">No entries provided.</td></tr>
+              <tr v-if="!competencyRows.length">
+                <td
+                  colspan="7"
+                  style="
+                    text-align: center;
+                    color: var(--text-light);
+                    padding: 16px;
+                    font-style: italic;
+                  "
+                >
+                  No entries provided.
+                </td>
+              </tr>
               <tr v-for="(row, idx) in competencyRows" :key="idx">
-                <td style="text-align:center;color:var(--text-light);font-weight:600;">{{ idx + 1 }}</td>
-                <td>{{ row.targetCompetency || '—' }}</td>
-                <td>{{ row.currentLevel || '—' }}</td>
-                <td>{{ row.requiredLevel || '—' }}</td>
-                <td>{{ row.leadInterventions || '—' }}</td>
-                <td>{{ row.targetTimeline || '—' }}</td>
+                <td
+                  style="
+                    text-align: center;
+                    color: var(--text-light);
+                    font-weight: 600;
+                  "
+                >
+                  {{ idx + 1 }}
+                </td>
+                <td>{{ row.targetCompetency || "—" }}</td>
+                <td>{{ row.currentLevel || "—" }}</td>
+                <td>{{ row.requiredLevel || "—" }}</td>
+                <td>{{ row.leadInterventions || "—" }}</td>
+                <td>{{ row.targetTimeline || "—" }}</td>
               </tr>
             </tbody>
           </table>
@@ -1255,14 +1315,16 @@
     <div class="review-card">
       <div class="review-card-header">
         <span class="review-card-num">II</span>
-        <span class="review-card-title">Academic Growth and Advancement Program (AGAP)</span>
+        <span class="review-card-title"
+          >Academic Growth and Advancement Program (AGAP)</span
+        >
       </div>
       <div class="review-card-body">
         <div class="review-table-wrap">
           <table class="review-table">
             <thead>
               <tr>
-                <th style="width:40px">No.</th>
+                <th style="width: 40px">No.</th>
                 <th>Degree Program</th>
                 <th>Target HEI</th>
                 <th>Mode of Study</th>
@@ -1271,14 +1333,34 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-if="!agapRows.length"><td colspan="7" style="text-align:center;color:var(--text-light);padding:16px;font-style:italic;">No entries provided.</td></tr>
+              <tr v-if="!agapRows.length">
+                <td
+                  colspan="7"
+                  style="
+                    text-align: center;
+                    color: var(--text-light);
+                    padding: 16px;
+                    font-style: italic;
+                  "
+                >
+                  No entries provided.
+                </td>
+              </tr>
               <tr v-for="(row, idx) in agapRows" :key="idx">
-                <td style="text-align:center;color:var(--text-light);font-weight:600;">{{ idx + 1 }}</td>
-                <td>{{ row.degreeProgram || '—' }}</td>
-                <td>{{ row.targetHEI || '—' }}</td>
-                <td>{{ row.modeOfStudy || '—' }}</td>
-                <td>{{ row.scholarshipGrant || '—' }}</td>
-                <td>{{ row.targetTimeline || '—' }}</td>
+                <td
+                  style="
+                    text-align: center;
+                    color: var(--text-light);
+                    font-weight: 600;
+                  "
+                >
+                  {{ idx + 1 }}
+                </td>
+                <td>{{ row.degreeProgram || "—" }}</td>
+                <td>{{ row.targetHEI || "—" }}</td>
+                <td>{{ row.modeOfStudy || "—" }}</td>
+                <td>{{ row.scholarshipGrant || "—" }}</td>
+                <td>{{ row.targetTimeline || "—" }}</td>
               </tr>
             </tbody>
           </table>
@@ -1290,14 +1372,17 @@
     <div class="review-card">
       <div class="review-card-header">
         <span class="review-card-num">III</span>
-        <span class="review-card-title">Professional Advancement through Capacity-Building and Trainings (Pro-ACT)</span>
+        <span class="review-card-title"
+          >Professional Advancement through Capacity-Building and Trainings
+          (Pro-ACT)</span
+        >
       </div>
       <div class="review-card-body">
         <div class="review-table-wrap">
           <table class="review-table">
             <thead>
               <tr>
-                <th style="width:40px">No.</th>
+                <th style="width: 40px">No.</th>
                 <th>Target Competency / Skill</th>
                 <th>Training / LeaD Intervention</th>
                 <th>Mode of Activity</th>
@@ -1306,14 +1391,40 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-if="!proactRows.length"><td colspan="7" style="text-align:center;color:var(--text-light);padding:16px;font-style:italic;">No entries provided.</td></tr>
+              <tr v-if="!proactRows.length">
+                <td
+                  colspan="7"
+                  style="
+                    text-align: center;
+                    color: var(--text-light);
+                    padding: 16px;
+                    font-style: italic;
+                  "
+                >
+                  No entries provided.
+                </td>
+              </tr>
               <tr v-for="(row, idx) in proactRows" :key="idx">
-                <td style="text-align:center;color:var(--text-light);font-weight:600;">{{ idx + 1 }}</td>
-                <td>{{ row.trainingTitle === '__others__' ? row.trainingTitleOther : row.trainingTitle || '—' }}</td>
-                <td>{{ row.targetSkill || '—' }}</td>
-                <td>{{ row.modeOfActivity || '—' }}</td>
-                <td>{{ row.trainerProvider || '—' }}</td>
-                <td>{{ row.targetTimeline || '—' }}</td>
+                <td
+                  style="
+                    text-align: center;
+                    color: var(--text-light);
+                    font-weight: 600;
+                  "
+                >
+                  {{ idx + 1 }}
+                </td>
+                <td>
+                  {{
+                    row.trainingTitle === "__others__"
+                      ? row.trainingTitleOther
+                      : row.trainingTitle || "—"
+                  }}
+                </td>
+                <td>{{ row.targetSkill || "—" }}</td>
+                <td>{{ row.modeOfActivity || "—" }}</td>
+                <td>{{ row.trainerProvider || "—" }}</td>
+                <td>{{ row.targetTimeline || "—" }}</td>
               </tr>
             </tbody>
           </table>
@@ -1324,20 +1435,31 @@
     <!-- Final Submission Action -->
     <div class="review-submit-area">
       <div class="review-submit-notice">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="review-notice-icon">
-          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          class="review-notice-icon"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
         </svg>
         <p>
-          By clicking <strong>Confirm &amp; Submit</strong>, you certify that all
-          information is accurate. Your supervisor will be notified automatically.
-          This action cannot be undone.
+          By clicking <strong>Confirm &amp; Submit</strong>, you certify that
+          all information is accurate. Your supervisor will be notified
+          automatically. This action cannot be undone.
         </p>
       </div>
       <div class="review-submit-actions">
         <button
           class="btn-review-back"
           :class="{ 'btn-clicked': clickedButtons['back-stage1'] }"
-          @click="markClicked('back-stage1'); backToStage1()"
+          @click="
+            markClicked('back-stage1');
+            backToStage1();
+          "
         >
           ← Go Back &amp; Edit
         </button>
@@ -1345,7 +1467,10 @@
           class="btn-submit"
           :class="{ 'btn-clicked': clickedButtons['confirm-stage1'] }"
           :disabled="isSubmitting"
-          @click="markClicked('confirm-stage1'); submitStage1()"
+          @click="
+            markClicked('confirm-stage1');
+            submitStage1();
+          "
         >
           <span v-if="isSubmitting">Submitting…</span>
           <span v-else>Confirm &amp; Submit IDP</span>
@@ -1805,7 +1930,9 @@
   <!-- ═══════════════════════════════════════════════ -->
   <div v-if="stage === 'review2'" class="container review-container">
     <div class="review-header-block">
-      <div class="review-eyebrow">IDP Supervisor Assessment — Ref: {{ idpData.refId }}</div>
+      <div class="review-eyebrow">
+        IDP Supervisor Assessment — Ref: {{ idpData.refId }}
+      </div>
       <h2 class="review-title">Review Your Assessment</h2>
       <p class="review-subtitle">
         Please verify your assessment below before submitting. Use
@@ -1817,25 +1944,33 @@
     <div class="review-card">
       <div class="review-card-header">
         <span class="review-card-num">H</span>
-        <span class="review-card-title">Personnel Information (Employee-Submitted)</span>
+        <span class="review-card-title"
+          >Personnel Information (Employee-Submitted)</span
+        >
       </div>
       <div class="review-card-body">
         <div class="review-grid">
           <div class="review-field">
             <span class="review-label">Name of Personnel</span>
-            <span class="review-value">{{ idpData.nameOfPersonnel || '—' }}</span>
+            <span class="review-value">{{
+              idpData.nameOfPersonnel || "—"
+            }}</span>
           </div>
           <div class="review-field">
             <span class="review-label">Office / Unit</span>
-            <span class="review-value">{{ idpData.collegeOfficeUnit || '—' }}</span>
+            <span class="review-value">{{
+              idpData.collegeOfficeUnit || "—"
+            }}</span>
           </div>
           <div class="review-field">
             <span class="review-label">Current Position</span>
-            <span class="review-value">{{ idpData.currentPosition || '—' }}</span>
+            <span class="review-value">{{
+              idpData.currentPosition || "—"
+            }}</span>
           </div>
           <div class="review-field">
             <span class="review-label">Purpose</span>
-            <span class="review-value">{{ idpData.headerPurpose || '—' }}</span>
+            <span class="review-value">{{ idpData.headerPurpose || "—" }}</span>
           </div>
         </div>
       </div>
@@ -1845,65 +1980,114 @@
     <div class="review-card">
       <div class="review-card-header">
         <span class="review-card-num">IV</span>
-        <span class="review-card-title">Supervisor's Assessment and Endorsement</span>
+        <span class="review-card-title"
+          >Supervisor's Assessment and Endorsement</span
+        >
       </div>
       <div class="review-card-body">
         <div class="review-table-wrap">
           <table class="review-table">
             <thead>
               <tr>
-                <th style="width:200px">Assessment Area</th>
-                <th style="width:100px;text-align:center">Response</th>
+                <th style="width: 200px">Assessment Area</th>
+                <th style="width: 100px; text-align: center">Response</th>
                 <th>Details / Remarks</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td class="review-row-label">Observed Performance Gaps</td>
-                <td style="text-align:center">
-                  <span :class="assessment.perfGapsYN === 'Yes' ? 'review-badge-yes' : 'review-badge-no'">{{ assessment.perfGapsYN || '—' }}</span>
+                <td style="text-align: center">
+                  <span
+                    :class="
+                      assessment.perfGapsYN === 'Yes'
+                        ? 'review-badge-yes'
+                        : 'review-badge-no'
+                    "
+                    >{{ assessment.perfGapsYN || "—" }}</span
+                  >
                 </td>
-                <td style="white-space:pre-wrap;font-size:12px;">{{ assessment.perfGapsDetails || '—' }}</td>
+                <td style="white-space: pre-wrap; font-size: 12px">
+                  {{ assessment.perfGapsDetails || "—" }}
+                </td>
               </tr>
               <tr>
                 <td class="review-row-label">Readiness for Advancement</td>
-                <td style="text-align:center">
-                  <span :class="assessment.readinessYN === 'Yes' ? 'review-badge-yes' : 'review-badge-no'">{{ assessment.readinessYN || '—' }}</span>
+                <td style="text-align: center">
+                  <span
+                    :class="
+                      assessment.readinessYN === 'Yes'
+                        ? 'review-badge-yes'
+                        : 'review-badge-no'
+                    "
+                    >{{ assessment.readinessYN || "—" }}</span
+                  >
                 </td>
-                <td style="white-space:pre-wrap;font-size:12px;">{{ assessment.readinessDetails || '—' }}</td>
+                <td style="white-space: pre-wrap; font-size: 12px">
+                  {{ assessment.readinessDetails || "—" }}
+                </td>
               </tr>
               <tr>
                 <td class="review-row-label">Recommended Interventions</td>
-                <td colspan="2" style="font-size:12px;">
-                  <div v-if="assessment.interventions && assessment.interventions.length" class="review-tags-row">
-                    <span v-for="iv in assessment.interventions" :key="iv" class="review-intervention-tag">{{ iv }}</span>
+                <td colspan="2" style="font-size: 12px">
+                  <div
+                    v-if="
+                      assessment.interventions &&
+                      assessment.interventions.length
+                    "
+                    class="review-tags-row"
+                  >
+                    <span
+                      v-for="iv in assessment.interventions"
+                      :key="iv"
+                      class="review-intervention-tag"
+                      >{{ iv }}</span
+                    >
                   </div>
-                  <span v-else style="color:var(--text-light)">—</span>
+                  <span v-else style="color: var(--text-light)">—</span>
                 </td>
               </tr>
               <tr>
                 <td class="review-row-label">Implementation Period</td>
-                <td colspan="2" style="font-size:12px;">
-                  <div v-if="assessment.implementationPeriod && assessment.implementationPeriod.length" class="review-tags-row">
-                    <span v-for="p in assessment.implementationPeriod" :key="p" class="review-source-tag">{{ p }}</span>
+                <td colspan="2" style="font-size: 12px">
+                  <div
+                    v-if="
+                      assessment.implementationPeriod &&
+                      assessment.implementationPeriod.length
+                    "
+                    class="review-tags-row"
+                  >
+                    <span
+                      v-for="p in assessment.implementationPeriod"
+                      :key="p"
+                      class="review-source-tag"
+                      >{{ p }}</span
+                    >
                   </div>
-                  <span v-else style="color:var(--text-light)">—</span>
+                  <span v-else style="color: var(--text-light)">—</span>
                 </td>
               </tr>
               <tr>
                 <td class="review-row-label">Overall Remarks</td>
-                <td colspan="2" style="white-space:pre-wrap;font-size:12px;">{{ assessment.overallRemarks || '—' }}</td>
+                <td colspan="2" style="white-space: pre-wrap; font-size: 12px">
+                  {{ assessment.overallRemarks || "—" }}
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
-        <div class="review-cert-box" style="margin-top:20px;">
+        <div class="review-cert-box" style="margin-top: 20px">
           <p class="review-cert-text">
-            I hereby certify that I have reviewed and assessed the Individual Development Plan
-            of the concerned personnel and confirm that the information provided is accurate.
+            I hereby certify that I have reviewed and assessed the Individual
+            Development Plan of the concerned personnel and confirm that the
+            information provided is accurate.
           </p>
-          <div class="review-cert-name">{{ idpData.supervisorName || '—' }}</div>
-          <div class="review-cert-sublabel">Signature over Printed Name of Immediate Supervisor</div>
+          <div class="review-cert-name">
+            {{ idpData.supervisorName || "—" }}
+          </div>
+          <div class="review-cert-sublabel">
+            Signature over Printed Name of Immediate Supervisor
+          </div>
         </div>
       </div>
     </div>
@@ -1911,20 +2095,31 @@
     <!-- Final Submission Action -->
     <div class="review-submit-area">
       <div class="review-submit-notice">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="review-notice-icon">
-          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          class="review-notice-icon"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
         </svg>
         <p>
-          By clicking <strong>Confirm &amp; Submit</strong>, you certify that your
-          assessment is complete and accurate. HR will be notified immediately.
-          This action cannot be undone.
+          By clicking <strong>Confirm &amp; Submit</strong>, you certify that
+          your assessment is complete and accurate. HR will be notified
+          immediately. This action cannot be undone.
         </p>
       </div>
       <div class="review-submit-actions">
         <button
           class="btn-review-back"
           :class="{ 'btn-clicked': clickedButtons['back-stage2'] }"
-          @click="markClicked('back-stage2'); backToStage2()"
+          @click="
+            markClicked('back-stage2');
+            backToStage2();
+          "
         >
           ← Go Back &amp; Edit
         </button>
@@ -1932,7 +2127,10 @@
           class="btn-submit"
           :class="{ 'btn-clicked': clickedButtons['confirm-stage2'] }"
           :disabled="isSubmitting"
-          @click="markClicked('confirm-stage2'); submitStage2()"
+          @click="
+            markClicked('confirm-stage2');
+            submitStage2();
+          "
         >
           <span v-if="isSubmitting">Submitting…</span>
           <span v-else>Confirm &amp; Submit Assessment</span>
@@ -4624,31 +4822,33 @@ function validateStage1() {
 
 // ── Review/confirmation helpers ────────────────────────────────────────────
 const clickedButtons = reactive({});
-function markClicked(id) { clickedButtons[id] = true; }
+function markClicked(id) {
+  clickedButtons[id] = true;
+}
 
 function openReview1() {
   if (!validateStage1()) return;
-  markClicked('review-stage1');
-  stage.value = 'review1';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  markClicked("review-stage1");
+  stage.value = "review1";
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function backToStage1() {
-  delete clickedButtons['review-stage1'];
-  stage.value = 'stage1';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  delete clickedButtons["review-stage1"];
+  stage.value = "stage1";
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function openReview2() {
-  markClicked('review-stage2');
-  stage.value = 'review2';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  markClicked("review-stage2");
+  stage.value = "review2";
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function backToStage2() {
-  delete clickedButtons['review-stage2'];
-  stage.value = 'stage2';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  delete clickedButtons["review-stage2"];
+  stage.value = "stage2";
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 // ── Stage 1 submit ─────────────────────────────────────────────────────────
@@ -5525,7 +5725,7 @@ textarea {
 }
 .ref-id-box {
   background: var(--navy);
-  color: #ffd740;
+  color: #fff;
   font-family: monospace;
   font-size: 22px;
   font-weight: 700;
@@ -5982,7 +6182,7 @@ textarea {
   background: #fff;
   border: 1px solid #d8d4c8;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(26,77,46,0.07);
+  box-shadow: 0 2px 8px rgba(26, 77, 46, 0.07);
   margin-bottom: 24px;
   overflow: hidden;
 }
@@ -6050,7 +6250,9 @@ textarea {
   border-radius: 8px;
   overflow: hidden;
 }
-.review-table thead tr { background: #2d6a3f; }
+.review-table thead tr {
+  background: #2d6a3f;
+}
 .review-table thead th {
   padding: 9px 12px;
   color: #fff;
@@ -6059,26 +6261,34 @@ textarea {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   text-align: left;
-  border-right: 1px solid rgba(255,255,255,0.1);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
   white-space: nowrap;
 }
-.review-table thead th:last-child { border-right: none; }
-.review-table tbody tr { border-bottom: 1px solid #d8d4c8; }
-.review-table tbody tr:nth-child(even) { background: #faf9f6; }
+.review-table thead th:last-child {
+  border-right: none;
+}
+.review-table tbody tr {
+  border-bottom: 1px solid #d8d4c8;
+}
+.review-table tbody tr:nth-child(even) {
+  background: #faf9f6;
+}
 .review-table tbody td {
   padding: 8px 12px;
   vertical-align: middle;
   border-right: 1px solid #d8d4c8;
 }
-.review-table tbody td:last-child { border-right: none; }
+.review-table tbody td:last-child {
+  border-right: none;
+}
 .review-row-label {
   font-weight: 600;
   color: #2d6a3f;
-  background: rgba(26,77,46,0.03) !important;
+  background: rgba(26, 77, 46, 0.03) !important;
   white-space: nowrap;
 }
 .review-badge-yes {
-  background: rgba(26,107,60,0.12);
+  background: rgba(26, 107, 60, 0.12);
   color: #1a6b3c;
   font-weight: 700;
   font-size: 11px;
@@ -6087,7 +6297,7 @@ textarea {
   display: inline-block;
 }
 .review-badge-no {
-  background: rgba(192,57,43,0.1);
+  background: rgba(192, 57, 43, 0.1);
   color: #c0392b;
   font-weight: 700;
   font-size: 11px;
@@ -6102,8 +6312,8 @@ textarea {
   margin-top: 4px;
 }
 .review-source-tag {
-  background: rgba(26,77,46,0.08);
-  border: 1px solid rgba(26,77,46,0.2);
+  background: rgba(26, 77, 46, 0.08);
+  border: 1px solid rgba(26, 77, 46, 0.2);
   color: #1a4d2e;
   font-size: 12px;
   font-weight: 600;
@@ -6112,8 +6322,8 @@ textarea {
 }
 .review-intervention-tag {
   display: inline-block;
-  background: rgba(26,77,46,0.08);
-  border: 1px solid rgba(26,77,46,0.2);
+  background: rgba(26, 77, 46, 0.08);
+  border: 1px solid rgba(26, 77, 46, 0.2);
   color: #1a4d2e;
   font-size: 11px;
   font-weight: 500;
@@ -6122,7 +6332,7 @@ textarea {
   margin: 2px 3px 2px 0;
 }
 .review-cert-box {
-  background: rgba(201,168,76,0.08);
+  background: rgba(201, 168, 76, 0.08);
   border: 1.5px solid #f5c300;
   border-radius: 10px;
   padding: 20px 24px;
@@ -6153,15 +6363,15 @@ textarea {
   border: 1px solid #d8d4c8;
   border-radius: 12px;
   padding: 28px 36px;
-  box-shadow: 0 2px 8px rgba(26,77,46,0.07);
+  box-shadow: 0 2px 8px rgba(26, 77, 46, 0.07);
   margin-top: 8px;
 }
 .review-submit-notice {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  background: rgba(245,195,0,0.1);
-  border: 1px solid rgba(245,195,0,0.4);
+  background: rgba(245, 195, 0, 0.1);
+  border: 1px solid rgba(245, 195, 0, 0.4);
   border-radius: 8px;
   padding: 14px 16px;
   margin-bottom: 24px;
@@ -6195,7 +6405,10 @@ textarea {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.18s, border-color 0.18s, color 0.18s;
+  transition:
+    background 0.18s,
+    border-color 0.18s,
+    color 0.18s;
 }
 .btn-review-back:hover {
   background: #f5f3ee;

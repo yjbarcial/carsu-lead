@@ -3470,7 +3470,7 @@ textarea {
 }
 .ref-id-box {
   background: var(--navy);
-  color: #ffd740;
+  color: #fff;
   font-family: monospace;
   font-size: 22px;
   font-weight: 700;
