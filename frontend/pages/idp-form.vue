@@ -578,7 +578,7 @@
                   v-if="form.designationMode === 'specify'"
                   type="text"
                   v-model="form.designation"
-                  placeholder="e.g. OIC Director, Acting Dean…"
+                  placeholder="e.g. Director, Dean…"
                   style="margin-top: 6px"
                 />
               </div>
