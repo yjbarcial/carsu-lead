@@ -49,10 +49,34 @@ export class IdpService {
     }
   }
 
+  // ── RefId generation ─────────────────────────────────────────────────────
+
+  private async generateRefId(): Promise<string> {
+    const year = new Date().getFullYear();
+    const prefix = `IDP-${year}-`;
+
+    // Find the latest record for this year by sorting DESC on refId
+    const last = await this.repo
+      .createQueryBuilder('idp')
+      .where('idp."refId" LIKE :prefix', { prefix: `${prefix}%` })
+      .orderBy('idp."refId"', 'DESC')
+      .getOne();
+
+    let nextNum = 1;
+    if (last) {
+      const parts = last.refId.split('-');
+      const lastNum = parseInt(parts[parts.length - 1], 10);
+      if (!isNaN(lastNum)) nextNum = lastNum + 1;
+    }
+
+    // Zero-pad to 6 digits: IDP-2026-000001
+    return `${prefix}${String(nextNum).padStart(6, '0')}`;
+  }
+
   // ── Create (initial submission) ─────────────────────────────────────────
 
   async create(data: Record<string, any>): Promise<Idp> {
-    const refId = 'IDP-' + Date.now();
+    const refId = await this.generateRefId();
     const supervisorToken = uuidv4();
 
     const record = this.repo.create({

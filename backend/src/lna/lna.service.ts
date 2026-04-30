@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Lna } from './lna.entity';
 import { MailService } from '../mail/mail.service';
 import { PdfService } from '../pdf/pdf.service';
@@ -13,10 +13,37 @@ export class LnaService {
     @InjectRepository(Lna) private repo: Repository<Lna>,
     private readonly mail: MailService,
     private readonly pdf: PdfService,
+    private readonly dataSource: DataSource,
   ) {}
 
+  // ── RefId generation ─────────────────────────────────────────────────────
+
+  private async generateRefId(): Promise<string> {
+    const year = new Date().getFullYear();
+    const prefix = `LNA-${year}-`;
+
+    // Find the latest record for this year by sorting DESC on refId
+    const last = await this.repo
+      .createQueryBuilder('lna')
+      .where('lna."refId" LIKE :prefix', { prefix: `${prefix}%` })
+      .orderBy('lna."refId"', 'DESC')
+      .getOne();
+
+    let nextNum = 1;
+    if (last) {
+      const parts = last.refId.split('-');
+      const lastNum = parseInt(parts[parts.length - 1], 10);
+      if (!isNaN(lastNum)) nextNum = lastNum + 1;
+    }
+
+    // Zero-pad to 4 digits: LNA-2026-0001
+    return `${prefix}${String(nextNum).padStart(4, '0')}`;
+  }
+
+  // ── Create ───────────────────────────────────────────────────────────────
+
   async create(data: Partial<Lna>): Promise<Lna> {
-    const refId = 'LNA-' + Date.now();
+    const refId = await this.generateRefId();
     const record = this.repo.create({
       ...data,
       refId,
