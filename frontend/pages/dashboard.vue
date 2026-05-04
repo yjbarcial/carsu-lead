@@ -2329,166 +2329,130 @@
 
         <!-- SECTION II: COMPETENCY MAPPING -->
         <div v-if="lnaSubTab === 'competency'">
-          <!-- Summary (cluster summary rows) -->
-          <div class="sub-section-label" style="margin-bottom: 8px">
-            Cluster Summary
-          </div>
-          <div class="tbl-wrap" style="margin-bottom: 20px">
-            <table class="dtbl">
-              <thead>
-                <tr>
-                  <th>Ref ID</th>
-                  <th>Office / Unit</th>
-                  <th>Year</th>
-                  <th>Cluster</th>
-                  <th>Strongest Competency</th>
-                  <th>Weakest Competency</th>
-                  <th>Intervention Needed?</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-if="!filteredClusterRows.length" class="empty-row">
-                  <td colspan="7">No cluster summary data found.</td>
-                </tr>
-                <tr v-for="r in filteredClusterRows" :key="r._key">
-                  <td>
-                    <code class="ref-code">{{ r.refId }}</code>
-                  </td>
-                  <td>{{ r.office }}</td>
-                  <td>{{ r.year }}</td>
-                  <td>
-                    <span class="badge badge-grey">{{ r.cluster }}</span>
-                  </td>
-                  <td>{{ r.strongest || "—" }}</td>
-                  <td>{{ r.weakest || "—" }}</td>
-                  <td>
-                    <span
-                      v-if="r.interventionNeeded === 'Y'"
-                      class="badge badge-red"
-                      >Yes</span
-                    >
-                    <span
-                      v-else-if="r.interventionNeeded === 'N'"
-                      class="badge badge-green"
-                      >No</span
-                    >
-                    <span v-else class="badge badge-grey">{{
-                      r.interventionNeeded || "—"
-                    }}</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+
+          <div v-if="!filteredLNAs.length" class="comp2-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28" style="opacity:.35"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            <p>No submissions found.</p>
           </div>
 
-          <!-- Detailed competency mapping per position level -->
-          <div class="sub-section-label" style="margin-bottom: 8px">
-            Detailed Competency Mapping by Position Level
-          </div>
-          <div class="tbl-wrap">
-            <table class="dtbl">
-              <thead>
-                <tr>
-                  <th>Ref ID</th>
-                  <th>Office / Unit</th>
-                  <th>Year</th>
-                  <th>Cluster</th>
-                  <th>Competency</th>
-                  <th>1st Level CL</th>
-                  <th>1st Level %</th>
-                  <th>2nd (Non-Sup) CL</th>
-                  <th>2nd (Non-Sup) %</th>
-                  <th>2nd (Sup) CL</th>
-                  <th>2nd (Sup) %</th>
-                  <th>3rd Level CL</th>
-                  <th>3rd Level %</th>
-                  <th>Faculty CL</th>
-                  <th>Faculty %</th>
-                  <th>Observations</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-if="!filteredCompRows.length" class="empty-row">
-                  <td colspan="16">No competency mapping data found.</td>
-                </tr>
-                <tr v-for="r in filteredCompRows" :key="r._key">
-                  <td>
-                    <code class="ref-code">{{ r.refId }}</code>
-                  </td>
-                  <td>{{ r.office }}</td>
-                  <td>{{ r.year }}</td>
-                  <td>
-                    <span class="badge badge-grey">{{ r.cluster }}</span>
-                  </td>
-                  <td>
-                    <strong>{{ r.competency }}</strong>
-                  </td>
-                  <td style="text-align: center">
-                    <span v-if="r.first_cl" class="level-badge level-req">{{
-                      r.first_cl
-                    }}</span
-                    ><span v-else style="color: var(--text-light)">—</span>
-                  </td>
-                  <td style="text-align: center">
-                    <span v-if="r.first_pct" class="badge badge-green">{{
-                      r.first_pct
-                    }}</span
-                    ><span v-else style="color: var(--text-light)">—</span>
-                  </td>
-                  <td style="text-align: center">
-                    <span
-                      v-if="r.secondNonSup_cl"
-                      class="level-badge level-req"
-                      >{{ r.secondNonSup_cl }}</span
-                    ><span v-else style="color: var(--text-light)">—</span>
-                  </td>
-                  <td style="text-align: center">
-                    <span v-if="r.secondNonSup_pct" class="badge badge-green">{{
-                      r.secondNonSup_pct
-                    }}</span
-                    ><span v-else style="color: var(--text-light)">—</span>
-                  </td>
-                  <td style="text-align: center">
-                    <span v-if="r.secondSup_cl" class="level-badge level-req">{{
-                      r.secondSup_cl
-                    }}</span
-                    ><span v-else style="color: var(--text-light)">—</span>
-                  </td>
-                  <td style="text-align: center">
-                    <span v-if="r.secondSup_pct" class="badge badge-green">{{
-                      r.secondSup_pct
-                    }}</span
-                    ><span v-else style="color: var(--text-light)">—</span>
-                  </td>
-                  <td style="text-align: center">
-                    <span v-if="r.third_cl" class="level-badge level-req">{{
-                      r.third_cl
-                    }}</span
-                    ><span v-else style="color: var(--text-light)">—</span>
-                  </td>
-                  <td style="text-align: center">
-                    <span v-if="r.third_pct" class="badge badge-green">{{
-                      r.third_pct
-                    }}</span
-                    ><span v-else style="color: var(--text-light)">—</span>
-                  </td>
-                  <td style="text-align: center">
-                    <span v-if="r.faculty_cl" class="level-badge level-req">{{
-                      r.faculty_cl
-                    }}</span
-                    ><span v-else style="color: var(--text-light)">—</span>
-                  </td>
-                  <td style="text-align: center">
-                    <span v-if="r.faculty_pct" class="badge badge-green">{{
-                      r.faculty_pct
-                    }}</span
-                    ><span v-else style="color: var(--text-light)">—</span>
-                  </td>
-                  <td class="cell-wrap">{{ r.observations || "—" }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <template v-else>
+            <div class="comp2-toolbar">
+              <span class="comp2-toolbar-count">{{ filteredLNAs.length }} submission{{ filteredLNAs.length !== 1 ? 's' : '' }}</span>
+              <button class="comp2-expand-all-btn" @click="comp2ExpandAll">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11">
+                  <polyline v-if="comp2AllExpanded" points="18 15 12 9 6 15"/>
+                  <polyline v-else points="6 9 12 15 18 9"/>
+                </svg>
+                {{ comp2AllExpanded ? 'Collapse All' : 'Expand All' }}
+              </button>
+            </div>
+
+            <div class="comp2-list">
+              <div
+                v-for="lna in filteredLNAs"
+                :key="lna.refId"
+                class="comp2-item"
+                :class="{ 'comp2-item-open': comp2IsExpanded(lna.refId) }"
+              >
+                <!-- Header -->
+                <div class="comp2-header" @click="comp2Toggle(lna.refId)">
+                  <div class="comp2-header-left">
+                    <div class="comp2-chevron" :class="{ 'comp2-chevron-open': comp2IsExpanded(lna.refId) }">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><polyline points="9 18 15 12 9 6"/></svg>
+                    </div>
+                    <div class="comp2-header-info">
+                      <span class="comp2-header-office">{{ lna.office }}</span>
+                      <div class="comp2-header-meta">
+                        <code class="ref-code" style="font-size:9px;padding:1px 5px;">{{ lna.refId }}</code>
+                        <span class="comp2-meta-year">{{ lna.yearCovered }}</span>
+                        <span class="comp2-meta-count">{{ comp2CompCount(lna) }} competenc{{ comp2CompCount(lna) !== 1 ? 'ies' : 'y' }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="comp2-header-right">
+                    <template v-for="cs in (lna._clusterSummary || [])" :key="cs.cluster">
+                      <span class="comp2-hpill" :class="(cs.interventionNeeded==='Y'||cs.interventionNeeded==='Yes') ? 'comp2-hpill-warn' : 'comp2-hpill-ok'">
+                        <span class="comp2-hpill-dot"></span>{{ cs.cluster }}
+                      </span>
+                    </template>
+                    <span v-if="!(lna._clusterSummary||[]).length" class="comp2-hpill comp2-hpill-none">No clusters</span>
+                  </div>
+                </div>
+
+                <!-- Expanded body -->
+                <transition name="comp2-slide">
+                  <div v-if="comp2IsExpanded(lna.refId)" class="comp2-body">
+
+                    <!-- Cluster summary strip -->
+                    <div v-if="(lna._clusterSummary||[]).length" class="comp2-cluster-strip">
+                      <div
+                        v-for="cs in lna._clusterSummary"
+                        :key="cs.cluster"
+                        class="comp2-cs-card"
+                        :class="(cs.interventionNeeded==='Y'||cs.interventionNeeded==='Yes') ? 'comp2-cs-flagged' : ''"
+                      >
+                        <div class="comp2-cs-top">
+                          <span class="comp2-cs-name">{{ cs.cluster }}</span>
+                          <span v-if="cs.interventionNeeded==='Y'||cs.interventionNeeded==='Yes'" class="comp2-cs-badge comp2-cs-badge-warn">⚠ Needs Intervention</span>
+                          <span v-else-if="cs.interventionNeeded==='N'||cs.interventionNeeded==='No'" class="comp2-cs-badge comp2-cs-badge-ok">✓ No Urgent Need</span>
+                          <span v-else class="comp2-cs-badge comp2-cs-badge-none">—</span>
+                        </div>
+                        <div class="comp2-cs-body">
+                          <div class="comp2-cs-row comp2-cs-strong">
+                            <span class="comp2-cs-lbl">Strongest</span>
+                            <span class="comp2-cs-val">{{ cs.strongest || '—' }}</span>
+                          </div>
+                          <div class="comp2-cs-row comp2-cs-weak">
+                            <span class="comp2-cs-lbl">Weakest</span>
+                            <span class="comp2-cs-val">{{ cs.weakest || '—' }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Competency tables per cluster type -->
+                    <template v-for="{ key: ck, label: clusterLabel } in COMP_CLUSTERS" :key="ck">
+                      <div v-if="(lna[ck]||[]).length" class="comp2-cluster-block">
+                        <div class="comp2-cluster-block-title">
+                          <span class="comp2-cbt-dot"></span>{{ clusterLabel }} Competencies
+                          <span class="comp2-cbt-count">{{ lna[ck].length }}</span>
+                        </div>
+                        <div class="comp2-grid">
+                          <!-- Column headers -->
+                          <div class="comp2-grid-head">
+                            <div class="comp2-gh-name">Competency</div>
+                            <div class="comp2-gh-levels">
+                              <span v-for="lvl in comp2Levels" :key="lvl.key" class="comp2-gh-lvl">{{ lvl.short }}</span>
+                            </div>
+                            <div class="comp2-gh-obs">Observations</div>
+                          </div>
+                          <!-- Rows -->
+                          <div v-for="(row, ri) in lna[ck]" :key="ri" class="comp2-grid-row" :class="ri % 2 === 1 ? 'comp2-row-alt' : ''">
+                            <div class="comp2-gr-name">{{ row.competency || '—' }}</div>
+                            <div class="comp2-gr-levels">
+                              <div v-for="lvl in comp2Levels" :key="lvl.key" class="comp2-gr-lvl">
+                                <template v-if="row[lvl.key+'_cl'] || row[lvl.key+'_pct']">
+                                  <span class="comp2-val-cl">{{ row[lvl.key+'_cl'] || '—' }}</span>
+                                  <span class="comp2-val-pct">{{ row[lvl.key+'_pct'] || '—' }}</span>
+                                </template>
+                                <span v-else class="comp2-val-nil">·</span>
+                              </div>
+                            </div>
+                            <div class="comp2-gr-obs">{{ row.observations || '' }}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+
+                    <div v-if="!(lna._clusterSummary||[]).length && !COMP_CLUSTERS.some(c=>(lna[c.key]||[]).length)" class="comp2-body-empty">
+                      No competency data recorded for this submission.
+                    </div>
+
+                  </div>
+                </transition>
+              </div>
+            </div>
+          </template>
         </div>
 
         <!-- SECTION III: DATA SOURCES & KEY INSIGHTS -->
@@ -3655,6 +3619,39 @@ const lnaHasSourcesFilter = ref("");
 const lnaInsightSourceFilter = ref("");
 const lnaInsightPersonnelFilter = ref("");
 const lnaInsightInterventionFilter = ref("");
+
+// ── LNA Section II accordion state ─────────────────────────────────────────
+const comp2Expanded = ref(new Set());
+const comp2Levels = [
+  { key: 'first',        short: '1st' },
+  { key: 'secondNonSup', short: '2nd (NS)' },
+  { key: 'secondSup',    short: '2nd (S)' },
+  { key: 'third',        short: '3rd' },
+  { key: 'faculty',      short: 'Faculty' },
+];
+function comp2Toggle(refId) {
+  const s = new Set(comp2Expanded.value);
+  s.has(refId) ? s.delete(refId) : s.add(refId);
+  comp2Expanded.value = s;
+}
+function comp2IsExpanded(refId) {
+  return comp2Expanded.value.has(refId);
+}
+const comp2AllExpanded = computed(() =>
+  filteredLNAs.value.length > 0 &&
+  filteredLNAs.value.every(lna => comp2Expanded.value.has(lna.refId))
+);
+function comp2ExpandAll() {
+  if (comp2AllExpanded.value) {
+    comp2Expanded.value = new Set();
+  } else {
+    comp2Expanded.value = new Set(filteredLNAs.value.map(lna => lna.refId));
+  }
+}
+function comp2CompCount(lna) {
+  return ['coreCompetencies','leadershipComps','orgComps','technicalComps']
+    .reduce((s, k) => s + (lna[k] || []).length, 0);
+}
 
 const sortState = reactive({
   idp: { col: -1, asc: true },
@@ -6878,5 +6875,241 @@ body,
 .adv-slide-leave-from {
   opacity: 1;
   max-height: 300px;
+}
+
+/* ── LNA Section II: Competency Accordion ───────────────────────── */
+.comp2-empty {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 8px; padding: 40px 0;
+  color: var(--text-light); font-size: 13px;
+}
+.comp2-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px;
+}
+.comp2-toolbar-count { font-size: 11px; color: var(--text-light); }
+.comp2-expand-all-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 700; color: var(--navy);
+  background: none; border: 1.5px solid var(--border);
+  border-radius: 6px; padding: 4px 10px; cursor: pointer;
+  font-family: inherit; transition: all 0.15s;
+}
+.comp2-expand-all-btn:hover { background: var(--navy); color: #fff; border-color: var(--navy); }
+.comp2-expand-all-btn:hover svg { stroke: #fff; }
+
+/* List */
+.comp2-list { display: flex; flex-direction: column; gap: 5px; }
+.comp2-item {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 10px; overflow: hidden;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+.comp2-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.comp2-item-open {
+  border-color: rgba(26,77,46,0.3);
+  box-shadow: 0 3px 14px rgba(0,0,0,0.08);
+}
+
+/* Header row */
+.comp2-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 10px 14px;
+  cursor: pointer; user-select: none; transition: background 0.1s;
+}
+.comp2-header:hover { background: var(--bg); }
+.comp2-item-open .comp2-header {
+  background: rgba(26,77,46,0.035);
+  border-bottom: 1.5px solid var(--border);
+}
+.comp2-header-left { display: flex; align-items: center; gap: 9px; min-width: 0; flex: 1; }
+.comp2-chevron {
+  flex-shrink: 0; display: flex; align-items: center;
+  transition: transform 0.2s; color: var(--text-light);
+}
+.comp2-chevron-open { transform: rotate(90deg); }
+.comp2-header-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.comp2-header-office {
+  font-size: 13px; font-weight: 700; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.comp2-header-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.comp2-meta-year {
+  font-size: 10px; font-weight: 600; color: var(--text-light);
+  background: var(--bg); border-radius: 4px; padding: 1px 6px;
+}
+.comp2-meta-count { font-size: 10px; color: var(--text-light); }
+.comp2-header-right {
+  display: flex; align-items: center; gap: 5px;
+  flex-wrap: wrap; justify-content: flex-end; flex-shrink: 0;
+}
+.comp2-hpill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 10px; font-weight: 700;
+  border-radius: 20px; padding: 2px 9px; white-space: nowrap;
+}
+.comp2-hpill-dot {
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+}
+.comp2-hpill-warn { background: rgba(192,57,43,0.1); color: #c0392b; }
+.comp2-hpill-warn .comp2-hpill-dot { background: #c0392b; }
+.comp2-hpill-ok   { background: rgba(26,107,60,0.09); color: #1a6b3c; }
+.comp2-hpill-ok   .comp2-hpill-dot { background: #1a6b3c; }
+.comp2-hpill-none { background: var(--bg); color: var(--text-light); font-style: italic; }
+
+/* Slide transition */
+.comp2-slide-enter-active, .comp2-slide-leave-active {
+  transition: all 0.22s ease; overflow: hidden;
+}
+.comp2-slide-enter-from, .comp2-slide-leave-to {
+  opacity: 0; max-height: 0;
+}
+.comp2-slide-enter-to, .comp2-slide-leave-from {
+  opacity: 1; max-height: 2000px;
+}
+
+/* Body */
+.comp2-body { display: flex; flex-direction: column; gap: 0; }
+.comp2-body-empty { padding: 14px 16px; font-size: 12px; color: var(--text-light); font-style: italic; }
+
+/* Cluster summary strip */
+.comp2-cluster-strip {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(26,77,46,0.018);
+}
+.comp2-cs-card {
+  flex: 1; min-width: 160px; max-width: 240px;
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 8px; padding: 9px 11px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.comp2-cs-flagged { border-color: #e8c4c4; background: #fff9f9; }
+.comp2-cs-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap; }
+.comp2-cs-name {
+  font-size: 10px; font-weight: 800; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--navy);
+  background: rgba(26,77,46,0.08); border-radius: 4px;
+  padding: 2px 7px;
+}
+.comp2-cs-badge {
+  font-size: 10px; font-weight: 700; border-radius: 20px;
+  padding: 2px 8px; white-space: nowrap;
+}
+.comp2-cs-badge-warn { background: rgba(192,57,43,0.1); color: #c0392b; }
+.comp2-cs-badge-ok   { background: rgba(26,107,60,0.1); color: #1a6b3c; }
+.comp2-cs-badge-none { background: var(--bg); color: var(--text-light); }
+.comp2-cs-body { display: flex; flex-direction: column; gap: 4px; }
+.comp2-cs-row { display: flex; align-items: baseline; gap: 6px; }
+.comp2-cs-lbl {
+  font-size: 9px; font-weight: 800; letter-spacing: 0.07em;
+  text-transform: uppercase; white-space: nowrap; flex-shrink: 0; width: 54px;
+}
+.comp2-cs-strong .comp2-cs-lbl { color: #1a6b3c; }
+.comp2-cs-weak   .comp2-cs-lbl { color: #c0392b; }
+.comp2-cs-val { font-size: 11px; font-weight: 600; color: var(--text); line-height: 1.3; }
+
+/* Per-cluster competency block */
+.comp2-cluster-block { border-bottom: 1px solid var(--border); }
+.comp2-cluster-block:last-child { border-bottom: none; }
+.comp2-cluster-block-title {
+  display: flex; align-items: center; gap: 7px;
+  padding: 8px 14px 6px;
+  font-size: 10px; font-weight: 800; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--navy);
+}
+.comp2-cbt-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--navy); flex-shrink: 0;
+}
+.comp2-cbt-count {
+  margin-left: auto; font-size: 10px; font-weight: 600;
+  color: var(--text-light); font-style: normal; text-transform: none;
+  letter-spacing: 0;
+}
+
+/* Compact grid table */
+.comp2-grid { width: 100%; font-size: 11.5px; }
+.comp2-grid-head {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr 1.1fr;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.comp2-grid-row {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr 1.1fr;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+}
+.comp2-grid-row:last-child { border-bottom: none; }
+.comp2-grid-row:hover { background: rgba(26,77,46,0.025); }
+.comp2-row-alt { background: rgba(0,0,0,0.012); }
+.comp2-row-alt:hover { background: rgba(26,77,46,0.025); }
+
+.comp2-gh-name, .comp2-gh-levels, .comp2-gh-obs {
+  padding: 6px 12px;
+  font-size: 9px; font-weight: 800; letter-spacing: 0.07em;
+  text-transform: uppercase; color: var(--text-light);
+}
+.comp2-gh-levels { border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+
+/* 5 level sub-columns inside the levels cell */
+.comp2-gh-levels, .comp2-gr-levels {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+}
+.comp2-gh-lvl {
+  font-size: 9px; font-weight: 800; letter-spacing: 0.05em;
+  text-transform: uppercase; color: var(--text-light);
+  text-align: center; padding: 0 4px;
+  border-right: 1px solid var(--border);
+}
+.comp2-gh-lvl:last-child { border-right: none; }
+
+.comp2-gr-name {
+  padding: 7px 12px; font-weight: 600; color: var(--text);
+  display: flex; align-items: center; line-height: 1.35;
+}
+.comp2-gr-levels {
+  border-left: 1px solid var(--border); border-right: 1px solid var(--border);
+}
+.comp2-gr-lvl {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 3px; padding: 5px 4px;
+  border-right: 1px solid var(--border);
+}
+.comp2-gr-lvl:last-child { border-right: none; }
+.comp2-gr-obs {
+  padding: 7px 12px; font-size: 11px; font-style: italic;
+  color: var(--text-light); line-height: 1.4;
+  display: flex; align-items: center;
+}
+
+.comp2-val-cl {
+  font-size: 10px; font-weight: 700;
+  background: rgba(26,77,46,0.1); color: var(--navy);
+  border-radius: 4px; padding: 1px 5px; white-space: nowrap;
+}
+.comp2-val-pct {
+  font-size: 10px; font-weight: 600;
+  background: rgba(45,106,159,0.1); color: #2d6a9f;
+  border-radius: 4px; padding: 1px 5px; white-space: nowrap;
+}
+.comp2-val-nil { font-size: 14px; color: var(--border); line-height: 1; }
+
+@media (max-width: 860px) {
+  .comp2-gh-levels, .comp2-gr-levels { grid-template-columns: repeat(3, 1fr); }
+  .comp2-gh-lvl:nth-child(4), .comp2-gh-lvl:nth-child(5),
+  .comp2-gr-lvl:nth-child(4), .comp2-gr-lvl:nth-child(5) { display: none; }
+  .comp2-grid-head, .comp2-grid-row { grid-template-columns: 1.6fr 1fr 1fr; }
+  .comp2-header { flex-wrap: wrap; }
+}
+@media (max-width: 580px) {
+  .comp2-cs-card { min-width: 100%; }
+  .comp2-grid-head, .comp2-grid-row { grid-template-columns: 1.4fr 1fr; }
+  .comp2-gh-obs, .comp2-gr-obs { display: none; }
 }
 </style>
