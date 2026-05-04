@@ -10,60 +10,8 @@
       <span class="nav-current">LeaD DASHBOARD</span>
     </div>
 
-    <!-- LOGIN -->
-    <div v-if="screen === 'login'" class="token-wrap">
-      <div class="token-card">
-        <div class="token-logo">
-          <img src="/img/csu-logo-square1.png" alt="CarSU" />
-        </div>
-        <h2>LeaD Dashboard</h2>
-        <p>
-          Enter your CarSU email to access the HRMS Learning &amp; Development
-          Dashboard.
-        </p>
-        <div class="field-group">
-          <label>CarSU Email Address <span class="req">*</span></label>
-          <div
-            class="email-prefix-wrapper"
-            :class="{ error: loginHintType === 'err' }"
-          >
-            <input
-              type="text"
-              v-model="loginEmailPrefix"
-              class="email-prefix-input"
-              placeholder="yourname"
-              autocomplete="username"
-              @keydown.enter="doLogin"
-            />
-            <span class="email-suffix">@carsu.edu.ph</span>
-          </div>
-          <p v-if="loginHint" class="token-error">{{ loginHint }}</p>
-        </div>
-        <button class="btn-load" :disabled="loginLoading" @click="doLogin">
-          {{ loginLoading ? "Checking..." : "Access Dashboard" }}
-        </button>
-      </div>
-    </div>
-
-    <!-- ACCESS DENIED -->
-    <div v-if="screen === 'denied'" class="auth-screen">
-      <div class="denied-card">
-        <div class="denied-icon">🔒</div>
-        <h2>Access Denied</h2>
-        <p>
-          {{
-            deniedMsg ||
-            "Your email is not authorized to access this dashboard."
-          }}
-        </p>
-        <button class="btn-try" @click="screen = 'login'">
-          ← Try Another Email
-        </button>
-      </div>
-    </div>
-
     <!-- DASHBOARD -->
-    <div v-if="screen === 'dash'" class="dash-wrap">
+    <div class="dash-wrap">
       <div class="dash-head">
         <div class="dash-head-left">
           <h1>LeaD Dashboard</h1>
@@ -95,6 +43,418 @@
         >
           {{ tab.icon }} {{ tab.label }}
         </button>
+      </div>
+
+      <!-- ── OVERVIEW ── -->
+      <div v-if="activeTab === 'overview'" class="tab-panel ov-panel">
+
+        <!-- ══ ROW 1: Key Metric Cards ══ -->
+        <div class="ov-metrics-row">
+          <!-- IDP Total -->
+          <div class="ov-metric-card ov-mc-navy" @click="toggleOv('idp-all')" :class="{ active: ovActive === 'idp-all' }">
+            <div class="ov-mc-icon">
+              <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="ov-mc-body">
+              <div class="ov-mc-num">{{ idps.length }}</div>
+              <div class="ov-mc-label">Total IDPs</div>
+              <div class="ov-mc-sub">Individual development plans</div>
+            </div>
+          </div>
+          <!-- IDP Pending -->
+          <div class="ov-metric-card ov-mc-amber" @click="toggleOv('idp-pending')" :class="{ active: ovActive === 'idp-pending' }">
+            <div class="ov-mc-icon">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="ov-mc-body">
+              <div class="ov-mc-num">{{ ovCounts.idpPending }}</div>
+              <div class="ov-mc-label">Awaiting Supervisor</div>
+              <div class="ov-mc-sub">Pending Stage 2 review</div>
+            </div>
+          </div>
+          <!-- IDP Completed -->
+          <div class="ov-metric-card ov-mc-green" @click="toggleOv('idp-complete')" :class="{ active: ovActive === 'idp-complete' }">
+            <div class="ov-mc-icon">
+              <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div class="ov-mc-body">
+              <div class="ov-mc-num">{{ ovCounts.idpComplete }}</div>
+              <div class="ov-mc-label">IDPs Completed</div>
+              <div class="ov-mc-sub">Supervisor-reviewed</div>
+            </div>
+          </div>
+          <!-- LNA Total -->
+          <div class="ov-metric-card ov-mc-blue" @click="toggleOv('lna-all')" :class="{ active: ovActive === 'lna-all' }">
+            <div class="ov-mc-icon">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            </div>
+            <div class="ov-mc-body">
+              <div class="ov-mc-num">{{ lnas.length }}</div>
+              <div class="ov-mc-label">Total LNAs</div>
+              <div class="ov-mc-sub">Office-level assessments</div>
+            </div>
+          </div>
+          <!-- Offices Covered -->
+          <div class="ov-metric-card ov-mc-slate">
+            <div class="ov-mc-icon">
+              <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </div>
+            <div class="ov-mc-body">
+              <div class="ov-mc-num">{{ ovCounts.lnaOffices }}</div>
+              <div class="ov-mc-label">Offices Covered</div>
+              <div class="ov-mc-sub">Unique units submitted</div>
+            </div>
+          </div>
+          <!-- LNA Workforce -->
+          <div class="ov-metric-card ov-mc-teal">
+            <div class="ov-mc-icon">
+              <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>
+            </div>
+            <div class="ov-mc-body">
+              <div class="ov-mc-num">{{ lnaTotalWorkforce.toLocaleString() }}</div>
+              <div class="ov-mc-label">Workforce Headcount</div>
+              <div class="ov-mc-sub">Across all LNA offices</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Drill-down table (clicking metric cards) -->
+        <transition name="adv-slide">
+          <div v-if="ovActive" class="ov-drill">
+            <div class="ov-drill-header">
+              <span class="ov-drill-title">{{ ovDrillTitle }}</span>
+              <button class="btn-ov-close" @click="ovActive = null">✕ Close</button>
+            </div>
+            <!-- IDP drill -->
+            <div v-if="ovActive.startsWith('idp')" class="tbl-wrap" style="border-radius:0;border:none;box-shadow:none;">
+              <table class="dtbl">
+                <thead>
+                  <tr>
+                    <th v-for="(col, i) in ovIdpCols" :key="col"
+                        :class="{ 'th-sortable': i > 0, 'th-sorted': sortState.ovIdp.col === i }"
+                        @click="i > 0 && (sortState.ovIdp.col === i ? sortState.ovIdp.asc = !sortState.ovIdp.asc : (sortState.ovIdp.col = i, sortState.ovIdp.asc = true))">
+                      {{ col }}<span v-if="i > 0" class="sort-ind">{{ sortState.ovIdp.col === i ? (sortState.ovIdp.asc ? ' ↑' : ' ↓') : ' ↕' }}</span>
+                    </th>
+                    <th class="th-action">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-if="!ovDrillRows.length" class="empty-row"><td colspan="9">No records found.</td></tr>
+                  <tr v-for="r in ovDrillRows" :key="r.refId">
+                    <td><code class="ref-code">{{ r.refId || '—' }}</code></td>
+                    <td><strong>{{ r.employeeName || '—' }}</strong><br/><span class="sub-text">{{ r.email || '' }}</span></td>
+                    <td>{{ r.position || '—' }}</td>
+                    <td>{{ r.office || '—' }}</td>
+                    <td>{{ r.yearCovered || '—' }}</td>
+                    <td><span :class="statusBadgeClass(r.status)">{{ statusBadgeLabel(r.status) }}</span></td>
+                    <td class="date-cell">{{ fmtDateTime(r.submittedAt) }}</td>
+                    <td class="date-cell">{{ r.status === 'COMPLETE' ? fmtDateTime(r.supervisorSignedAt) : '—' }}</td>
+                    <td><button class="btn-view" @click="viewIDP(r.refId)">View</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- LNA drill -->
+            <div v-if="ovActive.startsWith('lna')" class="tbl-wrap" style="border-radius:0;border:none;box-shadow:none;">
+              <table class="dtbl">
+                <thead>
+                  <tr>
+                    <th v-for="(col, i) in ovLnaCols" :key="col"
+                        :class="{ 'th-sortable': i > 0, 'th-sorted': sortState.ovLna.col === i }"
+                        @click="i > 0 && (sortState.ovLna.col === i ? sortState.ovLna.asc = !sortState.ovLna.asc : (sortState.ovLna.col = i, sortState.ovLna.asc = true))">
+                      {{ col }}<span v-if="i > 0" class="sort-ind">{{ sortState.ovLna.col === i ? (sortState.ovLna.asc ? ' ↑' : ' ↓') : ' ↕' }}</span>
+                    </th>
+                    <th class="th-action">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-if="!ovDrillRows.length" class="empty-row"><td colspan="8">No records found.</td></tr>
+                  <tr v-for="r in ovDrillRows" :key="r.refId">
+                    <td><code class="ref-code">{{ r.refId || '—' }}</code></td>
+                    <td>{{ r.office || '—' }}</td>
+                    <td>{{ r.headOfUnit || '—' }}</td>
+                    <td>{{ r.yearCovered || '—' }}</td>
+                    <td>{{ r.purpose || '—' }}</td>
+                    <td style="text-align:center;">{{ r.totalPersonnel ?? '—' }}</td>
+                    <td class="date-cell">{{ fmtDateTime(r.submittedAt) }}</td>
+                    <td><button class="btn-view" @click="viewLNA(r.refId)">View</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </transition>
+
+        <!-- ══ ROW 2: IDP Completion + Supervisor Insights ══ -->
+        <div class="ov-grid-2">
+
+          <!-- IDP Completion Ring + Position breakdown -->
+          <div class="ov-card">
+            <div class="ov-card-title">IDP Completion Overview</div>
+            <div class="ov-completion-wrap">
+              <!-- Ring -->
+              <div class="ov-ring-wrap">
+                <svg class="ov-ring" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="40" fill="none" stroke="var(--border)" stroke-width="10"/>
+                  <circle cx="50" cy="50" r="40" fill="none" stroke="var(--navy)" stroke-width="10"
+                    stroke-dasharray="251.2"
+                    :stroke-dashoffset="251.2 - (251.2 * idpCompletionRate / 100)"
+                    stroke-linecap="round"
+                    transform="rotate(-90 50 50)"
+                    style="transition: stroke-dashoffset 0.6s ease"/>
+                  <text x="50" y="54" text-anchor="middle" font-size="18" font-weight="700" fill="var(--navy)" font-family="Roboto, sans-serif">{{ idpCompletionRate }}%</text>
+                </svg>
+                <div class="ov-ring-label">Completion<br/>Rate</div>
+              </div>
+              <div class="ov-completion-details">
+                <div class="ov-detail-row">
+                  <span class="ov-dot ov-dot-green"></span>
+                  <span class="ov-detail-label">Completed</span>
+                  <span class="ov-detail-val">{{ ovCounts.idpComplete }}</span>
+                </div>
+                <div class="ov-detail-row">
+                  <span class="ov-dot ov-dot-amber"></span>
+                  <span class="ov-detail-label">Pending</span>
+                  <span class="ov-detail-val">{{ ovCounts.idpPending }}</span>
+                </div>
+                <div class="ov-detail-row">
+                  <span class="ov-dot ov-dot-slate"></span>
+                  <span class="ov-detail-label">Total</span>
+                  <span class="ov-detail-val">{{ idps.length }}</span>
+                </div>
+                <div class="ov-divider"></div>
+                <div class="ov-detail-row">
+                  <span class="ov-detail-label" style="color:var(--text-light)">Avg Years in Position</span>
+                  <span class="ov-detail-val">{{ insights[0].value }}</span>
+                </div>
+                <div class="ov-detail-row">
+                  <span class="ov-detail-label" style="color:var(--text-light)">Supervisors w/ Pending</span>
+                  <span class="ov-detail-val">{{ insights[2].value }}</span>
+                </div>
+              </div>
+            </div>
+            <!-- IDP by Position mini bar chart -->
+            <div v-if="idpByPosition.length" style="margin-top:14px;">
+              <div class="ov-mini-title">Submissions by Position</div>
+              <div class="ov-bar-list">
+                <div v-for="([label, count]) in idpByPosition" :key="label" class="ov-bar-row">
+                  <div class="ov-bar-label">{{ label }}</div>
+                  <div class="ov-bar-track">
+                    <div class="ov-bar-fill ov-bar-navy" :style="{ width: (count / maxOf(idpByPosition) * 100) + '%' }"></div>
+                  </div>
+                  <div class="ov-bar-count">{{ count }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Supervisor Assessment Summary -->
+          <div class="ov-card">
+            <div class="ov-card-title">Supervisor Assessment (Section IV)</div>
+            <div v-if="ovCounts.idpComplete === 0" class="ov-empty-note">No completed IDPs yet — supervisor assessments will appear here.</div>
+            <div v-else>
+              <!-- Perf Gaps -->
+              <div class="ov-sub-section">
+                <div class="ov-sub-label">Performance Gaps Identified</div>
+                <div class="ov-pill-row">
+                  <span class="ov-pill ov-pill-red">⚠ {{ supervisorPerfGaps.hasGap }} have gaps</span>
+                  <span class="ov-pill ov-pill-green">✓ {{ supervisorPerfGaps.noGap }} no gaps</span>
+                  <span class="ov-pill ov-pill-grey">⏳ {{ supervisorPerfGaps.pending }} pending</span>
+                </div>
+              </div>
+              <!-- Readiness -->
+              <div class="ov-sub-section">
+                <div class="ov-sub-label">Ready for Advancement</div>
+                <div class="ov-pill-row">
+                  <span class="ov-pill ov-pill-green">✓ {{ supervisorReadiness.ready }} ready</span>
+                  <span class="ov-pill ov-pill-red">✗ {{ supervisorReadiness.notReady }} not ready</span>
+                  <span class="ov-pill ov-pill-grey">⏳ {{ supervisorReadiness.noData }} no data</span>
+                </div>
+              </div>
+              <!-- Top recommended interventions -->
+              <div class="ov-sub-section" v-if="topSupInterventions.length">
+                <div class="ov-sub-label">Top Recommended Interventions</div>
+                <div class="ov-bar-list">
+                  <div v-for="([label, count]) in topSupInterventions" :key="label" class="ov-bar-row">
+                    <div class="ov-bar-label">{{ label }}</div>
+                    <div class="ov-bar-track">
+                      <div class="ov-bar-fill ov-bar-blue" :style="{ width: (count / maxOf(topSupInterventions) * 100) + '%' }"></div>
+                    </div>
+                    <div class="ov-bar-count">{{ count }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ ROW 3: Competency Gaps + LNA Intervention Flags ══ -->
+        <div class="ov-grid-2">
+          <!-- Top IDP Competency Gaps -->
+          <div class="ov-card">
+            <div class="ov-card-title">Top Competency Gaps <span class="ov-card-badge">IDP Section I</span></div>
+            <div class="ov-card-sub">Competencies where Required Level > Current Level</div>
+            <div v-if="!topIdpGaps.length" class="ov-empty-note">No competency gap data yet.</div>
+            <div v-else class="ov-bar-list" style="margin-top:10px;">
+              <div v-for="([label, count], i) in topIdpGaps" :key="label" class="ov-bar-row">
+                <div class="ov-bar-rank">{{ i + 1 }}</div>
+                <div class="ov-bar-label">{{ label }}</div>
+                <div class="ov-bar-track">
+                  <div class="ov-bar-fill ov-bar-red" :style="{ width: (count / maxOf(topIdpGaps) * 100) + '%' }"></div>
+                </div>
+                <div class="ov-bar-count">{{ count }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- LNA: Competency Flags -->
+          <div class="ov-card">
+            <div class="ov-card-title">LNA Competency Landscape <span class="ov-card-badge">LNA Section II</span></div>
+            <div class="ov-grid-inner-2" style="margin-bottom: 12px;">
+              <div class="ov-mini-stat">
+                <div class="ov-mini-num ov-num-red">{{ ovCounts.lnaFlagged }}</div>
+                <div class="ov-mini-label">Offices Flagging<br/>Intervention</div>
+              </div>
+              <div class="ov-mini-stat">
+                <div class="ov-mini-num ov-num-navy">{{ lnas.length - ovCounts.lnaFlagged }}</div>
+                <div class="ov-mini-label">Offices No<br/>Urgent Need</div>
+              </div>
+            </div>
+            <!-- Clusters needing intervention -->
+            <div v-if="lnaInterventionClusters.length" style="margin-bottom: 14px;">
+              <div class="ov-mini-title">Clusters Flagged for Intervention</div>
+              <div class="ov-bar-list">
+                <div v-for="([label, count]) in lnaInterventionClusters" :key="label" class="ov-bar-row">
+                  <div class="ov-bar-label">{{ label }}</div>
+                  <div class="ov-bar-track">
+                    <div class="ov-bar-fill ov-bar-amber" :style="{ width: (count / maxOf(lnaInterventionClusters) * 100) + '%' }"></div>
+                  </div>
+                  <div class="ov-bar-count">{{ count }}</div>
+                </div>
+              </div>
+            </div>
+            <!-- Strongest / Weakest side by side -->
+            <div class="ov-grid-inner-2">
+              <div>
+                <div class="ov-mini-title ov-title-green">Most Cited Strongest</div>
+                <div v-for="([label, count]) in lnaStrongestCompetencies" :key="label" class="ov-tag-row">
+                  <span class="ov-tag-label">{{ label }}</span><span class="ov-tag-count ov-tag-green">{{ count }}</span>
+                </div>
+                <div v-if="!lnaStrongestCompetencies.length" class="ov-empty-note" style="font-size:11px;">—</div>
+              </div>
+              <div>
+                <div class="ov-mini-title ov-title-red">Most Cited Weakest</div>
+                <div v-for="([label, count]) in lnaWeakestCompetencies" :key="label" class="ov-tag-row">
+                  <span class="ov-tag-label">{{ label }}</span><span class="ov-tag-count ov-tag-red">{{ count }}</span>
+                </div>
+                <div v-if="!lnaWeakestCompetencies.length" class="ov-empty-note" style="font-size:11px;">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ ROW 4: AGAP + Pro-ACT + Workforce ══ -->
+        <div class="ov-grid-3">
+          <!-- AGAP breakdown -->
+          <div class="ov-card">
+            <div class="ov-card-title">AGAP Plans <span class="ov-card-badge">IDP Section II</span></div>
+            <div class="ov-mini-stat" style="margin-bottom:12px;">
+              <div class="ov-mini-num ov-num-navy">{{ idps.reduce((s, r) => s + (r._agapRows || []).length, 0) }}</div>
+              <div class="ov-mini-label">Total AGAP entries across all IDPs</div>
+            </div>
+            <div v-if="agapModeBreakdown.length">
+              <div class="ov-mini-title">Mode of Study</div>
+              <div class="ov-bar-list">
+                <div v-for="([label, count]) in agapModeBreakdown" :key="label" class="ov-bar-row">
+                  <div class="ov-bar-label">{{ label }}</div>
+                  <div class="ov-bar-track">
+                    <div class="ov-bar-fill ov-bar-teal" :style="{ width: (count / maxOf(agapModeBreakdown) * 100) + '%' }"></div>
+                  </div>
+                  <div class="ov-bar-count">{{ count }}</div>
+                </div>
+              </div>
+            </div>
+            <div v-if="agapDegreeBreakdown.length" style="margin-top:10px;">
+              <div class="ov-mini-title">Top Degree Programs</div>
+              <div v-for="([label, count]) in agapDegreeBreakdown" :key="label" class="ov-tag-row">
+                <span class="ov-tag-label">{{ label }}</span><span class="ov-tag-count ov-tag-blue">{{ count }}</span>
+              </div>
+            </div>
+            <div v-if="!agapModeBreakdown.length && !agapDegreeBreakdown.length" class="ov-empty-note">No AGAP data yet.</div>
+          </div>
+
+          <!-- Pro-ACT breakdown -->
+          <div class="ov-card">
+            <div class="ov-card-title">Pro-ACT Plans <span class="ov-card-badge">IDP Section III</span></div>
+            <div class="ov-mini-stat" style="margin-bottom:12px;">
+              <div class="ov-mini-num ov-num-navy">{{ idps.reduce((s, r) => s + (r._proactRows || []).length, 0) }}</div>
+              <div class="ov-mini-label">Total Pro-ACT entries across all IDPs</div>
+            </div>
+            <div v-if="proactModeBreakdown.length">
+              <div class="ov-mini-title">Mode of Activity</div>
+              <div class="ov-bar-list">
+                <div v-for="([label, count]) in proactModeBreakdown" :key="label" class="ov-bar-row">
+                  <div class="ov-bar-label">{{ label }}</div>
+                  <div class="ov-bar-track">
+                    <div class="ov-bar-fill ov-bar-navy" :style="{ width: (count / maxOf(proactModeBreakdown) * 100) + '%' }"></div>
+                  </div>
+                  <div class="ov-bar-count">{{ count }}</div>
+                </div>
+              </div>
+            </div>
+            <div v-if="!proactModeBreakdown.length" class="ov-empty-note">No Pro-ACT data yet.</div>
+          </div>
+
+          <!-- Workforce profile summary -->
+          <div class="ov-card">
+            <div class="ov-card-title">Workforce Profile <span class="ov-card-badge">LNA Section I</span></div>
+            <div class="ov-mini-stat" style="margin-bottom:12px;">
+              <div class="ov-mini-num ov-num-navy">{{ lnaTotalWorkforce.toLocaleString() }}</div>
+              <div class="ov-mini-label">Total headcount across all LNA submissions</div>
+            </div>
+            <div class="ov-mini-title">Employment Type Breakdown</div>
+            <div class="ov-bar-list">
+              <template v-for="key in ['permanent','temporary','contractual','casual','coterminus','cos','jobOrder','others']" :key="key">
+                <div v-if="lnaEmploymentBreakdown[key] > 0" class="ov-bar-row">
+                  <div class="ov-bar-label" style="text-transform:capitalize;">{{ key === 'jobOrder' ? 'Job Order' : key === 'cos' ? 'COS' : key.charAt(0).toUpperCase() + key.slice(1) }}</div>
+                  <div class="ov-bar-track">
+                    <div class="ov-bar-fill ov-bar-slate"
+                      :style="{ width: (lnaEmploymentBreakdown[key] / (lnaTotalWorkforce || 1) * 100) + '%' }"></div>
+                  </div>
+                  <div class="ov-bar-count">{{ lnaEmploymentBreakdown[key] }}</div>
+                </div>
+              </template>
+            </div>
+            <div v-if="lnaTotalWorkforce === 0" class="ov-empty-note">No workforce data yet.</div>
+          </div>
+        </div>
+
+        <!-- ══ ROW 5: Recent Activity ══ -->
+        <div class="ov-card" style="margin-top: 4px;">
+          <div class="ov-card-title">Recent Activity</div>
+          <div class="ov-card-sub">Latest submissions across IDP and LNA (most recent 10)</div>
+          <div v-if="!recentActivity.length" class="ov-empty-note">No submissions yet.</div>
+          <div v-else class="ov-activity-list">
+            <div v-for="r in recentActivity" :key="r.refId" class="ov-activity-row">
+              <div class="ov-activity-type" :class="r.type === 'IDP' ? 'ov-type-idp' : 'ov-type-lna'">{{ r.type }}</div>
+              <div class="ov-activity-info">
+                <div class="ov-activity-name">{{ r.label }}</div>
+                <div class="ov-activity-meta">
+                  <span>{{ r.office }}</span>
+                  <span v-if="r.type === 'IDP'"> · {{ r.position }}</span>
+                  <span> · {{ r.yearCovered }}</span>
+                </div>
+              </div>
+              <div class="ov-activity-right">
+                <span v-if="r.type === 'IDP'" :class="statusBadgeClass(r.status)">{{ statusBadgeLabel(r.status) }}</span>
+                <span v-else class="badge badge-grey">Submitted</span>
+                <div class="ov-activity-date">{{ fmtDateTime(r.submittedAt) }}</div>
+              </div>
+              <button class="btn-view" style="margin-left:8px;" @click="r.type === 'IDP' ? viewIDP(r.refId) : viewLNA(r.refId)">View</button>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <!-- ── IDP SUBMISSIONS ── -->
@@ -2267,17 +2627,7 @@
                 </td>
                 <td class="date-cell">{{ fmtDate(u.dateAdded) }}</td>
                 <td>
-                  <span
-                    v-if="u.email === currentUser?.email"
-                    style="
-                      font-size: 12px;
-                      color: var(--text-light);
-                      font-style: italic;
-                    "
-                    >You</span
-                  >
                   <button
-                    v-else
                     class="btn-remove"
                     @click="removeHR(u.email, u.name)"
                   >
@@ -3221,17 +3571,9 @@ const config = useRuntimeConfig();
 const API = config.public.apiBase;
 
 // ── STATE ──────────────────────────────────────────────────────────────────
-const screen = ref("login");
-const currentUser = ref(null);
-const loginEmail = ref("");
-const loginEmailPrefix = ref("");
-const loginHint = ref("");
-const loginHintType = ref("");
-const loginLoading = ref(false);
-const deniedMsg = ref("");
 const dataLoading = ref(false);
 const lastUpdated = ref("Loading data...");
-const activeTab = ref("idp");
+const activeTab = ref("overview");
 const idpSubTab = ref("list");
 const lnaSubTab = ref("list");
 
@@ -3332,6 +3674,7 @@ const toasts = ref([]);
 
 // ── STATIC CONFIG ──────────────────────────────────────────────────────────
 const tabs = [
+  { key: "overview", label: "Overview", icon: "📊" },
   { key: "idp", label: "IDP Submissions", icon: "📋" },
   { key: "lna", label: "LNA Submissions", icon: "📝" },
   { key: "registry", label: "HR Registry", icon: "👥" },
@@ -4413,6 +4756,14 @@ function normalizeIDP(raw) {
   };
 }
 
+function safeArray(val) {
+  if (Array.isArray(val)) return val;
+  if (typeof val === "string" && val.trim().startsWith("[")) {
+    try { const p = JSON.parse(val); return Array.isArray(p) ? p : []; } catch {}
+  }
+  return [];
+}
+
 function normalizeLNA(raw) {
   let yearCovered = raw.yearCovered || "";
   if (!yearCovered && raw.submittedAt) {
@@ -4423,9 +4774,9 @@ function normalizeLNA(raw) {
     ...raw,
     yearCovered,
     office: raw.office || raw.unitOfficCollege || "",
-    _clusterSummary: raw.clusterSummaryRaw || raw.clusterSummary || [],
-    _dataSources: raw.dataSourcesRaw || raw.dataSources || [],
-    _insightRows: raw.dataSourceInsights || [],
+    _clusterSummary: safeArray(raw.clusterSummaryRaw ?? raw.clusterSummary),
+    _dataSources: safeArray(raw.dataSourcesRaw ?? raw.dataSources),
+    _insightRows: safeArray(raw.dataSourceInsights),
   };
 }
 
@@ -4605,60 +4956,201 @@ const recentActivity = computed(() => {
     .slice(0, 10);
 });
 
-// ── AUTH ───────────────────────────────────────────────────────────────────
-async function doLogin() {
-  const prefix = loginEmailPrefix.value.trim().toLowerCase();
-  const em = prefix ? `${prefix}@carsu.edu.ph` : "";
-  loginEmail.value = em;
-  if (!prefix) {
-    loginHint.value = "Please enter your email.";
-    loginHintType.value = "err";
-    return;
-  }
-  loginHint.value = "Verifying...";
-  loginHintType.value = "";
-  loginLoading.value = true;
-  try {
-    const res = await fetch(
-      `${API}/api/auth/check?email=${encodeURIComponent(em)}`,
-    );
-    const data = await res.json();
-    if (data.authorized) {
-      currentUser.value = { email: em, name: data.name };
-      screen.value = "dash";
-      loadDashboard();
-    } else {
-      screen.value = "denied";
-    }
-  } catch {
-    loginHint.value = "Network error. Try again.";
-    loginHintType.value = "err";
-  } finally {
-    loginLoading.value = false;
-  }
+// ── OVERVIEW — EXTENDED COMPUTEDS ──────────────────────────────────────────
+
+const idpCompletionRate = computed(() => {
+  const total = idps.value.length;
+  if (!total) return 0;
+  return Math.round(
+    (idps.value.filter((r) => r.status === "COMPLETE").length / total) * 100,
+  );
+});
+
+const idpByPosition = computed(() => {
+  const freq = {};
+  idps.value.forEach((r) => {
+    const p = (r.position || "Unknown").trim();
+    freq[p] = (freq[p] || 0) + 1;
+  });
+  return Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 6);
+});
+
+const supervisorReadiness = computed(() => {
+  let ready = 0, notReady = 0, noData = 0;
+  idps.value.forEach((r) => {
+    if (!r._assessment) { noData++; return; }
+    const v = (r._assessment.readinessYN || "").toLowerCase();
+    if (v === "yes" || v === "y") ready++;
+    else if (v === "no" || v === "n") notReady++;
+    else noData++;
+  });
+  return { ready, notReady, noData };
+});
+
+const supervisorPerfGaps = computed(() => {
+  let hasGap = 0, noGap = 0, pending = 0;
+  idps.value.forEach((r) => {
+    if (!r._assessment) { pending++; return; }
+    const v = (r._assessment.perfGapsYN || "").toLowerCase();
+    if (v === "yes" || v === "y") hasGap++;
+    else if (v === "no" || v === "n") noGap++;
+    else pending++;
+  });
+  return { hasGap, noGap, pending };
+});
+
+const topSupInterventions = computed(() => {
+  const freq = {};
+  idps.value.forEach((r) => {
+    if (!r._assessment) return;
+    const arr = Array.isArray(r._assessment.interventions) ? r._assessment.interventions : [];
+    arr.forEach((v) => { const vt = (v || "").trim(); if (vt) freq[vt] = (freq[vt] || 0) + 1; });
+  });
+  return Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 5);
+});
+
+const topIdpGaps = computed(() => {
+  const freq = {};
+  idps.value.forEach((r) => {
+    (r._competencyRows || []).forEach((row) => {
+      const comp = (row.targetCompetency || "").trim();
+      const cur = parseInt(row.currentLevel) || 0;
+      const req = parseInt(row.requiredLevel) || 0;
+      if (comp && req > cur) freq[comp] = (freq[comp] || 0) + 1;
+    });
+  });
+  return Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 6);
+});
+
+const lnaInterventionClusters = computed(() => {
+  const freq = {};
+  lnas.value.forEach((r) => {
+    (r._clusterSummary || []).forEach((c) => {
+      if (c.interventionNeeded === "Y" || c.interventionNeeded === "Yes") {
+        const cl = (c.cluster || "Unknown").trim();
+        freq[cl] = (freq[cl] || 0) + 1;
+      }
+    });
+  });
+  return Object.entries(freq).sort((a, b) => b[1] - a[1]);
+});
+
+const lnaWeakestCompetencies = computed(() => {
+  const freq = {};
+  lnas.value.forEach((r) => {
+    (r._clusterSummary || []).forEach((c) => {
+      const w = (c.weakest || "").trim();
+      if (w) freq[w] = (freq[w] || 0) + 1;
+    });
+  });
+  return Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 5);
+});
+
+const lnaStrongestCompetencies = computed(() => {
+  const freq = {};
+  lnas.value.forEach((r) => {
+    (r._clusterSummary || []).forEach((c) => {
+      const s = (c.strongest || "").trim();
+      if (s) freq[s] = (freq[s] || 0) + 1;
+    });
+  });
+  return Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 5);
+});
+
+const lnaTotalWorkforce = computed(() => {
+  let total = 0;
+  lnas.value.forEach((r) => {
+    const wp = r.workforceProfile || {};
+    POSITION_LEVELS.forEach((lv) => {
+      const row = wp[lv.key] || {};
+      total += EMP_TYPE_KEYS.reduce((s, k) => s + (Number(row[k]) || 0), 0);
+    });
+  });
+  return total;
+});
+
+const lnaEmploymentBreakdown = computed(() => {
+  const counts = {};
+  EMP_TYPE_KEYS.forEach((k) => (counts[k] = 0));
+  lnas.value.forEach((r) => {
+    const wp = r.workforceProfile || {};
+    POSITION_LEVELS.forEach((lv) => {
+      const row = wp[lv.key] || {};
+      EMP_TYPE_KEYS.forEach((k) => { counts[k] += Number(row[k]) || 0; });
+    });
+  });
+  return counts;
+});
+
+const agapModeBreakdown = computed(() => {
+  const freq = {};
+  idps.value.forEach((r) => {
+    (r._agapRows || []).forEach((row) => {
+      const m = (row.modeOfStudy || "").trim();
+      if (m) freq[m] = (freq[m] || 0) + 1;
+    });
+  });
+  return Object.entries(freq).sort((a, b) => b[1] - a[1]);
+});
+
+const agapDegreeBreakdown = computed(() => {
+  const freq = {};
+  idps.value.forEach((r) => {
+    (r._agapRows || []).forEach((row) => {
+      const d = (row.degreeProgram || "").trim();
+      if (d) freq[d] = (freq[d] || 0) + 1;
+    });
+  });
+  return Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 5);
+});
+
+const proactModeBreakdown = computed(() => {
+  const freq = {};
+  idps.value.forEach((r) => {
+    (r._proactRows || []).forEach((row) => {
+      const m = (row.modeOfActivity || "").trim();
+      if (m) freq[m] = (freq[m] || 0) + 1;
+    });
+  });
+  return Object.entries(freq).sort((a, b) => b[1] - a[1]);
+});
+
+function maxOf(arr) {
+  return arr.length ? Math.max(...arr.map((x) => x[1])) : 1;
 }
+
 
 // ── DATA ───────────────────────────────────────────────────────────────────
 async function loadDashboard() {
   dataLoading.value = true;
   lastUpdated.value = "Loading...";
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
   try {
     const [idpRes, lnaRes, hrRes] = await Promise.all([
-      fetch(`${API}/api/idp`),
-      fetch(`${API}/api/lna`),
-      fetch(`${API}/api/users`),
+      fetch(`${API}/api/idp`, { signal: controller.signal }),
+      fetch(`${API}/api/lna`, { signal: controller.signal }),
+      fetch(`${API}/api/users`, { signal: controller.signal }),
     ]);
-    const rawIdps = await idpRes.json();
-    const rawLnas = await lnaRes.json();
+    if (!idpRes.ok || !lnaRes.ok || !hrRes.ok) {
+      throw new Error(`Server error: ${[idpRes, lnaRes, hrRes].find(r => !r.ok)?.status}`);
+    }
+    const [rawIdps, rawLnas, rawHr] = await Promise.all([
+      idpRes.json(),
+      lnaRes.json(),
+      hrRes.json(),
+    ]);
     idps.value = Array.isArray(rawIdps) ? rawIdps.map(normalizeIDP) : [];
     lnas.value = Array.isArray(rawLnas) ? rawLnas.map(normalizeLNA) : [];
-    hrUsers.value = await hrRes.json();
+    hrUsers.value = Array.isArray(rawHr) ? rawHr : [];
     const now = new Date();
     lastUpdated.value = `Last updated: ${now.toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" })} at ${now.toLocaleTimeString("en-PH", { hour: "2-digit", minute: "2-digit" })}`;
-  } catch {
-    toast("Failed to load data.", "error");
+  } catch (err) {
+    const msg = err?.name === "AbortError" ? "Request timed out." : "Failed to load data.";
+    toast(msg, "error");
     lastUpdated.value = "Failed to load.";
   } finally {
+    clearTimeout(timeout);
     dataLoading.value = false;
   }
 }
@@ -4798,7 +5290,7 @@ function toast(msg, type = "") {
   }, 3500);
 }
 
-onMounted(() => {});
+onMounted(() => { loadDashboard(); });
 </script>
 
 <style scoped>
@@ -4896,177 +5388,6 @@ body,
   color: var(--gold);
   font-weight: 600;
   letter-spacing: 0.03em;
-}
-
-/* ── Token / login screen ── */
-.token-wrap {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--cream);
-  padding: 24px;
-}
-.token-card {
-  background: var(--white);
-  border-radius: 16px;
-  padding: 48px 40px;
-  max-width: 460px;
-  width: 100%;
-  box-shadow: 0 8px 40px rgba(0, 51, 0, 0.12);
-  border: 1px solid var(--border);
-}
-.token-logo {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-}
-.token-logo img {
-  width: 64px;
-  height: 64px;
-  object-fit: contain;
-}
-.token-card h2 {
-  font-family: "Roboto", sans-serif;
-  font-size: 22px;
-  color: var(--navy);
-  text-align: center;
-  margin-bottom: 8px;
-}
-.token-card > p {
-  color: var(--text-light);
-  font-size: 13px;
-  text-align: center;
-  margin-bottom: 24px;
-}
-.token-error {
-  color: var(--error);
-  font-size: 13px;
-  margin-bottom: 12px;
-  text-align: center;
-}
-.token-guidance {
-  display: block;
-  font-size: 12px;
-  font-style: italic;
-  color: #888;
-  margin-top: -2px;
-}
-.btn-load {
-  width: 100%;
-  padding: 13px;
-  background: var(--navy);
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 16px;
-  transition: background 0.2s;
-  font-family: "Roboto", sans-serif;
-}
-.btn-load:hover {
-  background: var(--navy-mid);
-}
-.btn-load:disabled {
-  background: #aaa;
-  cursor: not-allowed;
-}
-.field-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 16px;
-}
-.field-group label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--navy-mid);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-.req {
-  color: var(--error);
-  margin-left: 2px;
-}
-.email-prefix-wrapper {
-  display: flex;
-  align-items: center;
-  border: 1.5px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  background: var(--input-bg);
-}
-.email-prefix-wrapper.error {
-  border-color: var(--error);
-}
-.email-prefix-input {
-  flex: 1;
-  border: none !important;
-  background: transparent !important;
-  padding: 10px 12px;
-  font-size: 14px;
-  outline: none;
-  font-family: "Roboto", sans-serif;
-  color: var(--text);
-}
-.email-suffix {
-  padding: 10px 14px;
-  background: #e8ede8;
-  color: var(--text-light);
-  font-size: 13px;
-  border-left: 1px solid var(--border);
-  white-space: nowrap;
-}
-/* ── Access denied card ── */
-.denied-card {
-  background: var(--white);
-  border: 1px solid #f5c6c2;
-  border-radius: 16px;
-  padding: 48px 40px;
-  max-width: 460px;
-  width: 100%;
-  text-align: center;
-  box-shadow: 0 8px 40px rgba(0, 51, 0, 0.12);
-  border: 1px solid var(--border);
-}
-.denied-icon {
-  width: 68px;
-  height: 68px;
-  background: rgba(192, 57, 43, 0.08);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 34px;
-  margin: 0 auto 18px;
-}
-.denied-card h2 {
-  font-family: "Roboto", sans-serif;
-  font-size: 22px;
-  color: var(--error);
-  margin-bottom: 8px;
-}
-.denied-card p {
-  font-size: 13px;
-  color: var(--text-light);
-  margin-bottom: 18px;
-}
-.btn-try {
-  padding: 9px 24px;
-  background: var(--navy);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.btn-try:hover {
-  background: var(--navy-mid);
 }
 
 .dash-wrap {
@@ -5978,6 +6299,379 @@ body,
   background: rgba(192, 57, 43, 0.1);
   color: var(--error);
 }
+
+/* ── OVERVIEW PANEL ─────────────────────────────────────────────────── */
+.ov-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Metric Cards Row */
+.ov-metrics-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+}
+@media (max-width: 1100px) {
+  .ov-metrics-row { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 700px) {
+  .ov-metrics-row { grid-template-columns: repeat(2, 1fr); }
+}
+
+.ov-metric-card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: default;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.ov-metric-card[onClick], .ov-metric-card:has(.ov-mc-body) {
+  cursor: pointer;
+}
+.ov-metric-card:hover {
+  border-color: var(--navy);
+  box-shadow: 0 4px 16px rgba(26,77,46,0.1);
+  transform: translateY(-1px);
+}
+.ov-metric-card.active {
+  border-color: var(--navy);
+  background: var(--navy);
+}
+.ov-metric-card.active .ov-mc-num,
+.ov-metric-card.active .ov-mc-label,
+.ov-metric-card.active .ov-mc-sub {
+  color: #fff;
+}
+.ov-metric-card.active .ov-mc-icon svg {
+  stroke: rgba(255,255,255,0.8);
+}
+
+.ov-mc-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ov-mc-icon svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ov-mc-navy .ov-mc-icon { background: rgba(26,77,46,0.1); }
+.ov-mc-navy .ov-mc-icon svg { stroke: var(--navy); }
+.ov-mc-amber .ov-mc-icon { background: rgba(180,120,0,0.1); }
+.ov-mc-amber .ov-mc-icon svg { stroke: #8a6c00; }
+.ov-mc-green .ov-mc-icon { background: rgba(26,107,60,0.1); }
+.ov-mc-green .ov-mc-icon svg { stroke: #1a6b3c; }
+.ov-mc-blue .ov-mc-icon { background: rgba(45,106,159,0.1); }
+.ov-mc-blue .ov-mc-icon svg { stroke: #2d6a9f; }
+.ov-mc-slate .ov-mc-icon { background: rgba(90,96,112,0.1); }
+.ov-mc-slate .ov-mc-icon svg { stroke: var(--text-light); }
+.ov-mc-teal .ov-mc-icon { background: rgba(0,128,128,0.1); }
+.ov-mc-teal .ov-mc-icon svg { stroke: #007a7a; }
+
+.ov-mc-body { display: flex; flex-direction: column; gap: 1px; }
+.ov-mc-num {
+  font-family: "Roboto", sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1.1;
+}
+.ov-mc-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+.ov-mc-sub {
+  font-size: 10px;
+  color: var(--text-light);
+}
+
+/* 2-col and 3-col grids */
+.ov-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.ov-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 1000px) {
+  .ov-grid-2 { grid-template-columns: 1fr; }
+  .ov-grid-3 { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 700px) {
+  .ov-grid-3 { grid-template-columns: 1fr; }
+}
+
+/* Cards */
+.ov-card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  box-shadow: var(--shadow-sm);
+}
+.ov-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ov-card-sub {
+  font-size: 11px;
+  color: var(--text-light);
+  margin-bottom: 2px;
+}
+.ov-card-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  background: rgba(26,77,46,0.08);
+  color: var(--navy-mid);
+  border-radius: 20px;
+  letter-spacing: 0.02em;
+}
+
+/* Completion ring */
+.ov-completion-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  margin-top: 10px;
+}
+.ov-ring-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.ov-ring {
+  width: 90px;
+  height: 90px;
+}
+.ov-ring-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-light);
+  text-align: center;
+  line-height: 1.3;
+}
+.ov-completion-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 6px;
+}
+.ov-detail-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ov-detail-label {
+  font-size: 12px;
+  color: var(--text);
+  flex: 1;
+}
+.ov-detail-val {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy);
+  font-family: "Roboto", sans-serif;
+}
+.ov-divider {
+  border-top: 1px solid var(--border);
+  margin: 4px 0;
+}
+.ov-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.ov-dot-green { background: #1a6b3c; }
+.ov-dot-amber { background: #c67c00; }
+.ov-dot-slate { background: var(--text-light); }
+
+/* Bar charts */
+.ov-bar-list { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+.ov-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+}
+.ov-bar-rank {
+  width: 14px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-light);
+  text-align: center;
+  flex-shrink: 0;
+}
+.ov-bar-label {
+  flex: 0 0 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text);
+  font-size: 11px;
+}
+.ov-bar-track {
+  flex: 1;
+  height: 8px;
+  background: rgba(90,96,112,0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.ov-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+.ov-bar-navy { background: var(--navy); }
+.ov-bar-blue { background: #2d6a9f; }
+.ov-bar-red { background: #c0392b; }
+.ov-bar-amber { background: #c67c00; }
+.ov-bar-teal { background: #007a7a; }
+.ov-bar-slate { background: #5a6070; }
+.ov-bar-count {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--navy);
+  font-family: "Roboto", sans-serif;
+  min-width: 20px;
+  text-align: right;
+}
+
+/* Mini titles */
+.ov-mini-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-light);
+  margin-bottom: 6px;
+  margin-top: 4px;
+}
+.ov-title-green { color: #1a6b3c !important; }
+.ov-title-red { color: #c0392b !important; }
+
+/* Pill badges */
+.ov-pill-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; margin-bottom: 4px; }
+.ov-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.ov-pill-red { background: rgba(192,57,43,0.1); color: #c0392b; }
+.ov-pill-green { background: rgba(26,107,60,0.1); color: #1a6b3c; }
+.ov-pill-grey { background: rgba(90,96,112,0.1); color: var(--text-light); }
+
+/* Sub sections inside cards */
+.ov-sub-section { margin-bottom: 12px; }
+.ov-sub-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--navy-mid);
+  margin-bottom: 5px;
+}
+
+/* Mini stats */
+.ov-mini-stat { display: flex; flex-direction: column; gap: 2px; }
+.ov-mini-num {
+  font-family: "Roboto", sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+}
+.ov-num-navy { color: var(--navy); }
+.ov-num-red { color: #c0392b; }
+.ov-mini-label { font-size: 11px; color: var(--text-light); }
+
+/* Inner 2-col grid */
+.ov-grid-inner-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+/* Tag rows (label + small badge) */
+.ov-tag-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(90,96,112,0.08);
+  font-size: 11px;
+}
+.ov-tag-label { color: var(--text); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ov-tag-count {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+.ov-tag-green { background: rgba(26,107,60,0.1); color: #1a6b3c; }
+.ov-tag-red { background: rgba(192,57,43,0.1); color: #c0392b; }
+.ov-tag-blue { background: rgba(45,106,159,0.1); color: #2d6a9f; }
+
+/* Recent activity */
+.ov-activity-list { display: flex; flex-direction: column; gap: 0; margin-top: 10px; }
+.ov-activity-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+}
+.ov-activity-row:last-child { border-bottom: none; }
+.ov-activity-type {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 3px 8px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.ov-type-idp { background: rgba(26,77,46,0.1); color: var(--navy); }
+.ov-type-lna { background: rgba(45,106,159,0.1); color: #2d6a9f; }
+.ov-activity-info { flex: 1; min-width: 0; }
+.ov-activity-name { font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ov-activity-meta { font-size: 10px; color: var(--text-light); margin-top: 1px; }
+.ov-activity-right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0; }
+.ov-activity-date { font-size: 10px; color: var(--text-light); }
+
+/* Empty state */
+.ov-empty-note { font-size: 12px; color: var(--text-light); padding: 10px 0; font-style: italic; }
 
 @keyframes fadeUp {
   from {
