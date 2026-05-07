@@ -1070,20 +1070,160 @@
         </transition>
       </div>
 
-      <!-- CERTIFICATION -->
+      <!-- SECTION IV: PRO-ACT -->
       <div class="section-card section-card-collapsible">
         <div class="section-header">
           <div class="section-num">IV</div>
           <div>
-            <h3>Certification</h3>
-            <p>Rater / Head of Office declaration</p>
+            <h3>
+              Professional Advancement through Capacity-Building and Trainings
+              (Pro-ACT)
+            </h3>
+            <p>Recommended training interventions based on identified gaps</p>
           </div>
           <div v-if="!sectionDone.dataSources" class="section-locked-badge">
             Complete Section III first
           </div>
+          <div v-else-if="sectionDone.proact" class="section-done-badge">
+            ✓ Complete
+          </div>
         </div>
         <transition name="reveal">
           <div v-if="sectionDone.dataSources" class="section-body">
+            <div class="section-desc">
+              Based on the competency gaps and learning needs identified in
+              Sections II and III, specify the recommended training or LeaD
+              interventions for your office. Rows are auto-generated from
+              identified gaps. You may also add additional rows manually.
+            </div>
+            <div class="table-wrapper">
+              <table class="dynamic-table">
+                <thead>
+                  <tr>
+                    <th style="width: 40px">No.</th>
+                    <th style="background: var(--navy); opacity: 0.92">
+                      Identified Gap / Intervention Need
+                      <span style="font-size: 10px; font-weight: 400; opacity: 0.8">
+                        (from Sections II &amp; III)
+                      </span>
+                    </th>
+                    <th>Training / LeaD Intervention</th>
+                    <th style="width: 110px">Mode of Activity</th>
+                    <th>Trainer / Provider</th>
+                    <th style="width: 90px">Target Timeline</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template v-if="filledGaps.length === 0 && proactRows.length === 0">
+                    <tr>
+                      <td
+                        colspan="7"
+                        style="
+                          text-align: center;
+                          color: var(--text-light);
+                          font-style: italic;
+                          padding: 20px;
+                        "
+                      >
+                        Identify gaps in Sections II and III to auto-populate this table, or add rows manually.
+                      </td>
+                    </tr>
+                  </template>
+                  <!-- Auto-generated rows from gaps -->
+                  <tr v-for="(gap, idx) in filledGaps" :key="'gap-' + idx">
+                    <td class="row-num-cell">{{ idx + 1 }}</td>
+                    <td style="background: rgba(0, 51, 0, 0.04)">
+                      <div class="proact-skill-label">{{ gap }}</div>
+                    </td>
+                    <td>
+                      <select v-model="proactRows[idx].trainingTitle">
+                        <option value="">Select…</option>
+                        <optgroup label="On-the-Job Learning">
+                          <option>Observation / Demonstration</option>
+                          <option>Delegation</option>
+                          <option>Coaching</option>
+                          <option>Mentoring</option>
+                          <option>Deployment</option>
+                          <option>Job Rotation / Assignment</option>
+                          <option>Detail and Secondment</option>
+                          <option>Reading</option>
+                          <option>Flexible Learning</option>
+                          <option>Brainstorming / Group Discussion</option>
+                          <option>Experiential Learning</option>
+                        </optgroup>
+                        <optgroup label="Off-the-Job Learning">
+                          <option>Special Short Courses and Lectures</option>
+                          <option>
+                            Conferences, Training Programs, Conventions, Seminars,
+                            and Cum Paper Presentations
+                          </option>
+                          <option>Pursue Higher Education</option>
+                        </optgroup>
+                        <option value="__others__">Others / Specify</option>
+                      </select>
+                      <input
+                        v-if="proactRows[idx].trainingTitle === '__others__'"
+                        type="text"
+                        v-model="proactRows[idx].trainingTitleOther"
+                        placeholder="Please specify…"
+                        style="margin-top: 6px"
+                      />
+                    </td>
+                    <td>
+                      <select v-model="proactRows[idx].modeOfActivity">
+                        <option value="">Select…</option>
+                        <option>Face-to-face</option>
+                        <option>Online</option>
+                        <option>Blended</option>
+                        <option>On-the-job</option>
+                      </select>
+                    </td>
+                    <td>
+                      <input
+                        type="text"
+                        v-model="proactRows[idx].trainerProvider"
+                        placeholder="Optional"
+                      />
+                    </td>
+                    <td>
+                      <select v-model="proactRows[idx].targetTimeline">
+                        <option value="">Select…</option>
+                        <option>2026</option>
+                        <option>2027</option>
+                        <option>2028</option>
+                        <option>2029</option>
+                        <option>2030</option>
+                        <option>2031</option>
+                      </select>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p
+              v-if="filledGaps.length > 0"
+              style="font-size: 13px; color: var(--text-light); margin-top: 10px;"
+            >
+              Rows are auto-generated based on gaps identified in Sections II &amp; III.
+            </p>
+          </div>
+        </transition>
+      </div>
+
+      <!-- CERTIFICATION -->
+      <div class="section-card section-card-collapsible">
+        <div class="section-header">
+          <div class="section-num">V</div>
+          <div>
+            <h3>Certification</h3>
+            <p>Rater / Head of Office declaration</p>
+          </div>
+          <div v-if="!sectionDone.proact" class="section-locked-badge">
+            Complete Section IV first
+          </div>
+        </div>
+        <transition name="reveal">
+          <div v-if="sectionDone.proact" class="section-body">
             <div class="certification-box">
               <p>
                 I hereby certify that the information provided in this Learning
@@ -1329,10 +1469,48 @@
         </div>
       </div>
 
-      <!-- IV: Certification -->
+      <!-- IV: Pro-ACT -->
       <div class="review-card">
         <div class="review-card-header">
           <span class="review-card-num">IV</span>
+          <span class="review-card-title">Professional Advancement through Capacity-Building and Trainings (Pro-ACT)</span>
+          <button class="btn-review-edit" @click="backToForm()">Edit</button>
+        </div>
+        <div class="review-card-body">
+          <div v-if="allProactRows.length === 0" style="color: var(--text-light); font-style: italic; font-size: 13px;">
+            No training interventions specified.
+          </div>
+          <div v-else class="review-table-wrap">
+            <table class="review-table">
+              <thead>
+                <tr>
+                  <th style="width:36px">No.</th>
+                  <th>Identified Gap / Skill</th>
+                  <th>Training / LeaD Intervention</th>
+                  <th>Mode</th>
+                  <th>Trainer / Provider</th>
+                  <th>Timeline</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, idx) in allProactRows" :key="idx">
+                  <td style="text-align:center; color:var(--text-light); font-weight:600;">{{ idx + 1 }}</td>
+                  <td class="review-row-label" style="white-space:normal; font-size:12px;">{{ row.targetSkill || '—' }}</td>
+                  <td style="font-size:12px;">{{ row.trainingTitle === '__others__' ? row.trainingTitleOther : row.trainingTitle || '—' }}</td>
+                  <td style="font-size:12px;">{{ row.modeOfActivity || '—' }}</td>
+                  <td style="font-size:12px;">{{ row.trainerProvider || '—' }}</td>
+                  <td style="font-size:12px;">{{ row.targetTimeline || '—' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- V: Certification -->
+      <div class="review-card">
+        <div class="review-card-header">
+          <span class="review-card-num">V</span>
           <span class="review-card-title">Certification</span>
           <button class="btn-review-edit" @click="backToForm()">Edit</button>
         </div>
@@ -2100,6 +2278,9 @@ const sectionDone = computed(() => {
   );
   const competency = clusterSummaryDone && clDataFilled;
   const dataSourcesDone = form.selectedSources.length > 0;
+  // Pro-ACT is always considered done once Section III is complete
+  // (rows are optional — office may have no additional training needs)
+  const proactDone = dataSourcesDone;
   const certification = !!form.raterFullName.trim();
 
   return {
@@ -2107,6 +2288,7 @@ const sectionDone = computed(() => {
     workforce: workforceDone,
     competency,
     dataSources: dataSourcesDone,
+    proact: proactDone,
     certification,
   };
 });
@@ -2275,6 +2457,63 @@ const personnelLevelOptions = [
 ];
 
 const insightRows = reactive([]);
+
+// ── PRO-ACT (Section IV) ──────────────────────────────────────────────────────
+// Auto-generated rows — one per identified gap (from cluster summary + insight rows)
+const proactRows = ref([]);
+
+// Collect unique, non-empty gap/intervention texts from Sections II & III
+const filledGaps = computed(() => {
+  const gaps = new Set();
+  // From cluster summary "Intervention Needed" fields (where answer is "Yes")
+  activeClusterSummary.value.forEach(({ rows }) => {
+    rows.forEach((r) => {
+      if (r.interventionNeeded === "Yes" && r.weakest?.trim()) {
+        gaps.add(r.weakest.trim());
+      }
+    });
+  });
+  // From Section III insight rows (identified gaps)
+  insightRows.forEach((r) => {
+    if (r.gap?.trim()) gaps.add(r.gap.trim());
+  });
+  return [...gaps];
+});
+
+// Keep proactRows in sync with filledGaps
+watch(
+  filledGaps,
+  (list) => {
+    while (proactRows.value.length < list.length) {
+      proactRows.value.push({
+        targetSkill: "",
+        trainingTitle: "",
+        trainingTitleOther: "",
+        modeOfActivity: "",
+        trainerProvider: "",
+        targetTimeline: "",
+      });
+    }
+    proactRows.value.length = list.length;
+    list.forEach((gap, i) => {
+      proactRows.value[i].targetSkill = gap;
+    });
+  },
+  { immediate: true },
+);
+
+// Combined view for review screen & payload
+const allProactRows = computed(() =>
+  proactRows.value.map((r, i) => ({
+    targetSkill: filledGaps.value[i] || r.targetSkill,
+    trainingTitle: r.trainingTitle,
+    trainingTitleOther: r.trainingTitleOther,
+    modeOfActivity: r.modeOfActivity,
+    trainerProvider: r.trainerProvider,
+    targetTimeline: r.targetTimeline,
+  }))
+);
+// ─────────────────────────────────────────────────────────────────────────────
 
 watch(
   () => [...form.selectedSources],
@@ -2468,6 +2707,16 @@ async function submitForm() {
       interventions: Array.isArray(r.interventions)
         ? r.interventions.join("; ")
         : r.interventions,
+    })),
+    proactRows: allProactRows.value.map((r) => ({
+      targetSkill: r.targetSkill,
+      trainingTitle:
+        r.trainingTitle === "__others__"
+          ? r.trainingTitleOther || "Others"
+          : r.trainingTitle,
+      modeOfActivity: r.modeOfActivity,
+      trainerProvider: r.trainerProvider,
+      targetTimeline: r.targetTimeline,
     })),
   };
 
@@ -3185,6 +3434,98 @@ textarea {
   color: var(--navy-mid);
   background: rgba(26, 77, 46, 0.03) !important;
   white-space: nowrap;
+}
+
+/* ── Dynamic table (Pro-ACT) — mirrors IDP style ── */
+.dynamic-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+  min-width: 700px;
+}
+.dynamic-table thead tr {
+  background: var(--navy-mid);
+}
+.dynamic-table thead th {
+  padding: 10px 12px;
+  color: var(--white);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: left;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  white-space: nowrap;
+}
+.dynamic-table thead th:last-child {
+  border-right: none;
+}
+.dynamic-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.dynamic-table tbody tr:hover {
+  background: #f5f4f0;
+}
+.dynamic-table tbody td {
+  padding: 8px 10px;
+  vertical-align: top;
+  border-right: 1px solid var(--border);
+}
+.dynamic-table tbody td:last-child {
+  border-right: none;
+  text-align: center;
+}
+.dynamic-table td input,
+.dynamic-table td select,
+.dynamic-table td textarea {
+  padding: 6px 10px;
+  font-size: 13px;
+  border-radius: 6px;
+}
+
+/* ── Row number cell ── */
+.row-num-cell {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-light);
+  vertical-align: middle;
+}
+
+/* ── Add / Remove row buttons ── */
+.btn-add-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--navy);
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-family: "Roboto", sans-serif;
+}
+.btn-add-row:hover {
+  background: var(--navy-mid);
+}
+.btn-remove-row {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--error);
+  padding: 4px;
+  border-radius: 4px;
+  font-size: 18px;
+  line-height: 1;
+  transition: background 0.15s;
+}
+.btn-remove-row:hover {
+  background: rgba(192, 57, 43, 0.08);
 }
 
 .workforce-table th,
@@ -4509,5 +4850,17 @@ textarea {
   background: #fdf9e3;
   color: #1a4d2e;
   transform: none;
+}
+
+/* ── Pro-ACT pre-filled skill label ── */
+.proact-skill-label {
+  background: rgba(0, 51, 0, 0.07);
+  border: 1.5px solid rgba(0, 51, 0, 0.25);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  color: var(--navy);
+  font-weight: 600;
+  min-width: 160px;
 }
 </style>
