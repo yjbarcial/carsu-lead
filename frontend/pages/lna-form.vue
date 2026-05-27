@@ -985,11 +985,32 @@
                       {{ row.dataSource }}
                     </td>
                     <td>
-                      <textarea
-                        rows="2"
-                        v-model="row.gap"
-                        placeholder="Identified gap or issue..."
-                      ></textarea>
+                      <div class="gap-inputs-wrapper">
+                        <div
+                          v-for="(gap, gIdx) in row.gaps"
+                          :key="gIdx"
+                          class="gap-input-row"
+                        >
+                          <textarea
+                            rows="2"
+                            :value="gap"
+                            @input="row.gaps[gIdx] = $event.target.value"
+                            :placeholder="gIdx === 0 ? 'Identified gap or issue...' : 'Additional gap or issue...'"
+                          ></textarea>
+                          <button
+                            v-if="row.gaps.length > 1"
+                            type="button"
+                            class="gap-remove-btn"
+                            @click="row.gaps.splice(gIdx, 1)"
+                            title="Remove this gap"
+                          >×</button>
+                        </div>
+                        <button
+                          type="button"
+                          class="gap-add-btn"
+                          @click="row.gaps.push('')"
+                        >+ Add Issue</button>
+                      </div>
                     </td>
                     <td>
                       <div class="personnel-checks">
@@ -1449,7 +1470,14 @@
                 <tr v-for="(row, idx) in insightRows" :key="row.dataSource">
                   <td style="text-align:center; color:var(--text-light); font-weight:600;">{{ idx + 1 }}</td>
                   <td class="review-row-label" style="white-space:normal; font-size:12px;">{{ row.dataSource }}</td>
-                  <td style="white-space:pre-wrap; font-size:12px;">{{ row.gap || '—' }}</td>
+                  <td style="font-size:12px;">
+                    <div v-if="row.gaps && row.gaps.filter(g => g.trim()).length">
+                      <div v-for="(g, gi) in row.gaps.filter(g => g.trim())" :key="gi" style="margin-bottom: 4px;">
+                        <span v-if="row.gaps.filter(g => g.trim()).length > 1" style="font-weight:600; color:var(--text-light); font-size:11px;">{{ gi + 1 }}. </span>{{ g }}
+                      </div>
+                    </div>
+                    <span v-else style="color:var(--text-light)">—</span>
+                  </td>
                   <td style="font-size:12px;">
                     <div v-if="row.personnel && row.personnel.length">
                       <span v-for="p in row.personnel" :key="p" class="review-personnel-tag">{{ p }}</span>
@@ -2475,7 +2503,11 @@ const filledGaps = computed(() => {
   });
   // From Section III insight rows (identified gaps)
   insightRows.forEach((r) => {
-    if (r.gap?.trim()) gaps.add(r.gap.trim());
+    if (Array.isArray(r.gaps)) {
+      r.gaps.forEach(g => { if (g?.trim()) gaps.add(g.trim()); });
+    } else if (r.gap?.trim()) {
+      gaps.add(r.gap.trim());
+    }
   });
   return [...gaps];
 });
@@ -2543,7 +2575,7 @@ watch(
       if (!exists)
         insightRows.push({
           dataSource: src,
-          gap: "",
+          gaps: [""],
           personnel: [],
           interventions: [],
           _interventionOpen: false,
@@ -2700,7 +2732,7 @@ async function submitForm() {
     dataSourcesRaw: selectedSources,
     dataSourceInsights: insightRows.map((r) => ({
       dataSource: r.dataSource,
-      gap: r.gap,
+      gap: Array.isArray(r.gaps) ? r.gaps.filter(g => g.trim()).join("\n") : (r.gaps || ""),
       personnel: Array.isArray(r.personnel)
         ? r.personnel.join(", ")
         : r.personnel,
@@ -4852,7 +4884,61 @@ textarea {
   transform: none;
 }
 
-/* ── Pro-ACT pre-filled skill label ── */
+/* ── Multi-gap inputs ── */
+.gap-inputs-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.gap-input-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+.gap-input-row textarea {
+  flex: 1;
+  min-width: 0;
+}
+.gap-remove-btn {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  margin-top: 4px;
+  padding: 0;
+  background: rgba(192, 57, 43, 0.08);
+  border: 1px solid rgba(192, 57, 43, 0.3);
+  border-radius: 50%;
+  color: #c0392b;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s;
+}
+.gap-remove-btn:hover {
+  background: rgba(192, 57, 43, 0.18);
+  border-color: #c0392b;
+}
+.gap-add-btn {
+  align-self: flex-start;
+  padding: 4px 10px;
+  background: rgba(26, 77, 46, 0.07);
+  border: 1px dashed rgba(26, 77, 46, 0.4);
+  border-radius: 6px;
+  color: var(--navy);
+  font-family: "Roboto", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.gap-add-btn:hover {
+  background: rgba(26, 77, 46, 0.14);
+  border-color: var(--navy);
+}
+
 .proact-skill-label {
   background: rgba(0, 51, 0, 0.07);
   border: 1.5px solid rgba(0, 51, 0, 0.25);

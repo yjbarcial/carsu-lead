@@ -754,65 +754,29 @@
                 <tr v-for="(row, idx) in competencyRows" :key="idx">
                   <td class="row-num-cell">{{ idx + 1 }}</td>
                   <td>
-                    <select
+                    <input
+                      type="text"
                       v-model="row.targetCompetency"
+                      placeholder="Type competency…"
                       @change="
-                        row.competencyGroup = getCompetencyCluster(
-                          row.targetCompetency,
-                        );
-                        row.requiredLevel = getRequiredLevel(
-                          row.targetCompetency,
-                          form.currentPosition,
-                        );
+                        row.competencyGroup = getCompetencyCluster(row.targetCompetency);
+                        row.requiredLevel = getRequiredLevel(row.targetCompetency, form.currentPosition);
                       "
-                    >
-                      <option value="">Select…</option>
-                      <template
-                        v-for="cluster in availableClusters"
-                        :key="cluster"
-                      >
-                        <optgroup :label="cluster">
-                          <option
-                            v-for="c in allCompetencies[cluster]"
-                            :key="c"
-                            :value="c"
-                          >
-                            {{ c }}
-                          </option>
-                        </optgroup>
-                      </template>
-                    </select>
+                    />
                   </td>
                   <td>
-                    <select v-model="row.currentLevel">
-                      <option value="">Select…</option>
-                      <option value="1 - Basic">1 - Basic</option>
-                      <option value="2 - Intermediate">2 - Intermediate</option>
-                      <option value="3 - Advanced">3 - Advanced</option>
-                      <option value="4 - Expert">4 - Expert</option>
-                    </select>
+                    <input
+                      type="text"
+                      v-model="row.currentLevel"
+                      placeholder="e.g. 2 - Intermediate"
+                    />
                   </td>
                   <td>
-                    <template v-if="form.currentPosition === 'Director'">
-                      <select v-model="row.requiredLevel">
-                        <option value="">Select…</option>
-                        <option value="1 - Basic">1 - Basic</option>
-                        <option value="2 - Intermediate">
-                          2 - Intermediate
-                        </option>
-                        <option value="3 - Advanced">3 - Advanced</option>
-                        <option value="4 - Expert">4 - Expert</option>
-                      </select>
-                    </template>
-                    <template v-else>
-                      <div
-                        v-if="row.requiredLevel"
-                        class="required-level-badge"
-                      >
-                        {{ row.requiredLevel }}
-                      </div>
-                      <div v-else class="required-level-empty">Auto-set</div>
-                    </template>
+                    <input
+                      type="text"
+                      v-model="row.requiredLevel"
+                      placeholder="e.g. 3 - Advanced"
+                    />
                   </td>
                   <td>
                     <select
@@ -901,9 +865,9 @@
                   <th style="width: 40px">No.</th>
                   <th>Degree Program</th>
                   <th style="min-width: 200px">Target HEI</th>
-                  <th style="width: 80px">Mode of Study</th>
+                  <th style="width: 70px; white-space: normal; word-break: break-word; font-size: 10px;">Mode of Study</th>
                   <th style="min-width: 180px">Target Scholarship Grant</th>
-                  <th style="width: 80px">Intended Year of Enrollment</th>
+                  <th style="width: 70px; white-space: normal; word-break: break-word; font-size: 10px;">Intended Year of Enrollment</th>
                   <th style="width: 40px"></th>
                 </tr>
               </thead>
@@ -1022,7 +986,7 @@
                     >
                   </th>
                   <th>Training / LeaD Intervention</th>
-                  <th style="width: 80px">Mode of Activity</th>
+                  <th style="width: 70px; white-space: normal; word-break: break-word; font-size: 10px;">Mode of Activity</th>
                   <th>Trainer / Provider</th>
                   <th style="width: 80px">Target Timeline</th>
                   <th style="width: 40px"></th>
@@ -4643,7 +4607,12 @@ function getRequiredLevel(competency, position) {
   if (!competency || !position) return "";
   const posData = competencyModel[position];
   if (!posData) return "";
-  const lvl = posData[competency];
+  // Case-insensitive match to support free-text input (e.g. "INTEGRITY" → "Integrity")
+  const key = Object.keys(posData).find(
+    (k) => k.toLowerCase() === competency.trim().toLowerCase()
+  );
+  if (!key) return "";
+  const lvl = posData[key];
   if (lvl === null || lvl === undefined) return "";
   return LEVEL_LABEL[lvl] || "";
 }
