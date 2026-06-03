@@ -19,11 +19,8 @@ export class User {
   @Column({ unique: true })
   email: string;
 
-  @Column({ nullable: true })
-  password: string; // null if Google OAuth only
-
-  @Column({ nullable: true, unique: true })
-  googleId: string;
+  @Column()
+  password: string;
 
   @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
   role: UserRole;
@@ -31,7 +28,7 @@ export class User {
   @Column({ default: false })
   profileComplete: boolean;
 
-  // ── Profile fields (from IDP Personnel Info) ──────────────────────
+  // ── From IDP Personnel Info ───────────────────────────────────────
   @Column({ nullable: true }) firstName: string;
   @Column({ nullable: true }) lastName: string;
   @Column({ nullable: true }) middleInitial: string;
@@ -47,7 +44,7 @@ export class User {
   @Column({ nullable: true, type: 'float' }) yearsInPosition: number;
   @Column({ nullable: true, type: 'float' }) yearsInCSU: number;
 
-  // ── Profile fields (from LNA Office Info) ─────────────────────────
+  // ── From LNA Office Info ──────────────────────────────────────────
   @Column({ nullable: true }) office: string;
   @Column({ nullable: true }) headOfUnit: string;
   @Column({ nullable: true }) raterName: string;
