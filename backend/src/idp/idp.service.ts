@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { Idp } from './idp.entity';
+import { User } from '../users/user.entity';
 import { MailService } from '../mail/mail.service';
 import { PdfService } from '../pdf/pdf.service';
 import { IdpSuggestion } from './idp-suggestion.entity';
@@ -13,6 +14,7 @@ type EditCheckResult = Idp | 'not_found' | 'wrong_email' | 'locked';
 export class IdpService {
   constructor(
     @InjectRepository(Idp) private repo: Repository<Idp>,
+    @InjectRepository(User) private userRepo: Repository<User>,
     @InjectRepository(IdpSuggestion)
     private suggestionRepo: Repository<IdpSuggestion>,
     private readonly mail: MailService,
@@ -20,7 +22,7 @@ export class IdpService {
     private readonly dataSource: DataSource,
   ) {}
 
-  // ── Shared autocomplete suggestions (HEI & Pro-ACT) ─────────────────────
+  // ── Shared autocomplete suggestions ─────────────────────────────────────
 
   async getSuggestions(fieldName: string): Promise<string[]> {
     const rows = await this.suggestionRepo.find({
@@ -55,7 +57,6 @@ export class IdpService {
     const year = new Date().getFullYear();
     const prefix = `IDP-${year}-`;
 
-    // Find the latest record for this year by sorting DESC on refId
     const last = await this.repo
       .createQueryBuilder('idp')
       .where('idp."refId" LIKE :prefix', { prefix: `${prefix}%` })
@@ -69,37 +70,35 @@ export class IdpService {
       if (!isNaN(lastNum)) nextNum = lastNum + 1;
     }
 
-    // Zero-pad to 6 digits: IDP-2026-000001
     return `${prefix}${String(nextNum).padStart(6, '0')}`;
   }
 
-  // ── Create (initial submission) ─────────────────────────────────────────
+  // ── Helper: resolve user and derive display name ─────────────────────────
+
+  private async resolveUser(userId: string): Promise<User | null> {
+    return this.userRepo.findOne({ where: { id: userId } });
+  }
+
+  private getEmployeeName(user: User): string {
+    return (
+      [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email
+    );
+  }
+
+  // ── Create ───────────────────────────────────────────────────────────────
 
   async create(data: Record<string, any>): Promise<Idp> {
     const refId = await this.generateRefId();
     const supervisorToken = uuidv4();
 
+    // userId must be passed in from the controller (logged-in user)
+    const user = data.userId ? await this.resolveUser(data.userId) : null;
+
     const record = this.repo.create({
       refId,
       supervisorToken,
       status: 'PENDING',
-      campus: data.campus ?? 'CSU Main Campus',
-      officeAffiliation: data.officeAffiliation ?? '',
-      collegeOfficeUnit: data.collegeOfficeUnit ?? '',
-      collegeProgram: data.collegeProgram ?? '',
-      personnelType: data.personnelType ?? '',
-      nameOfPersonnel: data.nameOfPersonnel ?? '',
-      lastName: data.lastName ?? '',
-      firstName: data.firstName ?? '',
-      middleInitial: data.middleInitial ?? '',
-      employeeEmail: data.employeeEmail ?? '',
-      datePrepared: data.datePrepared ?? '',
-      educAttainment: data.educAttainment ?? '',
-      educAttainmentSpec: data.educAttainmentSpec ?? '',
-      currentPosition: data.currentPosition ?? '',
-      designation: data.designation ?? '',
-      yearsInPosition: data.yearsInPosition ?? 0,
-      yearsInCSU: data.yearsInCSU ?? 0,
+      userId: data.userId ?? null,
       supervisorName: data.supervisorName ?? '',
       supervisorEmail: data.supervisorEmail ?? '',
       headerPurpose: data.headerPurpose ?? '',
@@ -107,20 +106,21 @@ export class IdpService {
       competencyRowsJson: JSON.stringify(data.competencyRows ?? []),
       agapRowsJson: JSON.stringify(data.agapRows ?? []),
       proactRowsJson: JSON.stringify(data.proactRows ?? []),
+      // datePrepared is submission-specific so keep it on the record
+      // if you still have that column; otherwise remove it
     });
 
-    const saved = (await this.repo.save(record)) as unknown as Idp;
+    const saved = await this.repo.save(record);
 
-    const employeeName = [data.firstName, data.lastName]
-      .filter(Boolean)
-      .join(' ');
+    const employeeName = user ? this.getEmployeeName(user) : '';
+    const employeeEmail = user?.email ?? '';
     const frontendBase = process.env.FRONTEND_URL ?? 'http://localhost:3000';
     const reviewUrl = `${frontendBase}/idp-supervisor?token=${saved.supervisorToken}`;
 
-    if (saved.employeeEmail) {
+    if (employeeEmail) {
       this.mail.sendEmployeeConfirmation({
-        to: saved.employeeEmail,
-        name: employeeName || saved.nameOfPersonnel,
+        to: employeeEmail,
+        name: employeeName,
         refId: saved.refId,
         supervisorName: saved.supervisorName,
       });
@@ -130,10 +130,10 @@ export class IdpService {
       this.mail.sendSupervisorNotification({
         to: saved.supervisorEmail,
         supervisorName: saved.supervisorName,
-        employeeName: employeeName || saved.nameOfPersonnel,
+        employeeName,
         refId: saved.refId,
-        position: saved.currentPosition,
-        officeUnit: saved.collegeOfficeUnit,
+        position: user?.currentPosition ?? '',
+        officeUnit: user?.collegeOfficeUnit ?? '',
         reviewUrl,
       });
 
@@ -147,32 +147,47 @@ export class IdpService {
     }
 
     return (
-      (await this.repo.findOne({ where: { refId: saved.refId } })) ?? saved
+      (await this.repo.findOne({
+        where: { refId: saved.refId },
+        relations: ['user'],
+      })) ?? saved
     );
   }
 
-  // ── Read ────────────────────────────────────────────────────────────────
+  // ── Read ─────────────────────────────────────────────────────────────────
 
   findAll(): Promise<Idp[]> {
-    return this.repo.find({ order: { submittedAt: 'DESC' } });
+    return this.repo.find({
+      order: { submittedAt: 'DESC' },
+      relations: ['user'],
+    });
   }
 
   findByRef(refId: string): Promise<Idp | null> {
-    return this.repo.findOne({ where: { refId } });
+    return this.repo.findOne({ where: { refId }, relations: ['user'] });
   }
 
   findByToken(token: string): Promise<Idp | null> {
-    return this.repo.findOne({ where: { supervisorToken: token } });
+    return this.repo.findOne({
+      where: { supervisorToken: token },
+      relations: ['user'],
+    });
   }
 
-  // ── Employee edit ───────────────────────────────────────────────────────
+  // ── Employee edit ─────────────────────────────────────────────────────────
 
   async getForEdit(refId: string, email: string): Promise<EditCheckResult> {
-    const record = await this.repo.findOne({ where: { refId } });
+    const record = await this.repo.findOne({
+      where: { refId },
+      relations: ['user'],
+    });
     if (!record) return 'not_found';
-    if (record.employeeEmail.toLowerCase() !== email.trim().toLowerCase())
+
+    const employeeEmail = record.user?.email ?? '';
+    if (employeeEmail.toLowerCase() !== email.trim().toLowerCase())
       return 'wrong_email';
     if (record.status === 'COMPLETE') return 'locked';
+
     return record;
   }
 
@@ -184,27 +199,40 @@ export class IdpService {
     const check = await this.getForEdit(refId, email);
     if (typeof check === 'string') return check;
 
+    // If personnel profile fields are included in data, update the User record
     const record = check;
+    if (record.userId) {
+      const profileUpdate: Partial<User> = {};
+      const profileFields: (keyof User)[] = [
+        'firstName',
+        'lastName',
+        'middleInitial',
+        'campus',
+        'officeAffiliation',
+        'collegeOfficeUnit',
+        'collegeProgram',
+        'personnelType',
+        'educAttainment',
+        'educAttainmentSpec',
+        'currentPosition',
+        'designation',
+        'yearsInPosition',
+        'yearsInCSU',
+      ];
+      for (const field of profileFields) {
+        if (data[field] !== undefined) {
+          (profileUpdate as any)[field] = data[field];
+        }
+      }
+      if (Object.keys(profileUpdate).length > 0) {
+        await this.userRepo.update({ id: record.userId }, profileUpdate);
+      }
+    }
 
+    // Update only the IDP-specific fields
     await this.repo.update(
       { refId },
       {
-        officeAffiliation: data.officeAffiliation ?? record.officeAffiliation,
-        collegeOfficeUnit: data.collegeOfficeUnit ?? record.collegeOfficeUnit,
-        collegeProgram: data.collegeProgram ?? record.collegeProgram,
-        personnelType: data.personnelType ?? record.personnelType,
-        nameOfPersonnel: data.nameOfPersonnel ?? record.nameOfPersonnel,
-        lastName: data.lastName ?? record.lastName,
-        firstName: data.firstName ?? record.firstName,
-        middleInitial: data.middleInitial ?? record.middleInitial,
-        datePrepared: data.datePrepared ?? record.datePrepared,
-        educAttainment: data.educAttainment ?? record.educAttainment,
-        educAttainmentSpec:
-          data.educAttainmentSpec ?? record.educAttainmentSpec,
-        currentPosition: data.currentPosition ?? record.currentPosition,
-        designation: data.designation ?? record.designation,
-        yearsInPosition: data.yearsInPosition ?? record.yearsInPosition,
-        yearsInCSU: data.yearsInCSU ?? record.yearsInCSU,
         supervisorName: data.supervisorName ?? record.supervisorName,
         supervisorEmail: data.supervisorEmail ?? record.supervisorEmail,
         headerPurpose: data.headerPurpose ?? record.headerPurpose,
@@ -216,20 +244,20 @@ export class IdpService {
       },
     );
 
-    const updated = await this.repo.findOne({ where: { refId } });
+    const updated = await this.repo.findOne({
+      where: { refId },
+      relations: ['user'],
+    });
     if (!updated) return 'not_found';
 
-    const employeeName =
-      [updated.firstName, updated.lastName].filter(Boolean).join(' ') ||
-      updated.nameOfPersonnel ||
-      '';
-
+    const employeeName = updated.user ? this.getEmployeeName(updated.user) : '';
+    const employeeEmail = updated.user?.email ?? '';
     const frontendBase = process.env.FRONTEND_URL ?? 'http://localhost:3000';
     const reviewUrl = `${frontendBase}/idp-supervisor?token=${updated.supervisorToken}`;
 
-    if (updated.employeeEmail) {
+    if (employeeEmail) {
       this.mail.sendEmployeeEditConfirmation({
-        to: updated.employeeEmail,
+        to: employeeEmail,
         name: employeeName,
         refId: updated.refId,
         supervisorName: updated.supervisorName,
@@ -242,8 +270,8 @@ export class IdpService {
         supervisorName: updated.supervisorName,
         employeeName,
         refId: updated.refId,
-        position: updated.currentPosition,
-        officeUnit: updated.collegeOfficeUnit,
+        position: updated.user?.currentPosition ?? '',
+        officeUnit: updated.user?.collegeOfficeUnit ?? '',
         reviewUrl,
       });
     }
@@ -251,20 +279,21 @@ export class IdpService {
     return updated;
   }
 
-  // ── Supervisor review ───────────────────────────────────────────────────
+  // ── Supervisor review ─────────────────────────────────────────────────────
 
   async updateSupervisor(
     refId: string,
     data: Partial<Idp>,
   ): Promise<Idp | null> {
     await this.repo.update({ refId }, { ...data, status: 'COMPLETE' });
-    const updated = await this.repo.findOne({ where: { refId } });
+    const updated = await this.repo.findOne({
+      where: { refId },
+      relations: ['user'],
+    });
     if (!updated) return null;
 
-    const employeeName =
-      [updated.firstName, updated.lastName].filter(Boolean).join(' ') ||
-      updated.nameOfPersonnel ||
-      '';
+    const employeeName = updated.user ? this.getEmployeeName(updated.user) : '';
+    const employeeEmail = updated.user?.email ?? '';
     const completedAt = new Date().toLocaleDateString('en-PH', {
       year: 'numeric',
       month: 'long',
@@ -274,9 +303,9 @@ export class IdpService {
     try {
       const pdfBuffer = await this.pdf.generateIdpPdf({ ...updated } as any);
 
-      if (updated.employeeEmail) {
+      if (employeeEmail) {
         this.mail.sendEmployeeCompletion({
-          to: updated.employeeEmail,
+          to: employeeEmail,
           name: employeeName,
           refId: updated.refId,
           supervisorName: updated.supervisorName,
@@ -287,8 +316,8 @@ export class IdpService {
       this.mail.sendHrNotification({
         employeeName,
         refId: updated.refId,
-        position: updated.currentPosition,
-        officeUnit: updated.collegeOfficeUnit,
+        position: updated.user?.currentPosition ?? '',
+        officeUnit: updated.user?.collegeOfficeUnit ?? '',
         supervisorName: updated.supervisorName,
         completedAt,
         pdfBuffer,
@@ -311,10 +340,13 @@ export class IdpService {
     return this.updateSupervisor(record.refId, data);
   }
 
-  // ── PDF ─────────────────────────────────────────────────────────────────
+  // ── PDF ───────────────────────────────────────────────────────────────────
 
   async generatePdf(refId: string): Promise<Buffer | null> {
-    const record = await this.repo.findOne({ where: { refId } });
+    const record = await this.repo.findOne({
+      where: { refId },
+      relations: ['user'],
+    });
     if (!record) return null;
     try {
       return await this.pdf.generateIdpPdf({ ...record } as any);

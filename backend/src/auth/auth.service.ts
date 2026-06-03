@@ -46,29 +46,6 @@ export class AuthService {
     return this.issueTokens(user);
   }
 
-  // ── Google OAuth: find or create ───────────────────────────────────
-  async googleFindOrCreate(profile: {
-    googleId: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-  }) {
-    let user = await this.userRepo.findOne({ where: { email: profile.email } });
-    if (!user) {
-      user = this.userRepo.create({
-        email: profile.email,
-        googleId: profile.googleId,
-        firstName: profile.firstName,
-        lastName: profile.lastName,
-      });
-      await this.userRepo.save(user);
-    } else if (!user.googleId) {
-      user.googleId = profile.googleId;
-      await this.userRepo.save(user);
-    }
-    return this.issueTokens(user);
-  }
-
   // ── Refresh token ──────────────────────────────────────────────────
   async refresh(token: string) {
     const stored = await this.tokenRepo.findOne({ where: { token } });
