@@ -173,6 +173,9 @@ const form = reactive({
   yearsInPosition: "",
   yearsInCSU: "",
   headOfUnit: "",
+  headLastName: "",
+  headFirstName: "",
+  headMiddleInitial: "",
   office: "",
   raterName: "",
   campus: "CSU Main Campus",
@@ -195,7 +198,7 @@ async function save() {
     !form.officeAffiliation ||
     !form.collegeOfficeUnit ||
     !form.currentPosition ||
-    !form.educAttainment
+    !form.educAttainment 
   ) {
     error.value = "Please fill in all required fields.";
     return;

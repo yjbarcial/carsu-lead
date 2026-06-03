@@ -146,250 +146,83 @@
           </div>
         </div>
         <div class="section-body">
+          <!-- Profile auto-fill notice -->
+          <div
+            style="
+              background: #f0f7f3;
+              border-left: 3px solid #1a4d2e;
+              padding: 10px 16px;
+              border-radius: 0 8px 8px 0;
+              font-size: 13px;
+              color: #2d6a3f;
+              margin-bottom: 20px;
+            "
+          >
+            Office information is auto-filled from your profile and cannot be
+            edited here.
+            <a
+              href="/profile"
+              style="color: #1a4d2e; font-weight: 700; margin-left: 4px"
+              >Edit in Profile Settings →</a
+            >
+          </div>
+
+          <!-- Submitter Email — locked -->
           <div class="field-grid field-grid-2" style="margin-bottom: 18px">
             <div class="field-group span-2">
-              <label>Your CarSU Email Address <span class="req">*</span></label>
-              <div
-                class="email-prefix-wrapper"
-                :class="{
-                  error: emailHint.type === 'error',
-                  valid: emailHint.type === 'success',
-                }"
-              >
-                <input
-                  type="text"
-                  v-model="form.submitterEmailPrefix"
-                  class="email-prefix-input"
-                  placeholder="yourname"
-                  @blur="validateEmail"
-                />
-                <span class="email-suffix">@carsu.edu.ph</span>
+              <label>Your CarSU Email Address</label>
+              <div class="static-value">
+                {{ form.submitterEmailPrefix }}@carsu.edu.ph
               </div>
-              <small class="email-hint" :class="emailHint.type">{{
-                emailHint.msg
-              }}</small>
             </div>
           </div>
 
-          <!-- Campus — static display -->
+          <!-- Campus — locked -->
           <div class="field-group" style="margin-bottom: 20px">
             <label>Campus</label>
             <div class="static-value">CSU Main Campus</div>
           </div>
 
-          <!-- Office Affiliation -->
+          <!-- Office Affiliation — locked -->
           <div class="field-group" style="margin-bottom: 20px">
-            <label>Office Affiliation <span class="req">*</span></label>
-            <div class="checkbox-group">
-              <label
-                v-for="o in officeOptions"
-                :key="o"
-                class="checkbox-item"
-                :class="{ checked: form.officeAffiliation === o }"
-              >
-                <input
-                  type="radio"
-                  name="officeAffiliation"
-                  :value="o"
-                  v-model="form.officeAffiliation"
-                />
-                {{ o }}
-              </label>
-            </div>
+            <label>Office Affiliation</label>
+            <div class="static-value">{{ form.officeAffiliation || "—" }}</div>
           </div>
 
           <div class="field-grid field-grid-2" style="margin-bottom: 18px">
-            <!-- Name of Unit/Office/College -->
+            <!-- Unit / Office / College — locked -->
             <div class="field-group span-2">
-              <label
-                >Name of Unit / Office / College
-                <span class="req">*</span></label
-              >
-              <select
-                v-if="collegeOfficeUnitOptions.length > 0"
-                v-model="form.unitOfficeCollege"
-              >
-                <option value="">Select office / unit…</option>
-                <option
-                  v-for="opt in collegeOfficeUnitOptions"
-                  :key="opt"
-                  :value="opt"
-                >
-                  {{ opt }}
-                </option>
-                <option value="__others__">Others / Specify</option>
-              </select>
-              <input
-                v-else
-                type="text"
-                v-model="form.unitOfficeCollege"
-                placeholder="e.g. College of Engineering"
-              />
-              <input
-                v-if="form.unitOfficeCollege === '__others__'"
-                type="text"
-                v-model="form.unitOfficeCollegeOther"
-                placeholder="Please specify your office / unit…"
-                style="margin-top: 8px"
-                @input="autoCapitalize('unitOfficeCollegeOther', $event)"
-              />
-            </div>
-
-            <!-- Program selector -->
-            <div
-              v-if="isOVPAA && selectedCollegePrograms.length > 0"
-              class="field-group span-2"
-              style="margin-top: 4px"
-            >
-              <label>Program / Department <span class="req">*</span></label>
-              <select v-model="form.collegeProgram">
-                <option value="">Select program…</option>
-                <option
-                  v-for="p in selectedCollegePrograms"
-                  :key="p"
-                  :value="p"
-                >
-                  {{ p }}
-                </option>
-              </select>
-            </div>
-
-            <!-- Head of Unit — all three fields in one row -->
-            <div class="field-group span-2">
-              <label
-                >Head of Unit/Office/College <span class="req">*</span></label
-              >
-              <div class="name-row">
-                <div class="name-sub">
-                  <span class="name-sub-label">Last Name</span>
-                  <input
-                    type="text"
-                    v-model="form.headLastName"
-                    placeholder="DELA CRUZ"
-                    @input="autoCapitalize('headLastName', $event)"
-                  />
-                </div>
-                <div class="name-sub">
-                  <span class="name-sub-label">First Name</span>
-                  <input
-                    type="text"
-                    v-model="form.headFirstName"
-                    placeholder="JUAN"
-                    @input="autoCapitalize('headFirstName', $event)"
-                  />
-                </div>
-                <div class="name-sub name-sub-mi">
-                  <span class="name-sub-label">M.I.</span>
-                  <input
-                    type="text"
-                    v-model="form.headMiddleInitial"
-                    placeholder="A"
-                    maxlength="1"
-                    @input="autoCapitalize('headMiddleInitial', $event)"
-                  />
-                </div>
+              <label>Name of Unit / Office / College</label>
+              <div class="static-value">
+                {{ form.unitOfficeCollege || "—" }}
               </div>
             </div>
 
-            <!-- Position / Designation -->
-            <div class="field-group">
-              <label>Position <span class="req">*</span></label>
-              <!-- Campus Director: free-text input, auto-capitalized -->
-              <input
-                v-if="form.officeAffiliation === 'Campus Director'"
-                type="text"
-                v-model="form.position"
-                placeholder="Enter your position…"
-                @input="autoCapitalize('position', $event)"
-              />
-              <!-- OVPAF / OVPEO / OVPRDIE / OVPSAS: dropdown + Others/Specify -->
-              <template
-                v-else-if="
-                  ['OVPAF', 'OVPEO', 'OVPRDIE', 'OVPSAS'].includes(
-                    form.officeAffiliation,
-                  )
-                "
-              >
-                <select
-                  v-model="form.position"
-                  :disabled="!form.officeAffiliation"
-                >
-                  <option value="">Select position…</option>
-                  <option
-                    v-for="opt in positionOptions"
-                    :key="opt"
-                    :value="opt"
-                  >
-                    {{ opt }}
-                  </option>
-                  <option value="__others__">Others / Specify</option>
-                </select>
-                <input
-                  v-if="form.position === '__others__'"
-                  type="text"
-                  v-model="form.positionOther"
-                  placeholder="Please specify your position…"
-                  style="margin-top: 8px"
-                  @input="autoCapitalize('positionOther', $event)"
-                />
-              </template>
-              <!-- OVPAA: plain dropdown (Dean, Chairperson, Director) -->
-              <select
-                v-else
-                v-model="form.position"
-                :disabled="
-                  !form.officeAffiliation ||
-                  (isOVPAA && !form.unitOfficeCollege)
-                "
-              >
-                <option value="">Select position…</option>
-                <option v-for="opt in positionOptions" :key="opt" :value="opt">
-                  {{ opt }}
-                </option>
-              </select>
+            <!-- Program — locked if present -->
+            <div v-if="form.collegeProgram" class="field-group span-2">
+              <label>Program / Department</label>
+              <div class="static-value">{{ form.collegeProgram }}</div>
             </div>
 
-            <!-- Designation — N/A or Specify toggle -->
-            <div class="field-group">
-              <label>Designation <span class="req">*</span></label>
-              <div class="designation-toggle">
-                <label
-                  class="checkbox-item"
-                  :class="{ checked: form.designationMode === 'na' }"
-                >
-                  <input
-                    type="radio"
-                    name="designationMode"
-                    value="na"
-                    v-model="form.designationMode"
-                    @change="form.designation = 'N/A'"
-                  />
-                  N/A
-                </label>
-                <label
-                  class="checkbox-item"
-                  :class="{ checked: form.designationMode === 'specify' }"
-                >
-                  <input
-                    type="radio"
-                    name="designationMode"
-                    value="specify"
-                    v-model="form.designationMode"
-                    @change="form.designation = ''"
-                  />
-                  Specify
-                </label>
-              </div>
-              <input
-                v-if="form.designationMode === 'specify'"
-                type="text"
-                v-model="form.designation"
-                placeholder="e.g. OIC Director, Acting Dean…"
-                style="margin-top: 6px"
-              />
+            <!-- Head of Unit — locked -->
+            <div class="field-group span-2">
+              <label>Head of Unit/Office/College</label>
+              <div class="static-value">{{ form.raterFullName || "—" }}</div>
             </div>
 
-            <!-- Year Covered -->
+            <!-- Position — locked -->
+            <div class="field-group">
+              <label>Position</label>
+              <div class="static-value">{{ form.position || "—" }}</div>
+            </div>
+
+            <!-- Designation — locked -->
+            <div class="field-group">
+              <label>Designation</label>
+              <div class="static-value">{{ form.designation || "—" }}</div>
+            </div>
+
+            <!-- Year Covered — still editable -->
             <div class="field-group">
               <label>Year Covered <span class="req">*</span></label>
               <select v-model="form.yearCovered">
@@ -402,6 +235,8 @@
                 <option>2031</option>
               </select>
             </div>
+
+            <!-- Total Personnel — still editable -->
             <div class="field-group">
               <label
                 >Total Personnel in Your Office
@@ -416,6 +251,7 @@
             </div>
           </div>
 
+          <!-- Purpose — still editable -->
           <div class="field-group">
             <label>Purpose <span class="req">*</span></label>
             <div class="checkbox-group">
@@ -995,7 +831,11 @@
                             rows="2"
                             :value="gap"
                             @input="row.gaps[gIdx] = $event.target.value"
-                            :placeholder="gIdx === 0 ? 'Identified gap or issue...' : 'Additional gap or issue...'"
+                            :placeholder="
+                              gIdx === 0
+                                ? 'Identified gap or issue...'
+                                : 'Additional gap or issue...'
+                            "
                           ></textarea>
                           <button
                             v-if="row.gaps.length > 1"
@@ -1003,13 +843,17 @@
                             class="gap-remove-btn"
                             @click="row.gaps.splice(gIdx, 1)"
                             title="Remove this gap"
-                          >×</button>
+                          >
+                            ×
+                          </button>
                         </div>
                         <button
                           type="button"
                           class="gap-add-btn"
                           @click="row.gaps.push('')"
-                        >+ Add Issue</button>
+                        >
+                          + Add Issue
+                        </button>
                       </div>
                     </td>
                     <td>
@@ -1035,7 +879,9 @@
                       <div class="intervention-dropdown">
                         <!-- Tags displayed ABOVE the trigger -->
                         <div
-                          v-if="row.interventions && row.interventions.length > 0"
+                          v-if="
+                            row.interventions && row.interventions.length > 0
+                          "
                           class="intervention-tags"
                         >
                           <span
@@ -1062,7 +908,11 @@
                         <!-- Trigger button -->
                         <div
                           class="intervention-trigger intervention-trigger-portal"
-                          :class="{ open: interventionPortal.visible && interventionPortal.rowIndex === idx }"
+                          :class="{
+                            open:
+                              interventionPortal.visible &&
+                              interventionPortal.rowIndex === idx,
+                          }"
                           @click.stop="openInterventionPortal($event, idx)"
                         >
                           <span class="intervention-placeholder">
@@ -1075,7 +925,11 @@
                           <svg
                             viewBox="0 0 24 24"
                             class="intervention-chevron"
-                            :class="{ rotated: interventionPortal.visible && interventionPortal.rowIndex === idx }"
+                            :class="{
+                              rotated:
+                                interventionPortal.visible &&
+                                interventionPortal.rowIndex === idx,
+                            }"
                           >
                             <polyline points="6 9 12 15 18 9" />
                           </svg>
@@ -1124,7 +978,9 @@
                     <th style="width: 40px">No.</th>
                     <th style="background: var(--navy); opacity: 0.92">
                       Identified Gap / Intervention Need
-                      <span style="font-size: 10px; font-weight: 400; opacity: 0.8">
+                      <span
+                        style="font-size: 10px; font-weight: 400; opacity: 0.8"
+                      >
                         (from Sections II &amp; III)
                       </span>
                     </th>
@@ -1135,7 +991,9 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <template v-if="filledGaps.length === 0 && proactRows.length === 0">
+                  <template
+                    v-if="filledGaps.length === 0 && proactRows.length === 0"
+                  >
                     <tr>
                       <td
                         colspan="7"
@@ -1146,7 +1004,8 @@
                           padding: 20px;
                         "
                       >
-                        Identify gaps in Sections II and III to auto-populate this table, or add rows manually.
+                        Identify gaps in Sections II and III to auto-populate
+                        this table, or add rows manually.
                       </td>
                     </tr>
                   </template>
@@ -1175,8 +1034,8 @@
                         <optgroup label="Off-the-Job Learning">
                           <option>Special Short Courses and Lectures</option>
                           <option>
-                            Conferences, Training Programs, Conventions, Seminars,
-                            and Cum Paper Presentations
+                            Conferences, Training Programs, Conventions,
+                            Seminars, and Cum Paper Presentations
                           </option>
                           <option>Pursue Higher Education</option>
                         </optgroup>
@@ -1223,9 +1082,14 @@
             </div>
             <p
               v-if="filledGaps.length > 0"
-              style="font-size: 13px; color: var(--text-light); margin-top: 10px;"
+              style="
+                font-size: 13px;
+                color: var(--text-light);
+                margin-top: 10px;
+              "
             >
-              Rows are auto-generated based on gaps identified in Sections II &amp; III.
+              Rows are auto-generated based on gaps identified in Sections II
+              &amp; III.
             </p>
           </div>
         </transition>
@@ -1255,12 +1119,18 @@
                 <label>Full Name of Rater / Head of Office</label>
                 <div
                   class="static-value"
-                  style="max-width: 400px; font-size: 15px; font-weight: 700; letter-spacing: 0.02em;"
+                  style="
+                    max-width: 400px;
+                    font-size: 15px;
+                    font-weight: 700;
+                    letter-spacing: 0.02em;
+                  "
                 >
-                  {{ form.raterFullName || '—' }}
+                  {{ form.raterFullName || "—" }}
                 </div>
-                <small class="field-hint" style="margin-top: 6px;">
-                  Auto-filled from Head of Unit/Office/College in Office Information. Update the name fields above to change this.
+                <small class="field-hint" style="margin-top: 6px">
+                  Auto-filled from Head of Unit/Office/College in Office
+                  Information. Update the name fields above to change this.
                 </small>
               </div>
               <small
@@ -1320,7 +1190,9 @@
           <div class="review-grid">
             <div class="review-field">
               <span class="review-label">Email</span>
-              <span class="review-value">{{ form.submitterEmailPrefix }}@carsu.edu.ph</span>
+              <span class="review-value"
+                >{{ form.submitterEmailPrefix }}@carsu.edu.ph</span
+              >
             </div>
             <div class="review-field">
               <span class="review-label">Campus</span>
@@ -1340,7 +1212,7 @@
             </div>
             <div class="review-field">
               <span class="review-label">Head of Unit / Office / College</span>
-              <span class="review-value">{{ form.raterFullName || '—' }}</span>
+              <span class="review-value">{{ form.raterFullName || "—" }}</span>
             </div>
             <div class="review-field">
               <span class="review-label">Position</span>
@@ -1348,7 +1220,7 @@
             </div>
             <div class="review-field">
               <span class="review-label">Designation</span>
-              <span class="review-value">{{ form.designation || 'N/A' }}</span>
+              <span class="review-value">{{ form.designation || "N/A" }}</span>
             </div>
             <div class="review-field">
               <span class="review-label">Year Covered</span>
@@ -1360,7 +1232,9 @@
             </div>
             <div class="review-field">
               <span class="review-label">Purpose</span>
-              <span class="review-value">{{ form.purpose === 'Other' ? form.purposeOther : form.purpose }}</span>
+              <span class="review-value">{{
+                form.purpose === "Other" ? form.purposeOther : form.purpose
+              }}</span>
             </div>
           </div>
         </div>
@@ -1370,7 +1244,10 @@
       <div class="review-card">
         <div class="review-card-header">
           <span class="review-card-num">I</span>
-          <span class="review-card-title">Workforce Profile by Employment Classification and Position Level</span>
+          <span class="review-card-title"
+            >Workforce Profile by Employment Classification and Position
+            Level</span
+          >
           <button class="btn-review-edit" @click="backToForm()">Edit</button>
         </div>
         <div class="review-card-body">
@@ -1385,7 +1262,11 @@
               <tbody>
                 <tr v-for="lv in visiblePositionLevels" :key="lv.key">
                   <td class="review-row-label">{{ lv.label }}</td>
-                  <td v-for="t in employmentTypeKeys" :key="t" style="text-align:center;">
+                  <td
+                    v-for="t in employmentTypeKeys"
+                    :key="t"
+                    style="text-align: center"
+                  >
                     {{ workforce[lv.key][t] || 0 }}
                   </td>
                 </tr>
@@ -1399,14 +1280,16 @@
       <div class="review-card">
         <div class="review-card-header">
           <span class="review-card-num">II</span>
-          <span class="review-card-title">Competency Mapping — Cluster Summary</span>
+          <span class="review-card-title"
+            >Competency Mapping — Cluster Summary</span
+          >
           <button class="btn-review-edit" @click="backToForm()">Edit</button>
         </div>
         <div class="review-card-body">
           <div
             v-for="lvSummary in activeClusterSummary"
             :key="lvSummary.levelKey"
-            style="margin-bottom: 24px;"
+            style="margin-bottom: 24px"
           >
             <div class="review-level-label">{{ lvSummary.levelLabel }}</div>
             <div class="review-table-wrap">
@@ -1422,11 +1305,17 @@
                 <tbody>
                   <tr v-for="c in lvSummary.rows" :key="c.cluster">
                     <td class="review-row-label">{{ c.cluster }}</td>
-                    <td>{{ c.strongest || '—' }}</td>
-                    <td>{{ c.weakest || '—' }}</td>
-                    <td style="text-align:center;">
-                      <span :class="c.interventionNeeded === 'Yes' ? 'review-badge-yes' : 'review-badge-no'">
-                        {{ c.interventionNeeded || '—' }}
+                    <td>{{ c.strongest || "—" }}</td>
+                    <td>{{ c.weakest || "—" }}</td>
+                    <td style="text-align: center">
+                      <span
+                        :class="
+                          c.interventionNeeded === 'Yes'
+                            ? 'review-badge-yes'
+                            : 'review-badge-no'
+                        "
+                      >
+                        {{ c.interventionNeeded || "—" }}
                       </span>
                     </td>
                   </tr>
@@ -1445,21 +1334,28 @@
           <button class="btn-review-edit" @click="backToForm()">Edit</button>
         </div>
         <div class="review-card-body">
-          <div class="review-field" style="margin-bottom: 16px;">
+          <div class="review-field" style="margin-bottom: 16px">
             <span class="review-label">Selected Data Sources</span>
             <div class="review-tags-row">
               <span
                 v-for="src in form.selectedSources"
                 :key="src"
                 class="review-source-tag"
-              >{{ src === 'Others' ? (form.othersSourceText ? 'Others: ' + form.othersSourceText : 'Others') : src }}</span>
+                >{{
+                  src === "Others"
+                    ? form.othersSourceText
+                      ? "Others: " + form.othersSourceText
+                      : "Others"
+                    : src
+                }}</span
+              >
             </div>
           </div>
           <div v-if="insightRows.length > 0" class="review-table-wrap">
             <table class="review-table">
               <thead>
                 <tr>
-                  <th style="width:36px">No.</th>
+                  <th style="width: 36px">No.</th>
                   <th>Data Source</th>
                   <th>Identified Gap / Issue</th>
                   <th>Relevant Personnel</th>
@@ -1468,27 +1364,64 @@
               </thead>
               <tbody>
                 <tr v-for="(row, idx) in insightRows" :key="row.dataSource">
-                  <td style="text-align:center; color:var(--text-light); font-weight:600;">{{ idx + 1 }}</td>
-                  <td class="review-row-label" style="white-space:normal; font-size:12px;">{{ row.dataSource }}</td>
-                  <td style="font-size:12px;">
-                    <div v-if="row.gaps && row.gaps.filter(g => g.trim()).length">
-                      <div v-for="(g, gi) in row.gaps.filter(g => g.trim())" :key="gi" style="margin-bottom: 4px;">
-                        <span v-if="row.gaps.filter(g => g.trim()).length > 1" style="font-weight:600; color:var(--text-light); font-size:11px;">{{ gi + 1 }}. </span>{{ g }}
+                  <td
+                    style="
+                      text-align: center;
+                      color: var(--text-light);
+                      font-weight: 600;
+                    "
+                  >
+                    {{ idx + 1 }}
+                  </td>
+                  <td
+                    class="review-row-label"
+                    style="white-space: normal; font-size: 12px"
+                  >
+                    {{ row.dataSource }}
+                  </td>
+                  <td style="font-size: 12px">
+                    <div
+                      v-if="row.gaps && row.gaps.filter((g) => g.trim()).length"
+                    >
+                      <div
+                        v-for="(g, gi) in row.gaps.filter((g) => g.trim())"
+                        :key="gi"
+                        style="margin-bottom: 4px"
+                      >
+                        <span
+                          v-if="row.gaps.filter((g) => g.trim()).length > 1"
+                          style="
+                            font-weight: 600;
+                            color: var(--text-light);
+                            font-size: 11px;
+                          "
+                          >{{ gi + 1 }}. </span
+                        >{{ g }}
                       </div>
                     </div>
-                    <span v-else style="color:var(--text-light)">—</span>
+                    <span v-else style="color: var(--text-light)">—</span>
                   </td>
-                  <td style="font-size:12px;">
+                  <td style="font-size: 12px">
                     <div v-if="row.personnel && row.personnel.length">
-                      <span v-for="p in row.personnel" :key="p" class="review-personnel-tag">{{ p }}</span>
+                      <span
+                        v-for="p in row.personnel"
+                        :key="p"
+                        class="review-personnel-tag"
+                        >{{ p }}</span
+                      >
                     </div>
-                    <span v-else style="color:var(--text-light)">—</span>
+                    <span v-else style="color: var(--text-light)">—</span>
                   </td>
-                  <td style="font-size:12px;">
+                  <td style="font-size: 12px">
                     <div v-if="row.interventions && row.interventions.length">
-                      <span v-for="iv in row.interventions" :key="iv" class="review-intervention-tag">{{ iv }}</span>
+                      <span
+                        v-for="iv in row.interventions"
+                        :key="iv"
+                        class="review-intervention-tag"
+                        >{{ iv }}</span
+                      >
                     </div>
-                    <span v-else style="color:var(--text-light)">—</span>
+                    <span v-else style="color: var(--text-light)">—</span>
                   </td>
                 </tr>
               </tbody>
@@ -1501,18 +1434,28 @@
       <div class="review-card">
         <div class="review-card-header">
           <span class="review-card-num">IV</span>
-          <span class="review-card-title">Professional Advancement through Capacity-Building and Trainings (Pro-ACT)</span>
+          <span class="review-card-title"
+            >Professional Advancement through Capacity-Building and Trainings
+            (Pro-ACT)</span
+          >
           <button class="btn-review-edit" @click="backToForm()">Edit</button>
         </div>
         <div class="review-card-body">
-          <div v-if="allProactRows.length === 0" style="color: var(--text-light); font-style: italic; font-size: 13px;">
+          <div
+            v-if="allProactRows.length === 0"
+            style="
+              color: var(--text-light);
+              font-style: italic;
+              font-size: 13px;
+            "
+          >
             No training interventions specified.
           </div>
           <div v-else class="review-table-wrap">
             <table class="review-table">
               <thead>
                 <tr>
-                  <th style="width:36px">No.</th>
+                  <th style="width: 36px">No.</th>
                   <th>Identified Gap / Skill</th>
                   <th>Training / LeaD Intervention</th>
                   <th>Mode</th>
@@ -1522,12 +1465,37 @@
               </thead>
               <tbody>
                 <tr v-for="(row, idx) in allProactRows" :key="idx">
-                  <td style="text-align:center; color:var(--text-light); font-weight:600;">{{ idx + 1 }}</td>
-                  <td class="review-row-label" style="white-space:normal; font-size:12px;">{{ row.targetSkill || '—' }}</td>
-                  <td style="font-size:12px;">{{ row.trainingTitle === '__others__' ? row.trainingTitleOther : row.trainingTitle || '—' }}</td>
-                  <td style="font-size:12px;">{{ row.modeOfActivity || '—' }}</td>
-                  <td style="font-size:12px;">{{ row.trainerProvider || '—' }}</td>
-                  <td style="font-size:12px;">{{ row.targetTimeline || '—' }}</td>
+                  <td
+                    style="
+                      text-align: center;
+                      color: var(--text-light);
+                      font-weight: 600;
+                    "
+                  >
+                    {{ idx + 1 }}
+                  </td>
+                  <td
+                    class="review-row-label"
+                    style="white-space: normal; font-size: 12px"
+                  >
+                    {{ row.targetSkill || "—" }}
+                  </td>
+                  <td style="font-size: 12px">
+                    {{
+                      row.trainingTitle === "__others__"
+                        ? row.trainingTitleOther
+                        : row.trainingTitle || "—"
+                    }}
+                  </td>
+                  <td style="font-size: 12px">
+                    {{ row.modeOfActivity || "—" }}
+                  </td>
+                  <td style="font-size: 12px">
+                    {{ row.trainerProvider || "—" }}
+                  </td>
+                  <td style="font-size: 12px">
+                    {{ row.targetTimeline || "—" }}
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -1549,8 +1517,10 @@
               Needs Assessment is accurate and based on actual observation,
               data, and evidence gathered from the office.
             </p>
-            <div class="review-cert-name">{{ form.raterFullName || '—' }}</div>
-            <div class="review-cert-sublabel">Signature over Printed Name of Rater / Head of Office</div>
+            <div class="review-cert-name">{{ form.raterFullName || "—" }}</div>
+            <div class="review-cert-sublabel">
+              Signature over Printed Name of Rater / Head of Office
+            </div>
           </div>
         </div>
       </div>
@@ -1558,20 +1528,32 @@
       <!-- Final Submission Action -->
       <div class="review-submit-area">
         <div class="review-submit-notice">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="review-notice-icon">
-            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            class="review-notice-icon"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
           </svg>
           <p>
-            By clicking <strong>Confirm &amp; Submit</strong>, you certify that all
-            information is accurate and based on actual office data. This action cannot
-            be undone. HRMS will be notified immediately upon submission.
+            By clicking <strong>Confirm &amp; Submit</strong>, you certify that
+            all information is accurate and based on actual office data. This
+            action cannot be undone. HRMS will be notified immediately upon
+            submission.
           </p>
         </div>
         <div class="review-submit-actions">
           <button
             class="btn-review-back"
             :class="{ 'btn-clicked': clickedButtons['back-edit'] }"
-            @click="markClicked('back-edit'); backToForm()"
+            @click="
+              markClicked('back-edit');
+              backToForm();
+            "
           >
             ← Go Back &amp; Edit
           </button>
@@ -1579,7 +1561,10 @@
             class="btn-submit"
             :class="{ 'btn-clicked': clickedButtons['confirm-submit'] }"
             :disabled="isSubmitting"
-            @click="markClicked('confirm-submit'); submitForm()"
+            @click="
+              markClicked('confirm-submit');
+              submitForm();
+            "
           >
             <span v-if="isSubmitting">Submitting…</span>
             <span v-else>Confirm &amp; Submit LNA</span>
@@ -1613,7 +1598,9 @@
     <!-- ══ INTERVENTION DROPDOWN PORTAL (fixed, outside scroll) ══ -->
     <Teleport to="body">
       <div
-        v-if="interventionPortal.visible && interventionPortal.rowIndex !== null"
+        v-if="
+          interventionPortal.visible && interventionPortal.rowIndex !== null
+        "
         id="intervention-portal"
         class="intervention-menu-portal"
         :style="{
@@ -1629,7 +1616,9 @@
           class="intervention-option"
           :class="{
             checked:
-              insightRows[interventionPortal.rowIndex]?.interventions?.includes(opt),
+              insightRows[interventionPortal.rowIndex]?.interventions?.includes(
+                opt,
+              ),
           }"
           @click.stop
         >
@@ -1647,7 +1636,9 @@
           class="intervention-option"
           :class="{
             checked:
-              insightRows[interventionPortal.rowIndex]?.interventions?.includes(opt),
+              insightRows[interventionPortal.rowIndex]?.interventions?.includes(
+                opt,
+              ),
           }"
           @click.stop
         >
@@ -1673,7 +1664,7 @@
 </template>
 
 <script setup>
-definePageMeta({ middleware: ['auth'] });
+definePageMeta({ middleware: ["auth"] });
 
 import { ref, reactive, computed, watch, onMounted, nextTick } from "vue";
 
@@ -2506,7 +2497,9 @@ const filledGaps = computed(() => {
   // From Section III insight rows (identified gaps)
   insightRows.forEach((r) => {
     if (Array.isArray(r.gaps)) {
-      r.gaps.forEach(g => { if (g?.trim()) gaps.add(g.trim()); });
+      r.gaps.forEach((g) => {
+        if (g?.trim()) gaps.add(g.trim());
+      });
     } else if (r.gap?.trim()) {
       gaps.add(r.gap.trim());
     }
@@ -2545,7 +2538,7 @@ const allProactRows = computed(() =>
     modeOfActivity: r.modeOfActivity,
     trainerProvider: r.trainerProvider,
     targetTimeline: r.targetTimeline,
-  }))
+  })),
 );
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -2620,11 +2613,8 @@ function validateEmail() {
 
 function validate() {
   const requiredFields = [
-    ["unitOfficeCollege", "Unit/Office/College"],
-    ["position", "Position"],
     ["yearCovered", "Year Covered"],
     ["totalPersonnel", "Total Personnel in Your Office"],
-    ["raterFullName", "Rater Full Name"],
   ];
   for (const [field] of requiredFields) {
     if (!String(form[field] || "").trim()) {
@@ -2632,40 +2622,35 @@ function validate() {
       return false;
     }
   }
-  if (!form.designationMode) {
-    alert("Please select a Designation option.");
-    return false;
-  }
-  if (form.designationMode === "specify" && !form.designation.trim()) {
-    alert("Please specify your Designation.");
-    return false;
-  }
-  if (!form.headLastName.trim() || !form.headFirstName.trim()) {
-    alert(
-      "Please fill in the Head of Unit/Office/College Last Name and First Name.",
-    );
-    return false;
-  }
-  form.submitterEmail =
-    (form.submitterEmailPrefix || "").trim() + "@carsu.edu.ph";
-  if (!validateEmail()) {
-    alert("Please enter a valid CarSU email prefix.");
-    return false;
-  }
   if (!form.officeAffiliation) {
-    alert("Please select an Office Affiliation.");
+    alert("Office affiliation missing. Please update your profile.");
+    return false;
+  }
+  if (!form.unitOfficeCollege) {
+    alert("Office/unit missing. Please update your profile.");
+    return false;
+  }
+  if (!form.position) {
+    alert("Position missing. Please update your profile.");
+    return false;
+  }
+  if (!form.raterFullName?.trim()) {
+    alert("Head of Unit name missing. Please update your profile.");
     return false;
   }
   if (!form.purpose) {
     alert("Please select a Purpose.");
     return false;
   }
+  form.submitterEmail =
+    (form.submitterEmailPrefix || "").trim() + "@carsu.edu.ph";
   return true;
 }
 
 // ── REVIEW SCREEN ──
 const reviewOfficeDisplay = computed(() => {
-  if (form.unitOfficeCollege === "__others__") return form.unitOfficeCollegeOther || "—";
+  if (form.unitOfficeCollege === "__others__")
+    return form.unitOfficeCollegeOther || "—";
   return form.unitOfficeCollege || "—";
 });
 
@@ -2711,14 +2696,16 @@ async function submitForm() {
     submitterEmail: form.submitterEmail,
     campus: "CSU Main Campus",
     officeAffiliation: form.officeAffiliation,
-    office: form.unitOfficeCollege === "__others__"
-      ? (form.unitOfficeCollegeOther || "Others").trim()
-      : form.unitOfficeCollege.trim(),
+    office:
+      form.unitOfficeCollege === "__others__"
+        ? (form.unitOfficeCollegeOther || "Others").trim()
+        : form.unitOfficeCollege.trim(),
     collegeProgram: form.collegeProgram.trim(),
     headOfUnit: headOfUnitFull.value,
-    position: form.position === "__others__"
-      ? (form.positionOther || "Others").trim()
-      : form.position.trim(),
+    position:
+      form.position === "__others__"
+        ? (form.positionOther || "Others").trim()
+        : form.position.trim(),
     designation: form.designation.trim(),
     yearCovered: form.yearCovered.trim(),
     totalPersonnel: form.totalPersonnel,
@@ -2734,7 +2721,9 @@ async function submitForm() {
     dataSourcesRaw: selectedSources,
     dataSourceInsights: insightRows.map((r) => ({
       dataSource: r.dataSource,
-      gap: Array.isArray(r.gaps) ? r.gaps.filter(g => g.trim()).join("\n") : (r.gaps || ""),
+      gap: Array.isArray(r.gaps)
+        ? r.gaps.filter((g) => g.trim()).join("\n")
+        : r.gaps || "",
       personnel: Array.isArray(r.personnel)
         ? r.personnel.join(", ")
         : r.personnel,
@@ -2878,7 +2867,28 @@ function closeInterventionPortal() {
   interventionPortal.rowIndex = null;
 }
 
-onMounted(() => {
+onMounted(async () => {
+  // ── Auto-fill from user profile ──────────────────────────────────
+  const { user } = useAuth()
+  if (user.value) {
+    form.submitterEmailPrefix = user.value.email?.replace('@carsu.edu.ph', '') || ''
+    form.officeAffiliation = user.value.officeAffiliation || ''
+    await nextTick()
+    // unitOfficeCollege maps to user.collegeOfficeUnit
+    form.unitOfficeCollege = user.value.collegeOfficeUnit || ''
+    form.collegeProgram = user.value.collegeProgram || ''
+    await nextTick()
+    form.position = user.value.currentPosition || ''
+    form.designation = user.value.designation || ''
+    form.designationMode = user.value.designation === 'N/A' ? 'na'
+      : (user.value.designation ? 'specify' : '')
+    // headOfUnit is stored as a single string — put it in the last name field
+    // so raterFullName computed picks it up, or split if stored first/last/mi
+    form.headLastName = user.value.headOfUnit || ''
+    form.headFirstName = ''
+    form.headMiddleInitial = ''
+  }
+
   document.addEventListener("click", (e) => {
     if (interventionPortal.visible) {
       const portal = document.getElementById("intervention-portal");
@@ -2891,6 +2901,7 @@ onMounted(() => {
     }
   });
 });
+
 </script>
 
 <style scoped>
@@ -2992,7 +3003,10 @@ onMounted(() => {
   display: flex;
   align-items: center;
   cursor: pointer;
-  transition: background 0.18s, border-color 0.18s, color 0.18s;
+  transition:
+    background 0.18s,
+    border-color 0.18s,
+    color 0.18s;
 }
 .btn-privacy-decline:hover {
   background: #f5f5f0;
@@ -3012,7 +3026,9 @@ onMounted(() => {
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.18s, transform 0.1s;
+  transition:
+    background 0.18s,
+    transform 0.1s;
 }
 .btn-privacy-agree:not(:disabled):hover {
   background: #2d6a3f;
@@ -3970,7 +3986,9 @@ textarea {
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.18s, color 0.18s;
+  transition:
+    background 0.18s,
+    color 0.18s;
 }
 .btn-tab-nav:hover:not(:disabled) {
   background: var(--navy-mid);
@@ -4557,7 +4575,7 @@ textarea {
   margin-left: auto;
   padding: 5px 16px;
   background: transparent;
-  border: 1.5px solid rgba(255,255,255,0.5);
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
   border-radius: 7px;
   color: var(--white);
   font-family: "Roboto", sans-serif;
@@ -4565,12 +4583,15 @@ textarea {
   font-weight: 600;
   cursor: pointer;
   letter-spacing: 0.03em;
-  transition: background 0.18s, border-color 0.18s, color 0.18s;
+  transition:
+    background 0.18s,
+    border-color 0.18s,
+    color 0.18s;
   flex-shrink: 0;
 }
 .btn-review-edit:hover {
-  background: rgba(255,255,255,0.15);
-  border-color: rgba(255,255,255,0.85);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.85);
 }
 .btn-review-edit:active {
   background: #fdf9e3;
@@ -4626,24 +4647,30 @@ textarea {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   text-align: left;
-  border-right: 1px solid rgba(255,255,255,0.1);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
   white-space: nowrap;
 }
-.review-table thead th:last-child { border-right: none; }
+.review-table thead th:last-child {
+  border-right: none;
+}
 .review-table tbody tr {
   border-bottom: 1px solid var(--border);
 }
-.review-table tbody tr:nth-child(even) { background: #faf9f6; }
+.review-table tbody tr:nth-child(even) {
+  background: #faf9f6;
+}
 .review-table tbody td {
   padding: 8px 12px;
   vertical-align: middle;
   border-right: 1px solid var(--border);
 }
-.review-table tbody td:last-child { border-right: none; }
+.review-table tbody td:last-child {
+  border-right: none;
+}
 .review-row-label {
   font-weight: 600;
   color: var(--navy-mid);
-  background: rgba(26,77,46,0.03) !important;
+  background: rgba(26, 77, 46, 0.03) !important;
   white-space: nowrap;
 }
 .review-level-label {
@@ -4654,12 +4681,12 @@ textarea {
   letter-spacing: 0.05em;
   margin-bottom: 8px;
   padding: 5px 10px;
-  background: rgba(26,77,46,0.07);
+  background: rgba(26, 77, 46, 0.07);
   border-left: 3px solid var(--navy);
   border-radius: 0 4px 4px 0;
 }
 .review-badge-yes {
-  background: rgba(26,107,60,0.12);
+  background: rgba(26, 107, 60, 0.12);
   color: #1a6b3c;
   font-weight: 700;
   font-size: 11px;
@@ -4668,7 +4695,7 @@ textarea {
   display: inline-block;
 }
 .review-badge-no {
-  background: rgba(192,57,43,0.1);
+  background: rgba(192, 57, 43, 0.1);
   color: #c0392b;
   font-weight: 700;
   font-size: 11px;
@@ -4683,8 +4710,8 @@ textarea {
   margin-top: 4px;
 }
 .review-source-tag {
-  background: rgba(26,77,46,0.08);
-  border: 1px solid rgba(26,77,46,0.2);
+  background: rgba(26, 77, 46, 0.08);
+  border: 1px solid rgba(26, 77, 46, 0.2);
   color: var(--navy);
   font-size: 12px;
   font-weight: 600;
@@ -4704,8 +4731,8 @@ textarea {
 }
 .review-intervention-tag {
   display: inline-block;
-  background: rgba(26,77,46,0.08);
-  border: 1px solid rgba(26,77,46,0.2);
+  background: rgba(26, 77, 46, 0.08);
+  border: 1px solid rgba(26, 77, 46, 0.2);
   color: var(--navy);
   font-size: 11px;
   font-weight: 500;
@@ -4714,7 +4741,7 @@ textarea {
   margin: 2px 3px 2px 0;
 }
 .review-cert-box {
-  background: rgba(201,168,76,0.08);
+  background: rgba(201, 168, 76, 0.08);
   border: 1.5px solid var(--gold);
   border-radius: 10px;
   padding: 20px 24px;
@@ -4752,8 +4779,8 @@ textarea {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  background: rgba(245,195,0,0.1);
-  border: 1px solid rgba(245,195,0,0.4);
+  background: rgba(245, 195, 0, 0.1);
+  border: 1px solid rgba(245, 195, 0, 0.4);
   border-radius: 8px;
   padding: 14px 16px;
   margin-bottom: 24px;
@@ -4787,7 +4814,10 @@ textarea {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.18s, border-color 0.18s, color 0.18s;
+  transition:
+    background 0.18s,
+    border-color 0.18s,
+    color 0.18s;
 }
 .btn-review-back:hover {
   background: #f5f3ee;
@@ -4874,7 +4904,10 @@ textarea {
   font-weight: 700;
   cursor: pointer;
   letter-spacing: 0.03em;
-  transition: background 0.18s, transform 0.1s, color 0.18s;
+  transition:
+    background 0.18s,
+    transform 0.1s,
+    color 0.18s;
 }
 .intervention-menu-portal .intervention-done-btn:hover {
   background: #2d6a3f;
@@ -4917,7 +4950,9 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
 }
 .gap-remove-btn:hover {
   background: rgba(192, 57, 43, 0.18);
@@ -4934,7 +4969,9 @@ textarea {
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
 }
 .gap-add-btn:hover {
   background: rgba(26, 77, 46, 0.14);

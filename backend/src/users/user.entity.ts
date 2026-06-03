@@ -43,10 +43,17 @@ export class User {
   @Column({ nullable: true }) designation: string;
   @Column({ nullable: true, type: 'float' }) yearsInPosition: number;
   @Column({ nullable: true, type: 'float' }) yearsInCSU: number;
+  @Column({ nullable: true }) supervisorLastName: string;
+  @Column({ nullable: true }) supervisorFirstName: string;
+  @Column({ nullable: true }) supervisorMiddleInitial: string;
+  @Column({ nullable: true }) supervisorEmail: string;
 
   // ── From LNA Office Info ──────────────────────────────────────────
   @Column({ nullable: true }) office: string;
-  @Column({ nullable: true }) headOfUnit: string;
+  @Column({ nullable: true }) headOfUnit: string; // full name string (legacy/display)
+  @Column({ nullable: true }) headLastName: string;
+  @Column({ nullable: true }) headFirstName: string;
+  @Column({ nullable: true }) headMiddleInitial: string;
   @Column({ nullable: true }) raterName: string;
 
   @CreateDateColumn() createdAt: Date;

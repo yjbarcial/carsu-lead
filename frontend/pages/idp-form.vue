@@ -205,450 +205,135 @@
         </div>
       </div>
       <div class="section-body">
-        <!-- Campus — static display only -->
+        <!-- Profile auto-fill notice -->
+        <div
+          style="
+            background: #f0f7f3;
+            border-left: 3px solid #1a4d2e;
+            padding: 10px 16px;
+            border-radius: 0 8px 8px 0;
+            font-size: 13px;
+            color: #2d6a3f;
+            margin-bottom: 20px;
+          "
+        >
+          Personnel information is auto-filled from your profile and cannot be
+          edited here.
+          <a
+            href="/profile"
+            style="color: #1a4d2e; font-weight: 700; margin-left: 4px"
+            >Edit in Profile Settings →</a
+          >
+        </div>
+
+        <!-- Campus -->
         <div class="field-group" style="margin-bottom: 20px">
           <label>Campus</label>
           <div class="static-value">CSU Main Campus</div>
         </div>
 
-        <!-- Office Affiliation -->
+        <!-- Office Affiliation — locked -->
         <div class="field-group" style="margin-bottom: 20px">
-          <label>Office Affiliation <span class="req">*</span></label>
-          <div class="checkbox-group">
-            <label
-              v-for="option in officeOptions"
-              :key="option"
-              class="checkbox-item"
-              :class="{ checked: form.officeAffiliation === option }"
-            >
-              <input
-                type="radio"
-                name="officeAffiliation"
-                :value="option"
-                v-model="form.officeAffiliation"
-              />
-              {{ option }}
-            </label>
-          </div>
+          <label>Office Affiliation</label>
+          <div class="static-value">{{ form.officeAffiliation || "—" }}</div>
         </div>
 
-        <!-- College / Office / Unit -->
+        <!-- College / Office / Unit — locked -->
         <div class="field-grid field-grid-2" style="margin-bottom: 18px">
           <div class="field-group span-2">
-            <label>College / Office / Unit <span class="req">*</span></label>
-            <select
-              v-if="collegeOfficeUnitOptions.length > 0"
-              v-model="form.collegeOfficeUnit"
-              :class="{ error: errors.collegeOfficeUnit }"
-            >
-              <option value="">Select office / unit…</option>
-              <option
-                v-for="opt in collegeOfficeUnitOptions"
-                :key="opt"
-                :value="opt"
-              >
-                {{ opt }}
-              </option>
-              <option value="__others__">Others / Specify</option>
-            </select>
-            <input
-              v-else
-              type="text"
-              v-model="form.collegeOfficeUnit"
-              :class="{ error: errors.collegeOfficeUnit }"
-              placeholder="Type your college / office / unit"
-            />
-            <input
-              v-if="form.collegeOfficeUnit === '__others__'"
-              type="text"
-              v-model="form.collegeOfficeUnitOther"
-              :class="{ error: errors.collegeOfficeUnit }"
-              placeholder="Please specify your office / unit…"
-              style="margin-top: 8px"
-              @input="
-                form.collegeOfficeUnitOther =
-                  form.collegeOfficeUnitOther.toUpperCase()
-              "
-            />
+            <label>College / Office / Unit</label>
+            <div class="static-value">{{ form.collegeOfficeUnit || "—" }}</div>
           </div>
-          <!-- Program selector — only for OVPAA colleges with programs -->
-          <div
-            v-if="isOVPAA && selectedCollegePrograms.length > 0"
-            class="field-group span-2"
-            style="margin-top: 4px"
-          >
-            <label>Program / Department <span class="req">*</span></label>
-            <select
-              v-model="form.collegeProgram"
-              :class="{ error: errors.collegeProgram }"
-            >
-              <option value="">Select program…</option>
-              <option v-for="p in selectedCollegePrograms" :key="p" :value="p">
-                {{ p }}
-              </option>
-            </select>
+          <div v-if="form.collegeProgram" class="field-group span-2">
+            <label>Program / Department</label>
+            <div class="static-value">{{ form.collegeProgram }}</div>
           </div>
         </div>
 
-        <!-- Name of Personnel -->
+        <!-- Name of Personnel — locked -->
         <div class="field-group" style="margin-bottom: 18px">
-          <label>Name of Personnel <span class="req">*</span></label>
+          <label>Name of Personnel</label>
           <div class="name-grid">
             <div>
               <small class="field-hint">Last Name</small>
-              <input
-                type="text"
-                v-model="form.lastName"
-                :class="{ error: errors.lastName }"
-                placeholder="DELA CRUZ"
-                @input="form.lastName = form.lastName.toUpperCase()"
-              />
+              <div class="static-value">{{ form.lastName || "—" }}</div>
             </div>
             <div>
               <small class="field-hint">First Name</small>
-              <input
-                type="text"
-                v-model="form.firstName"
-                :class="{ error: errors.firstName }"
-                placeholder="JUAN"
-                @input="form.firstName = form.firstName.toUpperCase()"
-              />
+              <div class="static-value">{{ form.firstName || "—" }}</div>
             </div>
             <div class="mi-col">
               <small class="field-hint">M.I.</small>
-              <input
-                type="text"
-                v-model="form.middleInitial"
-                :class="{ error: errors.middleInitial }"
-                placeholder="A"
-                maxlength="1"
-                @input="form.middleInitial = form.middleInitial.toUpperCase()"
-              />
+              <div class="static-value">{{ form.middleInitial || "—" }}</div>
             </div>
           </div>
         </div>
 
         <div class="field-grid field-grid-2" style="margin-bottom: 18px">
-          <!-- Employee Email -->
+          <!-- Employee Email — locked -->
           <div class="field-group">
-            <label>Your CarSU Email Address <span class="req">*</span></label>
-            <div
-              class="email-prefix-wrapper"
-              :class="{
-                error: emailHints.employee.type === 'error',
-                valid: emailHints.employee.type === 'success',
-              }"
-            >
-              <input
-                type="text"
-                v-model="form.employeeEmailPrefix"
-                class="email-prefix-input"
-                placeholder="yourname"
-                @blur="validateEmail('employee')"
-              />
-              <span class="email-suffix">@carsu.edu.ph</span>
+            <label>CarSU Email Address</label>
+            <div class="static-value">
+              {{ form.employeeEmailPrefix }}@carsu.edu.ph
             </div>
-            <small class="email-hint" :class="emailHints.employee.type">{{
-              emailHints.employee.msg
-            }}</small>
           </div>
 
-          <!-- Educational Attainment -->
+          <!-- Educational Attainment — locked -->
           <div class="field-group span-2">
-            <label
-              >Highest Educational Attainment <span class="req">*</span></label
-            >
+            <label>Highest Educational Attainment</label>
+            <div class="static-value">
+              {{ form.educAttainment || "—"
+              }}{{
+                form.educAttainmentSpec ? " — " + form.educAttainmentSpec : ""
+              }}
+            </div>
+          </div>
+
+          <!-- Position & Designation — locked -->
+          <div class="field-group span-2">
+            <label>Position &amp; Designation</label>
             <div
               style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px"
             >
-              <select
-                v-model="form.educAttainment"
-                :class="{ error: errors.educAttainment }"
-              >
-                <option value="">Select…</option>
-                <option>Bachelor's Degree</option>
-                <option>Post-Baccalaureate Certificate</option>
-                <option>Master's Degree</option>
-                <option>Post-Master's Certificate</option>
-                <option>Doctorate Degree (Ph.D. / Ed.D. / etc.)</option>
-                <option>Post-Doctoral</option>
-              </select>
-              <input
-                type="text"
-                v-model="form.educAttainmentSpec"
-                :class="{ error: errors.educAttainmentSpec }"
-                placeholder="Specify degree / program (e.g. BS COMPUTER SCIENCE)"
-                @input="
-                  form.educAttainmentSpec =
-                    form.educAttainmentSpec.toUpperCase()
-                "
-              />
+              <div class="static-value">{{ form.currentPosition || "—" }}</div>
+              <div class="static-value">{{ form.designation || "—" }}</div>
             </div>
           </div>
 
-          <!-- Current Position & Designation -->
-          <div class="field-group span-2">
-            <label>Position &amp; Designation <span class="req">*</span></label>
-
-            <!-- OVPAA only: Personnel Type selector (above the 2-col row) -->
-            <div
-              v-if="form.officeAffiliation === 'OVPAA'"
-              style="margin-bottom: 10px"
-            >
-              <small
-                class="field-hint"
-                style="margin-bottom: 4px; display: block"
-                >Personnel Type</small
-              >
-              <select
-                v-model="form.personnelType"
-                :class="{ error: errors.personnelType }"
-                @change="form.currentPosition = ''"
-                style="max-width: 260px"
-              >
-                <option value="">Select type…</option>
-                <option value="non-teaching">Non-Teaching</option>
-                <option value="teaching">Teaching</option>
-              </select>
-            </div>
-
-            <!-- Position + Designation side by side for all affiliations -->
-            <div
-              style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px"
-            >
-              <!-- Position dropdown -->
-              <div>
-                <select
-                  v-model="form.currentPosition"
-                  :class="{ error: errors.currentPosition }"
-                  :disabled="
-                    form.officeAffiliation === 'OVPAA' && !form.personnelType
-                  "
-                >
-                  <option value="">Select position…</option>
-
-                  <!-- OVPAA teaching -->
-                  <template
-                    v-if="
-                      form.officeAffiliation === 'OVPAA' &&
-                      form.personnelType === 'teaching'
-                    "
-                  >
-                    <option>Assistant Professor I</option>
-                    <option>Assistant Professor II</option>
-                    <option>Assistant Professor III</option>
-                    <option>Assistant Professor IV</option>
-                    <option>Associate Professor I</option>
-                    <option>Associate Professor II</option>
-                    <option>Associate Professor III</option>
-                    <option>Associate Professor IV</option>
-                    <option>Associate Professor V</option>
-                    <option>Instructor I</option>
-                    <option>Instructor II</option>
-                    <option>Instructor III</option>
-                    <option>Professor I</option>
-                    <option>Professor II</option>
-                    <option>Professor III</option>
-                    <option>Professor IV</option>
-                    <option>Professor V</option>
-                    <option>Professor VI</option>
-                    <option>University Professor</option>
-                  </template>
-
-                  <!-- Non-teaching: shown for all affiliations (and OVPAA non-teaching) -->
-                  <template
-                    v-if="
-                      form.officeAffiliation !== 'OVPAA' ||
-                      form.personnelType === 'non-teaching'
-                    "
-                  >
-                    <option>Accountant I</option>
-                    <option>Accountant II</option>
-                    <option>Accountant III</option>
-                    <option>Administrative Aide I</option>
-                    <option>Administrative Aide II</option>
-                    <option>Administrative Aide III</option>
-                    <option>Administrative Aide IV</option>
-                    <option>Administrative Aide VI</option>
-                    <option>Administrative Assistant I</option>
-                    <option>Administrative Assistant II</option>
-                    <option>Administrative Assistant III</option>
-                    <option>Administrative Assistant IV</option>
-                    <option>Administrative Assistant V</option>
-                    <option>Administrative Officer I</option>
-                    <option>Administrative Officer II</option>
-                    <option>Administrative Officer III</option>
-                    <option>Administrative Officer IV</option>
-                    <option>Administrative Officer V</option>
-                    <option>Attorney IV</option>
-                    <option>Board Secretary I</option>
-                    <option>Board Secretary V</option>
-                    <option>Chief Administrative Officer</option>
-                    <option>College Librarian I</option>
-                    <option>College Librarian III</option>
-                    <option>Cook I</option>
-                    <option>Cook II</option>
-                    <option>Dentist II</option>
-                    <option>Dormitory Manager III</option>
-                    <option>Executive Assistant III</option>
-                    <option>Executive Assistant IV</option>
-                    <option>Farm Worker I</option>
-                    <option>Farm Worker II</option>
-                    <option>Food Service Supervisor II</option>
-                    <option>Guidance Coordinator I</option>
-                    <option>Guidance Counselor I</option>
-                    <option>Guidance Counselor III</option>
-                    <option>Heavy Equipment Operator I</option>
-                    <option>Houseparent II</option>
-                    <option>Information Officer I</option>
-                    <option>Information Officer II</option>
-                    <option>Information Officer III</option>
-                    <option>Information Systems Analyst I</option>
-                    <option>Information Systems Analyst II</option>
-                    <option>Information Technology Officer I</option>
-                    <option>Internal Auditor I</option>
-                    <option>Internal Auditor II</option>
-                    <option>Internal Auditor III</option>
-                    <option>Legal Assistant II</option>
-                    <option>Legal Assistant III</option>
-                    <option>Machinist I</option>
-                    <option>Nurse II</option>
-                    <option>Planning Officer I</option>
-                    <option>Planning Officer II</option>
-                    <option>Planning Officer III</option>
-                    <option>Project Development Officer I</option>
-                    <option>Project Development Officer II</option>
-                    <option>Project Development Officer III</option>
-                    <option>Registrar III</option>
-                    <option>School Farm Demonstrator</option>
-                    <option>School Farming Coordinator I</option>
-                    <option>Security Guard I</option>
-                    <option>Senior Administrative Assistant III</option>
-                    <option>SUC President IV</option>
-                    <option>Supervising Administrative Officer</option>
-                    <option>University Extension Associate I</option>
-                    <option>University Extension Specialist I</option>
-                    <option>University Extension Specialist II</option>
-                    <option>University Extension Specialist III</option>
-                    <option>University Extension Specialist IV</option>
-                    <option>University Extension Specialist V</option>
-                    <option>University Research Associate I</option>
-                    <option>University Research Associate II</option>
-                    <option>University Researcher II</option>
-                    <option>University Researcher IV</option>
-                    <option>University Researcher V</option>
-                    <option>Veterinarian II</option>
-                    <option>Vocational Placement Coordinator I</option>
-                  </template>
-                </select>
-              </div>
-
-              <!-- Designation — N/A or Specify toggle -->
-              <div class="field-group">
-                <label>Designation <span class="req">*</span></label>
-                <div class="designation-toggle">
-                  <label
-                    class="checkbox-item"
-                    :class="{ checked: form.designationMode === 'na' }"
-                  >
-                    <input
-                      type="radio"
-                      name="designationMode"
-                      value="na"
-                      v-model="form.designationMode"
-                      @change="form.designation = 'N/A'"
-                    />
-                    N/A
-                  </label>
-                  <label
-                    class="checkbox-item"
-                    :class="{ checked: form.designationMode === 'specify' }"
-                  >
-                    <input
-                      type="radio"
-                      name="designationMode"
-                      value="specify"
-                      v-model="form.designationMode"
-                      @change="form.designation = ''"
-                    />
-                    Specify
-                  </label>
-                </div>
-                <input
-                  v-if="form.designationMode === 'specify'"
-                  type="text"
-                  v-model="form.designation"
-                  placeholder="e.g. Director, Dean…"
-                  style="margin-top: 6px"
-                />
-              </div>
-            </div>
-          </div>
-
-          <!-- Years in Position -->
+          <!-- Years in Position — still editable -->
           <div class="field-group">
             <label>Years in Position <span class="req">*</span></label>
-            <input
-              type="number"
-              v-model="form.yearsInPosition"
-              :class="{ error: errors.yearsInPosition }"
-              min="0"
-              placeholder="0"
-            />
+            <div class="static-value">{{ form.yearsInPosition || "—" }}</div>
           </div>
 
-          <!-- Years in CSU -->
           <div class="field-group">
             <label>Years in CSU <span class="req">*</span></label>
-            <input
-              type="number"
-              v-model="form.yearsInCSU"
-              :class="{ error: errors.yearsInCSU }"
-              min="0"
-              placeholder="0"
-            />
+            <div class="static-value">{{ form.yearsInCSU || "—" }}</div>
           </div>
 
-          <!-- Supervisor Name -->
           <div class="field-group">
             <label>Immediate Supervisor Name <span class="req">*</span></label>
-            <input
-              type="text"
-              v-model="form.supervisorName"
-              :class="{ error: errors.supervisorName }"
-              placeholder="e.g. DELA CRUZ, JUAN D."
-              @input="form.supervisorName = form.supervisorName.toUpperCase()"
-            />
+            <div class="static-value">{{ form.supervisorName || "—" }}</div>
             <small class="field-hint"
               >Format: Last name, First name, M.I.</small
             >
           </div>
 
-          <!-- Supervisor Email -->
           <div class="field-group">
             <label>Supervisor CarSU Email <span class="req">*</span></label>
-            <div
-              class="email-prefix-wrapper"
-              :class="{
-                error: emailHints.supervisor.type === 'error',
-                valid: emailHints.supervisor.type === 'success',
-              }"
-            >
-              <input
-                type="text"
-                v-model="form.supervisorEmailPrefix"
-                class="email-prefix-input"
-                placeholder="supervisor"
-                @blur="validateEmail('supervisor')"
-              />
-              <span class="email-suffix">@carsu.edu.ph</span>
+            <div class="static-value">
+              {{
+                form.supervisorEmailPrefix
+                  ? form.supervisorEmailPrefix + "@carsu.edu.ph"
+                  : "—"
+              }}
             </div>
             <small class="email-hint" :class="emailHints.supervisor.type">{{
               emailHints.supervisor.msg
             }}</small>
           </div>
 
-          <!-- Purpose -->
+          <!-- Purpose — still editable -->
           <div class="field-group span-2">
             <label>Purpose <span class="req">*</span></label>
             <div class="checkbox-group">
@@ -759,8 +444,13 @@
                       v-model="row.targetCompetency"
                       placeholder="Type competency…"
                       @change="
-                        row.competencyGroup = getCompetencyCluster(row.targetCompetency);
-                        row.requiredLevel = getRequiredLevel(row.targetCompetency, form.currentPosition);
+                        row.competencyGroup = getCompetencyCluster(
+                          row.targetCompetency,
+                        );
+                        row.requiredLevel = getRequiredLevel(
+                          row.targetCompetency,
+                          form.currentPosition,
+                        );
                       "
                     />
                   </td>
@@ -865,9 +555,27 @@
                   <th style="width: 40px">No.</th>
                   <th>Degree Program</th>
                   <th style="min-width: 200px">Target HEI</th>
-                  <th style="width: 70px; white-space: normal; word-break: break-word; font-size: 10px;">Mode of Study</th>
+                  <th
+                    style="
+                      width: 70px;
+                      white-space: normal;
+                      word-break: break-word;
+                      font-size: 10px;
+                    "
+                  >
+                    Mode of Study
+                  </th>
                   <th style="min-width: 180px">Target Scholarship Grant</th>
-                  <th style="width: 70px; white-space: normal; word-break: break-word; font-size: 10px;">Intended Year of Enrollment</th>
+                  <th
+                    style="
+                      width: 70px;
+                      white-space: normal;
+                      word-break: break-word;
+                      font-size: 10px;
+                    "
+                  >
+                    Intended Year of Enrollment
+                  </th>
                   <th style="width: 40px"></th>
                 </tr>
               </thead>
@@ -986,7 +694,16 @@
                     >
                   </th>
                   <th>Training / LeaD Intervention</th>
-                  <th style="width: 70px; white-space: normal; word-break: break-word; font-size: 10px;">Mode of Activity</th>
+                  <th
+                    style="
+                      width: 70px;
+                      white-space: normal;
+                      word-break: break-word;
+                      font-size: 10px;
+                    "
+                  >
+                    Mode of Activity
+                  </th>
                   <th>Trainer / Provider</th>
                   <th style="width: 80px">Target Timeline</th>
                   <th style="width: 40px"></th>
@@ -2105,9 +1822,9 @@
 </template>
 
 <script setup>
-definePageMeta({ middleware: ['auth'] });
+definePageMeta({ middleware: ["auth"] });
 
-import { ref, reactive, computed, watch, onMounted } from "vue";
+import { ref, reactive, computed, watch, onMounted, nextTick } from "vue";
 
 // ── NOTE FOR MIGRATION ──────────────────────────────────────────────────────
 // APPS_SCRIPT_URL below is temporary for the current Google Sheets backend.
@@ -4611,7 +4328,7 @@ function getRequiredLevel(competency, position) {
   if (!posData) return "";
   // Case-insensitive match to support free-text input (e.g. "INTEGRITY" → "Integrity")
   const key = Object.keys(posData).find(
-    (k) => k.toLowerCase() === competency.trim().toLowerCase()
+    (k) => k.toLowerCase() === competency.trim().toLowerCase(),
   );
   if (!key) return "";
   const lvl = posData[key];
@@ -4620,11 +4337,54 @@ function getRequiredLevel(competency, position) {
 }
 
 // ── Lifecycle ──────────────────────────────────────────────────────────────
-onMounted(() => {
-  // Fetch shared suggestions for HEI and Pro-ACT fields
+onMounted(async () => {
   fetchSuggestions();
 
-  // Check if this is a supervisor link (token in URL)
+  // ── Auto-fill from user profile ──────────────────────────────────
+  const { user } = useAuth();
+  if (user.value) {
+    // Set officeAffiliation first, then wait for the watch to run,
+    // then set the downstream fields so the watch doesn't wipe them
+    form.officeAffiliation = user.value.officeAffiliation || "";
+    await nextTick();
+    form.collegeOfficeUnit = user.value.collegeOfficeUnit || "";
+    form.collegeProgram = user.value.collegeProgram || "";
+    form.personnelType = user.value.personnelType || "";
+    await nextTick();
+    form.currentPosition = user.value.currentPosition || "";
+    form.designation =
+      user.value.designation && user.value.designation !== "N/A"
+        ? user.value.designation
+        : user.value.designation === "N/A"
+          ? "N/A"
+          : "";
+    form.designationMode =
+      user.value.designation === "N/A"
+        ? "na"
+        : user.value.designation
+          ? "specify"
+          : "";
+    form.lastName = user.value.lastName || "";
+    form.firstName = user.value.firstName || "";
+    form.middleInitial = user.value.middleInitial || "";
+    form.educAttainment = user.value.educAttainment || "";
+    form.educAttainmentSpec = user.value.educAttainmentSpec || "";
+    form.yearsInPosition = user.value.yearsInPosition ?? "";
+    form.yearsInCSU = user.value.yearsInCSU ?? "";
+    form.employeeEmailPrefix =
+      user.value.email?.replace("@carsu.edu.ph", "") || "";
+    form.supervisorName = [
+      user.value.supervisorLastName,
+      user.value.supervisorFirstName,
+      user.value.supervisorMiddleInitial,
+    ]
+      .filter(Boolean)
+      .join(", ");
+
+    form.supervisorEmailPrefix =
+      user.value.supervisorEmail?.replace("@carsu.edu.ph", "") || "";
+  }
+
   const params = new URLSearchParams(window.location.search);
   const token = params.get("token");
   if (token) {
@@ -4744,40 +4504,29 @@ async function saveSuggestion(type, value) {
 // ── Stage 1 validation ─────────────────────────────────────────────────────
 function validateStage1() {
   let ok = true;
-  const required = [
-    "lastName",
-    "firstName",
-    "currentPosition",
-    "yearsInPosition",
-    "yearsInCSU",
-    "collegeOfficeUnit",
-    "supervisorName",
-    "educAttainment",
-    "educAttainmentSpec",
-  ];
+  // Only validate fields the user still fills in manually
+  const required = ["yearsInPosition", "yearsInCSU", "supervisorName"];
   required.forEach((field) => {
     if (!form[field]?.toString().trim()) {
       errors[field] = true;
       ok = false;
     } else delete errors[field];
   });
-  // Build full emails from prefixes before validating
+
+  // Email prefix comes from profile, but still build the full email
   form.employeeEmail =
     (form.employeeEmailPrefix || "").trim() + "@carsu.edu.ph";
   form.supervisorEmail =
     (form.supervisorEmailPrefix || "").trim() + "@carsu.edu.ph";
-  if (!validateEmail("employee")) ok = false;
+
   if (!validateEmail("supervisor")) ok = false;
+
   if (!form.officeAffiliation) {
-    alert("Please select an Office Affiliation.");
+    alert("Office affiliation missing. Please update your profile.");
     ok = false;
   }
-  // If "Others / Specify" chosen for College/Office/Unit, require the text input
-  if (
-    form.collegeOfficeUnit === "__others__" &&
-    !form.collegeOfficeUnitOther?.trim()
-  ) {
-    errors["collegeOfficeUnit"] = true;
+  if (!form.currentPosition) {
+    alert("Current position missing. Please update your profile.");
     ok = false;
   }
   if (!form.headerPurpose) {

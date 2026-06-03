@@ -4,10 +4,16 @@
       <h2>My Profile</h2>
       <p>Changes here will reflect on future IDP and LNA submissions.</p>
 
-      <div v-if="saved" class="success-msg">Profile updated successfully.</div>
-      <div v-if="error" class="error-msg">{{ error }}</div>
+      <!-- Toast notification -->
+      <Transition name="toast">
+        <div v-if="toast.show" :class="['toast', `toast-${toast.type}`]">
+          <span class="toast-icon">{{
+            toast.type === "success" ? "✓" : "✕"
+          }}</span>
+          {{ toast.message }}
+        </div>
+      </Transition>
 
-      <!-- Same fields as complete-profile, pre-filled -->
       <div class="field-group">
         <label>Name</label>
         <div class="name-grid">
@@ -113,17 +119,65 @@
         </div>
       </div>
 
+      <div class="form-section-note">Used in IDP Form</div>
+
       <div class="field-group">
-        <label>Head of Unit</label>
+        <label>Immediate Supervisor Name</label>
+        <div class="name-grid">
+          <div>
+            <small>Last Name</small>
+            <input
+              v-model="form.supervisorLastName"
+              type="text"
+              @input="
+                form.supervisorLastName = form.supervisorLastName.toUpperCase()
+              "
+            />
+          </div>
+          <div>
+            <small>First Name</small>
+            <input
+              v-model="form.supervisorFirstName"
+              type="text"
+              @input="
+                form.supervisorFirstName =
+                  form.supervisorFirstName.toUpperCase()
+              "
+            />
+          </div>
+          <div style="max-width: 80px">
+            <small>M.I.</small>
+            <input
+              v-model="form.supervisorMiddleInitial"
+              type="text"
+              maxlength="1"
+              @input="
+                form.supervisorMiddleInitial =
+                  form.supervisorMiddleInitial.toUpperCase()
+              "
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Supervisor CarSU Email</label>
         <input
-          v-model="form.headOfUnit"
+          v-model="form.supervisorEmail"
           type="text"
-          @input="form.headOfUnit = form.headOfUnit.toUpperCase()"
+          placeholder="supervisor@carsu.edu.ph"
         />
       </div>
 
-      <button class="btn-save" :disabled="loading" @click="save">
-        {{ loading ? "Saving…" : "Save Changes" }}
+      <button
+        class="btn-save"
+        :class="{ 'btn-saved': justSaved }"
+        :disabled="loading"
+        @click="save"
+      >
+        <span v-if="loading" class="btn-spinner"></span>
+        <template v-else-if="justSaved">✓ Saved!</template>
+        <template v-else>Save Changes</template>
       </button>
     </div>
   </div>
@@ -135,8 +189,18 @@ const { user, getAccessToken, fetchMe } = useAuth();
 const config = useRuntimeConfig();
 
 const loading = ref(false);
-const error = ref("");
-const saved = ref(false);
+const justSaved = ref(false);
+
+const toast = reactive({ show: false, type: "success", message: "" });
+
+function showToast(type, message) {
+  toast.type = type;
+  toast.message = message;
+  toast.show = true;
+  setTimeout(() => {
+    toast.show = false;
+  }, 3500);
+}
 
 const form = reactive({
   firstName: "",
@@ -152,7 +216,10 @@ const form = reactive({
   educAttainmentSpec: "",
   yearsInPosition: "",
   yearsInCSU: "",
-  headOfUnit: "",
+  supervisorLastName: "",
+  supervisorFirstName: "",
+  supervisorMiddleInitial: "",
+  supervisorEmail: "",
   office: "",
   raterName: "",
 });
@@ -166,9 +233,8 @@ onMounted(() => {
 });
 
 async function save() {
-  error.value = "";
-  saved.value = false;
   loading.value = true;
+  justSaved.value = false;
   try {
     const res = await fetch(`${config.public.apiBase}/users/me`, {
       method: "PATCH",
@@ -179,13 +245,17 @@ async function save() {
       body: JSON.stringify(form),
     });
     if (!res.ok) {
-      error.value = "Failed to save.";
+      showToast("error", "Failed to save. Please try again.");
       return;
     }
     await fetchMe();
-    saved.value = true;
+    justSaved.value = true;
+    showToast("success", "Profile updated successfully.");
+    setTimeout(() => {
+      justSaved.value = false;
+    }, 2500);
   } catch {
-    error.value = "Network error.";
+    showToast("error", "Network error. Please check your connection.");
   } finally {
     loading.value = false;
   }
@@ -209,35 +279,121 @@ async function save() {
   width: 100%;
   box-shadow: 0 8px 40px rgba(26, 77, 46, 0.12);
   border: 1px solid #d8d4c8;
+  font-family: "Roboto", sans-serif;
 }
 h2 {
-  font-size: 22px;
+  font-size: 20px;
+  font-weight: 700;
   color: #1a4d2e;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 p {
   font-size: 13px;
+  font-weight: 400;
   color: #5a6070;
   margin-bottom: 24px;
 }
-.success-msg {
+
+/* ── TOAST ───────────────────────────────────────────── */
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+.toast-success {
   background: #f0faf4;
-  border: 1px solid #a0d4b0;
-  border-radius: 8px;
-  padding: 10px 14px;
+  border: 1.5px solid #6dbb8a;
   color: #1a6b3c;
-  font-size: 13px;
-  margin-bottom: 16px;
 }
-.error-msg {
+.toast-error {
   background: #fdf0f0;
-  border: 1px solid #e0a0a0;
-  border-radius: 8px;
-  padding: 10px 14px;
+  border: 1.5px solid #e09090;
   color: #c0392b;
-  font-size: 13px;
-  margin-bottom: 16px;
 }
+.toast-icon {
+  font-size: 15px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* Toast transition */
+.toast-enter-active {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.toast-leave-active {
+  transition: all 0.2s ease;
+}
+.toast-enter-from {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+.toast-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.label-hint {
+  display: none;
+}
+.form-section-note {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #1a4d2e;
+  background: #e8f4ed;
+  border: 1.5px solid #a0ccb0;
+  border-radius: 20px;
+  display: inline-block;
+  padding: 3px 10px;
+  margin-bottom: 14px;
+  margin-top: 8px;
+}
+
+/* ── SECTION DIVIDERS ────────────────────────────────── */
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 24px 0 18px;
+}
+.section-badge {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  padding: 3px 9px;
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+.badge-idp {
+  background: #e8f4ed;
+  color: #1a4d2e;
+  border: 1.5px solid #a0ccb0;
+}
+.badge-lna {
+  background: #fff8e1;
+  color: #7a5500;
+  border: 1.5px solid #f5c300;
+}
+.section-divider-label {
+  font-size: 11px;
+  color: #aaa;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.section-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #ece9e0;
+}
+
+/* ── FIELDS ──────────────────────────────────────────── */
 .field-group {
   margin-bottom: 16px;
 }
@@ -247,8 +403,9 @@ p {
   font-weight: 700;
   color: #2d6a3f;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   margin-bottom: 5px;
+  font-family: "Roboto", sans-serif;
 }
 .name-grid {
   display: grid;
@@ -258,8 +415,10 @@ p {
 .name-grid small {
   display: block;
   font-size: 11px;
+  font-weight: 500;
   color: #888;
   margin-bottom: 4px;
+  font-family: "Roboto", sans-serif;
 }
 input[type="text"],
 input[type="number"],
@@ -270,12 +429,15 @@ select {
   border-radius: 8px;
   background: #f8f7f4;
   font-size: 14px;
+  font-family: "Roboto", sans-serif;
   outline: none;
 }
 input:focus,
 select:focus {
   border-color: #1a4d2e;
 }
+
+/* ── BUTTON ──────────────────────────────────────────── */
 .btn-save {
   width: 100%;
   padding: 13px;
@@ -287,12 +449,34 @@ select:focus {
   font-weight: 600;
   cursor: pointer;
   margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.2s;
 }
-.btn-save:hover {
+.btn-save:hover:not(:disabled) {
   background: #2d6a3f;
 }
 .btn-save:disabled {
   background: #aaa;
   cursor: not-allowed;
+}
+.btn-save.btn-saved {
+  background: #1a7a3c;
+}
+.btn-spinner {
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>
