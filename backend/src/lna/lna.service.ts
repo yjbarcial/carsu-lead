@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Lna } from './lna.entity';
+import { User } from '../users/user.entity';
 import { MailService } from '../mail/mail.service';
 import { PdfService } from '../pdf/pdf.service';
 
@@ -11,6 +12,7 @@ export class LnaService {
 
   constructor(
     @InjectRepository(Lna) private repo: Repository<Lna>,
+    @InjectRepository(User) private userRepo: Repository<User>,
     private readonly mail: MailService,
     private readonly pdf: PdfService,
     private readonly dataSource: DataSource,
@@ -22,7 +24,6 @@ export class LnaService {
     const year = new Date().getFullYear();
     const prefix = `LNA-${year}-`;
 
-    // Find the latest record for this year by sorting DESC on refId
     const last = await this.repo
       .createQueryBuilder('lna')
       .where('lna."refId" LIKE :prefix', { prefix: `${prefix}%` })
@@ -36,20 +37,44 @@ export class LnaService {
       if (!isNaN(lastNum)) nextNum = lastNum + 1;
     }
 
-    // Zero-pad to 4 digits: LNA-2026-0001
     return `${prefix}${String(nextNum).padStart(4, '0')}`;
   }
 
   // ── Create ───────────────────────────────────────────────────────────────
 
-  async create(data: Partial<Lna>): Promise<Lna> {
+  async create(data: Record<string, any>): Promise<Lna> {
     const refId = await this.generateRefId();
+
+    // Resolve the submitting user
+    const user = data.userId
+      ? await this.userRepo.findOne({ where: { id: data.userId } })
+      : null;
+
     const record = this.repo.create({
-      ...data,
       refId,
-      raterName: (data as any).raterFullName ?? (data as any).raterName ?? null,
+      userId: data.userId ?? null,
+      datePrepared: data.datePrepared ?? null,
+      yearCovered: data.yearCovered ?? null,
+      totalPersonnel: data.totalPersonnel ?? null,
+      purpose: data.purpose ?? null,
+      workforceProfile: data.workforceProfile ?? null,
+      coreCompetencies: data.coreCompetencies ?? null,
+      leadershipComps: data.leadershipComps ?? null,
+      orgComps: data.orgComps ?? null,
+      technicalComps: data.technicalComps ?? null,
+      clusterSummaryRaw: data.clusterSummaryRaw ?? null,
+      dataSourcesRaw: data.dataSourcesRaw ?? null,
+      dataSourceInsights: data.dataSourceInsights ?? null,
+      leadInterventions: data.leadInterventions ?? null,
     });
+
     const saved = await this.repo.save(record);
+
+    // Derive fields from the user relation
+    const submitterEmail = user?.email ?? '';
+    const headOfUnit = user?.headOfUnit ?? '';
+    const office = user?.office ?? user?.officeAffiliation ?? '';
+    const raterName = user?.raterName ?? '';
 
     const submittedAt = new Date().toLocaleDateString('en-PH', {
       year: 'numeric',
@@ -57,27 +82,27 @@ export class LnaService {
       day: 'numeric',
     });
 
-    // Generate PDF and send emails (non-blocking — errors logged, not thrown)
     try {
-      const pdfBuffer = await this.pdf.generateLnaPdf({ ...saved } as any);
+      const pdfBuffer = await this.pdf.generateLnaPdf({
+        ...saved,
+        user,
+      } as any);
 
-      // 1. Email to HR with PDF
       this.mail.sendLnaHrNotification({
         refId: saved.refId,
-        office: saved.office ?? saved.officeAffiliation ?? '',
-        headOfUnit: saved.headOfUnit ?? '',
-        submitterEmail: saved.submitterEmail ?? '',
+        office,
+        headOfUnit,
+        submitterEmail,
         submittedAt,
         pdfBuffer,
       });
 
-      // 2. Email to the submitter/head of office with PDF
-      if (saved.submitterEmail) {
+      if (submitterEmail) {
         this.mail.sendLnaSubmitterConfirmation({
-          to: saved.submitterEmail,
-          headOfUnit: saved.headOfUnit ?? '',
+          to: submitterEmail,
+          headOfUnit,
           refId: saved.refId,
-          office: saved.office ?? saved.officeAffiliation ?? '',
+          office,
           submittedAt,
           pdfBuffer,
         });
@@ -86,15 +111,28 @@ export class LnaService {
       this.logger.error(`LNA post-save email/PDF failed: ${err.message}`);
     }
 
-    return saved;
+    return (
+      (await this.repo.findOne({
+        where: { refId: saved.refId },
+        relations: ['user'],
+      })) ?? saved
+    );
   }
 
+  // ── Read ─────────────────────────────────────────────────────────────────
+
   findAll(): Promise<Lna[]> {
-    return this.repo.find({ order: { submittedAt: 'DESC' } });
+    return this.repo.find({
+      order: { submittedAt: 'DESC' },
+      relations: ['user'],
+    });
   }
 
   async generatePdf(refId: string): Promise<Buffer | null> {
-    const record = await this.repo.findOne({ where: { refId } });
+    const record = await this.repo.findOne({
+      where: { refId },
+      relations: ['user'],
+    });
     if (!record) return null;
     try {
       return await this.pdf.generateLnaPdf({ ...record } as any);

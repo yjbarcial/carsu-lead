@@ -5,9 +5,10 @@ import { LnaService } from './lna.service';
 import { LnaController } from './lna.controller';
 import { MailModule } from '../mail/mail.module';
 import { PdfModule } from '../pdf/pdf.module';
+import { User } from 'src/users/user.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Lna]), MailModule, PdfModule],
+  imports: [TypeOrmModule.forFeature([Lna, User]), MailModule, PdfModule],
   controllers: [LnaController],
   providers: [LnaService],
   exports: [LnaService],
