@@ -2105,6 +2105,8 @@
 </template>
 
 <script setup>
+definePageMeta({ middleware: ['auth'] });
+
 import { ref, reactive, computed, watch, onMounted } from "vue";
 
 // ── NOTE FOR MIGRATION ──────────────────────────────────────────────────────

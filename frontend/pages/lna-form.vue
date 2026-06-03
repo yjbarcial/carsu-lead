@@ -1673,6 +1673,8 @@
 </template>
 
 <script setup>
+definePageMeta({ middleware: ['auth'] });
+
 import { ref, reactive, computed, watch, onMounted, nextTick } from "vue";
 
 const config = useRuntimeConfig();

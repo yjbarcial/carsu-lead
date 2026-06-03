@@ -3997,7 +3997,11 @@
 </template>
 
 <script setup>
-definePageMeta({ ssr: false });
+definePageMeta({
+  middleware: ['auth', 'admin'],
+  ssr: false
+});
+
 import { ref, reactive, computed, watch, onMounted, nextTick } from "vue";
 
 const config = useRuntimeConfig();
