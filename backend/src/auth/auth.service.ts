@@ -24,16 +24,16 @@ export class AuthService {
 
   // ── Register (email/password) ──────────────────────────────────────
   async register(email: string, password: string) {
-    if (!email.endsWith('@carsu.edu.ph')) {
-      throw new BadRequestException('Only @carsu.edu.ph emails are allowed.');
+    const existing = await this.userRepo.findOne({ where: { email } });
+    if (existing) {
+      throw new ConflictException('Email already in use.');
     }
-    const exists = await this.userRepo.findOne({ where: { email } });
-    if (exists) throw new ConflictException('Email already registered.');
 
-    const hashed = await bcrypt.hash(password, 12);
+    const hashed = await bcrypt.hash(password, 10);
     const user = this.userRepo.create({ email, password: hashed });
     await this.userRepo.save(user);
-    return this.issueTokens(user);
+
+    return this.login(email, password); // reuse login to return tokens
   }
 
   // ── Login (email/password) ─────────────────────────────────────────
