@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Body, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Patch, Body, UseGuards, Req, Param } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -26,5 +26,21 @@ export class UsersController {
   @Get()
   findAll() {
     return this.usersService.findAll();
+  }
+
+  // Grant HR staff role (admin only)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Patch(':id/grant-hr-staff')
+  grantHrStaff(@Param('id') id: string) {
+    return this.usersService.grantHrStaffRole(id);
+  }
+
+  // Revoke HR staff role (admin only)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Patch(':id/revoke-hr-staff')
+  revokeHrStaff(@Param('id') id: string) {
+    return this.usersService.revokeHrStaffRole(id);
   }
 }

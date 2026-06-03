@@ -24,4 +24,14 @@ export class UsersService {
   findAll() {
     return this.repo.find();
   }
+
+  async grantHrStaffRole(userId: string) {
+    await this.repo.update(userId, { role: 'hr-staff' });
+    return this.repo.findOne({ where: { id: userId } });
+  }
+
+  async revokeHrStaffRole(userId: string) {
+    await this.repo.update(userId, { role: 'user' });
+    return this.repo.findOne({ where: { id: userId } });
+  }
 }

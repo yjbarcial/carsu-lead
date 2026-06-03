@@ -6,6 +6,7 @@ const user = ref<any | null>(null);
 export function useAuth() {
   const isLoggedIn = computed(() => !!accessToken.value);
   const isAdmin = computed(() => user.value?.role === "admin");
+  const isHrStaff = computed(() => user.value?.role === "hr-staff" || user.value?.role === "admin");
   const profileComplete = computed(() => user.value?.profileComplete === true);
 
   function setTokens(tokens: { accessToken: string; refreshToken: string }) {
@@ -84,6 +85,7 @@ export function useAuth() {
     user,
     isLoggedIn,
     isAdmin,
+    isHrStaff,
     profileComplete,
     setTokens,
     getAccessToken,

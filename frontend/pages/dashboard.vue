@@ -3998,8 +3998,8 @@
 
 <script setup>
 definePageMeta({
-  middleware: ['auth', 'admin'],
-  ssr: false
+  middleware: ["auth", "hr-staff"],
+  ssr: false,
 });
 
 import { ref, reactive, computed, watch, onMounted, nextTick } from "vue";
@@ -5089,7 +5089,10 @@ const ovFilteredLnas = computed(() => lnas.value);
 const stats = computed(() => {
   const total = idps.value.length;
   const done = idps.value.filter((r) => r.status === "COMPLETE").length;
-  const pend = idps.value.filter((r) => r.status === "PENDING" || r.status === "SUPERVISOR_NOTIFIED").length;  const lnaCount = lnas.value.length;
+  const pend = idps.value.filter(
+    (r) => r.status === "PENDING" || r.status === "SUPERVISOR_NOTIFIED",
+  ).length;
+  const lnaCount = lnas.value.length;
   const offices = new Set(
     [
       ...idps.value.map((r) => r.office),
@@ -5146,7 +5149,9 @@ const insights = computed(() => {
     : "—";
   const supPending = new Set(
     idps.value
-      .filter((r) => r.status === "PENDING" || r.status === "SUPERVISOR_NOTIFIED")
+      .filter(
+        (r) => r.status === "PENDING" || r.status === "SUPERVISOR_NOTIFIED",
+      )
       .map((r) => r.supervisorEmail)
       .filter(Boolean),
   ).size;

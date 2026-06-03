@@ -8,6 +8,7 @@ import {
 
 export enum UserRole {
   ADMIN = 'admin',
+  HR_STAFF = 'hr-staff',
   USER = 'user',
 }
 
