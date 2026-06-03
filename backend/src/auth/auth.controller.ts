@@ -1,24 +1,9 @@
-import {
-  Controller,
-  Post,
-  Get,
-  Body,
-  Req,
-  UseGuards,
-  Res,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { Controller, Post, Body, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { Response } from 'express';
-import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private authService: AuthService,
-    private cfg: ConfigService,
-  ) {}
+  constructor(private authService: AuthService) {}
 
   @Post('register')
   register(@Body() body: { email: string; password: string }) {
@@ -39,26 +24,5 @@ export class AuthController {
   @Post('logout')
   logout(@Body() body: { refreshToken: string }) {
     return this.authService.logout(body.refreshToken);
-  }
-
-  // ── Google OAuth ──────────────────────────────────────────────────
-  @Get('google')
-  @UseGuards(AuthGuard('google'))
-  googleAuth() {
-    // Redirects to Google — handled by Passport
-  }
-
-  @Get('google/callback')
-  @UseGuards(AuthGuard('google'))
-  async googleCallback(@Req() req: any, @Res() res: Response) {
-    const tokens = await this.authService.googleFindOrCreate(req.user);
-    const frontendUrl = this.cfg.get('FRONTEND_URL') || 'http://localhost:3000';
-    const redirect = tokens.profileComplete
-      ? '/dashboard'
-      : '/complete-profile';
-    res.redirect(
-      `${frontendUrl}/auth/callback?accessToken=${tokens.accessToken}` +
-        `&refreshToken=${tokens.refreshToken}&redirect=${redirect}`,
-    );
   }
 }
