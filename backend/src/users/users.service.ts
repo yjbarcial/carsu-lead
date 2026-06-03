@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from './user.entity';
+import { User, UserRole } from './user.entity';
 
 @Injectable()
 export class UsersService {
@@ -26,12 +26,12 @@ export class UsersService {
   }
 
   async grantHrStaffRole(userId: string) {
-    await this.repo.update(userId, { role: 'hr-staff' });
+    await this.repo.update(userId, { role: UserRole.HR_STAFF });
     return this.repo.findOne({ where: { id: userId } });
   }
 
   async revokeHrStaffRole(userId: string) {
-    await this.repo.update(userId, { role: 'user' });
+    await this.repo.update(userId, { role: UserRole.USER });
     return this.repo.findOne({ where: { id: userId } });
   }
 }
