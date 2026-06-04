@@ -94,6 +94,12 @@ export class IdpService {
     // userId must be passed in from the controller (logged-in user)
     const user = data.userId ? await this.resolveUser(data.userId) : null;
 
+    // Add this temporarily
+    console.log('userId received:', data.userId);
+    console.log('user found:', user);
+    console.log('currentPosition:', user?.currentPosition);
+    console.log('collegeOfficeUnit:', user?.collegeOfficeUnit);
+
     const record = this.repo.create({
       refId,
       supervisorToken,

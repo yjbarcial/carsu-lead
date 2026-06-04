@@ -95,7 +95,11 @@
           >Reference ID was sent to your CarSU email</span
         >
         <div class="email-prefix-wrapper" :class="{ error: tokenError }">
-          <span class="email-suffix" style="border-left:none; border-right:1px solid var(--border);">IDP-</span>
+          <span
+            class="email-suffix"
+            style="border-left: none; border-right: 1px solid var(--border)"
+            >IDP-</span
+          >
           <input
             type="text"
             v-model="tokenInputSuffix"
@@ -699,7 +703,7 @@ onMounted(() => {
   const ref = route.query.ref;
   if (ref) {
     tokenInput.value = ref;
-    tokenInputSuffix.value = ref.startsWith('IDP-') ? ref.slice(4) : ref;
+    tokenInputSuffix.value = ref.startsWith("IDP-") ? ref.slice(4) : ref;
   }
 });
 
@@ -720,7 +724,7 @@ async function loadByToken() {
   emailError.value = false;
 
   const suffix = tokenInputSuffix.value.trim();
-  tokenInput.value = suffix ? `IDP-${suffix}` : '';
+  tokenInput.value = suffix ? `IDP-${suffix}` : "";
   const token = tokenInput.value;
   const email = supervisorEmailPrefix.value.trim() + "@carsu.edu.ph";
 
@@ -758,6 +762,21 @@ async function loadByToken() {
     if (data.status === "COMPLETE") {
       tokenError.value = "This IDP has already been reviewed and submitted.";
       return;
+    }
+
+    // Flatten user profile fields into idpData for easy template access
+    if (data.user) {
+      data.campus = data.user.campus ?? "";
+      data.officeAffiliation = data.user.officeAffiliation ?? "";
+      data.collegeOfficeUnit = data.user.collegeOfficeUnit ?? "";
+      data.nameOfPersonnel = [data.user.firstName, data.user.lastName]
+        .filter(Boolean)
+        .join(" ");
+      data.educAttainment = data.user.educAttainment ?? "";
+      data.educAttainmentSpec = data.user.educAttainmentSpec ?? "";
+      data.currentPosition = data.user.currentPosition ?? "";
+      data.yearsInPosition = data.user.yearsInPosition ?? "";
+      data.yearsInCSU = data.user.yearsInCSU ?? "";
     }
 
     idpData.value = data;
@@ -804,14 +823,11 @@ async function submitAssessment() {
   loadingMsg.value = "Submitting your assessment…";
 
   try {
-    const res = await fetch(
-      `${API}/idp/${idpData.value.refId}/supervisor`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      },
-    );
+    const res = await fetch(`${API}/idp/${idpData.value.refId}/supervisor`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
     if (!res.ok) {
       const err = await res.text();
       alert("Submission failed: " + err);
@@ -829,7 +845,9 @@ async function submitAssessment() {
 <style scoped>
 @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap");
 
-* { font-family: "Roboto", sans-serif; }
+* {
+  font-family: "Roboto", sans-serif;
+}
 
 /* ── Privacy Modal ── */
 .privacy-overlay {
@@ -1391,8 +1409,13 @@ async function submitAssessment() {
   overflow: hidden;
   background: var(--input-bg);
 }
-.ref-prefix-wrapper.err { border-color: var(--error); }
-.ref-prefix-wrapper:focus-within { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(0,51,0,0.08); }
+.ref-prefix-wrapper.err {
+  border-color: var(--error);
+}
+.ref-prefix-wrapper:focus-within {
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px rgba(0, 51, 0, 0.08);
+}
 .ref-prefix {
   padding: 10px 12px;
   background: #e8ede8;

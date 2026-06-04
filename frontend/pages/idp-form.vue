@@ -4340,11 +4340,20 @@ function getRequiredLevel(competency, position) {
 onMounted(async () => {
   fetchSuggestions();
 
+  // ── Ensure auth is ready ──────────────────────────────────────────
+  const { user, getAccessToken, tryRefresh, fetchMe } = useAuth();
+
+  if (!getAccessToken()) {
+    await tryRefresh(); // restores accessToken from refreshToken in localStorage
+  }
+
+  // If user profile not loaded yet, fetch it
+  if (!user.value) {
+    await fetchMe();
+  }
+
   // ── Auto-fill from user profile ──────────────────────────────────
-  const { user } = useAuth();
   if (user.value) {
-    // Set officeAffiliation first, then wait for the watch to run,
-    // then set the downstream fields so the watch doesn't wipe them
     form.officeAffiliation = user.value.officeAffiliation || "";
     await nextTick();
     form.collegeOfficeUnit = user.value.collegeOfficeUnit || "";
@@ -4380,7 +4389,6 @@ onMounted(async () => {
     ]
       .filter(Boolean)
       .join(", ");
-
     form.supervisorEmailPrefix =
       user.value.supervisorEmail?.replace("@carsu.edu.ph", "") || "";
   }
@@ -4735,14 +4743,11 @@ async function submitStage2() {
 
   try {
     // Supervisor submit: new API endpoint
-    const res = await fetch(
-      `${API}/idp/${idpData.value.refId}/supervisor`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(assessment),
-      },
-    );
+    const res = await fetch(`${API}/idp/${idpData.value.refId}/supervisor`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(assessment),
+    });
     const data = await res.json();
     if (data.success) {
       stage.value = "stage2-success";

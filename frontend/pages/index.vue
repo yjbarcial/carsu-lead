@@ -76,6 +76,35 @@
             Edit IDP
           </button>
           <button
+            class="pill pill-gold"
+            :class="{ active: activeSection === 'supervisor' }"
+            @click="toggleSection('supervisor')"
+          >
+            <span class="pill-icon">
+              <svg viewBox="0 0 16 16" fill="none">
+                <path
+                  d="M8 1a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                />
+                <path
+                  d="M2 14s-.5-5 6-5 6 5 6 5"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M11 7l1.5 1.5L15 6"
+                  stroke="currentColor"
+                  stroke-width="1.4"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </span>
+            Supervisor Review
+          </button>
+          <button
             class="pill pill-orange"
             :class="{ active: activeSection === 'lna' }"
             @click="toggleSection('lna')"
@@ -280,6 +309,57 @@
         </div>
       </Transition>
 
+      <!-- Supervisor Review card -->
+      <Transition name="slide">
+        <div v-if="activeSection === 'supervisor'" class="section-block">
+          <div class="section-head">
+            <div class="sh-line"></div>
+            <span class="sh-label">For Supervisors</span>
+            <div class="sh-line"></div>
+          </div>
+          <div class="grid">
+            <NuxtLink to="/idp-supervisor" class="card">
+              <div class="card-bar bar-gold"></div>
+              <div class="card-icon icon-gold">
+                <svg viewBox="0 0 40 40" fill="none">
+                  <path
+                    d="M20 4a8 8 0 1 1 0 16 8 8 0 0 1 0-16z"
+                    stroke="currentColor"
+                    stroke-width="2.2"
+                  />
+                  <path
+                    d="M4 36s-1-12 16-12 16 12 16 12"
+                    stroke="currentColor"
+                    stroke-width="2.2"
+                    stroke-linecap="round"
+                  />
+                  <path
+                    d="M28 18l3 3 6-6"
+                    stroke="currentColor"
+                    stroke-width="2.2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </div>
+              <div class="card-tag tag-gold">For Supervisors</div>
+              <h2 class="card-title">IDP Supervisor Review</h2>
+              <p class="card-desc">
+                Review and assess your employee's Individual Development Plan.
+                Enter your Reference ID and CarSU email to access the submission
+                and complete Section IV.
+              </p>
+              <div class="card-foot">
+                <span class="card-meta">Requires Reference ID</span>
+                <span class="card-cta cta-gold"
+                  >Review IDP <span class="arr">→</span></span
+                >
+              </div>
+            </NuxtLink>
+          </div>
+        </div>
+      </Transition>
+
       <!-- LNA card -->
       <Transition name="slide">
         <div v-if="activeSection === 'lna'" class="section-block">
@@ -452,14 +532,13 @@
 <script setup>
 import { ref, computed } from "vue";
 
-const { isHrStaff } = useAuth()
+const { isHrStaff } = useAuth();
 
 const activeSection = ref(null);
 
 function toggleSection(key) {
   activeSection.value = activeSection.value === key ? null : key;
 }
-
 </script>
 
 <style scoped>
