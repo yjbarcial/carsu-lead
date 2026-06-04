@@ -2272,35 +2272,34 @@ const sectionDone = computed(() => {
 
   const workforceDone = true;
 
-  const clusterSummaryDone =
-    activeClusterSummary.value.length > 0 &&
-    activeClusterSummary.value.every(({ rows }) =>
-      rows.every((c) => c.strongest && c.weakest && c.interventionNeeded),
-    );
-  const activeLvKeys = (() => {
-    const baseKeys =
-      form.officeAffiliation === "OVPAA"
-        ? compLevelKeys
-        : compLevelKeys.filter((k) => k !== "faculty");
-    return baseKeys.filter((k) => {
-      const row = workforce?.[k];
-      if (!row) return false;
-      return employmentTypeKeys.some((t) => Number(row[t]) > 0);
-    });
-  })();
-  const clDataFilled = Object.entries(competencyData).every(([, rows]) =>
-    rows.every((row) =>
-      activeLvKeys.every(
-        (k) =>
-          (row[k + "_cl"] || "").trim() !== "" &&
-          (row[k + "_pct"] || "").trim() !== "",
+  // Use the reactive computed ref instead of re-computing locally
+  const activeLvKeys = activeCompLevelKeys.value;
+
+  // If no position levels have any personnel, skip competency validation entirely
+  const hasAnyPersonnel = activeLvKeys.length > 0;
+
+  const clDataFilled =
+    !hasAnyPersonnel ||
+    Object.entries(competencyData).every(([, rows]) =>
+      rows.every((row) =>
+        activeLvKeys.every(
+          (k) =>
+            (row[k + "_cl"] || "").trim() !== "" &&
+            (row[k + "_pct"] || "").trim() !== "",
+        ),
       ),
-    ),
-  );
+    );
+
+  // Cluster summary: only require completion for levels that actually have personnel
+  const clusterSummaryDone =
+    !hasAnyPersonnel ||
+    (activeClusterSummary.value.length > 0 &&
+      activeClusterSummary.value.every(({ rows }) =>
+        rows.every((c) => c.strongest && c.weakest && c.interventionNeeded),
+      ));
+
   const competency = clusterSummaryDone && clDataFilled;
   const dataSourcesDone = form.selectedSources.length > 0;
-  // Pro-ACT is always considered done once Section III is complete
-  // (rows are optional — office may have no additional training needs)
   const proactDone = dataSourcesDone;
   const certification = !!form.raterFullName.trim();
 
@@ -2869,30 +2868,48 @@ function closeInterventionPortal() {
 
 onMounted(async () => {
   // ── Auto-fill from user profile ──────────────────────────────────
-  const { user } = useAuth()
+  const { user } = useAuth();
   if (user.value) {
-    form.submitterEmailPrefix = user.value.email?.replace('@carsu.edu.ph', '') || ''
-    form.officeAffiliation = user.value.officeAffiliation || ''
-    await nextTick()
-    // unitOfficeCollege maps to user.collegeOfficeUnit
-    form.unitOfficeCollege = user.value.collegeOfficeUnit || ''
-    form.collegeProgram = user.value.collegeProgram || ''
-    await nextTick()
-    form.position = user.value.currentPosition || ''
-    form.designation = user.value.designation || ''
-    form.designationMode = user.value.designation === 'N/A' ? 'na'
-      : (user.value.designation ? 'specify' : '')
-    // headOfUnit is stored as a single string — put it in the last name field
-    // so raterFullName computed picks it up, or split if stored first/last/mi
-    form.headLastName = user.value.headOfUnit || ''
-    form.headFirstName = ''
-    form.headMiddleInitial = ''
+    form.submitterEmailPrefix =
+      user.value.email?.replace("@carsu.edu.ph", "") || "";
+    form.officeAffiliation = user.value.officeAffiliation || "";
+    await nextTick();
+    form.unitOfficeCollege = user.value.collegeOfficeUnit || "";
+    form.collegeProgram = user.value.collegeProgram || "";
+    await nextTick();
+    form.position = user.value.currentPosition || "";
+
+    // ── Fix designation ──────────────────────────────────────
+    form.designation = user.value.designation || "";
+    form.designationMode =
+      user.value.designation === "N/A"
+        ? "na"
+        : user.value.designation
+          ? "specify"
+          : "na"; // ← default to 'na' so it's never empty
+
+    // ── Fix head of unit name split ──────────────────────────
+    // headOfUnit is stored as full string e.g. "ALTHEA GUILA P. GORRES"
+    // split into first/last so headFirstName is never empty
+    const headFull = user.value.headOfUnit || "";
+    const headParts = headFull.trim().split(" ");
+    if (headParts.length >= 2) {
+      form.headLastName = headParts[headParts.length - 1]; // last word = last name
+      form.headFirstName = headParts.slice(0, -1).join(" "); // everything else = first name
+      form.headMiddleInitial = "";
+    } else {
+      form.headLastName = headFull;
+      form.headFirstName = headFull ? "N/A" : ""; // ensure headFirstName is never empty
+      form.headMiddleInitial = "";
+    }
   }
 
   document.addEventListener("click", (e) => {
     if (interventionPortal.visible) {
       const portal = document.getElementById("intervention-portal");
-      const triggers = document.querySelectorAll(".intervention-trigger-portal");
+      const triggers = document.querySelectorAll(
+        ".intervention-trigger-portal",
+      );
       let clickedInside = portal && portal.contains(e.target);
       triggers.forEach((t) => {
         if (t.contains(e.target)) clickedInside = true;
@@ -2901,7 +2918,6 @@ onMounted(async () => {
     }
   });
 });
-
 </script>
 
 <style scoped>
