@@ -51,6 +51,28 @@ export class PdfService {
   }
 
   private buildHtml(idp: Record<string, any>): string {
+    // ── ADD THIS: resolve user profile fields ──────────────────────────
+    const u = idp.user ?? {};
+    const campus = idp.campus || u.campus || '—';
+    const officeAffiliation =
+      idp.officeAffiliation || u.officeAffiliation || '—';
+    const collegeOfficeUnit =
+      idp.collegeOfficeUnit || u.collegeOfficeUnit || '—';
+    const collegeProgram = idp.collegeProgram || u.collegeProgram || '';
+    const currentPosition = idp.currentPosition || u.currentPosition || '—';
+    const designation = idp.designation || u.designation || '—';
+    const yearsInPosition = idp.yearsInPosition ?? u.yearsInPosition ?? '—';
+    const yearsInCSU = idp.yearsInCSU ?? u.yearsInCSU ?? '—';
+    const educAttainment = idp.educAttainment || u.educAttainment || '—';
+    const educAttainmentSpec =
+      idp.educAttainmentSpec || u.educAttainmentSpec || '';
+    const employeeName = (
+      idp.nameOfPersonnel ||
+      [u.firstName, u.lastName].filter(Boolean).join(' ') ||
+      [idp.firstName, idp.lastName].filter(Boolean).join(' ') ||
+      '—'
+    ).toUpperCase();
+    // ───────────────────────────────────────────────────────────────────
     let competencyRows: any[] = [];
     let agapRows: any[] = [];
     let proactRows: any[] = [];
@@ -69,11 +91,6 @@ export class PdfService {
       assessment = JSON.parse(idp.supervisorAssessment || '{}');
     } catch {}
 
-    const employeeName = (
-      idp.nameOfPersonnel ||
-      [idp.firstName, idp.lastName].filter(Boolean).join(' ') ||
-      '—'
-    ).toUpperCase();
     const completedAt = idp.supervisorSignedAt
       ? new Date(idp.supervisorSignedAt).toLocaleDateString('en-PH', {
           year: 'numeric',
@@ -143,17 +160,15 @@ export class PdfService {
   </div>
   <div class="section-body">
     <div class="ro-grid">
-      <div class="ro-field"><div class="ro-label">Campus</div><div class="ro-value">${this.safe(idp.campus)}</div></div>
-      <div class="ro-field"><div class="ro-label">Office Affiliation</div><div class="ro-value">${this.safe(idp.officeAffiliation)}</div></div>
-      <div class="ro-field span-2"><div class="ro-label">College / Office / Unit</div><div class="ro-value">${this.safe(idp.collegeOfficeUnit)}${idp.collegeProgram ? ' — ' + this.safe(idp.collegeProgram) : ''}</div></div>
-      <div class="ro-field"><div class="ro-label">Name of Personnel</div><div class="ro-value">${this.safe(employeeName)}</div></div>
-      <div class="ro-field span-2"><div class="ro-label">Highest Educational Attainment</div><div class="ro-value">${this.safe(idp.educAttainment)}${idp.educAttainmentSpec ? ' — ' + this.safe(idp.educAttainmentSpec) : ''}</div></div>
-      <div class="ro-field"><div class="ro-label">Current Position</div><div class="ro-value">${this.safe(idp.currentPosition)}</div></div>
-      <div class="ro-field"><div class="ro-label">Designation</div><div class="ro-value">${this.safe(idp.designation)}</div></div>
-      <div class="ro-field"><div class="ro-label">Years in Position</div><div class="ro-value">${this.safe(idp.yearsInPosition)}</div></div>
-      <div class="ro-field"><div class="ro-label">Years in CSU</div><div class="ro-value">${this.safe(idp.yearsInCSU)}</div></div>
-      <div class="ro-field"><div class="ro-label">Immediate Supervisor</div><div class="ro-value">${this.safe(idp.supervisorName ? String(idp.supervisorName).toUpperCase() : '—')}</div></div>
-      <div class="ro-field"><div class="ro-label">Purpose</div><div class="ro-value">${this.safe(idp.headerPurpose)}</div></div>
+      <div class="ro-field"><div class="ro-label">Campus</div><div class="ro-value">${this.safe(campus)}</div></div>
+<div class="ro-field"><div class="ro-label">Office Affiliation</div><div class="ro-value">${this.safe(officeAffiliation)}</div></div>
+<div class="ro-field span-2"><div class="ro-label">College / Office / Unit</div><div class="ro-value">${this.safe(collegeOfficeUnit)}${collegeProgram ? ' — ' + this.safe(collegeProgram) : ''}</div></div>
+<div class="ro-field"><div class="ro-label">Name of Personnel</div><div class="ro-value">${this.safe(employeeName)}</div></div>
+<div class="ro-field span-2"><div class="ro-label">Highest Educational Attainment</div><div class="ro-value">${this.safe(educAttainment)}${educAttainmentSpec ? ' — ' + this.safe(educAttainmentSpec) : ''}</div></div>
+<div class="ro-field"><div class="ro-label">Current Position</div><div class="ro-value">${this.safe(currentPosition)}</div></div>
+<div class="ro-field"><div class="ro-label">Designation</div><div class="ro-value">${this.safe(designation)}</div></div>
+<div class="ro-field"><div class="ro-label">Years in Position</div><div class="ro-value">${this.safe(yearsInPosition)}</div></div>
+<div class="ro-field"><div class="ro-label">Years in CSU</div><div class="ro-value">${this.safe(yearsInCSU)}</div></div>
     </div>
   </div>
 </div>
