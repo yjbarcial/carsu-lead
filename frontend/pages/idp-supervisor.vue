@@ -104,7 +104,7 @@
             type="text"
             v-model="tokenInputSuffix"
             class="email-prefix-input"
-            placeholder="1718000000000"
+            placeholder="2026-000001"
           />
         </div>
       </div>
