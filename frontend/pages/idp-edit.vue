@@ -2939,7 +2939,7 @@ async function doLookup() {
   lookupLoading.value = true;
   try {
     const res = await fetch(
-      `${API}/api/idp/${encodeURIComponent(refId)}/edit-check?email=${encodeURIComponent(email)}`,
+      `${API}/idp/${encodeURIComponent(refId)}/edit-check?email=${encodeURIComponent(email)}`,
     );
     if (res.status === 403) {
       const data = await res.json();
@@ -3030,8 +3030,8 @@ function populateForm(record) {
 async function fetchSuggestions() {
   try {
     const [heiRes, proactRes] = await Promise.all([
-      fetch(`${API}/api/idp/suggestions/hei`),
-      fetch(`${API}/api/idp/suggestions/proact`),
+      fetch(`${API}/idp/suggestions/hei`),
+      fetch(`${API}/idp/suggestions/proact`),
     ]);
     if (heiRes.ok) heiSuggestions.value = await heiRes.json();
     if (proactRes.ok) proactSuggestions.value = await proactRes.json();
@@ -3092,7 +3092,7 @@ async function doSubmitEdit() {
     };
 
     const res = await fetch(
-      `${API}/api/idp/${encodeURIComponent(lookupRefId.value.trim().toUpperCase())}`,
+      `${API}/idp/${encodeURIComponent(lookupRefId.value.trim().toUpperCase())}`,
       {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },

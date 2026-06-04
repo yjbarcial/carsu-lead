@@ -2744,7 +2744,7 @@ async function submitForm() {
   };
 
   try {
-    const res = await fetch(`${API}/api/lna`, {
+    const res = await fetch(`${API}/lna`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),

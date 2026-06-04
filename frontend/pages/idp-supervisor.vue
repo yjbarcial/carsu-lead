@@ -738,7 +738,7 @@ async function loadByToken() {
   loadingMsg.value = "Loading IDP submission…";
 
   try {
-    const res = await fetch(`${API}/api/idp/${token}`);
+    const res = await fetch(`${API}/idp/${token}`);
     if (!res.ok) {
       tokenError.value = "IDP not found. Please check your Reference ID.";
       return;
@@ -805,7 +805,7 @@ async function submitAssessment() {
 
   try {
     const res = await fetch(
-      `${API}/api/idp/${idpData.value.refId}/supervisor`,
+      `${API}/idp/${idpData.value.refId}/supervisor`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

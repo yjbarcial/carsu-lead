@@ -4462,8 +4462,8 @@ const proactSuggestions = ref([]);
 async function fetchSuggestions() {
   try {
     const [heiRes, proactRes] = await Promise.all([
-      fetch(`${API}/api/idp/suggestions/hei`),
-      fetch(`${API}/api/idp/suggestions/proact`),
+      fetch(`${API}/idp/suggestions/hei`),
+      fetch(`${API}/idp/suggestions/proact`),
     ]);
     if (heiRes.ok) heiSuggestions.value = await heiRes.json();
     if (proactRes.ok) proactSuggestions.value = await proactRes.json();
@@ -4483,7 +4483,7 @@ function onProactInput(val) {
 async function saveSuggestion(type, value) {
   if (!value || !value.trim()) return;
   try {
-    await fetch(`${API}/api/idp/suggestions/${type}`, {
+    await fetch(`${API}/idp/suggestions/${type}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ value: value.trim() }),
@@ -4627,7 +4627,7 @@ async function submitStage1() {
   isSubmitting.value = true;
 
   try {
-    const res = await fetch(`${API}/api/idp`, {
+    const res = await fetch(`${API}/idp`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -4695,7 +4695,7 @@ async function loadSubmission(token) {
 
   try {
     // Token verification: new API endpoint
-    const res = await fetch(`${API}/api/idp/${token}`);
+    const res = await fetch(`${API}/idp/${token}`);
     const data = await res.json();
     if (data.refId) {
       idpData.value = data;
@@ -4736,7 +4736,7 @@ async function submitStage2() {
   try {
     // Supervisor submit: new API endpoint
     const res = await fetch(
-      `${API}/api/idp/${idpData.value.refId}/supervisor`,
+      `${API}/idp/${idpData.value.refId}/supervisor`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
