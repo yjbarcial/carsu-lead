@@ -218,7 +218,10 @@ export class IdpService {
   }
 
   findByRef(refId: string): Promise<Idp | null> {
-    return this.repo.findOne({ where: { refId }, relations: ['user'] });
+    return this.repo.findOne({
+      where: { refId },
+      relations: ['user'],
+    });
   }
 
   findByToken(token: string): Promise<Idp | null> {
@@ -370,8 +373,8 @@ export class IdpService {
       this.mail.sendHrNotification({
         employeeName: data.supervisorName ?? employeeName,
         refId: updated.refId,
-        position: updated.user?.currentPosition ?? data.currentPosition ?? '',
-        officeUnit: updated.user?.collegeOfficeUnit ?? data.collegeOfficeUnit ?? '',
+        position: updated.user?.currentPosition ?? '',
+        officeUnit:updated.user?.collegeOfficeUnit ?? '',
         supervisorName: updated.supervisorName,
         completedAt,
         pdfBuffer,

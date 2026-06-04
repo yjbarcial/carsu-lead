@@ -1834,6 +1834,9 @@ import { ref, reactive, computed, watch, onMounted, nextTick } from "vue";
 // ────────────────────────────────────────────────────────────────────────────
 const config = useRuntimeConfig();
 const API = config.public.apiBase; // resolves to http://localhost:3001
+// ── Ensure auth is ready ──────────────────────────────────────────
+const { user, getAccessToken, tryRefresh, fetchMe } = useAuth();
+
 // ── Stage control ──────────────────────────────────────────────────────────
 // Possible values: 'stage1' | 'token' | 'stage2' | 'stage1-success' | 'stage2-success'
 // ── Privacy Modal ──
@@ -4340,9 +4343,6 @@ function getRequiredLevel(competency, position) {
 onMounted(async () => {
   fetchSuggestions();
 
-  // ── Ensure auth is ready ──────────────────────────────────────────
-  const { user, getAccessToken, tryRefresh, fetchMe } = useAuth();
-
   if (!getAccessToken()) {
     await tryRefresh(); // restores accessToken from refreshToken in localStorage
   }
@@ -4592,6 +4592,7 @@ async function submitStage1() {
 
   const payload = {
     action: "submitStage1",
+    userId: user.value?.id, // ← add this
     employeeEmail: form.employeeEmail,
     campus: "CSU Main Campus",
     officeAffiliation: form.officeAffiliation,
@@ -4703,9 +4704,26 @@ async function loadSubmission(token) {
 
   try {
     // Token verification: new API endpoint
-    const res = await fetch(`${API}/idp/${token}`);
+    const res = await fetch(`${API}/idp/by-token/${token}`); // ← fix this
     const data = await res.json();
+    console.log("LOAD SUBMISSION DATA:", JSON.stringify(data, null, 2));
+
     if (data.refId) {
+      // ── ADD THIS: flatten user profile into idpData ──
+      if (data.user) {
+        data.campus = data.user.campus ?? "";
+        data.officeAffiliation = data.user.officeAffiliation ?? "";
+        data.collegeOfficeUnit = data.user.collegeOfficeUnit ?? "";
+        data.nameOfPersonnel = [data.user.firstName, data.user.lastName]
+          .filter(Boolean)
+          .join(" ");
+        data.educAttainment = data.user.educAttainment ?? "";
+        data.educAttainmentSpec = data.user.educAttainmentSpec ?? "";
+        data.currentPosition = data.user.currentPosition ?? "";
+        data.yearsInPosition = data.user.yearsInPosition ?? "";
+        data.yearsInCSU = data.user.yearsInCSU ?? "";
+      }
+      // ────────────────────────────────────────────────
       idpData.value = data;
       stage.value = "stage2";
     } else {
