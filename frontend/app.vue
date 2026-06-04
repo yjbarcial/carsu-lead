@@ -1,59 +1,60 @@
 <template>
   <div>
-    <header class="header">
-      <div class="header-inner">
-        <img src="/img/csu-logo-square1.png" class="logo" alt="CarSU" />
-        <div class="header-label">
-          <span class="header-label-bot"
-            >Caraga State University - Main Campus</span
-          >
-          <span class="header-label-top"
-            >Human Resource Management Services</span
-          >
+    <ClientOnly>
+      <header class="header">
+        <div class="header-inner">
+          <img src="/img/csu-logo-square1.png" class="logo" alt="CarSU" />
+          <div class="header-label">
+            <span class="header-label-bot"
+              >Caraga State University - Main Campus</span
+            >
+            <span class="header-label-top"
+              >Human Resource Management Services</span
+            >
+          </div>
+
+          <nav v-if="isLoggedIn" class="app-nav">
+            <NuxtLink to="/" class="nav-link">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                <polyline points="9 22 9 12 15 12 15 22" />
+              </svg>
+              Home
+            </NuxtLink>
+            <NuxtLink to="/profile" class="nav-link">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              {{ user?.firstName || user?.email?.split("@")[0] || "Profile" }}
+            </NuxtLink>
+            <button class="nav-logout" @click="logout">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+              Log Out
+            </button>
+          </nav>
         </div>
-
-        <nav v-if="isLoggedIn" class="app-nav">
-          <NuxtLink to="/" class="nav-link">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-              <polyline points="9 22 9 12 15 12 15 22" />
-            </svg>
-            Home
-          </NuxtLink>
-          <NuxtLink to="/profile" class="nav-link">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-            {{ user?.firstName || user?.email?.split("@")[0] || "Profile" }}
-          </NuxtLink>
-          <button class="nav-logout" @click="logout">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-              <polyline points="16 17 21 12 16 7" />
-              <line x1="21" y1="12" x2="9" y2="12" />
-            </svg>
-            Log Out
-          </button>
-        </nav>
-      </div>
-    </header>
-
+      </header>
+    </ClientOnly>
     <NuxtPage />
   </div>
 </template>

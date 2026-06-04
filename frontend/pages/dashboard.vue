@@ -4004,6 +4004,20 @@ definePageMeta({
 
 import { ref, reactive, computed, watch, onMounted, nextTick } from "vue";
 
+const { getAccessToken } = useAuth();
+
+function authFetch(url, options = {}) {
+  const token = getAccessToken();
+  return fetch(url, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(options.headers || {}),
+    },
+  });
+}
+
 const config = useRuntimeConfig();
 const API = config.public.apiBase;
 
@@ -5643,10 +5657,11 @@ async function loadDashboard() {
   const timeout = setTimeout(() => controller.abort(), 15000);
   try {
     const [idpRes, lnaRes, hrRes] = await Promise.all([
-      fetch(`${API}/api/idp`, { signal: controller.signal }),
-      fetch(`${API}/api/lna`, { signal: controller.signal }),
-      fetch(`${API}/api/users`, { signal: controller.signal }),
+      authfetch(`${API}/idp`, { signal: controller.signal }),
+      authfetch(`${API}/lna`, { signal: controller.signal }),
+      authfetch(`${API}/users`, { signal: controller.signal }),
     ]);
+
     if (!idpRes.ok || !lnaRes.ok || !hrRes.ok) {
       throw new Error(
         `Server error: ${[idpRes, lnaRes, hrRes].find((r) => !r.ok)?.status}`,
@@ -5690,8 +5705,8 @@ function viewLNA(refId) {
 async function downloadPDF(type, refId, name) {
   try {
     toast("Generating PDF…");
-    const url = `${API}/api/${type}/${encodeURIComponent(refId)}/pdf`;
-    const res = await fetch(url);
+    const url = `${API}/${type}/${encodeURIComponent(refId)}/pdf`;
+    const res = await authfetch(url.at);
     if (!res.ok) {
       toast("PDF generation failed.", "error");
       return;
@@ -5718,7 +5733,7 @@ async function saveHR() {
     return;
   }
   try {
-    await fetch(`${API}/api/users`, {
+    await authfetch(`${API}/users`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -5740,7 +5755,7 @@ async function saveHR() {
 async function removeHR(email, name) {
   if (!confirm(`Remove ${name || email} from the HR Registry?`)) return;
   try {
-    await fetch(`${API}/api/users/${encodeURIComponent(email)}`, {
+    await authfetch(`${API}/users/${encodeURIComponent(email)}`, {
       method: "DELETE",
     });
     toast(`${name || email} removed.`, "success");
@@ -5810,8 +5825,11 @@ function toast(msg, type = "") {
   }, 3500);
 }
 
-onMounted(() => {
-  loadDashboard();
+onMounted(async () => {
+  if (!getAccessToken()) {
+    await tryRefresh();
+  }
+  await loadDashboard();
 });
 </script>
 
