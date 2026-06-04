@@ -103,6 +103,7 @@
             LNA / USWAG
           </button>
           <button
+            v-if="isHrStaff"
             class="pill pill-green"
             :class="{ active: activeSection === 'dashboard' }"
             @click="toggleSection('dashboard')"
@@ -450,6 +451,8 @@
 
 <script setup>
 import { ref, computed } from "vue";
+
+const { isHrStaff } = useAuth()
 
 const activeSection = ref(null);
 
