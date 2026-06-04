@@ -88,11 +88,59 @@ export class IdpService {
   // ── Create ───────────────────────────────────────────────────────────────
 
   async create(data: Record<string, any>): Promise<Idp> {
+    console.log('CREATE PAYLOAD:', JSON.stringify(data, null, 2));
+
     const refId = await this.generateRefId();
     const supervisorToken = uuidv4();
 
     // userId must be passed in from the controller (logged-in user)
-    const user = data.userId ? await this.resolveUser(data.userId) : null;
+    const user = data.userId
+      ? await this.resolveUser(data.userId)
+      : data.employeeEmail
+        ? await this.userRepo.findOne({ where: { email: data.employeeEmail } })
+        : null;
+    console.log(
+      'USER FROM DB:',
+      JSON.stringify(
+        {
+          id: user?.id,
+          currentPosition: user?.currentPosition,
+          collegeOfficeUnit: user?.collegeOfficeUnit,
+        },
+        null,
+        2,
+      ),
+    );
+    // ── ADD THIS: persist profile fields from the form submission ──────────
+    if (user) {
+      const profileFields: (keyof User)[] = [
+        'firstName',
+        'lastName',
+        'middleInitial',
+        'campus',
+        'officeAffiliation',
+        'collegeOfficeUnit',
+        'collegeProgram',
+        'personnelType',
+        'educAttainment',
+        'educAttainmentSpec',
+        'currentPosition',
+        'designation',
+        'yearsInPosition',
+        'yearsInCSU',
+      ];
+      const profileUpdate: Partial<User> = {};
+      for (const field of profileFields) {
+        if (data[field] !== undefined) {
+          (profileUpdate as any)[field] = data[field];
+        }
+      }
+      if (Object.keys(profileUpdate).length > 0) {
+        await this.userRepo.update({ id: user.id }, profileUpdate);
+        // Reflect updates locally so emails use the fresh values
+        Object.assign(user, profileUpdate);
+      }
+    }
 
     // Add this temporarily
     console.log('userId received:', data.userId);
@@ -136,10 +184,10 @@ export class IdpService {
       this.mail.sendSupervisorNotification({
         to: saved.supervisorEmail,
         supervisorName: saved.supervisorName,
-        employeeName,
+        employeeName: data.nameOfPersonnel ?? employeeName,
         refId: saved.refId,
-        position: user?.currentPosition ?? '',
-        officeUnit: user?.collegeOfficeUnit ?? '',
+        position: user?.currentPosition ?? data.currentPosition ?? '',
+        officeUnit: user?.collegeOfficeUnit ?? data.collegeOfficeUnit ?? '',
         reviewUrl,
       });
 
@@ -320,10 +368,10 @@ export class IdpService {
       }
 
       this.mail.sendHrNotification({
-        employeeName,
+        employeeName: data.supervisorName ?? employeeName,
         refId: updated.refId,
-        position: updated.user?.currentPosition ?? '',
-        officeUnit: updated.user?.collegeOfficeUnit ?? '',
+        position: updated.user?.currentPosition ?? data.currentPosition ?? '',
+        officeUnit: updated.user?.collegeOfficeUnit ?? data.collegeOfficeUnit ?? '',
         supervisorName: updated.supervisorName,
         completedAt,
         pdfBuffer,

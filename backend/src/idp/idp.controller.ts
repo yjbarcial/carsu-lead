@@ -9,6 +9,7 @@ import {
   Res,
   HttpCode,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { IdpService } from './idp.service';
@@ -20,8 +21,11 @@ export class IdpController {
   // ── Employee submission ─────────────────────────────────────────────────
 
   @Post()
-  create(@Body() body: any) {
-    return this.idpService.create(body);
+  create(@Body() body: any, @Req() req: any) {
+    return this.idpService.create({
+      ...body,
+      userId: req.user?.id ?? body.userId,
+    });
   }
 
   // ── HR dashboard ────────────────────────────────────────────────────────
