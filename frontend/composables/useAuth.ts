@@ -6,9 +6,16 @@ const user = ref<any | null>(null);
 export function useAuth() {
   const isLoggedIn = computed(() => !!accessToken.value);
   const isAdmin = computed(() => user.value?.role === "admin");
-  const isHrStaff = computed(() => user.value?.role === "hr-staff" || user.value?.role === "admin");
+  const isHrStaff = computed(
+    () => user.value?.role === "hr-staff" || user.value?.role === "admin",
+  );
   const profileComplete = computed(() => user.value?.profileComplete === true);
-
+  const isSupervisor = computed(
+    () =>
+      user.value?.role === "admin" ||
+      user.value?.role === "hr-staff" ||
+      !!(user.value?.headLastName?.trim() || user.value?.headFirstName?.trim()),
+  );
   function setTokens(tokens: { accessToken: string; refreshToken: string }) {
     accessToken.value = tokens.accessToken;
     if (import.meta.client) {
@@ -86,6 +93,7 @@ export function useAuth() {
     isLoggedIn,
     isAdmin,
     isHrStaff,
+    isSupervisor,
     profileComplete,
     setTokens,
     getAccessToken,

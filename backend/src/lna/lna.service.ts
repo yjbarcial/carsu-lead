@@ -70,10 +70,11 @@ export class LnaService {
 
     const saved = await this.repo.save(record);
 
-    // Derive fields from the user relation
-    const submitterEmail = user?.email ?? '';
-    const headOfUnit = user?.headOfUnit ?? '';
-    const office = user?.office ?? user?.officeAffiliation ?? '';
+    // ── Derive fields — prefer payload data, fall back to user relation ──
+    const submitterEmail = data.submitterEmail ?? user?.email ?? '';
+    const headOfUnit = data.headOfUnit ?? user?.headOfUnit ?? '';
+    const office =
+      data.office ?? user?.collegeOfficeUnit ?? user?.officeAffiliation ?? '';
     const raterName = user?.raterName ?? '';
 
     const submittedAt = new Date().toLocaleDateString('en-PH', {
@@ -98,6 +99,7 @@ export class LnaService {
       });
 
       if (submitterEmail) {
+        // Confirmation to the rater/supervisor who submitted the LNA
         this.mail.sendLnaSubmitterConfirmation({
           to: submitterEmail,
           headOfUnit,

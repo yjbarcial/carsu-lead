@@ -1664,7 +1664,7 @@
 </template>
 
 <script setup>
-definePageMeta({ middleware: ["auth"] });
+definePageMeta({ middleware: ["auth", "supervisor"] });
 
 import { ref, reactive, computed, watch, onMounted, nextTick } from "vue";
 
