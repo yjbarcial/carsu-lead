@@ -43,4 +43,9 @@ export class UsersService {
     await this.repo.update(userId, { isSupervisor: false });
     return this.repo.findOne({ where: { id: userId } });
   }
+
+  async setRole(userId: string, role: UserRole) {
+    await this.repo.update(userId, { role });
+    return this.repo.findOne({ where: { id: userId } });
+  }
 }

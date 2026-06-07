@@ -3010,7 +3010,32 @@
 
       <!-- ── HR REGISTRY ── -->
       <div v-if="activeTab === 'registry'" class="tab-panel">
-        <div class="reg-actions">
+        <!-- Toolbar -->
+        <div class="reg-toolbar">
+          <div class="reg-toolbar-left">
+            <input
+              v-model="regSearch"
+              type="text"
+              class="reg-search"
+              placeholder="🔍  Search name or email..."
+            />
+            <select v-model="regRoleFilter" class="reg-filter">
+              <option value="">All Roles</option>
+              <option value="admin">Admin</option>
+              <option value="hr-staff">HR Staff</option>
+              <option value="user">Employee</option>
+            </select>
+            <select v-model="regSupFilter" class="reg-filter">
+              <option value="">All</option>
+              <option value="yes">Supervisor</option>
+              <option value="no">Not Supervisor</option>
+            </select>
+            <span class="result-count">
+              {{ filteredRegUsers.length }} user{{
+                filteredRegUsers.length !== 1 ? "s" : ""
+              }}
+            </span>
+          </div>
           <button class="btn-add" @click="addHRModal = true">
             <svg
               viewBox="0 0 24 24"
@@ -3026,63 +3051,211 @@
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
-            Add HR User
+            Add User
           </button>
-          <span
-            style="
-              font-size: 13px;
-              color: var(--text-light);
-              align-self: center;
-            "
-            >Manage who can access this dashboard. Changes apply
-            immediately.</span
-          >
         </div>
-        <div class="tbl-wrap">
-          <table class="dtbl">
+
+        <!-- Table — no tbl-wrap, plain layout -->
+        <div class="reg-table-wrap">
+          <table class="dtbl reg-dtbl">
             <thead>
               <tr>
-                <th>Email</th>
-                <th>Name</th>
-                <th>Role</th>
+                <th class="th-sortable" @click="sortReg('name')">
+                  Name
+                  <span class="sort-ind">{{ regSortIndicator("name") }}</span>
+                </th>
+                <th class="th-sortable" @click="sortReg('email')">
+                  Email
+                  <span class="sort-ind">{{ regSortIndicator("email") }}</span>
+                </th>
+                <th class="th-sortable" @click="sortReg('role')">
+                  Role
+                  <span class="sort-ind">{{ regSortIndicator("role") }}</span>
+                </th>
                 <th>Supervisor</th>
-                <th>Date Added</th>
-                <th>Action</th>
+                <th class="th-sortable" @click="sortReg('createdAt')">
+                  Date Added
+                  <span class="sort-ind">{{
+                    regSortIndicator("createdAt")
+                  }}</span>
+                </th>
+                <th class="th-action">Action</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-if="!hrUsers.length" class="empty-row">
-                <td colspan="5">No HR users registered.</td>
+              <tr v-if="!filteredRegUsers.length" class="empty-row">
+                <td colspan="6">No users found.</td>
               </tr>
-              <tr v-for="u in hrUsers" :key="u.email">
-                <td>{{ u.email || "—" }}</td>
-                <td>{{ u.name || "—" }}</td>
+              <tr v-for="u in filteredRegUsers" :key="u.id">
                 <td>
-                  <span class="badge badge-green">{{
-                    u.role || "HR Staff"
-                  }}</span>
+                  <strong>{{
+                    [u.firstName, u.lastName].filter(Boolean).join(" ") || "—"
+                  }}</strong>
                 </td>
                 <td>
-                  <button
-                    v-if="!u.isSupervisor"
-                    class="btn-toggle-sup"
-                    @click="setSupervisor(u.id, true)"
-                  >
-                    Grant
-                  </button>
-                  <button
-                    v-else
-                    class="btn-toggle-sup btn-toggle-sup-revoke"
-                    @click="setSupervisor(u.id, false)"
-                  >
-                    ✓ Supervisor
-                  </button>
+                  <span class="sub-text">{{ u.email || "—" }}</span>
                 </td>
-                <td class="date-cell">{{ fmtDate(u.dateAdded) }}</td>
                 <td>
-                  <button class="btn-remove" @click="removeHR(u.email, u.name)">
-                    Remove
-                  </button>
+                  <span v-if="u.role === 'admin'" class="badge badge-green"
+                    >Admin</span
+                  >
+                  <span
+                    v-else-if="u.role === 'hr-staff'"
+                    class="badge badge-blue"
+                    >HR Staff</span
+                  >
+                  <span v-else class="badge badge-grey">Employee</span>
+                </td>
+                <td>
+                  <span v-if="u.isSupervisor" class="badge badge-green"
+                    >Yes</span
+                  >
+                  <span v-else class="badge badge-grey">No</span>
+                </td>
+                <td class="date-cell">{{ fmtDate(u.createdAt) }}</td>
+                <td>
+                  <div class="reg-dropdown-wrap">
+                    <button
+                      class="btn-reg-dots"
+                      @click.stop="toggleRegMenu(u.id)"
+                    >
+                      ⋯
+                    </button>
+                    <div v-if="regMenuOpen === u.id" class="reg-dropdown">
+                      <div class="reg-dd-section">ROLE</div>
+
+                      <template v-if="u.role !== 'admin'">
+                        <button
+                          class="reg-dd-item"
+                          @click="
+                            regAction(() =>
+                              openConfirm({
+                                title: 'Grant Admin Access',
+                                message: `Grant full Admin access to ${[u.firstName, u.lastName].filter(Boolean).join(' ') || u.email}? This gives them complete system control.`,
+                                confirmLabel: 'Grant Admin',
+                                confirmClass: 'btn-confirm-danger',
+                                onConfirm: () => setRole(u.id, 'admin'),
+                              }),
+                            )
+                          "
+                        >
+                          Make Admin
+                        </button>
+                      </template>
+                      <template v-if="u.role === 'admin' && isMasterAdmin">
+                        <button
+                          class="reg-dd-item reg-dd-danger"
+                          @click="
+                            regAction(() =>
+                              openConfirm({
+                                title: 'Revoke Admin Access',
+                                message: `Revoke Admin access from ${[u.firstName, u.lastName].filter(Boolean).join(' ') || u.email}? They will become a regular employee.`,
+                                confirmLabel: 'Revoke Admin',
+                                confirmClass: 'btn-confirm-danger',
+                                onConfirm: () => setRole(u.id, 'user'),
+                              }),
+                            )
+                          "
+                        >
+                          Revoke Admin
+                        </button>
+                      </template>
+                      <template
+                        v-if="u.role === 'user' || u.role === 'employee'"
+                      >
+                        <button
+                          class="reg-dd-item"
+                          @click="
+                            regAction(() =>
+                              openConfirm({
+                                title: 'Grant HR Staff Access',
+                                message: `Grant HR Staff access to ${[u.firstName, u.lastName].filter(Boolean).join(' ') || u.email}? They will be able to access the dashboard.`,
+                                confirmLabel: 'Grant HR Staff',
+                                confirmClass: 'btn-confirm-primary',
+                                onConfirm: () => confirmGrantHr(u),
+                              }),
+                            )
+                          "
+                        >
+                          Grant HR Staff
+                        </button>
+                      </template>
+                      <template v-if="u.role === 'hr-staff'">
+                        <button
+                          class="reg-dd-item reg-dd-warn"
+                          @click="
+                            regAction(() =>
+                              openConfirm({
+                                title: 'Revoke HR Staff Access',
+                                message: `Revoke HR Staff access from ${[u.firstName, u.lastName].filter(Boolean).join(' ') || u.email}? They will lose dashboard access.`,
+                                confirmLabel: 'Revoke',
+                                confirmClass: 'btn-confirm-danger',
+                                onConfirm: () => confirmRevokeHr(u),
+                              }),
+                            )
+                          "
+                        >
+                          Revoke HR Staff
+                        </button>
+                      </template>
+
+                      <div class="reg-dd-section">SUPERVISOR</div>
+                      <button
+                        v-if="!u.isSupervisor"
+                        class="reg-dd-item"
+                        @click="
+                          regAction(() =>
+                            openConfirm({
+                              title: 'Grant Supervisor Access',
+                              message: `Grant supervisor access to ${[u.firstName, u.lastName].filter(Boolean).join(' ') || u.email}? They will be able to submit LNA forms.`,
+                              confirmLabel: 'Grant Supervisor',
+                              confirmClass: 'btn-confirm-primary',
+                              onConfirm: () => setSupervisor(u.id, true),
+                            }),
+                          )
+                        "
+                      >
+                        Grant Supervisor
+                      </button>
+                      <button
+                        v-else
+                        class="reg-dd-item reg-dd-warn"
+                        @click="
+                          regAction(() =>
+                            openConfirm({
+                              title: 'Revoke Supervisor Access',
+                              message: `Revoke supervisor access from ${[u.firstName, u.lastName].filter(Boolean).join(' ') || u.email}?`,
+                              confirmLabel: 'Revoke',
+                              confirmClass: 'btn-confirm-danger',
+                              onConfirm: () => setSupervisor(u.id, false),
+                            }),
+                          )
+                        "
+                      >
+                        Revoke Supervisor
+                      </button>
+
+                      <template v-if="u.role !== 'admin'">
+                        <div class="reg-dd-divider"></div>
+                        <button
+                          class="reg-dd-item reg-dd-danger"
+                          @click="
+                            regAction(() =>
+                              openConfirm({
+                                title: 'Remove User',
+                                message: `Remove ${[u.firstName, u.lastName].filter(Boolean).join(' ') || u.email} from the system? This cannot be undone.`,
+                                confirmLabel: 'Remove',
+                                confirmClass: 'btn-confirm-danger',
+                                onConfirm: () => removeUser(u.id, u.email),
+                              }),
+                            )
+                          "
+                        >
+                          Remove User
+                        </button>
+                      </template>
+                    </div>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -3947,6 +4120,48 @@
                 Signature over Printed Name of Rater / Head of Office
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- CONFIRM MODAL -->
+    <div
+      v-if="confirmModal.open"
+      class="modal-overlay active"
+      @click.self="confirmModal.open = false"
+    >
+      <div class="modal confirm-modal">
+        <div class="modal-header">
+          <div class="modal-header-left">
+            <h3>{{ confirmModal.title }}</h3>
+          </div>
+          <div class="modal-header-right">
+            <button class="btn-close" @click="confirmModal.open = false">
+              ×
+            </button>
+          </div>
+        </div>
+        <div class="modal-body">
+          <p
+            style="
+              font-size: 14px;
+              color: var(--text);
+              line-height: 1.6;
+              margin-bottom: 24px;
+            "
+          >
+            {{ confirmModal.message }}
+          </p>
+          <div class="confirm-actions">
+            <button
+              class="btn-confirm-cancel"
+              @click="confirmModal.open = false"
+            >
+              Cancel
+            </button>
+            <button :class="confirmModal.confirmClass" @click="runConfirm">
+              {{ confirmModal.confirmLabel }}
+            </button>
           </div>
         </div>
       </div>
@@ -5740,6 +5955,28 @@ async function downloadPDF(type, refId, name) {
 }
 
 // ── HR REGISTRY ─────────────────────────────────────────────────────────────
+const regMenuOpen = ref(null);
+const { user: authUser } = useAuth();
+const isMasterAdmin = computed(
+  () => authUser.value?.email === "yssahjulianah.barcial@carsu.edu.ph",
+);
+
+function toggleRegMenu(id) {
+  regMenuOpen.value = regMenuOpen.value === id ? null : id;
+}
+
+function regAction(fn) {
+  regMenuOpen.value = null;
+  fn();
+}
+
+// Close dropdown when clicking outside
+if (import.meta.client) {
+  document.addEventListener("click", () => {
+    regMenuOpen.value = null;
+  });
+}
+
 async function saveHR() {
   if (!newHR.email || !newHR.name) {
     toast("Email and Name are required.", "error");
@@ -5781,6 +6018,50 @@ async function removeHR(email, name) {
     toast("Network error.", "error");
   }
 }
+
+// Confirm modal state
+const confirmModal = reactive({
+  open: false,
+  title: "",
+  message: "",
+  confirmLabel: "Confirm",
+  confirmClass: "btn-confirm-primary",
+  onConfirm: null,
+});
+
+function openConfirm({
+  title,
+  message,
+  confirmLabel,
+  confirmClass,
+  onConfirm,
+}) {
+  confirmModal.title = title;
+  confirmModal.message = message;
+  confirmModal.confirmLabel = confirmLabel;
+  confirmModal.confirmClass = confirmClass;
+  confirmModal.onConfirm = onConfirm;
+  confirmModal.open = true;
+}
+
+function runConfirm() {
+  confirmModal.open = false;
+  confirmModal.onConfirm?.();
+}
+
+async function setRole(userId, role) {
+  try {
+    await authFetch(`${API}/users/${userId}/role`, {
+      method: "PATCH",
+      body: JSON.stringify({ role }),
+    });
+    toast(`Role updated to ${role}.`, "success");
+    loadDashboard();
+  } catch {
+    toast("Network error.", "error");
+  }
+}
+
 async function setSupervisor(userId, grant) {
   const action = grant ? "grant-supervisor" : "revoke-supervisor";
   try {
@@ -5794,6 +6075,97 @@ async function setSupervisor(userId, grant) {
     toast("Network error.", "error");
   }
 }
+
+async function confirmGrantHr(u) {
+  try {
+    await authFetch(`${API}/users/${u.id}/grant-hr-staff`, { method: "PATCH" });
+    toast(`HR Staff access granted.`, "success");
+    loadDashboard();
+  } catch {
+    toast("Network error.", "error");
+  }
+}
+
+async function confirmRevokeHr(u) {
+  try {
+    await authFetch(`${API}/users/${u.id}/revoke-hr-staff`, {
+      method: "PATCH",
+    });
+    toast(`HR Staff access revoked.`, "success");
+    loadDashboard();
+  } catch {
+    toast("Network error.", "error");
+  }
+}
+
+async function removeUser(userId, email) {
+  try {
+    await authFetch(`${API}/users/${userId}`, { method: "DELETE" });
+    toast(`User removed.`, "success");
+    loadDashboard();
+  } catch {
+    toast("Network error.", "error");
+  }
+}
+
+// ── REGISTRY SEARCH / SORT / FILTER STATE ──────────────────────────
+const regSearch = ref('');
+const regRoleFilter = ref('');
+const regSupFilter = ref('');
+const regSortCol = ref('name');
+const regSortAsc = ref(true);
+ 
+function sortReg(col) {
+  if (regSortCol.value === col) {
+    regSortAsc.value = !regSortAsc.value;
+  } else {
+    regSortCol.value = col;
+    regSortAsc.value = true;
+  }
+}
+ 
+function regSortIndicator(col) {
+  if (regSortCol.value !== col) return '↕';
+  return regSortAsc.value ? '↑' : '↓';
+}
+ 
+const filteredRegUsers = computed(() => {
+  const q = regSearch.value.toLowerCase();
+  let rows = hrUsers.value.filter((u) => {
+    const name = [u.firstName, u.lastName].filter(Boolean).join(' ').toLowerCase();
+    const matchSearch = !q || name.includes(q) || (u.email || '').toLowerCase().includes(q);
+    const matchRole = !regRoleFilter.value || u.role === regRoleFilter.value;
+    const matchSup =
+      !regSupFilter.value ||
+      (regSupFilter.value === 'yes' && u.isSupervisor) ||
+      (regSupFilter.value === 'no' && !u.isSupervisor);
+    return matchSearch && matchRole && matchSup;
+  });
+ 
+  const col = regSortCol.value;
+  const asc = regSortAsc.value;
+ 
+  rows = [...rows].sort((a, b) => {
+    let av = '', bv = '';
+    if (col === 'name') {
+      av = [a.firstName, a.lastName].filter(Boolean).join(' ').toLowerCase();
+      bv = [b.firstName, b.lastName].filter(Boolean).join(' ').toLowerCase();
+    } else if (col === 'email') {
+      av = (a.email || '').toLowerCase();
+      bv = (b.email || '').toLowerCase();
+    } else if (col === 'role') {
+      av = a.role || '';
+      bv = b.role || '';
+    } else if (col === 'createdAt') {
+      return asc
+        ? new Date(a.createdAt) - new Date(b.createdAt)
+        : new Date(b.createdAt) - new Date(a.createdAt);
+    }
+    return asc ? av.localeCompare(bv) : bv.localeCompare(av);
+  });
+ 
+  return rows;
+});
 
 // ── SORT ────────────────────────────────────────────────────────────────────
 function sortTable(type, col) {
@@ -8122,5 +8494,251 @@ body,
   background: #c0392b;
   color: #fff;
   border-color: #c0392b;
+}
+
+.reg-action-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.btn-reg-action {
+  padding: 4px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  background: none;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--navy);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn-reg-action:hover {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+}
+.btn-reg-revoke {
+  color: #8a6c00;
+  border-color: rgba(138, 108, 0, 0.3);
+  background: rgba(255, 204, 0, 0.08);
+}
+.btn-reg-revoke:hover {
+  background: #8a6c00;
+  color: #fff;
+  border-color: #8a6c00;
+}
+.btn-reg-remove {
+  color: var(--error);
+  border-color: rgba(192, 57, 43, 0.3);
+  background: rgba(192, 57, 43, 0.05);
+}
+.btn-reg-remove:hover {
+  background: var(--error);
+  color: #fff;
+  border-color: var(--error);
+}
+
+/* Confirm modal */
+.confirm-modal {
+  max-width: 420px;
+}
+.confirm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+.btn-confirm-cancel {
+  padding: 9px 20px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: none;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-confirm-cancel:hover {
+  border-color: var(--text-light);
+  color: var(--text);
+}
+.btn-confirm-primary {
+  padding: 9px 20px;
+  border: none;
+  border-radius: 8px;
+  background: var(--navy);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-confirm-primary:hover {
+  background: var(--navy-mid);
+}
+.btn-confirm-danger {
+  padding: 9px 20px;
+  border: none;
+  border-radius: 8px;
+  background: var(--error);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-confirm-danger:hover {
+  background: #a93226;
+}
+
+.reg-dropdown-wrap {
+  position: relative;
+  display: inline-block;
+}
+.btn-reg-dots {
+  width: 30px;
+  height: 30px;
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  background: none;
+  font-size: 16px;
+  color: var(--text-light);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  font-family: inherit;
+  letter-spacing: 1px;
+}
+.btn-reg-dots:hover {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+}
+.reg-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  min-width: 170px;
+  z-index: 100;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.reg-dd-section {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--text-light);
+  padding: 6px 8px 3px;
+}
+.reg-dd-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+.reg-dd-item {
+  width: 100%;
+  text-align: left;
+  padding: 7px 10px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.reg-dd-item:hover {
+  background: rgba(0, 51, 0, 0.06);
+  color: var(--navy);
+}
+.reg-dd-warn {
+  color: #8a6c00;
+}
+.reg-dd-warn:hover {
+  background: rgba(255, 204, 0, 0.1);
+  color: #8a6c00;
+}
+.reg-dd-danger {
+  color: var(--error);
+}
+.reg-dd-danger:hover {
+  background: rgba(192, 57, 43, 0.07);
+  color: var(--error);
+}
+
+.reg-tbl {
+  overflow-x: visible;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.reg-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.reg-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+.reg-search {
+  padding: 8px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--white);
+  outline: none;
+  min-width: 220px;
+  transition: border-color 0.2s;
+}
+.reg-search:focus {
+  border-color: var(--navy);
+}
+.reg-filter {
+  padding: 8px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--white);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.reg-filter:focus {
+  border-color: var(--navy);
+}
+.reg-table-wrap {
+  width: 100%;
+}
+.reg-dtbl {
+  border-radius: 11px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 </style>

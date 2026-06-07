@@ -11,6 +11,7 @@ import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { UserRole } from './user.entity';
 
 @Controller('users')
 export class UsersController {
@@ -66,5 +67,13 @@ export class UsersController {
   @Patch(':id/revoke-supervisor')
   revokeSupervisor(@Param('id') id: string) {
     return this.usersService.revokeSupervisor(id);
+  }
+
+  // Role Endpoint
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Patch(':id/role')
+  setRole(@Param('id') id: string, @Body('role') role: UserRole) {
+    return this.usersService.setRole(id, role);
   }
 }
