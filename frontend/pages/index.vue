@@ -107,6 +107,12 @@
           <button
             class="pill pill-orange"
             :class="{ active: activeSection === 'lna' }"
+            :disabled="!user?.isSupervisor"
+            :title="
+              !user?.isSupervisor
+                ? 'Only Heads of Unit can submit LNA forms. Contact HRMS to request access.'
+                : ''
+            "
             @click="toggleSection('lna')"
           >
             <span class="pill-icon">
@@ -369,6 +375,28 @@
             <div class="sh-line"></div>
           </div>
           <div class="grid">
+            <!-- Locked state for non-supervisors -->
+            <div v-if="!user?.isSupervisor" class="card card-locked">
+              <div class="card-bar bar-gold"></div>
+              <div class="card-icon icon-gold">🔒</div>
+              <div class="card-tag tag-gold">For Office Heads</div>
+              <h2 class="card-title">USWAG Plan — LNA Tool</h2>
+              <p class="card-desc">
+                This form is only accessible to designated
+                <strong>Heads of Unit</strong>. To request access, contact the
+                <strong>HRMS office</strong> at
+                <a href="mailto:hrms@carsu.edu.ph" class="help-link"
+                  >hrms@carsu.edu.ph</a
+                >
+                to have your account updated.
+              </p>
+              <div class="card-foot">
+                <span class="card-meta">Restricted access</span>
+                <span class="card-cta" style="color: #bbb; cursor: default"
+                  >Not Available</span
+                >
+              </div>
+            </div>
             <NuxtLink to="/lna-form" class="card">
               <div class="card-bar bar-gold"></div>
               <div class="card-icon icon-gold">
@@ -532,7 +560,7 @@
 <script setup>
 import { ref, computed } from "vue";
 
-const { isHrStaff } = useAuth();
+const { isHrStaff, user } = useAuth();
 
 const activeSection = ref(null);
 
@@ -1207,6 +1235,22 @@ button {
   font-size: 11px;
   color: rgba(255, 255, 255, 0.4);
   letter-spacing: 0.03em;
+}
+
+.pill:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.pill:disabled:hover::before {
+  opacity: 0;
+}
+.card-locked {
+  cursor: default;
+  opacity: 0.85;
+}
+.card-locked:hover {
+  transform: none;
+  box-shadow: none;
 }
 
 /* ── RESPONSIVE ──────────────────────────────────────── */

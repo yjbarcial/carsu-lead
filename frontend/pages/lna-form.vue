@@ -1664,9 +1664,11 @@
 </template>
 
 <script setup>
-definePageMeta({ middleware: ["auth", "supervisor"] });
+definePageMeta({ middleware: ['auth'] });
 
 import { ref, reactive, computed, watch, onMounted, nextTick } from "vue";
+
+const isSupervisor = computed(() => user.value?.isSupervisor);
 
 const config = useRuntimeConfig();
 const API = config.public.apiBase;

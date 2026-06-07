@@ -133,17 +133,6 @@
         </div>
       </div>
 
-      <!-- Head of Unit (for LNA) -->
-      <div class="field-group">
-        <label>Head of Unit</label>
-        <input
-          v-model="form.headOfUnit"
-          type="text"
-          placeholder="Name of your Head of Unit"
-          @input="form.headOfUnit = form.headOfUnit.toUpperCase()"
-        />
-      </div>
-
       <button class="btn-save" :disabled="loading" @click="save">
         {{ loading ? "Saving…" : "Save & Continue" }}
       </button>
@@ -172,7 +161,6 @@ const form = reactive({
   educAttainmentSpec: "",
   yearsInPosition: "",
   yearsInCSU: "",
-  headOfUnit: "",
   headLastName: "",
   headFirstName: "",
   headMiddleInitial: "",
@@ -198,7 +186,7 @@ async function save() {
     !form.officeAffiliation ||
     !form.collegeOfficeUnit ||
     !form.currentPosition ||
-    !form.educAttainment 
+    !form.educAttainment
   ) {
     error.value = "Please fill in all required fields.";
     return;

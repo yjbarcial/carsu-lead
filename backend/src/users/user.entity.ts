@@ -29,6 +29,9 @@ export class User {
   @Column({ default: false })
   profileComplete: boolean;
 
+  @Column({ default: false })
+  isSupervisor: boolean;
+
   // ── From IDP Personnel Info ───────────────────────────────────────
   @Column({ nullable: true }) firstName: string;
   @Column({ nullable: true }) lastName: string;
@@ -51,7 +54,7 @@ export class User {
 
   // ── From LNA Office Info ──────────────────────────────────────────
   @Column({ nullable: true }) office: string;
-  @Column({ nullable: true }) headOfUnit: string; // full name string (legacy/display)
+  @Column({ nullable: true }) headOfUnit: string;
   @Column({ nullable: true }) headLastName: string;
   @Column({ nullable: true }) headFirstName: string;
   @Column({ nullable: true }) headMiddleInitial: string;

@@ -20,7 +20,6 @@ export class UsersService {
     return this.repo.findOne({ where: { id } });
   }
 
-  // Still needed for admin HR user management
   findAll() {
     return this.repo.find();
   }
@@ -32,6 +31,16 @@ export class UsersService {
 
   async revokeHrStaffRole(userId: string) {
     await this.repo.update(userId, { role: UserRole.USER });
+    return this.repo.findOne({ where: { id: userId } });
+  }
+
+  async grantSupervisor(userId: string) {
+    await this.repo.update(userId, { isSupervisor: true });
+    return this.repo.findOne({ where: { id: userId } });
+  }
+
+  async revokeSupervisor(userId: string) {
+    await this.repo.update(userId, { isSupervisor: false });
     return this.repo.findOne({ where: { id: userId } });
   }
 }

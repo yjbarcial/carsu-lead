@@ -3045,6 +3045,7 @@
                 <th>Email</th>
                 <th>Name</th>
                 <th>Role</th>
+                <th>Supervisor</th>
                 <th>Date Added</th>
                 <th>Action</th>
               </tr>
@@ -3060,6 +3061,22 @@
                   <span class="badge badge-green">{{
                     u.role || "HR Staff"
                   }}</span>
+                </td>
+                <td>
+                  <button
+                    v-if="!u.isSupervisor"
+                    class="btn-toggle-sup"
+                    @click="setSupervisor(u.id, true)"
+                  >
+                    Grant
+                  </button>
+                  <button
+                    v-else
+                    class="btn-toggle-sup btn-toggle-sup-revoke"
+                    @click="setSupervisor(u.id, false)"
+                  >
+                    ✓ Supervisor
+                  </button>
                 </td>
                 <td class="date-cell">{{ fmtDate(u.dateAdded) }}</td>
                 <td>
@@ -5657,9 +5674,9 @@ async function loadDashboard() {
   const timeout = setTimeout(() => controller.abort(), 15000);
   try {
     const [idpRes, lnaRes, hrRes] = await Promise.all([
-      authfetch(`${API}/idp`, { signal: controller.signal }),
-      authfetch(`${API}/lna`, { signal: controller.signal }),
-      authfetch(`${API}/users`, { signal: controller.signal }),
+      authFetch(`${API}/idp`, { signal: controller.signal }),
+      authFetch(`${API}/lna`, { signal: controller.signal }),
+      authFetch(`${API}/users`, { signal: controller.signal }),
     ]);
 
     if (!idpRes.ok || !lnaRes.ok || !hrRes.ok) {
@@ -5759,6 +5776,19 @@ async function removeHR(email, name) {
       method: "DELETE",
     });
     toast(`${name || email} removed.`, "success");
+    loadDashboard();
+  } catch {
+    toast("Network error.", "error");
+  }
+}
+async function setSupervisor(userId, grant) {
+  const action = grant ? "grant-supervisor" : "revoke-supervisor";
+  try {
+    await authFetch(`${API}/users/${userId}/${action}`, { method: "PATCH" });
+    toast(
+      grant ? "Supervisor access granted." : "Supervisor access revoked.",
+      "success",
+    );
     loadDashboard();
   } catch {
     toast("Network error.", "error");
@@ -8064,5 +8094,33 @@ body,
   .comp2-gr-obs {
     display: none;
   }
+}
+.btn-toggle-sup {
+  padding: 4px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  background: none;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-toggle-sup:hover {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+}
+.btn-toggle-sup-revoke {
+  background: rgba(26, 107, 60, 0.1);
+  color: #1a6b3c;
+  border-color: rgba(26, 107, 60, 0.3);
+}
+.btn-toggle-sup-revoke:hover {
+  background: #c0392b;
+  color: #fff;
+  border-color: #c0392b;
 }
 </style>

@@ -1,4 +1,12 @@
-import { Controller, Get, Patch, Body, UseGuards, Req, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Patch,
+  Body,
+  UseGuards,
+  Req,
+  Param,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -42,5 +50,21 @@ export class UsersController {
   @Patch(':id/revoke-hr-staff')
   revokeHrStaff(@Param('id') id: string) {
     return this.usersService.revokeHrStaffRole(id);
+  }
+
+  // Grant supervisor flag (admin or hr-staff)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'hr-staff')
+  @Patch(':id/grant-supervisor')
+  grantSupervisor(@Param('id') id: string) {
+    return this.usersService.grantSupervisor(id);
+  }
+
+  // Revoke supervisor flag (admin or hr-staff)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'hr-staff')
+  @Patch(':id/revoke-supervisor')
+  revokeSupervisor(@Param('id') id: string) {
+    return this.usersService.revokeSupervisor(id);
   }
 }
