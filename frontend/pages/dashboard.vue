@@ -3036,7 +3036,7 @@
               }}
             </span>
           </div>
-          <button class="btn-add" @click="addHRModal = true">
+          <!-- <button class="btn-add" @click="addHRModal = true">
             <svg
               viewBox="0 0 24 24"
               style="
@@ -3052,7 +3052,7 @@
               <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
             Add User
-          </button>
+          </button> -->
         </div>
 
         <!-- Table — no tbl-wrap, plain layout -->
@@ -3117,11 +3117,21 @@
                   <div class="reg-dropdown-wrap">
                     <button
                       class="btn-reg-dots"
-                      @click.stop="toggleRegMenu(u.id)"
+                      @click.stop="toggleRegMenu(u.id, $event)"
                     >
                       ⋯
                     </button>
-                    <div v-if="regMenuOpen === u.id" class="reg-dropdown">
+                    <div
+                      v-if="regMenuOpen === u.id"
+                      class="reg-dropdown"
+                      :style="{
+                        top: regMenuPos.top ? regMenuPos.top + 'px' : 'auto',
+                        bottom: regMenuPos.bottom
+                          ? regMenuPos.bottom + 'px'
+                          : 'auto',
+                        right: regMenuPos.right + 'px',
+                      }"
+                    >
                       <div class="reg-dd-section">ROLE</div>
 
                       <template v-if="u.role !== 'admin'">
@@ -5956,13 +5966,32 @@ async function downloadPDF(type, refId, name) {
 
 // ── HR REGISTRY ─────────────────────────────────────────────────────────────
 const regMenuOpen = ref(null);
-const { user: authUser } = useAuth();
+const { user: authUser, fetchMe } = useAuth();
 const isMasterAdmin = computed(
   () => authUser.value?.email === "yssahjulianah.barcial@carsu.edu.ph",
 );
+const regMenuOpenUp = ref(false);
 
-function toggleRegMenu(id) {
-  regMenuOpen.value = regMenuOpen.value === id ? null : id;
+const regMenuPos = reactive({ top: 0, right: 0 });
+
+function toggleRegMenu(id, event) {
+  if (regMenuOpen.value === id) {
+    regMenuOpen.value = null;
+    return;
+  }
+  const btn = event.currentTarget;
+  const rect = btn.getBoundingClientRect();
+  const spaceBelow = window.innerHeight - rect.bottom;
+
+  if (spaceBelow < 280) {
+    regMenuPos.top = null;
+    regMenuPos.bottom = window.innerHeight - rect.top + 6;
+  } else {
+    regMenuPos.top = rect.bottom + 6;
+    regMenuPos.bottom = null;
+  }
+  regMenuPos.right = window.innerWidth - rect.right;
+  regMenuOpen.value = id;
 }
 
 function regAction(fn) {
@@ -6063,16 +6092,14 @@ async function setRole(userId, role) {
 }
 
 async function setSupervisor(userId, grant) {
-  const action = grant ? "grant-supervisor" : "revoke-supervisor";
+  const action = grant ? 'grant-supervisor' : 'revoke-supervisor';
   try {
-    await authFetch(`${API}/users/${userId}/${action}`, { method: "PATCH" });
-    toast(
-      grant ? "Supervisor access granted." : "Supervisor access revoked.",
-      "success",
-    );
+    await authFetch(`${API}/users/${userId}/${action}`, { method: 'PATCH' });
+    toast(grant ? 'Supervisor access granted.' : 'Supervisor access revoked.', 'success');
+    if (userId === authUser.value?.id) await fetchMe();
     loadDashboard();
   } catch {
-    toast("Network error.", "error");
+    toast('Network error.', 'error');
   }
 }
 
@@ -6109,12 +6136,12 @@ async function removeUser(userId, email) {
 }
 
 // ── REGISTRY SEARCH / SORT / FILTER STATE ──────────────────────────
-const regSearch = ref('');
-const regRoleFilter = ref('');
-const regSupFilter = ref('');
-const regSortCol = ref('name');
+const regSearch = ref("");
+const regRoleFilter = ref("");
+const regSupFilter = ref("");
+const regSortCol = ref("name");
 const regSortAsc = ref(true);
- 
+
 function sortReg(col) {
   if (regSortCol.value === col) {
     regSortAsc.value = !regSortAsc.value;
@@ -6123,47 +6150,52 @@ function sortReg(col) {
     regSortAsc.value = true;
   }
 }
- 
+
 function regSortIndicator(col) {
-  if (regSortCol.value !== col) return '↕';
-  return regSortAsc.value ? '↑' : '↓';
+  if (regSortCol.value !== col) return "↕";
+  return regSortAsc.value ? "↑" : "↓";
 }
- 
+
 const filteredRegUsers = computed(() => {
   const q = regSearch.value.toLowerCase();
   let rows = hrUsers.value.filter((u) => {
-    const name = [u.firstName, u.lastName].filter(Boolean).join(' ').toLowerCase();
-    const matchSearch = !q || name.includes(q) || (u.email || '').toLowerCase().includes(q);
+    const name = [u.firstName, u.lastName]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    const matchSearch =
+      !q || name.includes(q) || (u.email || "").toLowerCase().includes(q);
     const matchRole = !regRoleFilter.value || u.role === regRoleFilter.value;
     const matchSup =
       !regSupFilter.value ||
-      (regSupFilter.value === 'yes' && u.isSupervisor) ||
-      (regSupFilter.value === 'no' && !u.isSupervisor);
+      (regSupFilter.value === "yes" && u.isSupervisor) ||
+      (regSupFilter.value === "no" && !u.isSupervisor);
     return matchSearch && matchRole && matchSup;
   });
- 
+
   const col = regSortCol.value;
   const asc = regSortAsc.value;
- 
+
   rows = [...rows].sort((a, b) => {
-    let av = '', bv = '';
-    if (col === 'name') {
-      av = [a.firstName, a.lastName].filter(Boolean).join(' ').toLowerCase();
-      bv = [b.firstName, b.lastName].filter(Boolean).join(' ').toLowerCase();
-    } else if (col === 'email') {
-      av = (a.email || '').toLowerCase();
-      bv = (b.email || '').toLowerCase();
-    } else if (col === 'role') {
-      av = a.role || '';
-      bv = b.role || '';
-    } else if (col === 'createdAt') {
+    let av = "",
+      bv = "";
+    if (col === "name") {
+      av = [a.firstName, a.lastName].filter(Boolean).join(" ").toLowerCase();
+      bv = [b.firstName, b.lastName].filter(Boolean).join(" ").toLowerCase();
+    } else if (col === "email") {
+      av = (a.email || "").toLowerCase();
+      bv = (b.email || "").toLowerCase();
+    } else if (col === "role") {
+      av = a.role || "";
+      bv = b.role || "";
+    } else if (col === "createdAt") {
       return asc
         ? new Date(a.createdAt) - new Date(b.createdAt)
         : new Date(b.createdAt) - new Date(a.createdAt);
     }
     return asc ? av.localeCompare(bv) : bv.localeCompare(av);
   });
- 
+
   return rows;
 });
 
@@ -8600,6 +8632,10 @@ body,
   position: relative;
   display: inline-block;
 }
+.reg-dropdown-up {
+  top: auto;
+  bottom: calc(100% + 6px);
+}
 .btn-reg-dots {
   width: 30px;
   height: 30px;
@@ -8622,15 +8658,13 @@ body,
   border-color: var(--navy);
 }
 .reg-dropdown {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 6px);
+  position: fixed; /* was absolute */
   background: var(--white);
   border: 1.5px solid var(--border);
   border-radius: 10px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   min-width: 170px;
-  z-index: 100;
+  z-index: 1000;
   padding: 6px;
   display: flex;
   flex-direction: column;
@@ -8732,13 +8766,23 @@ body,
 .reg-filter:focus {
   border-color: var(--navy);
 }
-.reg-table-wrap {
+.reg-dtbl {
+  border-radius: 0;   /* wrap handles it */
+  border: none;
+  box-shadow: none;
+  border-collapse: collapse;
   width: 100%;
 }
-.reg-dtbl {
-  border-radius: 11px;
-  border: 1px solid var(--border);
-  overflow: hidden;
+.reg-table-wrap {
+  width: 100%;
   box-shadow: var(--shadow-sm);
+  overflow: hidden; /* back to normal */
+}
+.reg-dtbl tbody tr {
+  position: static;
+}
+.reg-dtbl thead {
+  position: relative;
+  z-index: 1;
 }
 </style>

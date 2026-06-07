@@ -14,7 +14,7 @@ export function useAuth() {
     () =>
       user.value?.role === "admin" ||
       user.value?.role === "hr-staff" ||
-      !!(user.value?.headLastName?.trim() || user.value?.headFirstName?.trim()),
+      !!user.value?.isSupervisor, // handles null, false, true correctly
   );
   function setTokens(tokens: { accessToken: string; refreshToken: string }) {
     accessToken.value = tokens.accessToken;

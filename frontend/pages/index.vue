@@ -107,7 +107,7 @@
           <button
             class="pill pill-orange"
             :class="{ active: activeSection === 'lna' }"
-            :disabled="isSupervisor"
+            :disabled="!isSupervisor"
             :title="
               isSupervisor
                 ? 'Only Heads of Unit can submit LNA forms. Contact HRMS to request access.'
@@ -376,7 +376,7 @@
           </div>
           <div class="grid">
             <!-- Locked state for non-supervisors -->
-            <div v-if="isSupervisor" class="card card-locked">
+            <div v-if="!isSupervisor" class="card card-locked">
               <div class="card-bar bar-gold"></div>
               <div class="card-icon icon-gold">🔒</div>
               <div class="card-tag tag-gold">For Office Heads</div>
@@ -560,7 +560,13 @@
 <script setup>
 import { ref, computed } from "vue";
 
-const { isHrStaff, isSupervisor } = useAuth();
+const { isHrStaff, isSupervisor, user } = useAuth();
+console.log(
+  "index isSupervisor:",
+  isSupervisor.value,
+  "user:",
+  user.value?.email,
+);
 
 const activeSection = ref(null);
 

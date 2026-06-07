@@ -60,10 +60,18 @@
 </template>
 
 <script setup>
-const { isLoggedIn, user, logout, tryRefresh } = useAuth();
+const { tryRefresh, fetchMe, getAccessToken, isLoggedIn, user, logout, isSupervisor } =
+  useAuth();
 
-onMounted(() => {
-  tryRefresh();
+onMounted(async () => {
+  if (getAccessToken()) {
+    await fetchMe();
+  } else {
+    await tryRefresh();
+  }
+  // Removable
+  console.log('user:', JSON.stringify(user.value));
+  console.log('isSupervisor:', isSupervisor.value);
 });
 </script>
 
